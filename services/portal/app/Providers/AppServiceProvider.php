@@ -19,11 +19,12 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
+        if ($this->app->environment('production') || str_starts_with((string) config('app.url'), 'https://')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Rate limiting para la API pública (60 req/min por IP)
         RateLimiter::for('api-publica', function (Request $request) {
             $exemptIps = array_filter(array_map('trim', explode(',', (string) env('API_RATE_LIMIT_EXEMPT', '127.0.0.1,172.30.0.1'))));

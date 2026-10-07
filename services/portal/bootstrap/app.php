@@ -15,8 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Confianza en el proxy inverso Nginx local y red interna mesh
-        $middleware->trustProxies(at: ['172.30.0.1', '127.0.0.1']);
+        // Confianza en proxies inversos (Cloudflare y Nginx local)
+        $middleware->trustProxies(at: '*');
 
         // Eliminar cookies y sesiones del grupo público web para cumplir la política de cero rastreo
         $middleware->removeFromGroup('web', [
