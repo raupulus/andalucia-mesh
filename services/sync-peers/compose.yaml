@@ -1,0 +1,33 @@
+# ==============================================================================
+# compose.yaml (services/sync-peers/)
+#
+# Despliegue del microservicio sync-peers para Andalucía Mesh.
+# Microservicio interno en red 'mesh' sin puertos publicados hacia el host.
+# ==============================================================================
+
+services:
+  sync-peers:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: snm-sync-peers:0.1.0
+    container_name: sync-peers
+    restart: unless-stopped
+    networks:
+      - mesh
+    volumes:
+      - /srv/sync-peers/peers.json:/app/peers.json:ro
+    env_file:
+      - path: /srv/comun/.env
+        required: false
+      - path: /srv/sync-peers/.env
+        required: false
+      - path: .env
+        required: false
+    mem_limit: 256m
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  mesh:
+    external: true

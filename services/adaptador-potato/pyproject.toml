@@ -1,0 +1,26 @@
+[project]
+name = "snm-adaptador-potato"
+version = "0.1.0"
+description = "Adaptador de puente MQTT a API REST de PotatoMesh para Andalucía Mesh"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiomqtt>=2.0.0",
+    "meshtastic>=2.5.0",
+    "cryptography>=42.0.0",
+    "aiohttp>=3.9.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+

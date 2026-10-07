@@ -1,0 +1,40 @@
+# ==============================================================================
+# compose.yaml (integrations/potatomesh/)
+#
+# Despliegue de PotatoMesh para Andalucía Mesh.
+# Visor comunitario de nodos, telemetría y chat en tiempo real por SSE.
+# ==============================================================================
+
+services:
+  potatomesh:
+    image: ghcr.io/l5yth/potato-mesh-web-linux-amd64:0.7.5@sha256:2ed2284f6eb96ba4473c45444f1e592a7d51a403b7ea8552f1b9c8eb20012927
+    container_name: potatomesh
+    restart: unless-stopped
+    networks:
+      - mesh
+    ports:
+      - "127.0.0.1:41447:41447"
+    volumes:
+      - /srv/potatomesh/datos:/app/.local/share/potato-mesh
+      - /srv/potatomesh/config:/app/.config/potato-mesh
+      - ./pages:/app/pages:ro
+    env_file:
+      - path: /srv/comun/.env
+        required: false
+      - path: /srv/potatomesh/.env
+        required: false
+      - path: .env
+        required: false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:41447/version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    mem_limit: 768m
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  mesh:
+    external: true

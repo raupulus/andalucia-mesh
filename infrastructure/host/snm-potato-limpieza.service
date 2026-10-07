@@ -1,0 +1,9 @@
+[Unit]
+Description=Purga de retención a 30 días para PotatoMesh SQLite
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'if [ -f /srv/potatomesh/datos/mesh.db ]; then sqlite3 -cmd ".timeout 30000" /srv/potatomesh/datos/mesh.db < /var/www/storage/sur-nodos-en-mallas/integrations/potatomesh/limpieza.sql; fi'
+StandardOutput=journal
+StandardError=journal

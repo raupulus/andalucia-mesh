@@ -161,14 +161,20 @@ deploy_container() {
     log "[INFO] Desplegando componente Docker: ${name}"
     log "[INFO] ----------------------------------------------------"
 
-    local common_env="/var/www/storage/sur-nodos-en-mallas/common/.env"
+    local common_env="/srv/comun/.env"
+    if [[ ! -f "${common_env}" ]]; then
+        common_env="/var/www/storage/sur-nodos-en-mallas/common/.env"
+    fi
+    local srv_env="/srv/${name}/.env"
     local local_env="${dir_path}/.env"
     local env_args=()
 
     if [[ -f "${common_env}" ]]; then
         env_args+=("--env-file" "${common_env}")
     fi
-    if [[ -f "${local_env}" ]]; then
+    if [[ -f "${srv_env}" ]]; then
+        env_args+=("--env-file" "${srv_env}")
+    elif [[ -f "${local_env}" ]]; then
         env_args+=("--env-file" "${local_env}")
     fi
 

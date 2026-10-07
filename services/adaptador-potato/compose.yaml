@@ -1,0 +1,31 @@
+# ==============================================================================
+# compose.yaml (services/adaptador-potato/)
+#
+# Despliegue del microservicio adaptador-potato para Andalucía Mesh.
+# Microservicio interno en red 'mesh' sin puertos publicados hacia el host.
+# ==============================================================================
+
+services:
+  adaptador-potato:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: snm-adaptador-potato:0.1.0
+    container_name: adaptador-potato
+    restart: unless-stopped
+    networks:
+      - mesh
+    env_file:
+      - path: /srv/comun/.env
+        required: false
+      - path: /srv/adaptador-potato/.env
+        required: false
+      - path: .env
+        required: false
+    mem_limit: 256m
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  mesh:
+    external: true

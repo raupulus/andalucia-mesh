@@ -1,0 +1,10 @@
+[Unit]
+Description=Temporizador diario de purga de datos para PotatoMesh
+After=network.target
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

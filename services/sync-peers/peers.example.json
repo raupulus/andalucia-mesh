@@ -1,0 +1,22 @@
+[
+  {
+    "id": "malla-ejemplo-1",
+    "nombre": "Malla Vecina Demostración 1",
+    "url": "https://potato.malla-ejemplo.org",
+    "activo": true,
+    "mensajes": true,
+    "trazas": true,
+    "nodos": true,
+    "intervalo_nodos_s": 180
+  },
+  {
+    "id": "malla-ejemplo-2",
+    "nombre": "Malla Vecina Demostración 2",
+    "url": "https://potato.otra-malla.org",
+    "activo": false,
+    "mensajes": true,
+    "trazas": false,
+    "nodos": true,
+    "intervalo_nodos_s": 300
+  }
+]

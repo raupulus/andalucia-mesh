@@ -1,0 +1,52 @@
+[server]
+bind = *
+port = 8081
+
+[site]
+domain = ${PROJECT_DOMAIN}
+title = ${PROJECT_NAME}
+message = Visor técnico de la malla de ${PROJECT_NAME}. Más información: https://${PROJECT_DOMAIN}
+language = es
+starting = /map
+nodes = True
+conversations = True
+everything = True
+graphs = True
+stats = True
+net = False
+map = True
+top = True
+map_top_left_lat = 38.8
+map_top_left_lon = -7.6
+map_bottom_right_lat = 35.2
+map_bottom_right_lon = -1.5
+map_interval = 10
+firehose_interval = 10
+
+[mqtt]
+server = ${MQTT_HOST}
+port = ${MQTT_PORT}
+topics = ["${MQTT_TOPIC_ROOT}/#"]
+username = ${MQTT_USER}
+password = ${MQTT_PASSWORD}
+skip_node_ids =
+secondary_keys =
+
+[database]
+connection_string = postgresql+asyncpg://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+
+[cleanup]
+enabled = True
+days_to_keep = 14
+hour = 2
+minute = 00
+vacuum = False
+backup_enabled = False
+
+[snapshot]
+hour = 1
+minute = 00
+
+[logging]
+access_log = False
+db_cleanup_logfile = /var/log/meshview/dbcleanup.log

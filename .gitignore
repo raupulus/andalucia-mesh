@@ -1,6 +1,10 @@
 # Entornos, IDEs y dependencias efímeras
 .DS_Store
 .idea/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
 
 # Protocolo docs/ (efímero / por desarrollador)
 /docs/planning/

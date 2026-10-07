@@ -1,0 +1,60 @@
+# ==============================================================================
+# compose.yaml (integrations/meshview/)
+#
+# Despliegue de MeshView para Andalucía Mesh.
+# Consta de:
+#   1. meshview-config: contenedor efímero de un solo uso que genera config.ini
+#   2. meshview: servicio principal en red mesh publicado localmente en 127.0.0.1:8081
+# ==============================================================================
+
+services:
+  meshview-config:
+    image: ghcr.io/pablorevilla-meshtastic/meshview:3.0.8@sha256:06edaaff53e8a25a2267a0b55de591ec950809e7880f7696a26712b63643158f
+    container_name: meshview-config
+    network_mode: none
+    volumes:
+      - ./plantilla:/plantilla:ro
+      - /srv/meshview/datos/config:/etc/meshview
+    env_file:
+      - path: /srv/comun/.env
+        required: false
+      - path: /srv/meshview/.env
+        required: false
+      - path: .env
+        required: false
+    command: ["python3", "/plantilla/generar-config.py"]
+
+  meshview:
+    image: ghcr.io/pablorevilla-meshtastic/meshview:3.0.8@sha256:06edaaff53e8a25a2267a0b55de591ec950809e7880f7696a26712b63643158f
+    container_name: meshview
+    restart: unless-stopped
+    depends_on:
+      meshview-config:
+        condition: service_completed_successfully
+    networks:
+      - mesh
+    ports:
+      - "127.0.0.1:8081:8081"
+    volumes:
+      - /srv/meshview/datos/config:/etc/meshview:ro
+      - /srv/meshview/datos/logs:/var/log/meshview
+    env_file:
+      - path: /srv/comun/.env
+        required: false
+      - path: /srv/meshview/.env
+        required: false
+      - path: .env
+        required: false
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/health', timeout=5)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    mem_limit: 768m
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  mesh:
+    external: true
