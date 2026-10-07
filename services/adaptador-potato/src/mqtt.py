@@ -161,9 +161,10 @@ class MqttProcessor:
             return
 
         packet: mesh_pb2.MeshPacket = envelope.packet
+        from_node: int = getattr(packet, "from", 0)
 
         # Descartar paquetes con cabecera nula o corrupta
-        if packet.from_node == 0 or packet.id == 0:
+        if from_node == 0 or packet.id == 0:
             return
 
         # Descartar mensajes directos (no son de difusión pública)
@@ -171,11 +172,11 @@ class MqttProcessor:
             return
 
         # Deduplicación temporal en memoria
-        if self.dedup.is_duplicate(packet.from_node, packet.id):
+        if self.dedup.is_duplicate(from_node, packet.id):
             return
 
         rx_time = int(packet.rx_time) if packet.rx_time else int(time.time())
-        node_id_str = f"!{packet.from_node:08x}"
+        node_id_str = f"!{from_node:08x}"
 
         # Obtener carga Data
         data: mesh_pb2.Data | None = None
@@ -188,7 +189,7 @@ class MqttProcessor:
                 return
 
             data, status = decrypt_packet(
-                packet.encrypted, packet.id, packet.from_node, self.aes_key
+                packet.encrypted, packet.id, from_node, self.aes_key
             )
             if status != "ok" or data is None:
                 # Paquete con clave desconocida: registrar actividad como mensaje cifrado
@@ -208,7 +209,9 @@ class MqttProcessor:
         else:
             return
 
-        self._dispatch_payload(packet, data, channel_index, rx_time, node_id_str)
+        self._dispatch_payload(
+            packet, data, channel_index, rx_time, node_id_str, from_node
+        )
 
     def _dispatch_payload(
         self,
@@ -217,6 +220,7 @@ class MqttProcessor:
         channel_index: int,
         rx_time: int,
         node_id_str: str,
+        from_node: int,
     ) -> None:
         """Traduce la carga Data decodificada y la encola hacia el endpoint correspondiente."""
         portnum = data.portnum
@@ -370,10 +374,10 @@ class MqttProcessor:
             route = mesh_pb2.RouteDiscovery()
             try:
                 route.ParseFromString(data.payload)
-                hops_list = [packet.from_node] + list(route.route) + [packet.to]
+                hops_list = [from_node] + list(route.route) + [packet.to]
                 trace_payload = {
                     "id": packet.id,
-                    "from": packet.from_node,
+                    "from": from_node,
                     "to": packet.to,
                     "rx_time": rx_time,
                     "hops": hops_list,
