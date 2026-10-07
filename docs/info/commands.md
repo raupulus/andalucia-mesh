@@ -17,6 +17,7 @@ Catálogo de comandos, scripts de compilación, ejecución, pruebas y tareas ope
 | `infrastructure/postgresql/install-timescale.sh` | Instala TimescaleDB 2.x en PostgreSQL 17 y configura pg_hba | Bash, root / sudo, postgresql-17 |
 | `infrastructure/postgresql/set-role-password.sh <rol> [env]` | Genera contraseña criptográfica para un rol de PostgreSQL | Bash, PostgreSQL local |
 | `infrastructure/postgresql/check-db.sh` | Verifica el estado del clúster PostgreSQL y bases de datos | Bash, psql, pg_isready |
+| `infrastructure/postgresql/migrar-datos-historicos.py [opciones]` | Siembra y migra datos históricos desde SQLite hacia Ingest, MeshView y PotatoMesh | Python 3.13, asyncpg, meshtastic |
 | `infrastructure/nginx/install.sh` | Instala sitios, snippets y streams en Nginx nativo | Bash, root / sudo, nginx |
 | `infrastructure/nginx/certbot-setup.sh [opciones]` | Emite certificados Let's Encrypt mediante reto webroot | Bash, root / sudo, certbot |
 | `integrations/mosquitto/install.sh` | Instala Mosquitto nativo, inicializa credenciales y configura listeners | Bash, root / sudo, mosquitto |
@@ -30,4 +31,4 @@ Catálogo de comandos, scripts de compilación, ejecución, pruebas y tareas ope
 | `php artisan operador:desactivar {email}` | Revoca el acceso y desactiva a un operador técnico en `/admin` | PHP 8.4, Laravel, `services/portal/` |
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08
