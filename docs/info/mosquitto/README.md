@@ -231,14 +231,14 @@ Servicio nativo en el host: `mosquitto.service` (paquetes Debian `mosquitto` y `
 
 ## 9. Definición de hecho
 
-- [ ] Servicio `mosquitto.service` activo en el host; solo 1883 abierto directamente al exterior; 8883 por Nginx `stream`.
-- [ ] Sin acceso anónimo en 1883, 8883 y 1884; el 1885 solo es accesible en `127.0.0.1` del host.
-- [ ] ACL generadas desde `ALLOWED_CHANNELS` coinciden con §4; `test-acl.sh` en verde.
-- [ ] Ningún gateway recibe nada al suscribirse; ningún servicio puede publicar en `msh/#`.
-- [ ] Alta y baja de gateways sin reiniciar para el alta; la baja corta la sesión.
-- [ ] Seis usuarios de servicio creados y sus contraseñas solo en los `.env`.
-- [ ] Tabla de configuración del nodo entregada al portal.
-- [ ] El panel ve el broker en `172.30.0.1:1884` con `svc-panel`; la vigilancia lee `$SYS` por el 1885.
+- [x] Servicio `mosquitto.service` activo en el host; solo 1883 abierto directamente al exterior; 8883 por Nginx `stream`.
+- [x] Sin acceso anónimo en 1883, 8883 y 1884; el 1885 solo es accesible en `127.0.0.1` del host.
+- [x] ACL generadas desde `ALLOWED_CHANNELS` coinciden con §4; `test-acl.sh` en verde.
+- [x] Ningún gateway recibe nada al suscribirse; ningún servicio puede publicar en `msh/#`.
+- [x] Alta y baja de gateways sin reiniciar para el alta; la baja corta la sesión.
+- [x] Seis usuarios de servicio creados y sus contraseñas solo en los `.env`.
+- [x] Tabla de configuración del nodo entregada al portal.
+- [x] El panel ve el broker en `172.30.0.1:1884` con `svc-panel`; la vigilancia lee `$SYS` por el 1885.
 
 ## 10. Escenarios de prueba
 
