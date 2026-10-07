@@ -13,24 +13,24 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from meshtastic.protobuf import mesh_pb2
 
-# Constante de clave por defecto del firmware Meshtastic (16 bytes)
+# Constante de clave por defecto del firmware Meshtastic (16 bytes: AQ==)
 DEFAULT_PSK: bytes = bytes(
     [
         0xD4,
         0xF1,
         0xBB,
         0x3A,
+        0x20,
+        0x29,
+        0x07,
+        0x59,
+        0xF0,
+        0xBC,
+        0xFF,
+        0xAB,
+        0xCF,
+        0x4E,
         0x69,
-        0xEF,
-        0xB9,
-        0x90,
-        0x52,
-        0x68,
-        0x08,
-        0x25,
-        0xB9,
-        0xA1,
-        0xA8,
         0x01,
     ]
 )

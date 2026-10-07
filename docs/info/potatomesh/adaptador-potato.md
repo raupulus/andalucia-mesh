@@ -99,4 +99,4 @@ Sin base de datos: todo el estado es en memoria y se reconstruye solo.
 7. **Dado** un mensaje directo (`to` ≠ difusión), **cuando** llega, **entonces** no se envía nada.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

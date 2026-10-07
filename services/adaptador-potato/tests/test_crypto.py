@@ -19,10 +19,14 @@ from src.crypto import (
 
 
 def test_expand_key_default() -> None:
-    """Verifica que la clave por defecto AQ== produzca la constante DEFAULT_PSK."""
+    """Verifica que la clave por defecto AQ== produzca la constante DEFAULT_PSK oficial."""
     key = expand_key("AQ==")
     assert len(key) == 16
     assert key == DEFAULT_PSK
+    assert key == bytes([
+        0xD4, 0xF1, 0xBB, 0x3A, 0x20, 0x29, 0x07, 0x59,
+        0xF0, 0xBC, 0xFF, 0xAB, 0xCF, 0x4E, 0x69, 0x01,
+    ])
 
 
 def test_expand_key_empty_or_zero() -> None:

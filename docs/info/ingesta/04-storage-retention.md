@@ -161,4 +161,4 @@ Ninguno hacia fuera: tablas y agregados pueden cambiar sin aviso mientras las vi
 - **Dado** PostgreSQL con TimescaleDB en edición Apache, **cuando** arranca el servicio, **entonces** se detiene con un mensaje que pide la edición Community.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

@@ -150,6 +150,14 @@ class StorageManager:
         p = packet.payload
         if packet.portnum == "position":
             if "latitude" in p and "longitude" in p:
+                gps_time: datetime | None = None
+                raw_time = p.get("time")
+                if raw_time:
+                    try:
+                        gps_time = datetime.fromtimestamp(raw_time, timezone.utc)
+                    except (ValueError, OSError, OverflowError):
+                        gps_time = None
+
                 self._q_position.append((
                     packet.rx_first,
                     packet.from_id,
@@ -159,7 +167,7 @@ class StorageManager:
                     p.get("precision_bits"),
                     p.get("precision_m"),
                     "position",
-                    p.get("time"),
+                    gps_time,
                     packet.province,
                     p.get("border_uncertain", False),
                 ))
