@@ -25,11 +25,11 @@ Cada `###` es un H2 de la página.
 
 **H1:** Quién lo impulsa
 
-{PROJECT_NAME} es un proyecto personal y sin ánimo de lucro de Raúl Caro Pastorino. Lo diseña, lo desarrolla y lo mantiene él, con la ayuda de quienes conectan sus gateways para que la malla se vea entera.
+{PROJECT_NAME} es un proyecto personal y sin ánimo de lucro de [Raúl Caro Pastorino](https://raupulus.dev). Lo diseña, lo desarrolla y lo mantiene él, con la ayuda de quienes conectan sus gateways para que la malla se vea entera.
 
-**H3:** Raúl Caro Pastorino
+### [Raúl Caro Pastorino](https://raupulus.dev)
 
-Desarrollador web full stack especializado en backend · @raupulus
+Desarrollador web full stack especializado en backend · [@raupulus](https://raupulus.dev)
 
 "Soy un desarrollador backend con amplia experiencia en PHP, Laravel, Javascript y PostgreSQL. A lo largo de mi carrera he trabajado en una variedad de proyectos, desde pequeños sitios web hasta grandes aplicaciones empresariales."
 
@@ -48,13 +48,3 @@ Para cualquier cosa del proyecto (dar de alta un gateway, coordinar un router, a
 
 Por ahora no aceptamos donaciones; lo valoraremos cuando termine el desarrollo.
 
-## Datos dinámicos y configuración
-
-| Dato | Origen |
-|---|---|
-| Nombre, nick, rol, presentación, webs y redes | `config/autoria.php`. Los enlaces llevan `rel="me noopener"` |
-| Contacto | `PROJECT_CONTACT` |
-| Textos fijos | `resources/contenido/quien-lo-impulsa.md`. Sin datos de la API |
-
----
-> Creado: 2026-10-07 · Última revisión: 2026-10-07

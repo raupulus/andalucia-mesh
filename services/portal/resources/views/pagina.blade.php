@@ -17,8 +17,9 @@
                 <section class="tarjeta" style="margin-top: 3rem; padding: 2rem; background-color: var(--color-superficie-sutil);">
                     <h2 style="font-size: 1.35rem; margin-bottom: 0.75rem;">Autoría y Contacto del Proyecto</h2>
                     <p style="margin-bottom: 1rem;">
-                        <strong>{{ config('autoria.nombre') }}</strong> (<code>{{ config('autoria.nick') }}</code>)
+                        <strong><a href="https://raupulus.dev" target="_blank" rel="noopener noreferrer" style="color: var(--color-texto-1); text-decoration: underline;">{{ config('autoria.nombre') }}</a></strong> (<code><a href="https://raupulus.dev" target="_blank" rel="noopener noreferrer">{{ config('autoria.nick') }}</a></code>)
                     </p>
+
                     <p style="color: var(--color-texto-2); font-size: 0.95rem; margin-bottom: 1.25rem;">
                         {{ config('autoria.presentacion') }}
                     </p>

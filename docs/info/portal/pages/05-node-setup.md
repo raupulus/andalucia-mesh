@@ -48,6 +48,8 @@ La mayor parte de la malla en España usa esta configuración manual. Si tu nodo
 | Canal 0: clave | `AQ==` (la clave pública por defecto) |
 | Límite de saltos | `{LORA_HOP_LIMIT}` |
 
+> ⚠️ **Advertencia fundamental antes de encender el equipo:** Jamás conectes la alimentación ni enciendas tu placa LoRa sin tener la antena correctamente conectada. Emitir sin carga de antena puede quemar el amplificador de potencia de radiofrecuencia (PA) y dañar irreversiblemente tu equipo.
+
 Cómo ponerla:
 
 1. En la app del nodo, abre los ajustes de LoRa y elige la región `{LORA_REGION}`.
@@ -55,7 +57,7 @@ Cómo ponerla:
 3. Escribe ancho de banda `{LORA_BANDWIDTH}`, spreading factor `{LORA_SPREAD_FACTOR}` y coding rate `{LORA_CODING_RATE}`.
 4. Pon el frequency slot `{LORA_FREQUENCY_SLOT}` (o la frecuencia {LORA_FREQUENCY_MHZ} MHz, que es lo mismo).
 5. Cambia el nombre del canal 0 a `{PRIMARY_CHANNEL}` y deja la clave por defecto (`AQ==`).
-6. Pon el límite de saltos a `{LORA_HOP_LIMIT}`.
+6. Pon el límite de saltos a 3 o 4 (o 5 si estás en un extremo o en `CLIENT_MUTE`).
 
 Si administras un nodo a distancia, cambia los ajustes en este orden para no perder el acceso: primero la radio del nodo remoto, luego la del local; después el canal del remoto y, por último, el del local.
 
@@ -65,17 +67,16 @@ Si administras un nodo a distancia, cambia los ajustes en este orden para no per
 |---|---|
 | `CLIENT_MUTE` | La mayoría: nodos personales, de interior o con mala cobertura. No repite paquetes de otros |
 | `CLIENT` | Nodos de exterior bien situados, en una azotea o terraza despejada. Repite paquetes |
-| `ROUTER` | Solo en ubicaciones estratégicas y coordinado con el proyecto: escríbenos a {PROJECT_CONTACT} antes de activarlo. El sistema de alertas avisa de los routers no coordinados |
+| `ROUTER` | Solo en ubicaciones estratégicas y coordinado previamente con la comunidad andaluza por el grupo de Telegram. La infraestructura troncal actual ya está cubierta por operadores experimentados y no deben añadirse más routers para evitar colisiones |
 | `ROUTER_LATE`, `CLIENT_BASE` | No recomendados |
 
 No hace falta que todos los nodos repitan: si todos lo hacen, el mismo paquete ocupa el canal muchas veces. Ante la duda, `CLIENT_MUTE`.
 
 ### 3. Saltos
 
-- Por defecto, **{LORA_HOP_LIMIT}**: suficiente en casi toda la malla.
-- Hasta **4** en nodos bien conectados.
-- **5** solo en los extremos de la malla o en `CLIENT_MUTE` de interior.
-- Más de 5 satura la red para todos, y el sistema de alertas lo marca.
+- **Recomendados: 3 a 4 saltos.** En la inmensa mayoría de Andalucía, 3 o 4 saltos son suficientes y óptimos para propagar los mensajes eficazmente.
+- **5 saltos:** Válido únicamente si tu nodo está en modo `CLIENT_MUTE` de interior o si se ubica en un extremo geográfico o comarcal aislado de la malla para alcanzar repetidores distantes.
+- **6 o más saltos:** Perjudica a toda la comunidad multiplicando paquetes duplicados innecesarios; el detector de anomalías lo marcará automáticamente (`hops-high`).
 
 ### 4. Intervalos de emisión
 
@@ -102,7 +103,6 @@ Estos paquetes automáticos son la mayor parte del tráfico de la malla, y NodeI
 
 ### 6. Lo que perjudica a toda la malla
 
-- Encender el nodo sin antena: puede dañar la radio.
 - Poner más saltos de la cuenta.
 - Poner el rol `ROUTER` sin coordinarlo.
 - Intervalos más cortos que los de esta guía.
@@ -132,4 +132,5 @@ El orden de cambio en nodos remotos, la lista de "lo que perjudica" y el motivo 
 - `hops-high` empieza en 6 saltos (`medio`): un nodo con 4 o 5 saltos según esta guía no recibe alerta (corregido en `../../detector-alertas/02-rule-catalog.md`).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08
+

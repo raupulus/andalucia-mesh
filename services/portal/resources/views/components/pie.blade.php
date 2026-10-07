@@ -44,7 +44,8 @@
         <!-- Barra inferior de autoría y contacto -->
         <div style="border-top: 1px solid var(--color-borde); padding-top: 1.5rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--color-texto-2);">
             <div>
-                Impulsado con dedicación técnica por <strong>{{ config('autoria.nombre') }}</strong> (<code>{{ config('autoria.nick') }}</code>) · Contacto público: <a href="mailto:{{ config('autoria.email') }}">{{ config('autoria.email') }}</a>
+                Impulsado con dedicación técnica por <strong><a href="https://raupulus.dev" target="_blank" rel="noopener noreferrer" style="color: var(--color-texto-1); text-decoration: underline;">{{ config('autoria.nombre') }}</a></strong> (<code><a href="https://raupulus.dev" target="_blank" rel="noopener noreferrer">{{ config('autoria.nick') }}</a></code>) · Contacto público: <a href="mailto:{{ config('autoria.email') }}">{{ config('autoria.email') }}</a>
+
             </div>
             <div>
                 Sin rastreadores ni cookies de terceros · Infraestructura en la UE

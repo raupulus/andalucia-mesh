@@ -48,7 +48,9 @@ La mayor parte de la malla en España usa esta configuración manual. Si tu nodo
 | Nombre del preset | `SFNarrow` |
 | Canal principal (0): nombre | `{PRIMARY_CHANNEL}` |
 | Canal principal (0): clave PSK | `AQ==` (clave pública por defecto) |
-| Límite de saltos (Hop Limit) | `{LORA_HOP_LIMIT}` (máximo 4) |
+| Límite de saltos (Hop Limit) | 3 a 4 (5 para `CLIENT_MUTE` o extremos) |
+
+> ⚠️ **Advertencia fundamental antes de encender el equipo:** Jamás conectes la alimentación ni enciendas tu placa LoRa sin tener la antena correctamente conectada. Emitir sin carga de antena puede quemar el amplificador de potencia de radiofrecuencia (PA) y dañar irreversiblemente tu equipo.
 
 Cómo ponerla en la app de Meshtastic:
 
@@ -57,7 +59,7 @@ Cómo ponerla en la app de Meshtastic:
 3. Escribe ancho de banda `{LORA_BANDWIDTH}` (o 62.5 kHz), spreading factor `{LORA_SPREAD_FACTOR}` y coding rate `{LORA_CODING_RATE}`.
 4. Pon el **Frequency slot** en `{LORA_FREQUENCY_SLOT}` o, como alternativa equivalente, escribe la frecuencia en **Frequency override** `{LORA_FREQUENCY_MHZ}` MHz.
 5. En `Channels`, renombra el canal 0 a `{PRIMARY_CHANNEL}` y pon la clave PSK por defecto (`AQ==`).
-6. Pon el límite de saltos a `{LORA_HOP_LIMIT}`.
+6. Pon el límite de saltos a 3 o 4 (o 5 si estás en un extremo o en `CLIENT_MUTE`).
 
 Si administras un nodo a distancia, cambia los ajustes en este orden para no perder el acceso: primero la radio del nodo remoto, luego la del local; después el canal del remoto y, por último, el del local.
 
@@ -67,17 +69,16 @@ Si administras un nodo a distancia, cambia los ajustes en este orden para no per
 |---|---|
 | `CLIENT_MUTE` | La mayoría: nodos personales, de interior o con mala cobertura. No repite paquetes de otros |
 | `CLIENT` | Nodos de exterior bien situados, en una azotea o terraza despejada. Repite paquetes |
-| `ROUTER` | Solo en ubicaciones estratégicas y coordinado con el proyecto: escríbenos a {PROJECT_CONTACT} antes de activarlo. El sistema de alertas avisa de los routers no coordinados |
+| `ROUTER` | Solo en ubicaciones estratégicas y coordinado previamente con la comunidad andaluza por el grupo de Telegram. La infraestructura troncal actual ya está cubierta por operadores experimentados y no deben añadirse más routers para evitar colisiones |
 | `ROUTER_LATE`, `CLIENT_BASE` | No recomendados |
 
 No hace falta que todos los nodos repitan: si todos lo hacen, el mismo paquete ocupa el canal muchas veces. Ante la duda, `CLIENT_MUTE`.
 
 ### 3. Saltos
 
-- Por defecto, **{LORA_HOP_LIMIT}**: suficiente en casi toda la malla.
-- Hasta **4** en nodos bien conectados.
-- **5** solo en los extremos de la malla o en `CLIENT_MUTE` de interior.
-- Más de 5 satura la red para todos, y el sistema de alertas lo marca.
+- **Recomendados: 3 a 4 saltos.** En la inmensa mayoría de Andalucía, 3 o 4 saltos son suficientes y óptimos para propagar los mensajes eficazmente.
+- **5 saltos:** Válido únicamente si tu nodo está en modo `CLIENT_MUTE` de interior o si se ubica en un extremo geográfico o comarcal aislado de la malla para alcanzar repetidores distantes.
+- **6 o más saltos:** Perjudica a toda la comunidad multiplicando paquetes duplicados innecesarios; el detector de anomalías lo marcará automáticamente (`hops-high`).
 
 ### 4. Intervalos de emisión
 
@@ -104,7 +105,6 @@ Estos paquetes automáticos son la mayor parte del tráfico de la malla, y NodeI
 
 ### 6. Lo que perjudica a toda la malla
 
-- Encender el nodo sin antena: puede dañar la radio.
 - Poner más saltos de la cuenta.
 - Poner el rol `ROUTER` sin coordinarlo.
 - Intervalos más cortos que los de esta guía.
@@ -117,21 +117,3 @@ Estos paquetes automáticos son la mayor parte del tráfico de la malla, y NodeI
 
 **Botón primario:** [Conecta tu gateway](/conecta-tu-gateway)
 
-## Datos dinámicos y configuración
-
-| Dato | Origen |
-|---|---|
-| Radio | `LORA_REGION`, `LORA_BANDWIDTH`, `LORA_SPREAD_FACTOR`, `LORA_CODING_RATE`, `LORA_FREQUENCY_SLOT`, `LORA_HOP_LIMIT`, `PRIMARY_CHANNEL`. Valores actuales: `EU_868`, `62`, `7`, `5`, `4`, `3`, `SFNarrow` |
-| `{LORA_BANDWIDTH_KHZ}` y `{LORA_FREQUENCY_MHZ}` | Valores derivados en `config/proyecto.php` (62 → 62,5 kHz; slot 4 → 869,618 MHz), no variables nuevas del `.env`. Si cambia el slot o el ancho, cambian solos |
-| Clave `AQ==` | Fija (clave pública por defecto) |
-| Contacto | `PROJECT_CONTACT` |
-| Rol, saltos 4/5, intervalos y posición | Texto fijo en `resources/contenido/configura-tu-nodo.md`. Deben coincidir con los umbrales del bloque B de `../../detector-alertas/02-rule-catalog.md` (RF-PO-RN-3) |
-
-El orden de cambio en nodos remotos, la lista de "lo que perjudica" y el motivo de las banderas de posición salen de las buenas prácticas públicas de la comunidad, reescritas.
-
-## Supuestos aplicados
-
-- `hops-high` empieza en 6 saltos (`medio`): un nodo con 4 o 5 saltos según esta guía no recibe alerta (corregido en `../../detector-alertas/02-rule-catalog.md`).
-
----
-> Creado: 2026-10-07 · Última revisión: 2026-10-07

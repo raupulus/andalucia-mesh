@@ -145,12 +145,13 @@
                     Límite de Saltos (Hop Limit)
                 </div>
                 <div style="font-size: 1.25rem; font-weight: 800; color: var(--color-texto); font-family: var(--fuente-mono);">
-                    3 <span style="font-size: 0.95rem; font-weight: 600; color: var(--color-texto-2);">(máx. 4)</span>
+                    3 - 4 <span style="font-size: 0.95rem; font-weight: 600; color: var(--color-texto-2);">(5 en extremos)</span>
                 </div>
                 <div style="font-size: 0.8rem; color: var(--color-texto-2); margin-top: 0.25rem;">
-                    Evita saturar el canal de radio
+                    Recomendado 3–4 · 5 para CLIENT_MUTE o extremos
                 </div>
             </div>
+
 
         </div>
 

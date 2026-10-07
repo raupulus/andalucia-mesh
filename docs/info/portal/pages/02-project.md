@@ -35,8 +35,8 @@ Una red de pequeños equipos de radio, los nodos, que se pasan mensajes unos a o
 
 ### Qué encontrarás aquí
 
-- **MeshView:** el tráfico de la malla en directo, paquete a paquete, con sus rutas y quién oye a quién.
-- **PotatoMesh:** mapa y chat de los canales públicos, con la ficha de cada nodo.
+- **[MeshView]({MESHVIEW_URL}):** el tráfico de la malla en directo, paquete a paquete, con sus rutas y quién oye a quién.
+- **[PotatoMesh]({POTATOMESH_URL}):** mapa y chat de los canales públicos, con la ficha de cada nodo.
 - **Mapa por provincias** (en la [portada](/)): cuántos nodos hay y cómo de cargado va el canal en cada provincia.
 - **[Rankings](/rankings):** qué nodos consumen más red, cuáles están en peligro y quién aporta más.
 - **[Alertas](/alertas):** los problemas que detecta el sistema, con su riesgo y a quién afectan.
@@ -73,7 +73,7 @@ La radio sí es compartida. Recomendamos la misma configuración que usa la mayo
 
 ### Sin ánimo de lucro
 
-Es un proyecto personal de Raúl Caro Pastorino, sin ánimo de lucro y sin cookies ni rastreadores en sus páginas públicas. Más en [Quién lo impulsa](/quien-lo-impulsa) y [Cómo se gestiona](/como-se-gestiona).
+Es un proyecto personal de [Raúl Caro Pastorino](https://raupulus.dev), sin ánimo de lucro y sin cookies ni rastreadores en sus páginas públicas. Más en [Quién lo impulsa](/quien-lo-impulsa) y [Cómo se gestiona](/como-se-gestiona).
 
 No es un servicio de emergencias: ni la malla ni estas webs garantizan que un mensaje llegue.
 
@@ -88,4 +88,5 @@ No es un servicio de emergencias: ni la malla ni estas webs garantizan que un me
 | Texto | `resources/contenido/overview.md`. Sin datos de la API |
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08
+

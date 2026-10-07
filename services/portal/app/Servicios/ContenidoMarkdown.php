@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace App\Servicios;
 
 use Illuminate\Support\Facades\Cache;
-use League\CommonMark\GithubFlavoredMarkdownConverter;
+use League\CommonMark\Environment\Environment;
+use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
+use League\CommonMark\Extension\ExternalLink\ExternalLinkExtension;
+use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
+use League\CommonMark\MarkdownConverter;
 use RuntimeException;
 
 class ContenidoMarkdown
@@ -15,16 +19,28 @@ class ContenidoMarkdown
      */
     protected array $variables;
 
-    protected GithubFlavoredMarkdownConverter $converter;
+    protected MarkdownConverter $converter;
 
     public function __construct()
     {
-        $this->converter = new GithubFlavoredMarkdownConverter([
+        $projectDomain = config('proyecto.dominio');
+
+        $environment = new Environment([
             'html_input' => 'strip',
             'allow_unsafe_links' => false,
+            'external_link' => [
+                'internal_hosts' => [(string) $projectDomain],
+                'open_in_new_window' => true,
+                'noopener' => 'external',
+                'noreferrer' => 'external',
+            ],
         ]);
+        $environment->addExtension(new CommonMarkCoreExtension());
+        $environment->addExtension(new GithubFlavoredMarkdownExtension());
+        $environment->addExtension(new ExternalLinkExtension());
 
-        $projectDomain = config('proyecto.dominio');
+        $this->converter = new MarkdownConverter($environment);
+
 
         $this->variables = [
             '{PROJECT_NAME}' => (string) config('proyecto.nombre'),
@@ -64,6 +80,7 @@ class ContenidoMarkdown
             '{AUTOR_NOMBRE}' => (string) config('autoria.nombre'),
             '{AUTOR_NICK}' => (string) config('autoria.nick'),
             '{AUTOR_EMAIL}' => (string) config('autoria.email'),
+            '{AUTOR_WEB}' => (string) (config('autoria.webs.0.url') ?? 'https://raupulus.dev'),
         ];
     }
 
@@ -81,7 +98,7 @@ class ContenidoMarkdown
         }
 
         $mtime = filemtime($path);
-        $cacheKey = "markdown_render_v2:{$nombreFichero}:{$mtime}";
+        $cacheKey = "markdown_render_v3:{$nombreFichero}:{$mtime}";
 
         /** @var array{titulo: string, descripcion: string, html: string, h1: string} */
         return Cache::rememberForever($cacheKey, function () use ($path, $nombreFichero): array {
@@ -103,6 +120,12 @@ class ContenidoMarkdown
             if (preg_match('/## Borrador del texto\s+(.+)$/us', $rawContent, $mBody)) {
                 $body = $mBody[1];
             }
+
+            // Descartar metadatos técnicos, tablas de configuración y notas internas al final del borrador
+            $partes = preg_split('/\n##\s+(?:Datos dinámicos|Supuestos aplicados|Criterios de aceptación)/u', $body);
+            $body = $partes[0] ?? $body;
+            $body = preg_replace('/\n---\s*\n>\s*Creado:.*$/us', '', $body) ?? $body;
+
 
             // 3. Extraer H1 si está anotado como "**H1:** Título" y descartar meta-instrucciones previas
             $h1 = $titulo;

@@ -75,8 +75,9 @@
                                 </tr>
                                 <tr style="border-bottom: 1px solid var(--color-borde);">
                                     <td style="padding: 0.5rem 0; font-weight: 600;">Límite de saltos</td>
-                                    <td style="padding: 0.5rem 0;">Máximo <strong>{{ config('proyecto.lora.hop_limit') }}</strong> saltos</td>
+                                    <td style="padding: 0.5rem 0;">Recomendado <strong>3–4</strong> saltos (5 en <code>CLIENT_MUTE</code> o extremos)</td>
                                 </tr>
+
                                 <tr>
                                     <td style="padding: 0.5rem 0; font-weight: 600;">Rol sugerido</td>
                                     <td style="padding: 0.5rem 0;"><code>CLIENT_MUTE</code> en la mayoría de nodos personales; <code>CLIENT</code> si está en exterior despejado</td>
@@ -124,8 +125,9 @@
                     Quién está detrás
                 </h2>
                 <p style="color: var(--color-texto-2); font-size: 1.05rem; line-height: 1.6; margin-bottom: 1.5rem;">
-                    Andalucía Mesh es una iniciativa libre, personal y sin ánimo de lucro impulsada por <strong>{{ config('autoria.nombre') }}</strong> (<code>{{ config('autoria.nick') }}</code>) desde Chipiona (Cádiz), orientada a vertebrar una infraestructura de comunicaciones de emergencia y experimentación ciudadana para toda la región.
+                    Andalucía Mesh es una iniciativa libre, personal y sin ánimo de lucro impulsada por <strong><a href="https://raupulus.dev" target="_blank" rel="noopener noreferrer" style="color: var(--color-texto-1); text-decoration: underline;">{{ config('autoria.nombre') }}</a></strong> (<code><a href="https://raupulus.dev" target="_blank" rel="noopener noreferrer">{{ config('autoria.nick') }}</a></code>) desde Chipiona (Cádiz), orientada a vertebrar una infraestructura de comunicaciones de emergencia y experimentación ciudadana para toda la región.
                 </p>
+
 
                 <a href="/quien-lo-impulsa" class="btn btn-secundario">
                     Conoce más sobre quién impulsa el proyecto →

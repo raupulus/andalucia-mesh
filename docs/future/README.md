@@ -19,6 +19,9 @@ Registro de funcionalidades y conceptos que han sido decididos formalmente pero 
 | Revisión del margen costero de ingesta | Evaluar ampliación del margen de 500 m en costas para evitar nodos legítimos marcados como FUERA |
 | Inclusión de Ceuta y Melilla como provincias | Tratar Ceuta y Melilla como provincias de pleno derecho en polígonos, rankings y mapa (conexión natural hacia la península) |
 | Configurador de nodos con descarga de configuración | Asistente interactivo en el portal para generar y descargar la configuración óptima (exportación en YAML / backup o código QR para la app de Meshtastic) adaptada al rol, tipo de nodo e intervalos recomendados de la malla |
+| Tiempos de telemetría de energía y clima en «Configura tu nodo» | Ampliar `/configura-tu-nodo` con recomendaciones e intervalos detallados para telemetría de energía (batería, paneles solares) y sensores climáticos/ambientales (temperatura, humedad, presión), orientados a minimizar el uso de canal |
+| Página de reporte de ideas y sugerencias | Formulario público en el portal para el envío de sugerencias e ideas de la comunidad, con persistencia en el backend de Laravel y gestión desde `/admin` |
+| Sección visual de malas prácticas y problemas frecuentes | Diapositivas o carrusel gráfico didáctico en el portal sobre errores que saturan la red: saturación por rol ROUTER, cuándo elegir CLIENT vs CLIENT_MUTE, telemetría excesiva, Range Test emitiendo por el canal principal, etc. |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08
