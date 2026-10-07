@@ -68,6 +68,7 @@ Se generan desde `MQTT_TOPIC_ROOT`, `MQTT_TOPIC_PREFIX`, `ALLOWED_CHANNELS` (`/s
 
 ```text
 # credenciales/acl-gateways — generado, no editar
+user meshdev
 topic write msh/EU_868/2/e/SFNarrow/#
 topic write msh/EU_868/2/e/Iberia/#
 topic write msh/EU_868/2/e/Andalucia/#
@@ -83,6 +84,22 @@ topic write msh/EU_868/2/e/Ceuta/#
 topic write msh/EU_868/2/e/Melilla/#
 topic write msh/EU_868/2/e/sos/#
 topic write msh/EU_868/2/map/#
+
+pattern write msh/EU_868/2/e/SFNarrow/%u
+pattern write msh/EU_868/2/e/Iberia/%u
+pattern write msh/EU_868/2/e/Andalucia/%u
+pattern write msh/EU_868/2/e/Cadiz/%u
+pattern write msh/EU_868/2/e/Huelva/%u
+pattern write msh/EU_868/2/e/Almeria/%u
+pattern write msh/EU_868/2/e/Granada/%u
+pattern write msh/EU_868/2/e/Jaen/%u
+pattern write msh/EU_868/2/e/Sevilla/%u
+pattern write msh/EU_868/2/e/Cordoba/%u
+pattern write msh/EU_868/2/e/Malaga/%u
+pattern write msh/EU_868/2/e/Ceuta/%u
+pattern write msh/EU_868/2/e/Melilla/%u
+pattern write msh/EU_868/2/e/sos/%u
+pattern write msh/EU_868/2/map/#
 
 # credenciales/acl-servicios — generado, no editar
 user svc-meshview

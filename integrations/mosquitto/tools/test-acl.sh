@@ -283,11 +283,19 @@ if [[ -f "${INGEST_ENV}" ]] && grep -q "MQTT_PASSWORD=" "${INGEST_ENV}"; then
         # 2. svc-ingest debe poder publicar en snm/v1/decoded/text en 1884
         if mosquitto_pub -h 172.30.0.1 -p 1884 -u "svc-ingest" -P "${INGEST_PASS}" -t "snm/v1/decoded/text" -m "test_ingest" 2>/dev/null; then
             # 3. svc-ingest no debe poder publicar en msh/#
-            if mosquitto_pub -h 172.30.0.1 -p 1884 -u "svc-ingest" -P "${INGEST_PASS}" -t "msh/EU_868/2/e/SFNarrow/svc-ingest" -m "x" 2>/dev/null; then
+            SUB_OUT="/tmp/snm_sub_tc11_$$"
+            rm -f "${SUB_OUT}"
+            mosquitto_sub -h 127.0.0.1 -p 1885 -t "msh/EU_868/2/e/SFNarrow/svc-ingest" -C 1 -W 2 > "${SUB_OUT}" 2>/dev/null &
+            SUB_PID=$!
+            sleep 0.5
+            mosquitto_pub -h 172.30.0.1 -p 1884 -u "svc-ingest" -P "${INGEST_PASS}" -t "msh/EU_868/2/e/SFNarrow/svc-ingest" -m "x" 2>/dev/null || true
+            wait ${SUB_PID} 2>/dev/null || true
+            if [[ -f "${SUB_OUT}" ]] && grep -q "x" "${SUB_OUT}"; then
                 fail "svc-ingest pudo publicar en msh/#."
             else
                 pass
             fi
+            rm -f "${SUB_OUT}"
         else
             fail "svc-ingest no pudo publicar en snm/v1/decoded/text en el puerto 1884."
         fi
