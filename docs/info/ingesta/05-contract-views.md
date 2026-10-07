@@ -191,4 +191,4 @@ Las vistas de esta página. Quitar o renombrar una columna exige cambiar antes `
 - **Dado** el rol lector, **cuando** consulta `api_node_intervals` de un nodo, **entonces** obtiene una fila por tipo (y por variante en telemetría).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

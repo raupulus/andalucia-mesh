@@ -156,9 +156,428 @@ FROM agg_traffic_day
 GROUP BY 1, 2, 3;
 
 -- 7. Rankings de la red (api_rank_<id>)
+-- 7.1 api_rank_network_usage (Uso del espectro y tiempo de aire)
+CREATE OR REPLACE VIEW api_rank_network_usage AS
+SELECT
+    bucket AS bucket_start,
+    'hour'::text AS granularity,
+    from_id AS subject_id,
+    sum(airtime_s)::double precision AS value,
+    jsonb_build_object('packets', sum(packets), 'airtime_s', round(sum(airtime_s)::numeric, 2)) AS extra
+FROM agg_node_hour
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    bucket AS bucket_start,
+    'day'::text AS granularity,
+    from_id AS subject_id,
+    sum(airtime_s)::double precision AS value,
+    jsonb_build_object('packets', sum(packets), 'airtime_s', round(sum(airtime_s)::numeric, 2)) AS extra
+FROM agg_node_day
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('week', bucket)::timestamptz AS bucket_start,
+    'week'::text AS granularity,
+    from_id AS subject_id,
+    sum(airtime_s)::double precision AS value,
+    jsonb_build_object('packets', sum(packets), 'airtime_s', round(sum(airtime_s)::numeric, 2)) AS extra
+FROM agg_node_day
+WHERE bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('month', bucket)::timestamptz AS bucket_start,
+    'month'::text AS granularity,
+    from_id AS subject_id,
+    sum(airtime_s)::double precision AS value,
+    jsonb_build_object('packets', sum(packets), 'airtime_s', round(sum(airtime_s)::numeric, 2)) AS extra
+FROM agg_node_day
+WHERE bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3;
 
--- 7.1 api_rank_active_nodes (nodos activos por provincia)
-CREATE OR REPLACE VIEW api_rank_active_nodes AS
+CREATE OR REPLACE VIEW api_rank_airtime AS SELECT * FROM api_rank_network_usage;
+
+-- 7.2 api_rank_gateway_coverage (Cobertura de gateways)
+CREATE OR REPLACE VIEW api_rank_gateway_coverage AS
+SELECT
+    bucket AS bucket_start,
+    'hour'::text AS granularity,
+    gateway_id AS subject_id,
+    count(DISTINCT from_id)::double precision AS value,
+    jsonb_build_object('gateway_id', gateway_id, 'nodes', count(DISTINCT from_id), 'direct_links', sum(direct)) AS extra
+FROM agg_reception_hour
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    bucket AS bucket_start,
+    'day'::text AS granularity,
+    gateway_id AS subject_id,
+    count(DISTINCT from_id)::double precision AS value,
+    jsonb_build_object('gateway_id', gateway_id, 'nodes', count(DISTINCT from_id), 'direct_links', sum(direct)) AS extra
+FROM agg_reception_day
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('week', bucket)::timestamptz AS bucket_start,
+    'week'::text AS granularity,
+    gateway_id AS subject_id,
+    count(DISTINCT from_id)::double precision AS value,
+    jsonb_build_object('gateway_id', gateway_id, 'nodes', count(DISTINCT from_id), 'direct_links', sum(direct)) AS extra
+FROM agg_reception_day
+WHERE bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('month', bucket)::timestamptz AS bucket_start,
+    'month'::text AS granularity,
+    gateway_id AS subject_id,
+    count(DISTINCT from_id)::double precision AS value,
+    jsonb_build_object('gateway_id', gateway_id, 'nodes', count(DISTINCT from_id), 'direct_links', sum(direct)) AS extra
+FROM agg_reception_day
+WHERE bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3;
+
+CREATE OR REPLACE VIEW api_rank_gateways_heard AS SELECT * FROM api_rank_gateway_coverage;
+
+-- 7.3 api_rank_gateway_exclusive (Gateways exclusivos)
+CREATE OR REPLACE VIEW api_rank_gateway_exclusive AS
+SELECT
+    bucket AS bucket_start,
+    'hour'::text AS granularity,
+    first_gateway AS subject_id,
+    sum(exclusive)::double precision AS value,
+    jsonb_build_object('gateway_id', first_gateway, 'packets', sum(packets), 'exclusive', sum(exclusive)) AS extra
+FROM agg_gateway_hour
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    bucket AS bucket_start,
+    'day'::text AS granularity,
+    first_gateway AS subject_id,
+    sum(exclusive)::double precision AS value,
+    jsonb_build_object('gateway_id', first_gateway, 'packets', sum(packets), 'exclusive', sum(exclusive)) AS extra
+FROM agg_gateway_day
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('week', bucket)::timestamptz AS bucket_start,
+    'week'::text AS granularity,
+    first_gateway AS subject_id,
+    sum(exclusive)::double precision AS value,
+    jsonb_build_object('gateway_id', first_gateway, 'packets', sum(packets), 'exclusive', sum(exclusive)) AS extra
+FROM agg_gateway_day
+WHERE bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('month', bucket)::timestamptz AS bucket_start,
+    'month'::text AS granularity,
+    first_gateway AS subject_id,
+    sum(exclusive)::double precision AS value,
+    jsonb_build_object('gateway_id', first_gateway, 'packets', sum(packets), 'exclusive', sum(exclusive)) AS extra
+FROM agg_gateway_day
+WHERE bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3;
+
+-- 7.4 api_rank_longest_links (Enlaces directos de mayor alcance)
+CREATE OR REPLACE VIEW api_rank_longest_links AS
+SELECT
+    bucket AS bucket_start,
+    'hour'::text AS granularity,
+    from_id AS subject_id,
+    max(max_distance_km)::double precision AS value,
+    jsonb_build_object('gateway', gateway_id, 'distance_km', max(max_distance_km)) AS extra
+FROM agg_reception_hour
+WHERE direct > 0 AND max_distance_km IS NOT NULL
+GROUP BY 1, 2, 3, gateway_id
+UNION ALL
+SELECT
+    bucket AS bucket_start,
+    'day'::text AS granularity,
+    from_id AS subject_id,
+    max(max_distance_km)::double precision AS value,
+    jsonb_build_object('gateway', gateway_id, 'distance_km', max(max_distance_km)) AS extra
+FROM agg_reception_day
+WHERE direct > 0 AND max_distance_km IS NOT NULL
+GROUP BY 1, 2, 3, gateway_id
+UNION ALL
+SELECT
+    date_trunc('week', bucket)::timestamptz AS bucket_start,
+    'week'::text AS granularity,
+    from_id AS subject_id,
+    max(max_distance_km)::double precision AS value,
+    jsonb_build_object('gateway', gateway_id, 'distance_km', max(max_distance_km)) AS extra
+FROM agg_reception_day
+WHERE direct > 0 AND max_distance_km IS NOT NULL AND bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3, gateway_id
+UNION ALL
+SELECT
+    date_trunc('month', bucket)::timestamptz AS bucket_start,
+    'month'::text AS granularity,
+    from_id AS subject_id,
+    max(max_distance_km)::double precision AS value,
+    jsonb_build_object('gateway', gateway_id, 'distance_km', max(max_distance_km)) AS extra
+FROM agg_reception_day
+WHERE direct > 0 AND max_distance_km IS NOT NULL AND bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3, gateway_id;
+
+-- 7.5 api_rank_best_links (Mejor calidad de enlace directo SNR)
+CREATE OR REPLACE VIEW api_rank_best_links AS
+SELECT
+    bucket AS bucket_start,
+    'hour'::text AS granularity,
+    from_id AS subject_id,
+    round((sum(snr_direct_sum) / NULLIF(sum(direct), 0))::numeric, 2)::double precision AS value,
+    jsonb_build_object('gateway', gateway_id, 'direct_receptions', sum(direct)) AS extra
+FROM agg_reception_hour
+WHERE direct >= 3
+GROUP BY 1, 2, 3, gateway_id
+UNION ALL
+SELECT
+    bucket AS bucket_start,
+    'day'::text AS granularity,
+    from_id AS subject_id,
+    round((sum(snr_direct_sum) / NULLIF(sum(direct), 0))::numeric, 2)::double precision AS value,
+    jsonb_build_object('gateway', gateway_id, 'direct_receptions', sum(direct)) AS extra
+FROM agg_reception_day
+WHERE direct >= 5
+GROUP BY 1, 2, 3, gateway_id
+UNION ALL
+SELECT
+    date_trunc('week', bucket)::timestamptz AS bucket_start,
+    'week'::text AS granularity,
+    from_id AS subject_id,
+    round((sum(snr_direct_sum) / NULLIF(sum(direct), 0))::numeric, 2)::double precision AS value,
+    jsonb_build_object('gateway', gateway_id, 'direct_receptions', sum(direct)) AS extra
+FROM agg_reception_day
+WHERE direct >= 10 AND bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3, gateway_id
+UNION ALL
+SELECT
+    date_trunc('month', bucket)::timestamptz AS bucket_start,
+    'month'::text AS granularity,
+    from_id AS subject_id,
+    round((sum(snr_direct_sum) / NULLIF(sum(direct), 0))::numeric, 2)::double precision AS value,
+    jsonb_build_object('gateway', gateway_id, 'direct_receptions', sum(direct)) AS extra
+FROM agg_reception_day
+WHERE direct >= 10 AND bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3, gateway_id;
+
+-- 7.6 api_rank_most_neighbors (Nodos con mayor vecindad directa)
+CREATE OR REPLACE VIEW api_rank_most_neighbors AS
+SELECT
+    bucket AS bucket_start,
+    'hour'::text AS granularity,
+    node_id AS subject_id,
+    count(DISTINCT neighbor_id)::double precision AS value,
+    jsonb_build_object('node_id', node_id, 'unique_neighbors', count(DISTINCT neighbor_id)) AS extra
+FROM agg_neighbor_hour
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    bucket AS bucket_start,
+    'day'::text AS granularity,
+    node_id AS subject_id,
+    count(DISTINCT neighbor_id)::double precision AS value,
+    jsonb_build_object('node_id', node_id, 'unique_neighbors', count(DISTINCT neighbor_id)) AS extra
+FROM agg_neighbor_day
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('week', bucket)::timestamptz AS bucket_start,
+    'week'::text AS granularity,
+    node_id AS subject_id,
+    count(DISTINCT neighbor_id)::double precision AS value,
+    jsonb_build_object('node_id', node_id, 'unique_neighbors', count(DISTINCT neighbor_id)) AS extra
+FROM agg_neighbor_day
+WHERE bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('month', bucket)::timestamptz AS bucket_start,
+    'month'::text AS granularity,
+    node_id AS subject_id,
+    count(DISTINCT neighbor_id)::double precision AS value,
+    jsonb_build_object('node_id', node_id, 'unique_neighbors', count(DISTINCT neighbor_id)) AS extra
+FROM agg_neighbor_day
+WHERE bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3;
+
+-- 7.7 api_rank_uptime (Tiempo activo ininterrumpido)
+CREATE OR REPLACE VIEW api_rank_uptime AS
+SELECT
+    bucket AS bucket_start,
+    'hour'::text AS granularity,
+    node_id AS subject_id,
+    round((max(max_uptime) / 3600.0)::numeric, 1)::double precision AS value,
+    jsonb_build_object('node_id', node_id, 'uptime_seconds', max(max_uptime), 'readings', sum(readings)) AS extra
+FROM agg_telemetry_hour
+WHERE max_uptime IS NOT NULL
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    bucket AS bucket_start,
+    'day'::text AS granularity,
+    node_id AS subject_id,
+    round((max(max_uptime) / 3600.0)::numeric, 1)::double precision AS value,
+    jsonb_build_object('node_id', node_id, 'uptime_seconds', max(max_uptime), 'readings', sum(readings)) AS extra
+FROM agg_telemetry_day
+WHERE max_uptime IS NOT NULL
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('week', bucket)::timestamptz AS bucket_start,
+    'week'::text AS granularity,
+    node_id AS subject_id,
+    round((max(max_uptime) / 3600.0)::numeric, 1)::double precision AS value,
+    jsonb_build_object('node_id', node_id, 'uptime_seconds', max(max_uptime), 'readings', sum(readings)) AS extra
+FROM agg_telemetry_day
+WHERE max_uptime IS NOT NULL AND bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('month', bucket)::timestamptz AS bucket_start,
+    'month'::text AS granularity,
+    node_id AS subject_id,
+    round((max(max_uptime) / 3600.0)::numeric, 1)::double precision AS value,
+    jsonb_build_object('node_id', node_id, 'uptime_seconds', max(max_uptime), 'readings', sum(readings)) AS extra
+FROM agg_telemetry_day
+WHERE max_uptime IS NOT NULL AND bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3;
+
+-- 7.8 api_rank_solar_health (Salud de nodos solares)
+CREATE OR REPLACE VIEW api_rank_solar_health AS
+SELECT
+    bucket AS bucket_start,
+    'hour'::text AS granularity,
+    node_id AS subject_id,
+    min(min_level)::double precision AS value,
+    jsonb_build_object('node_id', node_id, 'min_level', min(min_level), 'avg_level', round((sum(sum_level) / NULLIF(sum(readings), 0))::numeric, 1), 'readings', sum(readings)) AS extra
+FROM agg_telemetry_hour
+WHERE min_level IS NOT NULL
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    bucket AS bucket_start,
+    'day'::text AS granularity,
+    node_id AS subject_id,
+    min(min_level)::double precision AS value,
+    jsonb_build_object('node_id', node_id, 'min_level', min(min_level), 'avg_level', round((sum(sum_level) / NULLIF(sum(readings), 0))::numeric, 1), 'readings', sum(readings)) AS extra
+FROM agg_telemetry_day
+WHERE min_level IS NOT NULL
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('week', bucket)::timestamptz AS bucket_start,
+    'week'::text AS granularity,
+    node_id AS subject_id,
+    min(min_level)::double precision AS value,
+    jsonb_build_object('node_id', node_id, 'min_level', min(min_level), 'avg_level', round((sum(sum_level) / NULLIF(sum(readings), 0))::numeric, 1), 'readings', sum(readings)) AS extra
+FROM agg_telemetry_day
+WHERE min_level IS NOT NULL AND bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('month', bucket)::timestamptz AS bucket_start,
+    'month'::text AS granularity,
+    node_id AS subject_id,
+    min(min_level)::double precision AS value,
+    jsonb_build_object('node_id', node_id, 'min_level', min(min_level), 'avg_level', round((sum(sum_level) / NULLIF(sum(readings), 0))::numeric, 1), 'readings', sum(readings)) AS extra
+FROM agg_telemetry_day
+WHERE min_level IS NOT NULL AND bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3;
+
+CREATE OR REPLACE VIEW api_rank_battery_lowest AS SELECT * FROM api_rank_solar_health;
+
+-- 7.9 api_rank_chatters (Emisión de mensajes de texto)
+CREATE OR REPLACE VIEW api_rank_chatters AS
+SELECT
+    bucket AS bucket_start,
+    'hour'::text AS granularity,
+    from_id AS subject_id,
+    sum(messages)::double precision AS value,
+    jsonb_build_object('from_id', from_id, 'messages', sum(messages)) AS extra
+FROM agg_text_hour
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    bucket AS bucket_start,
+    'day'::text AS granularity,
+    from_id AS subject_id,
+    sum(messages)::double precision AS value,
+    jsonb_build_object('from_id', from_id, 'messages', sum(messages)) AS extra
+FROM agg_text_day
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('week', bucket)::timestamptz AS bucket_start,
+    'week'::text AS granularity,
+    from_id AS subject_id,
+    sum(messages)::double precision AS value,
+    jsonb_build_object('from_id', from_id, 'messages', sum(messages)) AS extra
+FROM agg_text_day
+WHERE bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('month', bucket)::timestamptz AS bucket_start,
+    'month'::text AS granularity,
+    from_id AS subject_id,
+    sum(messages)::double precision AS value,
+    jsonb_build_object('from_id', from_id, 'messages', sum(messages)) AS extra
+FROM agg_text_day
+WHERE bucket >= (now() - INTERVAL '70 days')
+GROUP BY 1, 2, 3;
+
+CREATE OR REPLACE VIEW api_rank_messages AS SELECT * FROM api_rank_chatters;
+
+-- 7.10 api_rank_new_nodes (Nuevos nodos registrados)
+CREATE OR REPLACE VIEW api_rank_new_nodes AS
+SELECT
+    date_trunc('hour', first_seen) AS bucket_start,
+    'hour'::text AS granularity,
+    id AS subject_id,
+    EXTRACT(EPOCH FROM first_seen)::double precision AS value,
+    jsonb_build_object('node_id', id, 'first_seen', to_char(first_seen at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')) AS extra
+FROM node
+UNION ALL
+SELECT
+    date_trunc('day', first_seen at time zone 'Europe/Madrid')::timestamptz AS bucket_start,
+    'day'::text AS granularity,
+    id AS subject_id,
+    EXTRACT(EPOCH FROM first_seen)::double precision AS value,
+    jsonb_build_object('node_id', id, 'first_seen', to_char(first_seen at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')) AS extra
+FROM node
+UNION ALL
+SELECT
+    date_trunc('week', first_seen at time zone 'Europe/Madrid')::timestamptz AS bucket_start,
+    'week'::text AS granularity,
+    id AS subject_id,
+    EXTRACT(EPOCH FROM first_seen)::double precision AS value,
+    jsonb_build_object('node_id', id, 'first_seen', to_char(first_seen at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')) AS extra
+FROM node
+UNION ALL
+SELECT
+    date_trunc('month', first_seen at time zone 'Europe/Madrid')::timestamptz AS bucket_start,
+    'month'::text AS granularity,
+    id AS subject_id,
+    EXTRACT(EPOCH FROM first_seen)::double precision AS value,
+    jsonb_build_object('node_id', id, 'first_seen', to_char(first_seen at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')) AS extra
+FROM node;
+
+-- 7.11 api_rank_provinces_growth (Crecimiento por provincia)
+CREATE OR REPLACE VIEW api_rank_provinces_growth AS
+SELECT
+    bucket AS bucket_start,
+    'hour'::text AS granularity,
+    province AS subject_id,
+    count(DISTINCT from_id)::double precision AS value,
+    jsonb_build_object('province', province, 'nodes', count(DISTINCT from_id)) AS extra
+FROM agg_node_hour
+WHERE province IS NOT NULL AND province != 'FUERA'
+GROUP BY 1, 2, 3
+UNION ALL
 SELECT
     bucket AS bucket_start,
     'day'::text AS granularity,
@@ -167,55 +586,31 @@ SELECT
     jsonb_build_object('province', province, 'nodes', count(DISTINCT from_id)) AS extra
 FROM agg_node_day
 WHERE province IS NOT NULL AND province != 'FUERA'
-GROUP BY 1, 2, 3;
-
--- 7.2 api_rank_gateways_heard (nodos únicos escuchados por gateway)
-CREATE OR REPLACE VIEW api_rank_gateways_heard AS
+GROUP BY 1, 2, 3
+UNION ALL
 SELECT
-    bucket AS bucket_start,
-    'day'::text AS granularity,
-    gateway_id AS subject_id,
+    date_trunc('week', bucket)::timestamptz AS bucket_start,
+    'week'::text AS granularity,
+    province AS subject_id,
     count(DISTINCT from_id)::double precision AS value,
-    jsonb_build_object('gateway_id', gateway_id, 'nodes', count(DISTINCT from_id), 'direct_links', sum(direct)) AS extra
-FROM agg_reception_day
+    jsonb_build_object('province', province, 'nodes', count(DISTINCT from_id)) AS extra
+FROM agg_node_day
+WHERE province IS NOT NULL AND province != 'FUERA' AND bucket >= (now() - INTERVAL '100 days')
+GROUP BY 1, 2, 3
+UNION ALL
+SELECT
+    date_trunc('month', bucket)::timestamptz AS bucket_start,
+    'month'::text AS granularity,
+    province AS subject_id,
+    count(DISTINCT from_id)::double precision AS value,
+    jsonb_build_object('province', province, 'nodes', count(DISTINCT from_id)) AS extra
+FROM agg_node_day
+WHERE province IS NOT NULL AND province != 'FUERA' AND bucket >= (now() - INTERVAL '100 days')
 GROUP BY 1, 2, 3;
 
--- 7.3 api_rank_longest_links (enlaces RF directos más largos)
-CREATE OR REPLACE VIEW api_rank_longest_links AS
-SELECT
-    bucket AS bucket_start,
-    'day'::text AS granularity,
-    (from_id || ' -> ' || gateway_id) AS subject_id,
-    max(max_distance_km)::double precision AS value,
-    jsonb_build_object('from_id', from_id, 'gateway_id', gateway_id, 'distance_km', max(max_distance_km)) AS extra
-FROM agg_reception_day
-WHERE direct > 0 AND max_distance_km IS NOT NULL
-GROUP BY 1, 2, 3, from_id, gateway_id;
+CREATE OR REPLACE VIEW api_rank_active_nodes AS SELECT * FROM api_rank_provinces_growth;
 
--- 7.4 api_rank_best_links (enlaces directos con mejor SNR medio)
-CREATE OR REPLACE VIEW api_rank_best_links AS
-SELECT
-    bucket AS bucket_start,
-    'day'::text AS granularity,
-    (from_id || ' -> ' || gateway_id) AS subject_id,
-    round((sum(snr_direct_sum) / NULLIF(sum(direct), 0))::numeric, 2)::double precision AS value,
-    jsonb_build_object('from_id', from_id, 'gateway_id', gateway_id, 'direct_receptions', sum(direct)) AS extra
-FROM agg_reception_day
-WHERE direct >= 5
-GROUP BY 1, 2, 3, from_id, gateway_id;
-
--- 7.5 api_rank_most_neighbors (nodos con más vecinos reportados)
-CREATE OR REPLACE VIEW api_rank_most_neighbors AS
-SELECT
-    bucket AS bucket_start,
-    'day'::text AS granularity,
-    node_id AS subject_id,
-    count(DISTINCT neighbor_id)::double precision AS value,
-    jsonb_build_object('node_id', node_id, 'unique_neighbors', count(DISTINCT neighbor_id)) AS extra
-FROM agg_neighbor_day
-GROUP BY 1, 2, 3;
-
--- 7.6 api_rank_ch_util (routers con mayor saturación de canal)
+-- Vistas auxiliares compatibles
 CREATE OR REPLACE VIEW api_rank_ch_util AS
 SELECT
     date_trunc('day', n.metrics_at)::timestamptz AS bucket_start,
@@ -226,30 +621,6 @@ SELECT
 FROM node n
 WHERE n.role IN ({{INFRA_ROLES}}) AND n.channel_utilization IS NOT NULL;
 
--- 7.7 api_rank_airtime (nodos con mayor tiempo en el aire acumulado)
-CREATE OR REPLACE VIEW api_rank_airtime AS
-SELECT
-    bucket AS bucket_start,
-    'day'::text AS granularity,
-    from_id AS subject_id,
-    sum(airtime_s)::double precision AS value,
-    jsonb_build_object('from_id', from_id, 'airtime_s', sum(airtime_s), 'packets', sum(packets)) AS extra
-FROM agg_node_day
-GROUP BY 1, 2, 3;
-
--- 7.8 api_rank_battery_lowest (nodos con menor nivel de batería)
-CREATE OR REPLACE VIEW api_rank_battery_lowest AS
-SELECT
-    bucket AS bucket_start,
-    'day'::text AS granularity,
-    node_id AS subject_id,
-    min(min_level)::double precision AS value,
-    jsonb_build_object('node_id', node_id, 'min_level', min(min_level), 'readings', sum(readings)) AS extra
-FROM agg_telemetry_day
-WHERE min_level IS NOT NULL
-GROUP BY 1, 2, 3;
-
--- 7.9 api_rank_battery_highest (nodos con batería más estable y alta)
 CREATE OR REPLACE VIEW api_rank_battery_highest AS
 SELECT
     bucket AS bucket_start,
@@ -261,7 +632,6 @@ FROM agg_telemetry_day
 WHERE max_level IS NOT NULL
 GROUP BY 1, 2, 3;
 
--- 7.10 api_rank_reboots (nodos con mayor número de reinicios)
 CREATE OR REPLACE VIEW api_rank_reboots AS
 SELECT
     bucket AS bucket_start,
@@ -271,17 +641,6 @@ SELECT
     jsonb_build_object('node_id', node_id, 'reboots', sum(reboots)) AS extra
 FROM agg_telemetry_day
 WHERE reboots > 0
-GROUP BY 1, 2, 3;
-
--- 7.11 api_rank_messages (nodos con mayor emisión de mensajes de texto)
-CREATE OR REPLACE VIEW api_rank_messages AS
-SELECT
-    bucket AS bucket_start,
-    'day'::text AS granularity,
-    from_id AS subject_id,
-    sum(messages)::double precision AS value,
-    jsonb_build_object('from_id', from_id, 'messages', sum(messages)) AS extra
-FROM agg_text_day
 GROUP BY 1, 2, 3;
 
 -- 8. Vistas de diagnóstico personal ("Revisa tu nodo")
@@ -336,17 +695,25 @@ GRANT SELECT ON
     api_gateways,
     api_summary,
     api_traffic_mix,
-    api_rank_active_nodes,
+    api_rank_network_usage,
+    api_rank_airtime,
+    api_rank_gateway_coverage,
     api_rank_gateways_heard,
+    api_rank_gateway_exclusive,
     api_rank_longest_links,
     api_rank_best_links,
     api_rank_most_neighbors,
-    api_rank_ch_util,
-    api_rank_airtime,
+    api_rank_uptime,
+    api_rank_solar_health,
     api_rank_battery_lowest,
     api_rank_battery_highest,
-    api_rank_reboots,
+    api_rank_chatters,
     api_rank_messages,
+    api_rank_new_nodes,
+    api_rank_provinces_growth,
+    api_rank_active_nodes,
+    api_rank_ch_util,
+    api_rank_reboots,
     api_node_intervals,
     api_node_battery_daily,
     api_node_reboots_daily
