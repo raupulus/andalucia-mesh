@@ -1,0 +1,23 @@
+# Entornos, IDEs y dependencias efímeras
+.DS_Store
+.idea/
+
+# Protocolo docs/ (efímero / por desarrollador)
+/docs/planning/
+/docs/auditorias/
+
+# Enlace local al análisis técnico (no versionar, no cargar)
+/docs/analisis-tecnico
+
+# Configuración y datos de cada instancia
+.env
+.env.*
+!.env.example
+peers.json
+credenciales/
+datos/
+certificados/
+acme.json
+
+# Temporales
+.tmp*
