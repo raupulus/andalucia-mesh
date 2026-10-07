@@ -49,9 +49,11 @@ Convertir cada paquete nuevo en un **paquete único** con sus campos por tipo, a
 ### Deduplicación
 
 - Clave `(from, packet_id)`, ventana `INGESTA_VENTANA_DEDUP_MIN` = 15 min desde `rx_first` (ids aleatorios de 32 bits por nodo).
+- **Entrada unificada:** aplica tanto al tráfico de radio local (`msh/EU_868/#`) como a los eventos sincronizados de peers (`snm/v1/peer/#`).
 - Entrada de caché: `rx_first`, gateways ya vistos, estado (`ventana`, `publicado`, `descartado`), `reception_count`, `hops_min`.
 - Primera recepción → abre la ventana de publicación (`INGESTA_VENTANA_PUBLICACION_S` = 2 s). Al cerrarse: mensaje `decoded` (06) y filas a 04.
-- Recepción posterior: gateway ya presente → se ignora (`recepcion_repetida`); gateway nuevo dentro de la ventana → entra en `receptions`; tras el cierre (**tardía**) → fila de `reception` y actualización de `reception_count` y `hops_min` de `packet`, sin republicar.
+- Recepción posterior (sea por radio local o por sincronización de peer posterior): origen ya presente o paquete ya publicado → se ignora (`recepcion_repetida`); si llega por un gateway nuevo dentro de la ventana → entra en `receptions`; tras el cierre (**tardía**) → fila de `reception` y actualización de `reception_count` y `hops_min` de `packet`, sin republicar en `decoded`.
+- Si un paquete solo fue escuchado por un peer y nunca por nuestros gateways locales: entra como paquete nuevo, se guarda en la base `ingest` y se emite exactamente **1 sola vez** al flujo `decoded` (alimentando el detector de alertas, bots y el chat en directo).
 - Pasados 15 min la entrada se borra; un `(from, id)` posterior cuenta como paquete nuevo.
 - Al arrancar se precargan desde la base los paquetes y recepciones de los últimos 15 min (un reinicio no duplica).
 - La deduplicación va antes de descifrar ([01](01-input-decryption.md)). Tamaño: unos 5.000 elementos al ritmo de referencia.

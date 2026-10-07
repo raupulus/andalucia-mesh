@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Mostrar en la instancia lo que reciben otras comunidades que no suben a su broker, leyendo solo las APIs públicas de las instancias PotatoMesh que el operador configure. Sin secretos en el código, cursores en PostgreSQL y paginación completa.
+Mostrar en la instancia lo que reciben otras comunidades que no suben a su broker, leyendo solo las APIs públicas de las instancias PotatoMesh que el operador configure. Los datos se envían a PotatoMesh local (mapa y chat) y se publican en Mosquitto (`snm/v1/peer/<peer_id>/...`) para que el servicio de `ingesta` aplique el filtro anti-duplicados y alimente TimescaleDB, el detector de alertas y los bots con la cobertura regional completa.
 
 No es la federación nativa de PotatoMesh (desactivada): nunca se escribe ni se envía nada a instancias ajenas.
 
@@ -26,7 +26,10 @@ No es la federación nativa de PotatoMesh (desactivada): nunca se escribe ni se 
 - **Mensajes y trazas:** cada 60 s, `GET /api/messages?since=<cursor>&limit=100` y `GET /api/traces?since=<cursor>&limit=100`. Si una respuesta trae 100 elementos se pide la siguiente página en el mismo ciclo hasta vaciar (tope 20 páginas por ciclo).
 - **Nodos:** cada `intervalo_nodos_s` (180 s), `GET /api/nodes?since=<cursor>` en lotes de 500.
 - Filtro: solo canales de `ALLOWED_CHANNELS`; `PRIMARY_CHANNEL` → índice 0 y el resto con el mismo índice estable que el adaptador (posición en la lista). Mensajes directos nunca.
-- Envío a nuestra API con `POST` y el token propio. El cursor se actualiza **en una transacción solo después** de confirmar el `POST` del lote: un corte reenvía como mucho el último lote, que PotatoMesh absorbe por id.
+- **Envío doble:**
+  1. A nuestra API de PotatoMesh con `POST` y el token propio (para actualizar el visor local).
+  2. Publicación MQTT en `snm/v1/peer/<peer_id>/<tipo>` (`messages`, `nodes`, `traces`) en `mosquitto:1884` con usuario `svc-potato` para que el servicio de `ingesta` aplique el filtro anti-duplicados (15 min) y alimente TimescaleDB y las alertas.
+- El cursor se actualiza **en una transacción solo después** de confirmar el envío del lote: un corte reenvía como mucho el último lote, que PotatoMesh e ingesta absorben sin duplicar.
 - Marca de origen: si la versión fijada de PotatoMesh admite un campo de procedencia, se rellena con el `id` del peer; si no, no se marca (limitación anotada).
 
 ### Peers caídos
@@ -68,6 +71,8 @@ Migraciones versionadas al arrancar. Sin datos personales. Copia: la del Postgre
 |---|---|---|---|
 | `PROJECT_NAME` / `PROJECT_DOMAIN` / `PROJECT_CONTACT` | — | Común | No |
 | `ALLOWED_CHANNELS` / `PRIMARY_CHANNEL` | — | Común | No |
+| `MQTT_HOST` / `MQTT_PORT` | `172.30.0.1` / `1884` | Común | No |
+| `MQTT_USER` / `MQTT_PASSWORD` | `svc-potato` / — | Propia | Contraseña sí |
 | `DB_HOST` / `DB_PORT` | `172.30.0.1` / `5432` | Común | No |
 | `DB_NAME` / `DB_USER` / `DB_PASSWORD` | `peersync` / `peersync` / — | Propia | Contraseña sí |
 | `POTATOMESH_URL` | `http://potatomesh:41447` | Propia | No |

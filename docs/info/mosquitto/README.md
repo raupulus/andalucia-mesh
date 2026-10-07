@@ -54,6 +54,7 @@ Con `per_listener_settings true` cada listener tiene su archivo de contraseñas 
 |---|---|---|---|
 | `msh/EU_868/2/e/<canal>/<!id>` | Gateways | MeshView, adaptador-potato, ingesta | `ServiceEnvelope` protobuf |
 | `msh/EU_868/2/map/` | Gateways | MeshView, ingesta | Map report (`MAP_REPORT_APP`) |
+| `snm/v1/peer/<peer_id>/<type>` | sync-peers | ingesta | JSON de eventos sincronizados de peers para deduplicación regional |
 | `snm/v1/decoded/<portnum>` | ingesta | detector-alertas | JSON del flujo `decoded` (`../integration.md` §6), QoS 0, sin retained |
 
 - **Downlink imposible:** ninguna cuenta de gateway lee y ningún servicio escribe en `msh/#`; aunque un nodo tenga el downlink activado, no recibe nada que retransmitir.
@@ -87,8 +88,10 @@ user svc-meshview
 topic read msh/EU_868/#
 user svc-potato
 topic read msh/EU_868/#
+topic write snm/v1/peer/#
 user svc-ingest
 topic read msh/EU_868/#
+topic read snm/v1/peer/#
 topic write snm/v1/decoded/#
 user svc-detector
 topic read snm/v1/decoded/#

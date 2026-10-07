@@ -24,7 +24,7 @@
 | RN-05 | El portal y la API nunca exponen coordenadas: solo provincia y recuentos | [portal](portal/README.md) |
 | RN-06 | Las páginas públicas no usan cookies ni hacen peticiones a terceros | [portal](portal/README.md) |
 | RN-07 | Retención: bruto 30 días; posiciones y telemetría 90; agregados con nodo 1 año; sin nodo indefinidos; alertas y avisos enviados 1 año; PotatoMesh 30 días; MeshView 14 días | [04-storage-retention](ingesta/04-storage-retention.md) |
-| RN-08 | Independencia: sin bridges ni dependencias de brokers o servicios de otras comunidades; `sync-peers` solo **lee** APIs públicas de otras instancias | [sync-peers](potatomesh/sync-peers.md) |
+| RN-08 | Independencia y centralización: sin bridges MQTT bidireccionales; sync-peers solo lee APIs públicas de otras instancias y las canaliza a ingesta (filtro anti-duplicados) y PotatoMesh | [sync-peers](potatomesh/sync-peers.md) |
 
 ## 3. Definiciones y cálculos
 
@@ -78,6 +78,7 @@
 | Fecha | Regla | Cambio | Pedido por |
 |---|---|---|---|
 | 2026-10-07 | Todas | Versión inicial | Responsable del proyecto |
+| 2026-10-07 | RN-08, OB-02, OB-03 | Canalización de sync-peers a la ingesta para deduplicación unificada y cobertura regional completa de alertas y métricas | Responsable del proyecto |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-07

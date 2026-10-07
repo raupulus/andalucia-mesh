@@ -134,6 +134,16 @@ server {
 - Los contenedores reciben la conexión desde la puerta de su red (`172.30.0.1`). La IP real va en `X-Forwarded-For` / `X-Real-IP`, que Nginx **sustituye** (nunca reenvía lo que mande el cliente).
 - Las aplicaciones solo confían en esas cabeceras si la conexión viene de `172.30.0.1` (portal: `trustProxies(at: ['172.30.0.1'])`; chat-ws: `CHAT_PROXIES_CONFIABLES=172.30.0.1`).
 
+### Protección y Anti-Scraping (Rate Limiting y Fail2ban)
+
+Para evitar que otras instancias o terceros extraigan masivamente datos o abusen de los endpoints del servidor:
+
+- **Rate Limiting en Nginx:** zona `limit_req_zone $binary_remote_addr zone=snm_api:10m rate=60r/m;` aplicada sobre `/api/` en el portal (`limit_req zone=snm_api burst=20 nodelay;`). Superar el umbral devuelve `429 Too Many Requests`.
+- **Detección y bloqueo con Fail2ban:** cárcel `snm-api-abuse` que monitoriza los errores `429` en el log de Nginx. Si una misma IP genera más de 10 respuestas `429` en 1 minuto:
+  1. Se bloquea temporalmente la IP en el cortafuegos UFW durante 1 hora.
+  2. Se genera un aviso inmediato al operador (log de auditoría / panel / bot privado) para evaluar si es una instancia amiga mal configurada o un scraping abusivo.
+- **Protección de PotatoMesh:** los endpoints de inyección/escritura (`/api/nodes`, `/api/messages`, etc.) exigen el token `POTATOMESH_API_TOKEN` interno; el acceso externo no autenticado solo permite lectura web normal.
+
 ## Contratos propios
 
 - Puertos locales de la tabla anterior; hosts; 8883 terminado en Nginx hacia `127.0.0.1:1883`.

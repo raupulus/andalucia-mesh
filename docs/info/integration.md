@@ -18,6 +18,7 @@ flowchart LR
   PA -- "POST /api/*" --> PM[PotatoMesh]
   PEER[Instancias PotatoMesh vecinas] -- "GET API pública" --> SP[sync-peers]
   SP -- "POST /api/*" --> PM
+  SP -- "MQTT snm/v1/peer/#" --> B
 
   I -- "snm/v1/decoded/#" --> B
   I --> DBI[(PG: ingest)]
@@ -63,8 +64,8 @@ Total: 9 desarrollos propios, 2 piezas de comunidad (PotatoMesh, MeshView), y Ng
 ## 3. Flujos
 
 1. **Radio → broker.** Cada gateway publica lo que oye en `msh/EU_868/2/e/<canal>/<!id_gateway>` (protobuf `ServiceEnvelope`) y sus map reports en `msh/EU_868/2/map/`. La ACL solo acepta los 14 canales y el propio id del gateway. Nada vuelve a la radio: ningún gateway puede leer.
-2. **Visores de comunidad.** MeshView lee `msh/EU_868/#` directamente. PotatoMesh no lee MQTT: lo alimenta `adaptador-potato` (lee `msh/EU_868/#`, descifra, deduplica y hace `POST` a su API) y `sync-peers` (copia de instancias vecinas).
-3. **Datos propios.** `ingesta` lee `msh/EU_868/#`, descifra, decodifica, deduplica, asigna provincia, guarda en la base `ingest` y publica un mensaje por paquete único en `snm/v1/decoded/<portnum>`.
+2. **Visores de comunidad.** MeshView lee `msh/EU_868/#` directamente. PotatoMesh no lee MQTT: lo alimenta `adaptador-potato` (lee `msh/EU_868/#`, descifra, deduplica y hace `POST` a su API) y `sync-peers` (copia de instancias vecinas hacia PotatoMesh y publica en `snm/v1/peer/#` para la ingesta).
+3. **Datos propios y agregados.** `ingesta` lee `msh/EU_868/#` (radio local) y `snm/v1/peer/#` (instancias vecinas), descifra, decodifica, aplica filtro anti-duplicados (15 min), asigna provincia, guarda en la base `ingest` y publica un mensaje por paquete único en `snm/v1/decoded/<portnum>`.
 4. **Alertas.** `detector-alertas` lee `snm/v1/decoded/#`, evalúa reglas, clasifica (riesgo × tipo), guarda en la base `alertas` y emite cada transición por el socket Unix.
 5. **Avisos.** `bot-telegram`, `bot-discord` y `webhooks` están conectados al socket, filtran por destino y envían. Guardan lo enviado en su base.
 6. **Portal.** Sirve la web, la API pública `/api/v1` y el panel `/admin`. Lee **solo** las vistas `api_*` de `ingest` y `alertas` con roles de solo lectura (excepción documentada). Los bots usan esa API para sus comandos.
@@ -124,8 +125,8 @@ El resto de volúmenes son propios de cada servicio (ver su ficha).
 |---|---|
 | `!<id>` (cada gateway) | Escritura en `msh/EU_868/2/e/<canal>/<!id>` para cada canal de `ALLOWED_CHANNELS` y en `msh/EU_868/2/map/#`. Sin lectura |
 | `svc-meshview` | Lectura `msh/EU_868/#` |
-| `svc-potato` | Lectura `msh/EU_868/#` |
-| `svc-ingest` | Lectura `msh/EU_868/#`; escritura `snm/v1/decoded/#` |
+| `svc-potato` | Lectura `msh/EU_868/#`; escritura `snm/v1/peer/#` |
+| `svc-ingest` | Lectura `msh/EU_868/#`, `snm/v1/peer/#`; escritura `snm/v1/decoded/#` |
 | `svc-detector` | Lectura `snm/v1/decoded/#` |
 | `svc-chatws` | Lectura `snm/v1/decoded/text` |
 | `svc-panel` | Ningún permiso de topic: solo conecta (comprobación de salud desde el panel) |
@@ -134,6 +135,7 @@ El resto de volúmenes son propios de cada servicio (ver su ficha).
 |---|---|---|---|
 | `msh/EU_868/2/e/<canal>/<!id>` | Gateways | MeshView, adaptador-potato, ingesta | `ServiceEnvelope` protobuf |
 | `msh/EU_868/2/map/` | Gateways | MeshView, ingesta | Map report (`MAP_REPORT_APP`) |
+| `snm/v1/peer/<peer_id>/<type>` | sync-peers | ingesta | JSON con eventos sincronizados de peers (mensajes, nodos, trazas) |
 | `snm/v1/decoded/<portnum>` | ingesta | detector-alertas; `text` también chat-ws | JSON (sección 6) |
 
 `max_packet_size` 16384 (cabe el JSON `decoded`). No existen topics de estado (el firmware no publica LWT), ni JSON del firmware, ni topics públicos de eventos. El chat se publica por WebSocket, no por MQTT.

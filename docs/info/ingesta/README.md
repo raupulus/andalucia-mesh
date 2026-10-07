@@ -56,14 +56,16 @@ El servicio se publica con licencia GPL-3.0, compatible con los protobufs oficia
 |---|---|
 | Conexión | `mosquitto:1884` (listener interno, red `mesh`), MQTT 3.1.1, client id `ingesta`, sesión limpia |
 | Usuario | `svc-ingest` (`MQTT_USER` / `MQTT_PASSWORD`) |
-| Suscripciones (QoS 0) | `msh/EU_868/2/e/#` (`ServiceEnvelope` con `MeshPacket`) y `msh/EU_868/2/map/#` (map report en claro) |
+| Suscripciones (QoS 0) | `msh/EU_868/2/e/#` (`ServiceEnvelope` con `MeshPacket`), `msh/EU_868/2/map/#` (map report en claro) y `snm/v1/peer/#` (eventos de instancias PotatoMesh vecinas) |
 | Topic de gateway | `msh/EU_868/2/e/<canal>/<!id_gateway>`, `<canal>` ∈ `ALLOWED_CHANNELS` |
+| Topic de peers | `snm/v1/peer/<peer_id>/<type>`, publicado por `sync-peers` |
 
 ACL que necesita en el broker (`../mosquitto/`):
 
 ```text
 user svc-ingest
 topic read msh/EU_868/#
+topic read snm/v1/peer/#
 topic write snm/v1/decoded/#
 ```
 

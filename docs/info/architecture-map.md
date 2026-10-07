@@ -4,27 +4,43 @@
 
 ```text
 NODOS ──radio LoRa──▶ GATEWAYS ──MQTT 1883/8883──▶ [Mosquitto]   solo subida, un usuario por gateway
-                                                       │
-                                                       │ msh/EU_868/#  (paquetes cifrados)
-          ┌────────────────────────────┬───────────────┴─────────────────┐
-          ▼                            ▼                                 ▼
-     [MeshView]                (adaptador-potato)                    (ingesta) ──▶ PG "ingest"
-     visor técnico                     │ POST /api                       │          (TimescaleDB)
-                                       ▼                                 │ publica snm/v1/decoded/#
-     [PotatoMesh] ◀── POST /api ── (sync-peers) ◀── APIs públicas        │ (paquete único, ya descifrado)
-     mapa + chat                                   de otras instancias   │
-                                                                         ▼
-                                          ┌──────────────── [Mosquitto] ─────────────────┐
-                                          ▼                                              ▼
-                                 (detector-alertas) ──▶ PG "alertas"               (chat-ws)
-                                          │ socket Unix /run/snm/alertas.sock      WebSocket público
-                         ┌────────────────┼────────────────┐                      por canal de chat
-                         ▼                ▼                ▼
-                  (bot-telegram)    (bot-discord)     (webhooks)
+                                                        │
+                                                        │ msh/EU_868/#  (paquetes cifrados)
+           ┌────────────────────────────┬───────────────┴─────────────────┐
+           ▼                            ▼                                 │
+      [MeshView]                (adaptador-potato)                        │
+      visor técnico                     │ POST /api                       │
+                                        ▼                                 │
+      [PotatoMesh] ◀── POST /api ── (sync-peers) ◀── APIs públicas        │
+      mapa + chat                       │            de otras instancias  │
+                                        │                                 │
+                                        │ publica snm/v1/peer/#           │
+                                        ▼                                 │
+                                   [Mosquitto]                            │
+                                        │                                 │
+                                        ├─────────────────────────────────┘
+                                        ▼
+                                    (ingesta) ──▶ PG "ingest" (TimescaleDB)
+                                        │         Filtro anti-duplicados (15 min)
+                                        │         Guarda toda la red regional
+                                        │
+                                        │ publica snm/v1/decoded/#
+                                        │ (paquete único, ya desduplicado y descifrado)
+                                        ▼
+                                   [Mosquitto]
+                                  ┌─────┴────────────────────────┐
+                                  ▼                              ▼
+                         (detector-alertas) ──▶ PG "alertas"  (chat-ws)
+                                  │                            WebSocket público
+                                  │ socket Unix                chat en vivo regional
+                                  ▼ /run/snm/alertas.sock
+                         ┌────────┴───────┬──────────────┐
+                         ▼                ▼              ▼
+                  (bot-telegram)    (bot-discord)   (webhooks)
                          │                │
                          └── comandos: GET /api/v1 ──┐
                                                      ▼
-     PG "ingest" ──vistas api_* (solo lectura)──▶ (PORTAL Laravel + Filament) ◀──vistas api_*── PG "alertas"
+     PG "ingest" ──vistas api_* (solo lectura)──▶ (PORTAL) ◀──vistas api_*── PG "alertas"
                                                   web · API /api/v1 · panel /admin
                                                   el panel consulta /health de todos
 
@@ -42,12 +58,13 @@ Base común: servidor Debian 13 · Docker · [Nginx] nativo, HTTPS y MQTT-TLS ·
 | Canal | De → a | Qué viaja |
 |---|---|---|
 | MQTT `msh/EU_868/#` | Gateways → Mosquitto → MeshView, adaptador-potato, ingesta | Paquetes de radio tal cual (protobuf cifrado) |
-| MQTT `snm/v1/decoded/#` | ingesta → detector-alertas, chat-ws | Un JSON por paquete único, descifrado, con datos del nodo |
+| MQTT `snm/v1/peer/#` | sync-peers → Mosquitto → ingesta | Eventos leídos de instancias vecinas (JSON) para deduplicación y alertas |
+| MQTT `snm/v1/decoded/#` | ingesta → detector-alertas, chat-ws | Un JSON por paquete único, ya desduplicado, con datos del nodo |
 | HTTP `POST` interno | adaptador-potato y sync-peers → PotatoMesh | Nodos, posiciones, mensajes, telemetría |
-| Socket Unix | detector-alertas → bots y webhooks | Transiciones de alertas (abierta, actualizada, resuelta) |
-| Vistas SQL `api_*` | ingest y alertas → portal | Solo lectura, con roles dedicados |
+| Socket Unix | detector-alertas → bots y webhooks | Transiciones de alertas de toda la región (abierta, actualizada, resuelta) |
+| Vistas SQL `api_*` | ingest y alertas → portal | Solo lectura, con roles dedicados (cobertura regional completa) |
 | HTTP `GET /api/v1` | Bots e integradores → portal | Estado, rankings, routers, alertas |
-| WebSocket `/ws/chat` | chat-ws → cualquiera | Mensajes de texto de los canales suscritos |
+| WebSocket `/ws/chat` | chat-ws → cualquiera | Mensajes de texto de los canales suscritos en toda la región |
 | HTTP `/health` | Panel → todos | Estado de cada pieza |
 
 Ninguna pieza lee la base de datos de otra salvo el portal, y solo por vistas `api_*`.
