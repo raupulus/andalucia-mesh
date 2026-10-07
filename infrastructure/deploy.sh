@@ -31,6 +31,8 @@
 
 set -euo pipefail
 
+export PATH="${PATH}:/usr/sbin:/sbin"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
@@ -97,7 +99,7 @@ deploy_native() {
                     mosquitto -c /etc/mosquitto/conf.d/snm.conf -t
                 fi
                 if command -v systemctl >/dev/null 2>&1; then
-                    systemctl reload mosquitto || systemctl restart mosquitto
+                    sudo systemctl reload mosquitto 2>/dev/null || systemctl reload mosquitto 2>/dev/null || true
                     log "[OK] Mosquitto recargado correctamente."
                 fi
             else
@@ -116,9 +118,9 @@ deploy_native() {
         nginx)
             log "[INFO] Validando y recargando Nginx nativo..."
             if command -v nginx >/dev/null 2>&1; then
-                nginx -t
+                sudo nginx -t 2>/dev/null || nginx -t
                 if command -v systemctl >/dev/null 2>&1; then
-                    systemctl reload nginx
+                    sudo systemctl reload nginx 2>/dev/null || systemctl reload nginx
                     log "[OK] Nginx recargado correctamente."
                 fi
             else
