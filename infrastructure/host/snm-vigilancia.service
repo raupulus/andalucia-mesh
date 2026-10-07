@@ -1,0 +1,9 @@
+[Unit]
+Description=Vigilancia de recursos y certificados para Andalucía Mesh
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/var/www/storage/sur-nodos-en-mallas/infrastructure/host/vigilancia.sh
+StandardOutput=journal
+StandardError=journal

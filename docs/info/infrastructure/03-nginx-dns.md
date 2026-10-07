@@ -50,12 +50,15 @@ internet ─1883─────────────────────�
 |---|---|---|
 | `snippets/snm-proxy.conf` | `/etc/nginx/snippets/` | Cabeceras de proxy comunes |
 | `snippets/snm-security.conf` | `/etc/nginx/snippets/` | HSTS, `nosniff`, `Referrer-Policy`, `X-Frame-Options` |
+| `snippets/snm-ratelimit.conf` | `/etc/nginx/snippets/` | Zona de rate-limiting (60 req/min) para `/api/` |
 | `sites/snm-portal.conf` | `/etc/nginx/sites-available/` + enlace en `sites-enabled/` | Portal y `/ws/` |
 | `sites/snm-potatomesh.conf` | Ídem | PotatoMesh (SSE) |
 | `sites/snm-meshview.conf` | Ídem | MeshView |
-| `streams/snm-mqtts.conf` | `/etc/nginx/streams-enabled/` | TLS del 8883 |
+| `streams/snm-mqtts.conf` | `/etc/nginx/streams-available/` + enlace en `streams-enabled/` | TLS del 8883 hacia Mosquitto 127.0.0.1:1883 |
+| `install.sh` | — | Script instalador que reemplaza variables, verifica `nginx -t` y recarga |
+| `certbot-setup.sh` | — | Emite certificados Let's Encrypt para los 4 hosts por reto webroot |
 
-Los archivos usan `mesh.example.org` como marcador; `infrastructure/nginx/install.sh` los copia sustituyendo el dominio por `PROJECT_DOMAIN` de `/srv/comun/.env`, ejecuta `nginx -t` y recarga solo si la prueba pasa. No toca ninguna otra web del servidor.
+Los archivos usan `mesh.example.org` como marcador; `infrastructure/nginx/install.sh` los copia sustituyendo el dominio por `PROJECT_DOMAIN` de `common/.env`, ejecuta `nginx -t` y recarga solo si la prueba pasa. No toca ninguna otra web del servidor.
 
 `snippets/snm-proxy.conf`:
 

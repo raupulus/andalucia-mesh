@@ -6,23 +6,25 @@ Un único procedimiento de despliegue para todas las piezas, actualizaciones con
 
 ## Especificación
 
-### Despliegue: `deploy.sh <nombre>` y `snm-compose`
+### Despliegue: `infrastructure/deploy.sh <nombre|all>` y `check-compose.sh`
 
-| `<nombre>` | Ruta en el repositorio |
-|---|---|
-| `meshview`, `potatomesh` | `integrations/<nombre>` |
-| `mosquitto` | `integrations/mosquitto` (herramientas y configuración del host; recarga `systemd`) |
-| `portal`, `ingesta`, `detector-alertas`, `bot-telegram`, `bot-discord`, `webhooks`, `adaptador-potato`, `sync-peers`, `chat-ws` | `services/<nombre>` |
+| `<nombre>` | Tipo / Ruta | Acción de despliegue |
+|---|---|---|
+| `mosquitto` | Nativo (`integrations/mosquitto`) | Valida sintaxis con `mosquitto -c ... -t` y recarga systemd |
+| `postgresql` | Nativo (`infrastructure/postgresql`) | Comprueba estado del clúster con `pg_isready` |
+| `nginx` | Nativo (`infrastructure/nginx`) | Valida sintaxis con `nginx -t` y recarga Nginx |
+| `meshview`, `potatomesh` | `integrations/<nombre>` | Comprueba `.env`, descarga imagen y levanta contenedor |
+| `portal`, `ingesta`, `detector-alertas`, `bot-telegram`, `bot-discord`, `webhooks`, `adaptador-potato`, `sync-peers`, `chat-ws` | `services/<nombre>` | Comprueba `.env`, construye imagen si hay Dockerfile (`build --pull`) y levanta contenedor |
+| `all` | Global | Despliega todos los servicios nativos, integraciones y microservicios |
 
-Pasos del script (falla en el primero que no se cumpla):
+Pasos del script `deploy.sh`:
 
-1. Exige `/srv/<nombre>/.env` con todas las claves de su `.env.example` (lista las que faltan; `mosquitto` no usa `.env`).
-2. `git -C /srv/repo pull --ff-only`.
-3. `rsync -a --delete --exclude .env --exclude datos/ --exclude credenciales/ --exclude certificados/ /srv/repo/<ruta>/ /srv/<nombre>/`.
-4. En servicios Docker: `docker compose --env-file /srv/comun/.env --env-file .env config -q`; imágenes de terceros: `pull`; servicios propios: `build` (desde su `Dockerfile`, en el servidor); después `up -d --remove-orphans`. En `mosquitto`: valida configuración con `mosquitto -c ... -t`, copia credenciales y envía `SIGHUP` a `mosquitto.service`.
-5. Espera hasta 120 s a que los contenedores (o el servicio host) estén `healthy` / activos; si no, muestra `ps` o `systemctl status` y los últimos logs y sale con error.
-
-`snm-compose <nombre> <args…>` ejecuta `docker compose --env-file /srv/comun/.env --env-file .env <args…>` dentro de `/srv/<nombre>/`.
+1. **Auditoría de seguridad Compose obligatoria:** Ejecuta `infrastructure/check-compose.sh` para verificar que ningún contenedor exponga puertos en `0.0.0.0` y que todos los puertos mapeados apunten explícitamente a `127.0.0.1`. Si la auditoría detecta una exposición insegura, el despliegue se detiene de inmediato.
+2. Carga variables de entorno comunes desde `/var/www/storage/sur-nodos-en-mallas/common/.env` (o plantilla `infrastructure/common/.env.example`).
+3. En servicios nativos: verifica configuración y recarga el servicio correspondiente.
+4. En servicios Docker: carga el `.env` específico de la pieza, compila imagen propia o descarga externa (`pull`), y levanta con `docker compose up -d --remove-orphans`.
+5. Comprueba salud: verifica que los contenedores arranquen correctamente y no entren en estado de reinicio cíclico.
+6. Registra cada operación con marca de tiempo y usuario en `/var/www/storage/sur-nodos-en-mallas/logs/deploy.log`.
 
 ### Versiones de los servicios propios
 

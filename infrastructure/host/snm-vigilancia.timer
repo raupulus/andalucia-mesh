@@ -1,0 +1,11 @@
+[Unit]
+Description=Temporizador de vigilancia de recursos para Andalucía Mesh
+After=network.target
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
