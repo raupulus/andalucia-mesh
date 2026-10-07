@@ -25,7 +25,7 @@
 
 **Crear la aplicación (operador, una vez)** en el portal de desarrolladores de Discord:
 
-1. *New Application*: nombre = `PROJECT_NAME`, icono con el logo propio, descripción `Avisos de los problemas de la malla de ${PROJECT_NAME}. Más información: https://${PROJECT_DOMAIN}/bots`.
+1. *New Application*: nombre = `PROJECT_NAME`, icono con el logo propio (`services/bot-discord/assets/logo.jpg`), descripción `Avisos de los problemas de la malla de ${PROJECT_NAME}. Más información: https://${PROJECT_DOMAIN}/bots`.
 2. *Installation*: solo *Guild Install*; ámbitos `bot` y `applications.commands`; permisos de la tabla de abajo.
 3. *Bot*: generar el token → `DISCORD_BOT_TOKEN`; *Public Bot* activado (cualquiera puede invitarlo); *Requires OAuth2 Code Grant* desactivado; los tres *Privileged Gateway Intents* desactivados.
 4. *Application ID* → `DISCORD_APP_ID`; el enlace de invitación (abajo) va a la configuración del portal (`config/proyecto.php`).
@@ -182,4 +182,4 @@ Hilo: `reference = MessageReference(message_id=<mensaje_id del hilo>, channel_id
 8. **Canal borrado.** Dado un canal suscrito con 3 envíos pendientes, cuando se borra el canal, entonces el destino queda `canal_borrado` y no se hacen más peticiones a ese canal.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

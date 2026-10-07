@@ -6,3 +6,9 @@ Consulte la documentación canónica del proyecto:
 - [Documentación técnica del Bot de Discord](../../docs/info/bots-webhooks/02-bot-discord.md)
 - [Arquitectura general de Bots y Webhooks](../../docs/info/bots-webhooks/README.md)
 - [Contrato común del sistema](../../docs/info/integration.md)
+
+## Recursos
+
+- `assets/logo.jpg`: Icono oficial de la aplicación (Andalucía Mesh + Meshtastic) para el Discord Developer Portal (App Icon).
+- `assets/logo-transparent.png`: Logotipo con canal alfa (fondo transparente) para avatares, bots e integraciones.
+

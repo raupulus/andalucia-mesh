@@ -10,4 +10,5 @@ Consulte la documentación canónica del proyecto:
 ## Recursos
 
 - `assets/logo.jpg`: Logotipo y avatar oficial del bot (Andalucía Mesh + Meshtastic) para configurar en @BotFather (`/setuserpic`).
+- `assets/logo-transparent.png`: Logotipo con canal alfa (fondo transparente) para avatares, bots e integraciones.
 

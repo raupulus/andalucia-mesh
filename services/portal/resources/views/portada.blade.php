@@ -1,14 +1,20 @@
 <x-layout :title="config('proyecto.nombre') . ' — Red Regional Comunitaria LoRa Meshtastic en Andalucía'">
     <div class="contenedor">
         <!-- 1. Presentación institucional -->
-        <header class="seccion" style="padding-top: 3rem; padding-bottom: 2rem;">
-            <h1 style="font-size: 2.75rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 1rem; color: var(--color-texto-1);">
-                {{ config('proyecto.nombre') }}
-            </h1>
-            <p class="lead" style="max-width: 760px; font-size: 1.25rem; color: var(--color-texto-2); line-height: 1.5; margin-bottom: 0;">
-                Red regional comunitaria de radioenlaces de largo alcance LoRa Meshtastic en Andalucía. Comunicación abierta, descentralizada y libre entre comarcas sin dependencia de internet ni operadoras.
-            </p>
+        <header class="seccion" style="padding-top: 3rem; padding-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 280px;">
+                <h1 style="font-size: 2.75rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 1rem; color: var(--color-texto-1);">
+                    {{ config('proyecto.nombre') }}
+                </h1>
+                <p class="lead" style="max-width: 760px; font-size: 1.25rem; color: var(--color-texto-2); line-height: 1.5; margin-bottom: 0;">
+                    Red regional comunitaria de radioenlaces de largo alcance LoRa Meshtastic en Andalucía. Comunicación abierta, descentralizada y libre entre comarcas sin dependencia de internet ni operadoras.
+                </p>
+            </div>
+            <div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                <img src="{{ asset('img/logo.png') }}" alt="{{ config('proyecto.nombre') }}" style="width: 130px; height: 130px; object-fit: contain; filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.15));" width="130" height="130">
+            </div>
         </header>
+
 
         <!-- 2. Tres tarjetas fijas (en orden estricto) -->
         <section aria-label="Servicios principales de la red" style="margin-bottom: 3.5rem;">

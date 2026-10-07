@@ -31,7 +31,11 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->brandName(config('proyecto.nombre') . ' · Operador')
+            ->brandLogo(fn () => asset('img/logo.png'))
+            ->brandLogoHeight('2.5rem')
+            ->favicon(asset('favicon.ico'))
             ->login()
+
             ->multiFactorAuthentication([
                 AppAuthentication::make(),
             ])

@@ -4,9 +4,8 @@
     <div class="contenedor" style="display: flex; align-items: center; justify-content: space-between; height: 4.5rem;">
         <!-- Logotipo e Identidad -->
         <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--color-texto);">
-            <div style="width: 2.25rem; height: 2.25rem; background-color: var(--color-acento); border-radius: var(--radio-md); display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--color-sobre-acento); font-size: 1.1rem;">
-                M
-            </div>
+            <img src="{{ asset('img/logo.png') }}" alt="{{ config('proyecto.nombre') }}" style="width: 2.5rem; height: 2.5rem; object-fit: contain; flex-shrink: 0;" width="40" height="40">
+
             <div>
                 <span style="font-weight: 700; font-size: 1.15rem; display: block; line-height: 1.2;">{{ config('proyecto.nombre') }}</span>
                 <span style="font-size: 0.75rem; color: var(--color-texto-2); display: block;">Red Meshtastic Regional</span>

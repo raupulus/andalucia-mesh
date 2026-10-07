@@ -3,7 +3,10 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2.5rem; margin-bottom: 2.5rem;">
             <!-- Columna 1: Proyecto -->
             <div>
-                <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--color-texto);">{{ config('proyecto.nombre') }}</h3>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <img src="{{ asset('img/logo.png') }}" alt="{{ config('proyecto.nombre') }}" style="width: 2rem; height: 2rem; object-fit: contain; flex-shrink: 0;" width="32" height="32">
+                    <h3 style="font-size: 1.1rem; margin: 0; color: var(--color-texto);">{{ config('proyecto.nombre') }}</h3>
+                </div>
                 <p style="font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.5;">
                     Red regional ciudadana de telecomunicaciones en malla LoRa Meshtastic. Proyecto libre, abierto y sin ánimo de lucro para Cádiz y Andalucía.
                 </p>

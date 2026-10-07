@@ -48,8 +48,9 @@ Bots, alertas y API no llevan tarjeta: van en navegación y pie.
 
 ### SEO
 
-- Por página: `<title>`, `meta description`, Open Graph (`og:title`, `og:description`, `og:image` 1200×630 propia, `og:url`), `link rel=canonical`. Valores en la sección SEO de cada documento de `pages/`.
+- Por página: `<title>`, `meta description`, Open Graph (`og:title`, `og:description`, `og:image` 1200×630 en `/img/og-andalucia-mesh.png`, `og:url`), `link rel=canonical`, favicons en formato `.ico` y `.png` multirresolución con `apple-touch-icon`. Valores en la sección SEO de cada documento de `pages/`.
 - `sitemap.xml` generado de la lista de rutas públicas (sin `/alertas/{id}` ni `/revisa-tu-nodo/{id}`). `robots.txt`: `Disallow: /admin`, `Disallow: /api/v1`, `Sitemap:`.
+
 - `lang="es"`, `meta theme-color` según modo.
 
 ### QR
@@ -79,4 +80,4 @@ Bots, alertas y API no llevan tarjeta: van en navegación y pie.
 5. **Dado** la portada, **cuando** se inspeccionan las peticiones, **entonces** ninguna sale a otro dominio y no hay `Set-Cookie`.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08
