@@ -31,7 +31,7 @@ from .links import evaluate_direct_link
 from .migrations import MigrationRunner
 from .publisher import DecodedPublisher
 from .reboot import detect_node_reboot
-from .registry import NodeRegistry
+from .registry import GatewayRecord, NodeRegistry
 from .storage import StorageManager
 from .validator import TopicValidator
 
@@ -116,10 +116,17 @@ async def main() -> None:
 
         gw_rows = await conn.fetch("SELECT * FROM gateway;")
         for g in gw_rows:
-            gw = registry.gateways.get(g["id"])
-            if gw is None:
-                gw = registry.gateways[g["id"]] = registry.gateways.get(g["id"]) or registry.get_or_create_node(g["id"], g["last_message_at"])
-            registry.record_gateway_seen(g["id"], g["last_message_at"])
+            registry.gateways[g["id"]] = GatewayRecord(
+                id=g["id"],
+                first_message_at=g["first_message_at"],
+                last_message_at=g["last_message_at"],
+                messages_total=g["messages_total"] if g["messages_total"] is not None else 1,
+                typical_interval_s=g["typical_interval_s"],
+            )
+            node = registry.get_or_create_node(g["id"], g["last_message_at"])
+            node.is_gateway = True
+            if node.gateway_first_at is None:
+                node.gateway_first_at = g["first_message_at"]
 
     # Limpiar estado dirty de la precarga
     registry.dirty_nodes.clear()

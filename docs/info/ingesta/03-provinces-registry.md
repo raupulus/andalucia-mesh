@@ -123,4 +123,4 @@ En memoria (unas 2.000 entradas), cargado de la tabla `node` al arrancar; las fi
 - **Dado** un nodo que pasa de Cádiz a Málaga, **cuando** llega la nueva posición, **entonces** los paquetes siguientes se guardan con `province = ES-MA` y los anteriores no cambian.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08
