@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     log_level: str = Field(default="INFO", validation_alias="LOG_LEVEL")
 
     # Configuración de red y roles de infraestructura
-    mqtt_host: str = Field(default="mosquitto", validation_alias="MQTT_HOST")
+    mqtt_host: str = Field(default="172.30.0.1", validation_alias="MQTT_HOST")
     mqtt_port: int = Field(default=1884, validation_alias="MQTT_PORT")
     mqtt_topic_prefix: str = Field(default="snm", validation_alias="MQTT_TOPIC_PREFIX")
     infra_roles: str = Field(default="ROUTER,ROUTER_LATE,REPEATER", validation_alias="INFRA_ROLES")

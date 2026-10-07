@@ -5,6 +5,7 @@ from typing import Any
 
 import yaml
 
+import detector.reglas  # noqa: F401 - Registra las reglas mediante sus decoradores @registrar
 from detector.config import Settings
 from detector.motor.clasificador import Clasificador
 from detector.motor.protocolos import REGISTRO_REGLAS, ConfigGeneral, Regla
