@@ -79,7 +79,7 @@ Total: 9 desarrollos propios, 2 piezas de comunidad (PotatoMesh, MeshView), y Ng
 |---|---|---|
 | `mesh.example.org` | Portal (web, `/api/v1`, `/admin`); `/ws/` → `chat-ws` | 443 (80 → 443) |
 | `potato.mesh.example.org` | PotatoMesh | 443 |
-| `meshview.mesh.example.org` | MeshView | 443 |
+| `meshview.mesh.example.org` (o `${MESHVIEW_DOMAIN}`) | MeshView | 443 |
 | `mqtt.mesh.example.org` | Mosquitto | 1883 (MQTT) y 8883 (MQTT con TLS terminado en Nginx `stream` → `127.0.0.1:1883`) |
 
 DNS: `mesh.example.org` y `*.mesh.example.org` → IPv4 e IPv6 del servidor, **sin proxy de CDN**.
@@ -304,8 +304,9 @@ Un archivo en el servidor (`/srv/comun/.env`) que cada `compose.yaml` carga con 
 
 | Variable | Valor | Usan |
 |---|---|---|
-| `PROJECT_NAME` | `Sur Nodos en Mallas` | Todos |
+| `PROJECT_NAME` | `Andalucía Mesh` | Todos |
 | `PROJECT_DOMAIN` | `mesh.example.org` | Todos |
+| `MESHVIEW_DOMAIN` | `meshview.${PROJECT_DOMAIN}` *(configurable a host independiente, ej. `meshview.example.org` por TR-01)* | MeshView, Portal, Nginx |
 | `PROJECT_CONTACT` | `public@raupulus.dev` | Portal, bots, sync-peers (User-Agent) |
 | `TZ` | `Europe/Madrid` | Todos (periodos de rankings en hora local) |
 | `MQTT_HOST` / `MQTT_PORT` | `172.30.0.1` / `1884` | Servicios MQTT |

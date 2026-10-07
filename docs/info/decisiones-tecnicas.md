@@ -28,6 +28,7 @@ Registro de decisiones deliberadas de arquitectura, diseño y convenciones técn
 | DT-20 | Estructura de código en inglés (vistas, tablas, columnas, variables, claves, funciones, archivos); contenedores, documentación y comentarios en español. Los identificadores que aún figuren en español en `docs/info/` se traducen antes de implementarlos | Código uniforme; nombres de servicio legibles para el operador |
 | DT-21 | Todo el código tipado y comentado en español de España con el formato estándar de cada lenguaje (PHPDoc, docstrings PEP 257, JSDoc…) | Mantenibilidad |
 | DT-22 | Proxy inverso = Nginx nativo del servidor con certbot (80/443 y `stream` en 8883 → `127.0.0.1:1883`); los contenedores publicados solo en `127.0.0.1`; sin Traefik ni red `proxy` | El servidor ya tiene Nginx en 80/443; una pieza menos |
+| DT-23 | Hosts de servicios web con proxy CDN (Cloudflare) admiten desacoplamiento de nivel de subdominio (ej. `MESHVIEW_DOMAIN` independiente) | El certificado gratuito de Cloudflare solo cubre un nivel (`*.dominio.tld`). Evita errores SSL cuando un servicio web se publica con proxy naranja. |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-07

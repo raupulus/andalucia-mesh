@@ -38,8 +38,11 @@ internet ─1883─────────────────────�
 | `portal` | `${PROJECT_DOMAIN}` | `127.0.0.1:8100` | `8080` |
 | `chat-ws` | `${PROJECT_DOMAIN}/ws/` | `127.0.0.1:8090` | `8000` |
 | `potatomesh` | `potato.${PROJECT_DOMAIN}` | `127.0.0.1:41447` | `41447` |
-| `meshview` | `meshview.${PROJECT_DOMAIN}` | `127.0.0.1:8081` | `8081` |
+| `meshview` | `${MESHVIEW_DOMAIN}` *(por defecto `meshview.${PROJECT_DOMAIN}`)* | `127.0.0.1:8081` | `8081` |
 | Mosquitto (TLS) | `mqtt.${PROJECT_DOMAIN}:8883` | `127.0.0.1:1883` | — (nativo) |
+
+> [!NOTE]
+> **Compatibilidad con Cloudflare (TR-01):** El certificado gratuito de Cloudflare solo cubre un nivel (`*.dominio.tld`). Si `meshview` se publica con proxy naranja y `${PROJECT_DOMAIN}` es un subdominio (ej. `mesh.dominio.tld`), `MESHVIEW_DOMAIN` debe configurarse en un solo nivel (ej. `meshview.dominio.tld`) para evitar errores SSL.
 
 ### Archivos en el repositorio: `infrastructure/nginx/`
 

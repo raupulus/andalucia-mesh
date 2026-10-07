@@ -241,7 +241,7 @@ El repositorio contiene muchas aplicaciones independientes. **No se carga toda l
 
 | ID | Módulo / Área | Trampa | Solución / Mitigación |
 | :--- | :--- | :--- | :--- |
-| *(Ninguna registrada)* | — | — | — |
+| `TR-01` | Infraestructura / DNS / SSL | Los certificados SSL gratuitos de Cloudflare (Universal SSL) solo cubren un nivel de subdominio (`*.dominio.tld`). Subdominios de segundo nivel con proxy naranja (`*.mesh.dominio.tld` como `meshview.mesh...`) fallan con error SSL de certificado no válido. | Los servicios que usen proxy naranja deben configurarse en un único nivel (ej. `meshview.dominio.tld` mediante `MESHVIEW_DOMAIN`) o mantenerse en gris si van en segundo nivel. |
 
 ---
 
