@@ -35,6 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('2.5rem')
             ->favicon(asset('favicon.ico'))
             ->login()
+            ->profile()
 
             ->multiFactorAuthentication([
                 AppAuthentication::make(),

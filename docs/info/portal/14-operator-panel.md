@@ -11,7 +11,7 @@ Que los operadores vean de un vistazo si cada pieza funciona y qué pasa en la m
 ### Acceso
 
 - Panel Filament único `admin` en `/admin` (`App\Providers\Filament\AdminPanelProvider`), con sesión y CSRF (grupo `web`; las rutas públicas van en otro grupo sin sesión).
-- Sin registro ni recuperación pública: los operadores se crean con `php artisan operador:crear {email} {nombre}` (pide la contraseña por consola, mínimo 12 caracteres) y se desactivan con `operador:desactivar {email}`.
+- Sin registro ni recuperación pública: los operadores se crean con `php artisan operador:crear {email} {nombre}` (pide la contraseña por consola, mínimo 12 caracteres) y se desactivan con `operador:desactivar {email}`. Cambio de contraseña disponible desde el perfil del operador (`->profile()`).
 - Segundo factor TOTP obligatorio (autenticación multifactor de Filament 5): en el primer acceso el operador lo configura; sin él no entra. Códigos de recuperación de un solo uso.
 - `throttle` de inicio de sesión: 5 intentos fallidos por IP y email → bloqueo 15 min. IP real por `trustProxies` (ver [11](11-public-api.md)).
 - `User::canAccessPanel()` = `activo = true`. Sesión de 8 h; cookie `Secure`, `HttpOnly`, `SameSite=Lax`.
@@ -95,4 +95,4 @@ Recurso `Operadores` (base `portal`): listar, desactivar/activar, forzar nuevo T
 Alta y baja de gateways en Mosquitto, gestión de destinos de webhooks y edición de textos del portal. Cada una exige definir cómo el portal entrega la configuración al otro servicio sin escribir en su base.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08
