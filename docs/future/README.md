@@ -16,6 +16,9 @@ Registro de funcionalidades y conceptos que han sido decididos formalmente pero 
 | Gestión de destinos de webhooks y edición de textos desde el panel | Ídem |
 | Reglas de ampliación del detector | Tras calibrar el MVP (`docs/info/detector-alertas/02-rule-catalog.md`) |
 | Portal en inglés | — |
+| Revisión del margen costero de ingesta | Evaluar ampliación del margen de 500 m en costas para evitar nodos legítimos marcados como FUERA |
+| Inclusión de Ceuta y Melilla como provincias | Tratar Ceuta y Melilla como provincias de pleno derecho en polígonos, rankings y mapa (conexión natural hacia la península) |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-07
+
