@@ -103,7 +103,8 @@ done
 echo "[INFO] Instalando snippets en /etc/nginx/snippets/..."
 install -m 0644 "${SCRIPT_DIR}/snippets/snm-proxy.conf" /etc/nginx/snippets/snm-proxy.conf
 install -m 0644 "${SCRIPT_DIR}/snippets/snm-security.conf" /etc/nginx/snippets/snm-security.conf
-install -m 0644 "${SCRIPT_DIR}/snippets/snm-ratelimit.conf" /etc/nginx/snippets/snm-ratelimit.conf
+mkdir -p /etc/nginx/conf.d
+install -m 0644 "${SCRIPT_DIR}/snippets/snm-ratelimit.conf" /etc/nginx/conf.d/snm-ratelimit.conf
 
 # 8. Renderizar e instalar sitios HTTP/HTTPS
 echo "[INFO] Renderizando e instalando sitios virtuales..."
