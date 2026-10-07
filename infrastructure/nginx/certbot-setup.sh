@@ -84,6 +84,13 @@ for dom in "${DOMAINS[@]}"; do
     echo "[INFO] Solicitando certificado para: ${dom}"
     echo "----------------------------------------------------------"
 
+    # Si existe un certificado autofirmado provisional previo (sin configuración en /etc/letsencrypt/renewal/),
+    # se limpia para permitir que Certbot genere la estructura canónica.
+    if [[ -d "/etc/letsencrypt/live/${dom}" ]] && [[ ! -f "/etc/letsencrypt/renewal/${dom}.conf" ]]; then
+        echo "[INFO] Limpiando certificado provisional autofirmado para ${dom}..."
+        rm -rf "/etc/letsencrypt/live/${dom}"
+    fi
+
     certbot certonly \
         --webroot \
         -w "${WEBROOT_DIR}" \
