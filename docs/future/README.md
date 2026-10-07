@@ -18,7 +18,8 @@ Registro de funcionalidades y conceptos que han sido decididos formalmente pero 
 | Portal en inglés | — |
 | Revisión del margen costero de ingesta | Evaluar ampliación del margen de 500 m en costas para evitar nodos legítimos marcados como FUERA |
 | Inclusión de Ceuta y Melilla como provincias | Tratar Ceuta y Melilla como provincias de pleno derecho en polígonos, rankings y mapa (conexión natural hacia la península) |
+| Configurador de nodos con descarga de configuración | Asistente interactivo en el portal para generar y descargar la configuración óptima (exportación en YAML / backup o código QR para la app de Meshtastic) adaptada al rol, tipo de nodo e intervalos recomendados de la malla |
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08
 
