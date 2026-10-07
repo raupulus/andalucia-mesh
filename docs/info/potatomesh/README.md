@@ -1,6 +1,6 @@
 # 04 · PotatoMesh
 
-> Visor de comunidad (mapa, chat de canales, nodos, telemetría y trazas, en vivo) en `potato.${PROJECT_DOMAIN}`, alimentado por dos servicios propios: `adaptador-potato` (MQTT → API) y `sync-peers` (instancias vecinas → API). **Tipo:** comunidad + propio · **Fase:** 3 · **Complejidad:** baja-media · **Monorepo:** `integrations/potatomesh/`, `services/adaptador-potato/`, `services/sync-peers/`
+> Visor de comunidad (mapa, chat de canales, nodos, telemetría y trazas, en vivo) en `potato.${PROJECT_DOMAIN}`, alimentado por dos servicios propios: `adaptador-potato` (MQTT → API) y `sync-peers` (instancias vecinas → API y Mosquitto/ingesta). **Tipo:** comunidad + propio · **Fase:** 3 · **Complejidad:** baja-media · **Monorepo:** `integrations/potatomesh/`, `services/adaptador-potato/`, `services/sync-peers/`
 
 ## 1. Contexto
 
@@ -16,7 +16,7 @@
 | Módulo | Archivo | Qué es | Complejidad |
 |---|---|---|---|
 | 04.1 | [`adaptador-potato.md`](adaptador-potato.md) | `msh/EU_868/#` → descifrado → deduplicación → `POST` por lotes | Baja-media |
-| 04.2 | [`sync-peers.md`](sync-peers.md) | Lectura incremental de las APIs públicas de otras instancias PotatoMesh configuradas → `POST` | Baja |
+| 04.2 | [`sync-peers.md`](sync-peers.md) | Lectura incremental de las APIs públicas de otras instancias PotatoMesh configuradas → `POST` a PotatoMesh y publicación en Mosquitto para ingesta | Baja |
 
 **Fuera de esta entrega:** federación nativa (`FEDERATION=0`), ingestor oficial con radio, puente Matrix, cambios en el código de PotatoMesh, parches de frontend.
 
@@ -42,9 +42,9 @@
 
 - `https://potato.${PROJECT_DOMAIN}` por Nginx (certificado comodín, `snm-potatomesh.conf`). Rutas: `/`, `/nodes/:id`, `/pages/:slug`, `/api/*` (lectura pública, incluida `/api/events` SSE de PotatoMesh), `/robots.txt`, `/sitemap.xml`.
 
-### 4.3 MQTT (lo usa el adaptador)
+### 4.3 MQTT (lo usan el adaptador y sync-peers)
 
-Usuario `svc-potato`, lectura `msh/EU_868/#` en `mosquitto:1884`. Solo canales de `ALLOWED_CHANNELS` (el broker ya filtra; el adaptador comprueba otra vez).
+Usuario `svc-potato`, lectura `msh/EU_868/#` (adaptador) y escritura `snm/v1/peer/#` (sync-peers) en `mosquitto:1884`. Solo canales de `ALLOWED_CHANNELS` (el broker ya filtra; el adaptador comprueba otra vez).
 
 ## 5. Configuración
 

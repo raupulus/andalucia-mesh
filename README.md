@@ -42,10 +42,12 @@ flowchart LR
 
   MQ -- "msh/EU_868/#" --> MV["MeshView<br/>visor técnico"]
   MQ -- "msh/EU_868/#" --> AP("adaptador-potato")
-  MQ -- "msh/EU_868/#" --> IN("ingesta")
+  MQ -- "msh/EU_868/#" --> IN("ingesta<br/>filtro anti-duplicados")
   AP -- "POST" --> PM["PotatoMesh<br/>mapa + chat"]
-  SP("sync-peers") -- "POST" --> PM
-  EXT[Otras instancias<br/>PotatoMesh] -. "API pública" .-> SP
+  EXT[Otras instancias<br/>PotatoMesh] -. "API pública" .-> SP("sync-peers")
+  SP -- "POST" --> PM
+  SP -- "snm/v1/peer/#" --> MQ
+  MQ -- "snm/v1/peer/#" --> IN
 
   IN --> DBI[("PG ingest<br/>TimescaleDB")]
   IN -- "snm/v1/decoded/#" --> MQ
@@ -86,8 +88,8 @@ Detalle de cada canal de comunicación: [docs/info/architecture-map.md](docs/inf
 | 🔍 MeshView | Integración | Visor técnico de paquetes, rutas y nodos | [`integrations/meshview/`](integrations/meshview/) | [meshview](docs/info/meshview/README.md) |
 | 🥔 PotatoMesh | Integración | Mapa y chat en vivo | [`integrations/potatomesh/`](integrations/potatomesh/) | [potatomesh](docs/info/potatomesh/README.md) |
 | 🔌 adaptador-potato | Propio · Python | Alimenta PotatoMesh desde MQTT | [`services/adaptador-potato/`](services/adaptador-potato/) | [adaptador-potato](docs/info/potatomesh/adaptador-potato.md) |
-| 🔁 sync-peers | Propio · Python | Trae datos públicos de otras instancias PotatoMesh | [`services/sync-peers/`](services/sync-peers/) | [sync-peers](docs/info/potatomesh/sync-peers.md) |
-| 📥 ingesta | Propio · Python | Descifra, deduplica, asigna provincia, guarda histórico y publica el flujo normalizado | [`services/ingesta/`](services/ingesta/) | [ingesta](docs/info/ingesta/README.md) |
+| 🔁 sync-peers | Propio · Python | Trae datos públicos de otras instancias hacia PotatoMesh e Ingesta | [`services/sync-peers/`](services/sync-peers/) | [sync-peers](docs/info/potatomesh/sync-peers.md) |
+| 📥 ingesta | Propio · Python | Descifra, deduplica (radio + peers), asigna provincia, guarda histórico y publica flujo normalizado | [`services/ingesta/`](services/ingesta/) | [ingesta](docs/info/ingesta/README.md) |
 | 🌐 portal | Propio · Laravel + Filament | Web pública, API `/api/v1` y panel `/admin` | [`services/portal/`](services/portal/) | [portal](docs/info/portal/README.md) |
 | 🚨 detector-alertas | Propio · Python | Detecta y cataloga alertas (riesgo × tipo) | [`services/detector-alertas/`](services/detector-alertas/) | [detector-alertas](docs/info/detector-alertas/README.md) |
 | 💬 bot-telegram | Propio · Python | Avisos y comandos en Telegram | [`services/bot-telegram/`](services/bot-telegram/) | [bot-telegram](docs/info/bots-webhooks/01-bot-telegram.md) |

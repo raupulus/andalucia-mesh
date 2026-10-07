@@ -34,8 +34,8 @@ Páginas públicas del portal: inicio, el proyecto, quién lo impulsa, cómo se 
 | 3 | MeshView | Integración | Visor técnico de paquetes, rutas y nodos | [`meshview/`](meshview/README.md) | `integrations/meshview/` |
 | 4 | PotatoMesh | Integración | Mapa y chat en vivo | [`potatomesh/`](potatomesh/README.md) | `integrations/potatomesh/` |
 | 5 | adaptador-potato | Propio (Python) | Alimenta PotatoMesh desde MQTT | [`potatomesh/adaptador-potato.md`](potatomesh/adaptador-potato.md) | `services/adaptador-potato/` |
-| 6 | sync-peers | Propio (Python) | Trae datos públicos de otras instancias PotatoMesh configuradas | [`potatomesh/sync-peers.md`](potatomesh/sync-peers.md) | `services/sync-peers/` |
-| 7 | Ingesta | Propio (Python) | Descifra, deduplica, asigna provincia, guarda histórico y publica el flujo normalizado | [`ingesta/`](ingesta/README.md) | `services/ingesta/` |
+| 6 | sync-peers | Propio (Python) | Trae datos públicos de otras instancias hacia PotatoMesh e Ingesta | [`potatomesh/sync-peers.md`](potatomesh/sync-peers.md) | `services/sync-peers/` |
+| 7 | Ingesta | Propio (Python) | Descifra, deduplica (radio + peers), asigna provincia, guarda histórico y publica flujo normalizado | [`ingesta/`](ingesta/README.md) | `services/ingesta/` |
 | 8 | Portal | Propio (Laravel + Filament) | Web pública, API `/api/v1` y panel de operadores | [`portal/`](portal/README.md) | `services/portal/` |
 | 9 | Detector de alertas | Propio (Python) | Detecta y cataloga alertas (riesgo × tipo) y las emite por socket Unix | [`detector-alertas/`](detector-alertas/README.md) | `services/detector-alertas/` |
 | 10 | Bots y webhooks | 3 propios (Python) | Bot de Telegram, bot de Discord y webhooks | [`bots-webhooks/`](bots-webhooks/README.md) | `services/bot-telegram/`, `services/bot-discord/`, `services/webhooks/` |
