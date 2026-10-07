@@ -22,7 +22,7 @@
 | Arranque | `getMe` (usuario del bot, para reconocer `/comando@usuario`); `setMyCommands` y `setMyDescription`/`setMyShortDescription` solo si difieren de lo que devuelven `getMyCommands`/`getMyDescription` |
 | Instancia única | Bloqueo consultivo del núcleo (UT-08.1). Si aun así llega `409 Conflict` de `getUpdates`, se registra como error y se reintenta con la espera de aiogram |
 
-**Crear el bot (operador, una vez).** Con @BotFather: `/newbot` (nombre = `PROJECT_NAME`, usuario libre terminado en `bot`), `/setprivacy` → *Enable* (por defecto), `/setjoingroups` → *Enable*, foto con el logo propio. El token va a `TELEGRAM_BOT_TOKEN`; el usuario (sin `@`) a la configuración del portal (`config/proyecto.php`). Comandos y descripciones los publica el propio bot al arrancar: no se escriben en BotFather.
+**Crear el bot (operador, una vez).** Con @BotFather: `/newbot` (nombre = `PROJECT_NAME`, usuario libre terminado en `bot`), `/setprivacy` → *Enable* (por defecto), `/setjoingroups` → *Enable*, foto con el logo propio (`services/bot-telegram/assets/logo.jpg` mediante `/setuserpic`). El token va a `TELEGRAM_BOT_TOKEN`; el usuario (sin `@`) a la configuración del portal (`config/proyecto.php`). Comandos y descripciones los publica el propio bot al arrancar: no se escriben en BotFather.
 
 ### Destinos
 
@@ -164,4 +164,4 @@ Descripción (`setMyDescription`): `Avisos de los problemas de la malla de ${PRO
 9. **Privacidad.** Dado el bot administrador de un canal, cuando se publican 10 mensajes normales, entonces no se escribe nada en la base ni en el registro (salvo, en `DEBUG`, "actualización descartada" sin contenido).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

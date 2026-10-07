@@ -6,3 +6,8 @@ Consulte la documentación canónica del proyecto:
 - [Documentación técnica del Bot de Telegram](../../docs/info/bots-webhooks/01-bot-telegram.md)
 - [Arquitectura general de Bots y Webhooks](../../docs/info/bots-webhooks/README.md)
 - [Contrato común del sistema](../../docs/info/integration.md)
+
+## Recursos
+
+- `assets/logo.jpg`: Logotipo y avatar oficial del bot (Andalucía Mesh + Meshtastic) para configurar en @BotFather (`/setuserpic`).
+
