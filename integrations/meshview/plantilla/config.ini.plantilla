@@ -1,6 +1,7 @@
 [server]
 bind = *
 port = 8081
+tls_cert =
 
 [site]
 domain = ${PROJECT_DOMAIN}
