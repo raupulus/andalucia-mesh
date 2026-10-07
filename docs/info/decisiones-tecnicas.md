@@ -38,6 +38,9 @@ Registro de decisiones deliberadas de arquitectura, diseño y convenciones técn
 | DT-30 | Cero cookies y sesiones en navegación pública del portal (`removeFromGroup('web', [...])`) | Privacidad absoluta para visitantes; elimina la necesidad legal de banner de cookies y simplifica la caché HTTP en CDN/proxy. Solo `/admin` emite cookies de sesión y CSRF. |
 | DT-31 | Ejecución síncrona de `ComprobarServicios` en `portal-tareas` (`php artisan schedule:work`) | Auditoría de salud ejecutada inline en ~250ms en cada tick del planificador sin requerir un worker de colas (`queue:work`) dedicado. |
 | DT-32 | Proxy inverso Nginx con soporte dual HTTP/HTTPS hacia `127.0.0.1:8100` y `trustProxies('*')` en Laravel | Permite compatibilidad con CDN/Cloudflare tanto en modo Flexible (conexión por puerto 80) como Universal/Full SSL (443) evitando bucles de redirección 301. |
+| DT-33 | Carga estática explícita de módulos de reglas (`detector.reglas`) en el gestor de recarga | Al desacoplar el catálogo de reglas en módulos individuales usando decoradores `@registrar`, se requiere la importación explícita de `detector.reglas` en tiempo de inicialización para que la metaclase / decorador registre las clases antes de instanciarlas dinámicamente desde `reglas.yaml`. |
+| DT-34 | Supervisión de salud del worker `portal-tareas` mediante inspección de proceso `schedule:work` | Al ser un proceso CLI continuo sin servidor HTTP que hereda la imagen FrankenPHP, el healthcheck de Docker debe comprobar `pgrep -f 'schedule:work' || exit 1` en lugar de una sonda HTTP a localhost. |
+| DT-35 | Compatibilidad dual de marcas temporales en vistas contrato (`inicio_at` y `abierta_en`) | Para mantener compatibilidad estricta con controladores del portal y APIs REST externas, la vista `api_alertas` expone `a.abierta_en` y el alias `a.abierta_en AS inicio_at`. |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-07

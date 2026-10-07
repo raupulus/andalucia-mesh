@@ -30,7 +30,7 @@ Documentación técnica canónica del proyecto. Todavía no hay código: cada do
 | sync-peers | [potatomesh/sync-peers.md](potatomesh/sync-peers.md) | `services/sync-peers/` | Desplegado y verificado |
 | Ingesta | [ingesta/](ingesta/README.md): [entrada y descifrado](ingesta/01-input-decryption.md), [decodificación y deduplicación](ingesta/02-decoding-dedup.md), [provincias y registros](ingesta/03-provinces-registry.md), [persistencia y retención](ingesta/04-storage-retention.md), [vistas contrato](ingesta/05-contract-views.md), [flujo `decoded`](ingesta/06-decoded-stream.md) | `services/ingesta/` | Desplegado y verificado |
 | Portal | [portal/](portal/README.md): módulos 01–14 y [páginas](portal/pages/README.md) | `services/portal/` | Desplegado y verificado |
-| Detector de alertas | [detector-alertas/](detector-alertas/README.md): [motor](detector-alertas/01-rule-engine.md), [catálogo de reglas](detector-alertas/02-rule-catalog.md), [socket y persistencia](detector-alertas/03-socket-persistence.md) | `services/detector-alertas/` | Especificado |
+| Detector de alertas | [detector-alertas/](detector-alertas/README.md): [motor](detector-alertas/01-rule-engine.md), [catálogo de reglas](detector-alertas/02-rule-catalog.md), [socket y persistencia](detector-alertas/03-socket-persistence.md) | `services/detector-alertas/` | Desplegado y verificado |
 | Bots y webhooks | [bots-webhooks/](bots-webhooks/README.md): [Telegram](bots-webhooks/01-bot-telegram.md), [Discord](bots-webhooks/02-bot-discord.md), [webhooks](bots-webhooks/03-webhooks.md) | `services/bot-telegram/`, `services/bot-discord/`, `services/webhooks/` | Especificado |
 | Chat en directo | [chat-ws/](chat-ws/README.md) | `services/chat-ws/` | Especificado |
 
