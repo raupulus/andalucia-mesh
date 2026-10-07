@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Servicios;
 
 use Illuminate\Support\Facades\Cache;
-use League\CommonMark\CommonMarkConverter;
+use League\CommonMark\GithubFlavoredMarkdownConverter;
 use RuntimeException;
 
 class ContenidoMarkdown
@@ -15,11 +15,11 @@ class ContenidoMarkdown
      */
     protected array $variables;
 
-    protected CommonMarkConverter $converter;
+    protected GithubFlavoredMarkdownConverter $converter;
 
     public function __construct()
     {
-        $this->converter = new CommonMarkConverter([
+        $this->converter = new GithubFlavoredMarkdownConverter([
             'html_input' => 'strip',
             'allow_unsafe_links' => false,
         ]);
@@ -79,7 +79,7 @@ class ContenidoMarkdown
         }
 
         $mtime = filemtime($path);
-        $cacheKey = "markdown_render:{$nombreFichero}:{$mtime}";
+        $cacheKey = "markdown_render_v2:{$nombreFichero}:{$mtime}";
 
         /** @var array{titulo: string, descripcion: string, html: string, h1: string} */
         return Cache::rememberForever($cacheKey, function () use ($path, $nombreFichero): array {
@@ -102,12 +102,19 @@ class ContenidoMarkdown
                 $body = $mBody[1];
             }
 
-            // 3. Extraer H1 si está anotado como "**H1:** Título"
+            // 3. Extraer H1 si está anotado como "**H1:** Título" y descartar meta-instrucciones previas
             $h1 = $titulo;
-            if (preg_match('/\*\*H1:\*\*\s*([^\n]+)/u', $body, $mH1)) {
+            if (preg_match('/\*\*H1:\*\*\s*([^\n]+)\n+(.+)$/us', $body, $mH1)) {
+                $h1 = trim($mH1[1]);
+                $body = $mH1[2];
+            } elseif (preg_match('/\*\*H1:\*\*\s*([^\n]+)/u', $body, $mH1)) {
                 $h1 = trim($mH1[1]);
                 $body = preg_replace('/\*\*H1:\*\*\s*[^\n]+\n+/u', '', $body) ?? $body;
             }
+
+            // Limpiar posibles notas internas que hayan quedado al inicio
+            $body = preg_replace('/^Cada\s+`?###`?.*?\n+/um', '', $body) ?? $body;
+            $body = preg_replace('/^>\s+\*\*Borrador orientativo\.\*\*.*?\n+/um', '', $body) ?? $body;
 
             // 4. Reemplazar variables
             $titulo = strtr($titulo, $this->variables);

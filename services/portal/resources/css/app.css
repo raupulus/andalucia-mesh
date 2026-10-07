@@ -296,6 +296,72 @@ p.lead {
   background-color: var(--color-superficie-sutil);
 }
 
+/* Tablas y elementos en páginas de contenido (.prose) */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+.prose th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-superficie-sutil);
+  color: var(--color-texto);
+  border-bottom: 2px solid var(--color-borde);
+  font-weight: 600;
+}
+
+.prose td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-borde);
+  color: var(--color-texto);
+}
+
+.prose tr:hover td {
+  background-color: var(--color-superficie-sutil);
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  padding: 0.15em 0.35em;
+  border-radius: var(--radio-sm);
+  background-color: var(--color-superficie-sutil);
+  color: var(--color-texto);
+}
+
+.prose ol,
+.prose ul {
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+
+.prose li {
+  margin-bottom: 0.5rem;
+}
+
+.prose h2 {
+  margin-top: 2.25rem;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-texto);
+}
+
+.prose h3 {
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.prose p {
+  margin-bottom: 1.25rem;
+}
+
 /* Trama diagonal para "sin datos" */
 .trama-nodata {
   background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(141, 142, 166, 0.25) 5px, rgba(141, 142, 166, 0.25) 10px);
