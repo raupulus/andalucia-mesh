@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -20,7 +19,7 @@ use Throwable;
  *
  * Conforme a docs/info/portal/14-operator-panel.md e integration.md §11.
  */
-class ComprobarServicios implements ShouldQueue
+class ComprobarServicios
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
