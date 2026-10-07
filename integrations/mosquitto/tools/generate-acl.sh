@@ -147,7 +147,7 @@ echo "[INFO] Generando ${CRED_DIR}/acl-gateways..."
         ch="$(echo "${ch}" | xargs)"
         echo "pattern write ${MQTT_TOPIC_ROOT}/2/e/${ch}/%u"
     done
-    echo "pattern write ${MQTT_TOPIC_ROOT}/2/map/#"
+    echo "topic write ${MQTT_TOPIC_ROOT}/2/map/#"
 } > "${TMP_PREFIX}.gateways"
 
 chmod 0640 "${TMP_PREFIX}.gateways" 2>/dev/null || sudo chmod 0640 "${TMP_PREFIX}.gateways"

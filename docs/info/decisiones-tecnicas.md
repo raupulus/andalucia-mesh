@@ -31,6 +31,8 @@ Registro de decisiones deliberadas de arquitectura, diseño y convenciones técn
 | DT-23 | Hosts de servicios web con proxy CDN (Cloudflare) admiten desacoplamiento de nivel de subdominio (ej. `MESHVIEW_DOMAIN` independiente) | El certificado gratuito de Cloudflare solo cubre un nivel (`*.dominio.tld`). Evita errores SSL cuando un servicio web se publica con proxy naranja. |
 | DT-24 | Canalización de `sync-peers` hacia `ingesta` (`snm/v1/peer/#`) con filtro anti-duplicados (15 min) | Permite que alertas, estadísticas de TimescaleDB y chat cubran toda la región de Andalucía sin crear bucles MQTT bidireccionales con terceros. |
 | DT-25 | Protección anti-scraping y centralización (rate limiting en Nginx a 60 req/min + bloqueo en Fail2ban/UFW con aviso al operador) | Evita que instancias externas extraigan datos masivamente o abusen de los endpoints; el proyecto centraliza hacia adentro. |
+| DT-26 | Omisión de `persistence` redundante en `snm.conf` de Mosquitto | En Debian 13, `/etc/mosquitto/mosquitto.conf` ya declara `persistence true` y `persistence_location`. Declararlas de nuevo en `conf.d/snm.conf` genera un error fatal de configuración duplicada en Mosquitto 2.x. |
+| DT-27 | Uso de `topic write` en lugar de `pattern write` para map reports en `acl-gateways` | El topic `msh/EU_868/2/map/#` no contiene `%u` ni `%c` (el gateway se identifica dentro del protobuf). `pattern` genera un warning en el broker si no contiene variables de cliente. |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-07

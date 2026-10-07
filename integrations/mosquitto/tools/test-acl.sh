@@ -262,7 +262,7 @@ fi
 # TC-10: Healthcheck local en 1885 ($SYS/broker/uptime)
 # ------------------------------------------------------------------------------
 log_test "TC-10" "Lectura anónima de métricas en listener local 1885 (\$SYS/broker/uptime)"
-UPTIME_OUT="$(mosquitto_sub -h 127.0.0.1 -p 1885 -t '\$SYS/broker/uptime' -C 1 -W 3 2>/dev/null || true)"
+UPTIME_OUT="$(mosquitto_sub -h 127.0.0.1 -p 1885 -t '$SYS/broker/uptime' -C 1 -W 3 2>/dev/null || true)"
 if [[ -n "${UPTIME_OUT}" ]]; then
     pass
 else
