@@ -1,0 +1,26 @@
+# ==============================================================================
+# Clasificación de Alertas para Andalucía Mesh
+# Define los niveles de riesgo ordenados y los tipos de afectación
+# ==============================================================================
+
+riesgos:
+  - id: bajo
+    nombre: Bajo
+    descripcion: "Conviene saberlo; no hay daño inmediato"
+  - id: medio
+    nombre: Medio
+    descripcion: "Riesgo real para un nodo o una zona; conviene actuar"
+  - id: alto
+    nombre: Alto
+    descripcion: "Fallo activo o daño a la malla"
+
+tipos:
+  - id: infraestructura
+    nombre: Infraestructura
+    descripcion: "Routers y gateways, y lo que degrada la malla o afecta a muchos nodos"
+  - id: clientes
+    nombre: Clientes
+    descripcion: "Problemas de un nodo concreto que no es infraestructura"
+
+# Lista de IDs de nodos tratados como infraestructura además de INFRA_ROLES y gateways detectados
+infraestructura_manual: []

@@ -1,0 +1,46 @@
+# ==============================================================================
+# compose.yaml (services/detector-alertas/)
+#
+# Microservicio detector-alertas para Andalucía Mesh.
+# Motor de detección y catalogación de anomalías y alertas en red 'mesh'.
+# Microservicio interno en red 'mesh' sin puertos publicados hacia el host.
+# ==============================================================================
+
+services:
+  detector-alertas:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: snm-detector-alertas:0.1.0
+    container_name: detector-alertas
+    restart: unless-stopped
+    networks:
+      - mesh
+    env_file:
+      - path: /srv/comun/.env
+        required: false
+      - path: /srv/detector-alertas/.env
+        required: false
+      - path: .env
+        required: false
+    volumes:
+      - alertas-socket:/run/snm
+      - detector-grabaciones:/datos/grabaciones
+      - ./config:/config:ro
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    read_only: true
+    user: "10501:10500"
+    stop_grace_period: 30s
+    mem_limit: 512m
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  alertas-socket:
+    external: true
+  detector-grabaciones:
+
+networks:
+  mesh:
+    external: true
