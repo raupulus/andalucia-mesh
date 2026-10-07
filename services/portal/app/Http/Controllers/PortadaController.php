@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Datos\Ingesta\Provincias;
+use App\Data\Ingest\Provincias;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Throwable;

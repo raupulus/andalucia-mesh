@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Datos\Fuente;
+use App\Data\Fuente;
 use App\Excepciones\FuenteNoDisponible;
 use Illuminate\Support\Facades\Cache;
 use RuntimeException;

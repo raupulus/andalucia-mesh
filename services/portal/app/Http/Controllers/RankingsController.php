@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Datos\Ingesta\Rankings;
-use App\Datos\Ingesta\Trafico;
+use App\Data\Ingest\Rankings;
+use App\Data\Ingest\Trafico;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Throwable;

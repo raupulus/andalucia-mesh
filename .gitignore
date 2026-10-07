@@ -18,9 +18,9 @@ __pycache__/
 .env.*
 !.env.example
 peers.json
-credenciales/
-datos/
-certificados/
+/credenciales/
+/datos/
+/certificados/
 acme.json
 
 # Temporales

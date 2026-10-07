@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Datos\Ingesta\Provincias;
-use App\Datos\Ingesta\Rankings;
-use App\Datos\Ingesta\Resumen;
-use App\Datos\Ingesta\Routers;
-use App\Datos\Ingesta\Trafico;
+use App\Data\Ingest\Provincias;
+use App\Data\Ingest\Rankings;
+use App\Data\Ingest\Resumen;
+use App\Data\Ingest\Routers;
+use App\Data\Ingest\Trafico;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
