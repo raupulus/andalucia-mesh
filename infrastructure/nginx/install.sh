@@ -124,6 +124,11 @@ sed -e "s/meshview\.mesh\.example\.org/${MESHVIEW_DOMAIN}/g" \
     "${SCRIPT_DIR}/sites/snm-meshview.conf" > /etc/nginx/sites-available/snm-meshview.conf
 ln -sf /etc/nginx/sites-available/snm-meshview.conf /etc/nginx/sites-enabled/snm-meshview.conf
 
+# MQTT ACME Challenge (HTTP 80)
+sed -e "s/mqtt\.mesh\.example\.org/${MQTT_DOMAIN}/g" \
+    "${SCRIPT_DIR}/sites/snm-mqtt.conf" > /etc/nginx/sites-available/snm-mqtt.conf
+ln -sf /etc/nginx/sites-available/snm-mqtt.conf /etc/nginx/sites-enabled/snm-mqtt.conf
+
 # 9. Renderizar e instalar stream TCP MQTT TLS
 echo "[INFO] Renderizando e instalando stream TCP..."
 sed -e "s/mqtt\.mesh\.example\.org/${MQTT_DOMAIN}/g" \
