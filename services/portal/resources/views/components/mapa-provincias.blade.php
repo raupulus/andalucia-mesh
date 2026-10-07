@@ -69,7 +69,7 @@
             <defs>
                 <!-- Trama diagonal accesible para provincias sin datos de telemetría -->
                 <pattern id="trama-sin-datos" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                    <rect width="10" height="10" fill="var(--color-mapa-gris)" />
+                    <rect width="10" height="10" fill="var(--mapa-nodata)" />
                     <line x1="0" y1="0" x2="0" y2="10" stroke="rgba(255,255,255,0.4)" stroke-width="3" />
                 </pattern>
             </defs>
@@ -235,19 +235,19 @@
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; font-size: 0.88rem; margin-bottom: 1.25rem;">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <span style="display: inline-block; width: 16px; height: 16px; border-radius: 4px; background: var(--color-mapa-verde);"></span>
+                <span style="display: inline-block; width: 16px; height: 16px; border-radius: 4px; background: var(--mapa-verde);"></span>
                 <span>≤ 20 %: canal holgado</span>
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <span style="display: inline-block; width: 16px; height: 16px; border-radius: 4px; background: var(--color-mapa-naranja);"></span>
+                <span style="display: inline-block; width: 16px; height: 16px; border-radius: 4px; background: var(--mapa-naranja);"></span>
                 <span>20 % – 40 %: canal cargado</span>
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <span style="display: inline-block; width: 16px; height: 16px; border-radius: 4px; background: var(--color-mapa-rojo);"></span>
+                <span style="display: inline-block; width: 16px; height: 16px; border-radius: 4px; background: var(--mapa-rojo);"></span>
                 <span>≥ 40 %: canal saturado</span>
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <span style="display: inline-block; width: 16px; height: 16px; border-radius: 4px; background: var(--color-mapa-gris); border: 1px dashed var(--color-borde);"></span>
+                <span style="display: inline-block; width: 16px; height: 16px; border-radius: 4px; background: var(--mapa-nodata); border: 1px dashed var(--color-borde);"></span>
                 <span>Sin datos en 12 h</span>
             </div>
         </div>

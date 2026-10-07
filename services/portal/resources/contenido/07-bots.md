@@ -73,13 +73,14 @@ Escríbele y te responde a los comandos de consulta (`/status`, `/battery`, `/ro
 
 **Para quitarlo**, expúlsalo del grupo o del canal. El bot lo detecta y deja de enviar.
 
-### Bot de Discord
+### Bot de Discord (Próximamente)
 
-**Botón secundario:** "Invitar el bot a tu servidor" → `{DISCORD_INVITE_URL}`
+**Estado:** Próximamente (en fase de desarrollo y homologación).
+**Botón secundario:** Deshabilitado durante la fase de desarrollo ("Invitar bot a tu servidor (Próximamente)"). Enlace de producción previsto: `{DISCORD_INVITE_URL}`
 
 En Discord el bot entra en un servidor, no en un canal. Por eso, después de invitarlo, eliges en qué canales publica.
 
-1. Abre el enlace de invitación y elige tu servidor. El bot pide permiso para ver canales, enviar mensajes, insertar enlaces y leer el historial de mensajes.
+1. Abrirás el enlace de invitación y elegirás tu servidor. El bot pide permiso para ver canales, enviar mensajes, insertar enlaces y leer el historial de mensajes.
 2. En el canal donde quieras las alertas, alguien con permiso para gestionar canales escribe `/subscribe`. El canal queda activo con los filtros por defecto.
 3. Ajusta los filtros con `/levels` y `/types` en ese mismo canal. Puedes activar varios canales, cada uno con sus filtros.
 
@@ -214,4 +215,4 @@ Los bots solo guardan el identificador de cada grupo o canal donde están, sus f
 - Mensajes de ejemplo y código: componente "Bloque de código" de `DESIGN.md`.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

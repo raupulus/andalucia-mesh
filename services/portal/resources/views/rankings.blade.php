@@ -43,9 +43,9 @@
             <!-- Barra gráfica de proporciones -->
             @php
                 $coloresPortnum = [
-                    'telemetry' => 'var(--color-mapa-verde)',
+                    'telemetry' => 'var(--mapa-verde)',
                     'position' => 'var(--color-enlace)',
-                    'nodeinfo' => 'var(--color-mapa-naranja)',
+                    'nodeinfo' => 'var(--mapa-naranja)',
                     'text' => 'var(--color-critico-texto)',
                     'neighborinfo' => 'var(--color-texto-3)',
                 ];

@@ -73,4 +73,4 @@ Ver la malla de Andalucía de un vistazo, sin peticiones a terceros, con una alt
 5. **Dado** un `CLIENT_MUTE` con carga 80 % en Huelva, **cuando** se pinta el mapa, **entonces** no afecta al color de Huelva; un `CLIENT_BASE` al 80 % sí entra en la media de clientes junto a los `CLIENT`.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

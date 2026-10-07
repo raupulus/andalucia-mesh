@@ -54,6 +54,32 @@ class RutasEstaticasTest extends TestCase
         $response->assertSee(config('autoria.email'));
     }
 
+    public function test_pagina_bots_muestra_tarjetas_visuales_discord_proximamente_y_aviso(): void
+    {
+        $response = $this->get('/bots');
+
+        $response->assertStatus(200);
+        $response->assertHeaderMissing('Set-Cookie');
+
+        // Tarjetas visuales de Telegram y Discord
+        $response->assertSee('Bot de Telegram');
+        $response->assertSee('Bot de Discord');
+        $response->assertSee('Próximamente');
+        $response->assertSee('Invitar bot a tu servidor (Próximamente)');
+
+        // Bloques de código para ejemplos de respuesta
+        $response->assertSee('Ejemplos de Respuesta');
+        $response->assertSee('tarjeta-codigo', false);
+        $response->assertSee('bloque-codigo', false);
+        $response->assertSee('/status');
+        $response->assertSee('/battery');
+        $response->assertSee('/routers');
+
+        // Sección de aviso destacado
+        $response->assertSee('Así es un Aviso en Directo');
+        $response->assertSee('🔴 ALTO · Infraestructura · Bucle de reinicio');
+    }
+
     public function test_sitemap_xml_cumple_estructura(): void
     {
         $response = $this->get('/sitemap.xml');

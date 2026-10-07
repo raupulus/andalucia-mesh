@@ -16,6 +16,7 @@
 
   /* Texto */
   --color-texto: #2C2D3C;
+  --color-texto-1: #2C2D3C;
   --color-texto-2: #515267;
   --color-texto-3: #6E708C;
   --color-enlace: #15612F;
@@ -41,6 +42,11 @@
   --mapa-naranja: #F59E0B;
   --mapa-rojo: #E5484D;
   --mapa-nodata: #E0E1EB;
+  --color-mapa-verde: var(--mapa-verde);
+  --color-mapa-naranja: var(--mapa-naranja);
+  --color-mapa-rojo: var(--mapa-rojo);
+  --color-mapa-gris: var(--mapa-nodata);
+  --color-mapa-nodata: var(--mapa-nodata);
   --mapa-trazo-provincia: #FFFFFF;
   --mapa-contorno-andalucia: #515267;
   --mapa-burbuja-fondo: #FFFFFF;
@@ -62,6 +68,9 @@
   /* Tipografía */
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --fuente-inter: var(--font-sans);
+  --fuente-sans: var(--font-sans);
+  --fuente-mono: var(--font-mono);
 }
 
 [data-theme="dark"] {
@@ -75,6 +84,7 @@
 
   /* Texto */
   --color-texto: #F0F0F5;
+  --color-texto-1: #F0F0F5;
   --color-texto-2: #C7C8D4;
   --color-texto-3: #9FA0B4;
   --color-enlace: #67EA94;
@@ -100,6 +110,11 @@
   --mapa-naranja: #F59E0B;
   --mapa-rojo: #E5484D;
   --mapa-nodata: #3D3E4D;
+  --color-mapa-verde: var(--mapa-verde);
+  --color-mapa-naranja: var(--mapa-naranja);
+  --color-mapa-rojo: var(--mapa-rojo);
+  --color-mapa-gris: var(--mapa-nodata);
+  --color-mapa-nodata: var(--mapa-nodata);
   --mapa-trazo-provincia: #1F2029;
   --mapa-contorno-andalucia: #C7C8D4;
   --mapa-burbuja-fondo: #1F2029;
@@ -332,6 +347,53 @@ p.lead {
   color: var(--color-texto);
 }
 
+/* Bloques de código preformateado y tarjetas de código (DESIGN.md §9) */
+pre,
+.bloque-codigo {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  background-color: var(--color-superficie-sutil);
+  color: var(--color-texto);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 2;
+  margin: 1rem 0;
+}
+
+.bloque-codigo code,
+pre code {
+  font-family: inherit;
+  font-size: inherit;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+}
+
+.tarjeta-codigo {
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-superficie);
+  overflow: hidden;
+  box-shadow: var(--sombra-1);
+}
+
+.tarjeta-codigo-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  background: var(--color-superficie-sutil);
+  border-bottom: 1px solid var(--color-borde);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-texto-2);
+}
+
 .prose ol,
 .prose ul {
   padding-left: 1.5rem;
@@ -377,7 +439,7 @@ p.lead {
 }
 
 .provincia-path {
-  stroke: var(--color-borde);
+  stroke: var(--mapa-trazo-provincia);
   stroke-width: 1.5;
   stroke-linejoin: round;
   cursor: pointer;
@@ -387,21 +449,21 @@ p.lead {
 
 .provincia-path:hover,
 .provincia-path:focus-visible {
-  stroke: var(--color-acento);
-  stroke-width: 3;
+  stroke: var(--color-texto);
+  stroke-width: 2.5;
   filter: brightness(1.08);
 }
 
 .provincia-path.nivel-green {
-  fill: var(--color-mapa-verde);
+  fill: var(--mapa-verde);
 }
 
 .provincia-path.nivel-orange {
-  fill: var(--color-mapa-naranja);
+  fill: var(--mapa-naranja);
 }
 
 .provincia-path.nivel-red {
-  fill: var(--color-mapa-rojo);
+  fill: var(--mapa-rojo);
 }
 
 .provincia-path.nivel-nodata {

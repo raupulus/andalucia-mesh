@@ -49,7 +49,7 @@ class PaginaController extends Controller
     public function bots(): View
     {
         $data = $this->markdown->render('07-bots.md');
-        return view('pagina', $data);
+        return view('bots', $data);
     }
 
     public function firmware(): View
