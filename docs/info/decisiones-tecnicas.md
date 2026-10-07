@@ -33,6 +33,9 @@ Registro de decisiones deliberadas de arquitectura, diseño y convenciones técn
 | DT-25 | Protección anti-scraping y centralización (rate limiting en Nginx a 60 req/min + bloqueo en Fail2ban/UFW con aviso al operador) | Evita que instancias externas extraigan datos masivamente o abusen de los endpoints; el proyecto centraliza hacia adentro. |
 | DT-26 | Omisión de `persistence` redundante en `snm.conf` de Mosquitto | En Debian 13, `/etc/mosquitto/mosquitto.conf` ya declara `persistence true` y `persistence_location`. Declararlas de nuevo en `conf.d/snm.conf` genera un error fatal de configuración duplicada en Mosquitto 2.x. |
 | DT-27 | Uso de `topic write` en lugar de `pattern write` para map reports en `acl-gateways` | El topic `msh/EU_868/2/map/#` no contiene `%u` ni `%c` (el gateway se identifica dentro del protobuf). `pattern` genera un warning en el broker si no contiene variables de cliente. |
+| DT-28 | Ejecución no transaccional de agregados continuos en TimescaleDB | `CREATE MATERIALIZED VIEW ... WITH (timescaledb.continuous)` no puede ejecutarse dentro de un bloque explícito `BEGIN ... COMMIT`. El ejecutor de migraciones analiza las sentencias SQL y las ejecuta individualmente fuera de bloques de transacción. |
+| DT-29 | Propiedad estricta de objetos en base de datos `snm_ingest` | El usuario de aplicación `snm_ingest` debe ser el propietario de todas las tablas, vistas materializadas y procedimientos almacenados (no el superusuario `postgres`) para permitir migraciones automatizadas e introspección sin elevar privilegios. |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-07
+

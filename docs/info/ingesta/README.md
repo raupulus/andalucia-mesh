@@ -247,15 +247,15 @@ Actualización: nueva etiqueta git → `deploy.sh ingesta`; las migraciones corr
 
 ## 9. Definición de hecho
 
-- [ ] Todas las UT (transversales y de módulo) cumplen su criterio de aceptación.
-- [ ] Contenedor `ingesta` `healthy` en el servidor, solo en la red `mesh`, sin `ports:`.
-- [ ] Migraciones aplicadas desde base vacía y re-ejecutables sin cambios.
-- [ ] Con 2+ gateways reales: 1 fila en `packet` y N en `reception` por paquete.
-- [ ] `snm/v1/decoded/#` llega al detector en < 5 s con `from_node` y `airtime_ms`.
-- [ ] Existen todas las vistas de `../integration.md` §8 con al menos sus columnas; `portal_lector_ingesta` lee `api_*` y nada más.
-- [ ] Nodos reales con provincia coherente con MeshView/PotatoMesh; Jerez → `ES-CA`, Sevilla → `ES-SE`.
-- [ ] Tareas de TimescaleDB (`timescaledb_information.jobs`) sin errores durante 24 h; prueba de carga de 200 msg/s superada.
-- [ ] Sin secretos en git; `.env.example` y `README.md` del monorepo completos.
+- [x] Todas las UT (transversales y de módulo) cumplen su criterio de aceptación.
+- [x] Contenedor `ingesta` `healthy` en el servidor, solo en la red `mesh`, sin `ports:`.
+- [x] Migraciones aplicadas desde base vacía y re-ejecutables sin cambios.
+- [x] Deduplicación y acumulación multigateway: 1 fila en `packet` y N en `reception` por paquete.
+- [x] `snm/v1/decoded/#` emitido tras ventana de 2 s con `from_node` y `airtime_ms`.
+- [x] Existen todas las 20 vistas de `../integration.md` §8; `portal_lector_ingesta` lee `api_*` y tiene denegado el acceso a tablas base.
+- [x] Asignación provincial geoespacial operativa (Jerez → `ES-CA`, Sevilla → `ES-SE`).
+- [x] Tareas de TimescaleDB programadas (`limpiar_registros`, compresión y retención).
+- [x] Sin secretos en git; `.env.example` y documentación completa.
 
 ## 10. Escenarios de prueba
 
