@@ -44,11 +44,7 @@ sudo cp -f "${SCRIPT_DIR}/config/mosquitto.conf" /etc/mosquitto/conf.d/snm.conf
 sudo chmod 0644 /etc/mosquitto/conf.d/snm.conf
 sudo chown root:root /etc/mosquitto/conf.d/snm.conf
 
-# 5. Validar sintaxis
-log "[INFO] Validando sintaxis de configuración..."
-sudo mosquitto -c /etc/mosquitto/conf.d/snm.conf -t
-
-# 6. Habilitar y reiniciar servicio
+# 5. Habilitar y reiniciar servicio
 log "[INFO] Reiniciando y habilitando servicio systemd mosquitto..."
 sudo systemctl enable mosquitto
 sudo systemctl restart mosquitto

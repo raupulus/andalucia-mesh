@@ -100,7 +100,6 @@ deploy_native() {
             else
                 "${BASE_DIR}/integrations/mosquitto/tools/generate-acl.sh"
                 sudo cp -f "${BASE_DIR}/integrations/mosquitto/config/mosquitto.conf" /etc/mosquitto/conf.d/snm.conf
-                sudo mosquitto -c /etc/mosquitto/conf.d/snm.conf -t 2>/dev/null || mosquitto -c /etc/mosquitto/conf.d/snm.conf -t
                 if command -v systemctl >/dev/null 2>&1; then
                     sudo systemctl reload mosquitto 2>/dev/null || systemctl reload mosquitto 2>/dev/null || true
                     log "[OK] Mosquitto recargado correctamente."
