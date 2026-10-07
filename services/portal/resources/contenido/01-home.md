@@ -128,21 +128,20 @@ Con estos ajustes tu nodo oye a la malla y no la satura. Es la configuración de
 
 Si tu nodo tiene internet, puede hacer de gateway: sube lo que oye por radio a nuestro servidor y así la malla aparece completa en mapas, estadísticas y alertas. Solo sube: nada de lo que llega por internet vuelve a la radio.
 
-1. Necesitas un nodo con WiFi o Ethernet (o que use la app del móvil como puente MQTT), configurado como arriba.
-2. Pide tu usuario: escribe a {PROJECT_CONTACT} con el id de tu nodo (`!xxxxxxxx`) y tu zona aproximada. Te enviamos un usuario y una contraseña solo para ti.
-3. Aplica estos ajustes.
-4. En unos minutos tu nodo aparecerá en MeshView y PotatoMesh.
+1. Necesitas un nodo con WiFi o Ethernet (o que use la app del móvil como puente MQTT), configurado según la guía.
+2. Aplica estos ajustes directamente con las credenciales comunitarias públicas de solo subida.
+3. En pocos minutos tu nodo aparecerá en MeshView y PotatoMesh.
 
 | Ajuste | Valor |
 |---|---|
 | MQTT activado | Sí |
-| Servidor | `mqtt.{PROJECT_DOMAIN}` [Copiar] |
-| Puerto | `1883` (`8883` con TLS) |
-| Usuario / contraseña | Los tuyos: `!<id>` y la que te enviamos |
+| Servidor | `mqtt.{PROJECT_DOMAIN}` |
+| Puerto | `8883` (con TLS) |
+| Usuario / contraseña | `{MQTT_GATEWAY_USER}` / `{MQTT_GATEWAY_PASSWORD}` |
 | Cifrado | Activado |
 | JSON | Desactivado |
-| TLS | Opcional |
-| Root topic | `{MQTT_TOPIC_ROOT}` [Copiar] |
+| TLS | Activado |
+| Root topic | `{MQTT_TOPIC_ROOT}` |
 | Map reporting | Activado |
 | Uplink | Activado en `{PRIMARY_CHANNEL}` y en los canales de la lista que uses |
 | Downlink | Desactivado en todos los canales · chip `aviso` "Siempre desactivado" |

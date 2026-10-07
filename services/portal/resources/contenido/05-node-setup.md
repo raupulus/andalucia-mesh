@@ -38,23 +38,25 @@ La mayor parte de la malla en España usa esta configuración manual. Si tu nodo
 
 | Ajuste | Valor |
 |---|---|
-| Región | `{LORA_REGION}` |
-| Usar preset | Desactivado |
-| Ancho de banda | `{LORA_BANDWIDTH}` ({LORA_BANDWIDTH_KHZ} kHz) |
+| Región (Region) | `{LORA_REGION}` (European Union 868 MHz) |
+| Usar preset (Predefined) | Desactivado (para desbloquear los campos personalizados) |
+| Ancho de banda (Bandwidth) | `{LORA_BANDWIDTH}` (o {LORA_BANDWIDTH_KHZ} kHz) |
 | Spreading factor | `{LORA_SPREAD_FACTOR}` |
-| Coding rate | `{LORA_CODING_RATE}` |
-| Frequency slot | `{LORA_FREQUENCY_SLOT}` ({LORA_FREQUENCY_MHZ} MHz) |
-| Canal 0: nombre | `{PRIMARY_CHANNEL}` |
-| Canal 0: clave | `AQ==` (la clave pública por defecto) |
-| Límite de saltos | `{LORA_HOP_LIMIT}` |
+| Coding rate | `{LORA_CODING_RATE}` (4/5) |
+| Frequency slot | `{LORA_FREQUENCY_SLOT}` |
+| Frequency override | `{LORA_FREQUENCY_MHZ}` MHz (o 869.6188 MHz) |
+| Nombre del preset | `SFNarrow` |
+| Canal principal (0): nombre | `{PRIMARY_CHANNEL}` |
+| Canal principal (0): clave PSK | `AQ==` (clave pública por defecto) |
+| Límite de saltos (Hop Limit) | `{LORA_HOP_LIMIT}` (máximo 4) |
 
-Cómo ponerla:
+Cómo ponerla en la app de Meshtastic:
 
-1. En la app del nodo, abre los ajustes de LoRa y elige la región `{LORA_REGION}`.
-2. Desactiva "usar preset".
-3. Escribe ancho de banda `{LORA_BANDWIDTH}`, spreading factor `{LORA_SPREAD_FACTOR}` y coding rate `{LORA_CODING_RATE}`.
-4. Pon el frequency slot `{LORA_FREQUENCY_SLOT}` (o la frecuencia {LORA_FREQUENCY_MHZ} MHz, que es lo mismo).
-5. Cambia el nombre del canal 0 a `{PRIMARY_CHANNEL}` y deja la clave por defecto (`AQ==`).
+1. En la app del nodo, abre los ajustes de LoRa (`Radio Configuration → LoRa`) y elige la región `{LORA_REGION}`.
+2. Desactiva **Usar preset (Predefined)** para desbloquear los campos manuales.
+3. Escribe ancho de banda `{LORA_BANDWIDTH}` (o 62.5 kHz), spreading factor `{LORA_SPREAD_FACTOR}` y coding rate `{LORA_CODING_RATE}`.
+4. Pon el **Frequency slot** en `{LORA_FREQUENCY_SLOT}` o, como alternativa equivalente, escribe la frecuencia en **Frequency override** `{LORA_FREQUENCY_MHZ}` MHz.
+5. En `Channels`, renombra el canal 0 a `{PRIMARY_CHANNEL}` y pon la clave PSK por defecto (`AQ==`).
 6. Pon el límite de saltos a `{LORA_HOP_LIMIT}`.
 
 Si administras un nodo a distancia, cambia los ajustes en este orden para no perder el acceso: primero la radio del nodo remoto, luego la del local; después el canal del remoto y, por último, el del local.

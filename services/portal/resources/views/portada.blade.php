@@ -52,16 +52,20 @@
                                     <td style="padding: 0.5rem 0;"><code>{{ config('proyecto.lora.region') }}</code></td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid var(--color-borde);">
+                                    <td style="padding: 0.5rem 0; font-weight: 600;">Usar preset (Predefined)</td>
+                                    <td style="padding: 0.5rem 0;"><span class="chip chip-info" style="font-size: 0.8rem; font-weight: 600;">Desactivado</span> (para campos personalizados)</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--color-borde);">
                                     <td style="padding: 0.5rem 0; font-weight: 600;">Ancho de banda · SF · CR</td>
-                                    <td style="padding: 0.5rem 0;">{{ config('proyecto.lora.bandwidth') }} kHz · SF{{ config('proyecto.lora.spread_factor') }} · CR4/{{ config('proyecto.lora.coding_rate') }}</td>
+                                    <td style="padding: 0.5rem 0;">BW <strong>{{ config('proyecto.lora.bandwidth') }}</strong> (62.5 kHz) · SF<strong>{{ config('proyecto.lora.spread_factor') }}</strong> · CR4/<strong>{{ config('proyecto.lora.coding_rate') }}</strong></td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid var(--color-borde);">
-                                    <td style="padding: 0.5rem 0; font-weight: 600;">Frequency slot</td>
-                                    <td style="padding: 0.5rem 0;">Slot {{ config('proyecto.lora.frequency_slot') }} ({{ config('proyecto.lora.frequency_mhz') }} MHz)</td>
+                                    <td style="padding: 0.5rem 0; font-weight: 600;">Frequency slot / Override</td>
+                                    <td style="padding: 0.5rem 0;">Slot <strong>{{ config('proyecto.lora.frequency_slot') }}</strong> (o <code>{{ config('proyecto.lora.frequency_mhz') }} MHz</code>)</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid var(--color-borde);">
-                                    <td style="padding: 0.5rem 0; font-weight: 600;">Canal primario (0)</td>
-                                    <td style="padding: 0.5rem 0;"><code>{{ config('proyecto.canales.primario') }}</code> (clave por defecto <code>{{ config('proyecto.canales.clave_defecto') }}</code>)</td>
+                                    <td style="padding: 0.5rem 0; font-weight: 600;">Canal principal (0)</td>
+                                    <td style="padding: 0.5rem 0;"><code>{{ config('proyecto.canales.primario') }}</code> (clave PSK <code>{{ config('proyecto.canales.clave_defecto') }}</code>)</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid var(--color-borde);">
                                     <td style="padding: 0.5rem 0; font-weight: 600;">Límite de saltos</td>
@@ -94,9 +98,10 @@
 
                 <div class="tarjeta" style="padding: 1.5rem; margin-bottom: 1.5rem; background: var(--color-superficie-sutil);">
                     <ul style="margin: 0; padding-left: 1.25rem; line-height: 1.7; font-size: 0.95rem;">
-                        <li>Servidor MQTT público: <code>{{ config('proyecto.mqtt.host_publico') }}</code> (puerto 1883 plano o 8883 con TLS)</li>
+                        <li>Servidor MQTT público: <code>{{ config('proyecto.mqtt.host_publico') }}</code> (puerto <strong>{{ config('proyecto.mqtt.puerto_tls') }} con TLS</strong>)</li>
+                        <li>Usuario: <code>{{ config('proyecto.mqtt.gateway_user') }}</code> · Contraseña: <code>{{ config('proyecto.mqtt.gateway_password') }}</code></li>
                         <li>Topic raíz: <code>{{ config('proyecto.mqtt.topic_root') }}</code></li>
-                        <li>Solicita tu usuario personalizado escribiendo a <a href="mailto:{{ config('proyecto.contacto') }}">{{ config('proyecto.contacto') }}</a></li>
+                        <li>Uplink: activado · Downlink: <strong>siempre desactivado</strong></li>
                     </ul>
                 </div>
 

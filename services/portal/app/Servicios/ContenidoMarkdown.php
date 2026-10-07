@@ -46,6 +46,8 @@ class ContenidoMarkdown
             '{MQTT_PORT}' => (string) config('proyecto.mqtt.puerto_plano'),
             '{MQTT_TLS_PORT}' => (string) config('proyecto.mqtt.puerto_tls'),
             '{MQTT_TOPIC_ROOT}' => (string) config('proyecto.mqtt.topic_root'),
+            '{MQTT_GATEWAY_USER}' => (string) config('proyecto.mqtt.gateway_user'),
+            '{MQTT_GATEWAY_PASSWORD}' => (string) config('proyecto.mqtt.gateway_password'),
             '{MESHVIEW_URL}' => 'https://' . env('MESHVIEW_DOMAIN', 'meshview.' . $projectDomain),
             '{POTATOMESH_URL}' => 'https://potato.' . $projectDomain,
             '{TELEGRAM_BOT_USERNAME}' => (string) config('proyecto.bots.telegram_username'),

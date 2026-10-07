@@ -117,6 +117,14 @@ if [[ ${INIT_MODE} -eq 1 ]]; then
         fi
     done
 
+    # Asegurar usuario predeterminado para pasarelas públicas
+    if ! grep -q "^meshdev:" "${CRED_DIR}/passwd-gateways" 2>/dev/null; then
+        mosquitto_passwd -b "${CRED_DIR}/passwd-gateways" "meshdev" "large4cats" 2>/dev/null || sudo mosquitto_passwd -b "${CRED_DIR}/passwd-gateways" "meshdev" "large4cats" 2>/dev/null || true
+        set_ownership "${CRED_DIR}/passwd-gateways"
+        chmod 0640 "${CRED_DIR}/passwd-gateways" 2>/dev/null || sudo chmod 0640 "${CRED_DIR}/passwd-gateways"
+        echo "[OK] Configurado usuario público meshdev en ${CRED_DIR}/passwd-gateways"
+    fi
+
     if [[ ! -f "${CRED_DIR}/gateways.tsv" ]]; then
         cat <<EOF > "${CRED_DIR}/gateways.tsv.tmp"
 # NODE_ID	CREATED_AT	STATUS	NOTE
@@ -145,7 +153,7 @@ echo "[INFO] Generando ${CRED_DIR}/acl-gateways..."
     echo "# =============================================================================="
     for ch in "${CHANNELS[@]}"; do
         ch="$(echo "${ch}" | xargs)"
-        echo "pattern write ${MQTT_TOPIC_ROOT}/2/e/${ch}/%u"
+        echo "topic write ${MQTT_TOPIC_ROOT}/2/e/${ch}/#"
     done
     echo "topic write ${MQTT_TOPIC_ROOT}/2/map/#"
 } > "${TMP_PREFIX}.gateways"

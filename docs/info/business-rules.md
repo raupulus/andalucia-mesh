@@ -18,7 +18,7 @@
 | ID | Regla | Dónde |
 |---|---|---|
 | RN-01 | Nada de lo que llega por internet vuelve a la radio: el broker solo acepta subidas; ningún gateway ni cliente externo lee | [mosquitto](mosquitto/README.md) |
-| RN-02 | Cada gateway tiene usuario propio y solo publica en su propio topic y en los canales de `ALLOWED_CHANNELS`; el canal primario es siempre el índice 0; solo clave por defecto | [mosquitto](mosquitto/README.md) |
+| RN-02 | Acceso a gateways simplificado con credenciales compartidas públicas (`meshdev` / `large4cats`) de solo subida sin lectura en los canales de `ALLOWED_CHANNELS` y map reports por TLS 8883; canal 0 `SFNarrow` | [mosquitto](mosquitto/README.md) |
 | RN-03 | Solo se trata lo que el nodo permite subir (OK to MQTT). No hay exclusión de nodos ni feed filtrado: quien no quiere aparecer desactiva OK to MQTT | [10-legal-privacy](portal/10-legal-privacy.md) |
 | RN-04 | Nunca se publican mensajes directos (PKI ni texto con destinatario); solo difusión en canales de la lista | [ingesta](ingesta/06-decoded-stream.md), [chat-ws](chat-ws/README.md) |
 | RN-05 | El portal y la API nunca exponen coordenadas: solo provincia y recuentos | [portal](portal/README.md) |
@@ -79,6 +79,7 @@
 |---|---|---|---|
 | 2026-10-07 | Todas | Versión inicial | Responsable del proyecto |
 | 2026-10-07 | RN-08, OB-02, OB-03 | Canalización de sync-peers a la ingesta para deduplicación unificada y cobertura regional completa de alertas y métricas | Responsable del proyecto |
+| 2026-10-08 | RN-02 | Credenciales públicas compartidas (meshdev / large4cats) para gateways con permisos de solo subida a canales autorizados por TLS 8883 | Responsable del proyecto |
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

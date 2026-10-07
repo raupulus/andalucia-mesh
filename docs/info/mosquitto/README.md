@@ -29,8 +29,8 @@
 
 | Listener | Puerto | Alcance | Quién | Autenticación |
 |---|---|---|---|---|
-| Público | 1883 | Publicado en el host (IPv4 e IPv6) | Gateways | Usuario = id del gateway (`!a1b2c3d4`) + contraseña; `passwd-gateways` + `acl-gateways` |
-| Público TLS | 8883 | Nginx termina TLS → `127.0.0.1:1883` | Gateways con TLS | Igual que el 1883 |
+| Público | 1883 | Escucha local / interno (destino de stream TLS) | Gateways | Usuario = `meshdev` (o individual) + contraseña; `passwd-gateways` + `acl-gateways` |
+| Público TLS | 8883 | Nginx termina TLS → `127.0.0.1:1883` | Gateways con TLS (recomendado) | Igual que el 1883 con cifrado TLS |
 | Interno | 1884 | Solo red `mesh` (`172.30.0.1:1884`) | Servicios | Usuario por servicio; `passwd-servicios` + `acl-servicios` |
 | Local | 1885 | `127.0.0.1` del host | Host | Healthcheck, vigilancia, diagnóstico; anónimo, solo lectura (`acl-local`) |
 
@@ -40,7 +40,8 @@ Con `per_listener_settings true` cada listener tiene su archivo de contraseñas 
 
 | Usuario | Archivo | Permisos | Credenciales en |
 |---|---|---|---|
-| `!<id>` (cada gateway) | `passwd-gateways` | Escritura en `msh/EU_868/2/e/<canal>/<!id>` para cada canal de `ALLOWED_CHANNELS` y en `msh/EU_868/2/map/#`. **Sin lectura** | Las entrega el operador del proyecto |
+| `meshdev` (comunitario público) | `passwd-gateways` | Escritura en `msh/EU_868/2/e/<canal>/#` para cada canal de `ALLOWED_CHANNELS` y en `msh/EU_868/2/map/#`. **Sin lectura** | Públicas en el portal (`meshdev` / `large4cats`) |
+| `!<id>` (individuales opcionales) | `passwd-gateways` | Escritura en `msh/EU_868/2/e/<canal>/#` y map reports. **Sin lectura** | Entregadas por el operador si se solicitan |
 | `svc-meshview` | `passwd-servicios` | Lectura `msh/EU_868/#` | `/srv/meshview/.env` (variable de `../meshview/README.md`) |
 | `svc-potato` | `passwd-servicios` | Lectura `msh/EU_868/#` | `/srv/adaptador-potato/.env` |
 | `svc-ingest` | `passwd-servicios` | Lectura `msh/EU_868/#`; escritura `snm/v1/decoded/#` | `/srv/ingesta/.env` |
@@ -67,21 +68,21 @@ Se generan desde `MQTT_TOPIC_ROOT`, `MQTT_TOPIC_PREFIX`, `ALLOWED_CHANNELS` (`/s
 
 ```text
 # credenciales/acl-gateways — generado, no editar
-pattern write msh/EU_868/2/e/SFNarrow/%u
-pattern write msh/EU_868/2/e/Iberia/%u
-pattern write msh/EU_868/2/e/Andalucia/%u
-pattern write msh/EU_868/2/e/Cadiz/%u
-pattern write msh/EU_868/2/e/Huelva/%u
-pattern write msh/EU_868/2/e/Almeria/%u
-pattern write msh/EU_868/2/e/Granada/%u
-pattern write msh/EU_868/2/e/Jaen/%u
-pattern write msh/EU_868/2/e/Sevilla/%u
-pattern write msh/EU_868/2/e/Cordoba/%u
-pattern write msh/EU_868/2/e/Malaga/%u
-pattern write msh/EU_868/2/e/Ceuta/%u
-pattern write msh/EU_868/2/e/Melilla/%u
-pattern write msh/EU_868/2/e/sos/%u
-pattern write msh/EU_868/2/map/#
+topic write msh/EU_868/2/e/SFNarrow/#
+topic write msh/EU_868/2/e/Iberia/#
+topic write msh/EU_868/2/e/Andalucia/#
+topic write msh/EU_868/2/e/Cadiz/#
+topic write msh/EU_868/2/e/Huelva/#
+topic write msh/EU_868/2/e/Almeria/#
+topic write msh/EU_868/2/e/Granada/#
+topic write msh/EU_868/2/e/Jaen/#
+topic write msh/EU_868/2/e/Sevilla/#
+topic write msh/EU_868/2/e/Cordoba/#
+topic write msh/EU_868/2/e/Malaga/#
+topic write msh/EU_868/2/e/Ceuta/#
+topic write msh/EU_868/2/e/Melilla/#
+topic write msh/EU_868/2/e/sos/#
+topic write msh/EU_868/2/map/#
 
 # credenciales/acl-servicios — generado, no editar
 user svc-meshview
@@ -280,4 +281,4 @@ Servicio nativo en el host: `mosquitto.service` (paquetes Debian `mosquitto` y `
 9. **Pruebas de ACL** con gateways temporales `!ffff0001`/`!ffff0002` y mensajes vacíos.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

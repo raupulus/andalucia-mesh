@@ -123,21 +123,21 @@ fi
 rm -f "${SUB_OUT}"
 
 # ------------------------------------------------------------------------------
-# TC-02: Intento de suplantación de otro gateway (cross-gateway publish)
+# TC-02: Publicación del usuario público compartido meshdev en canal autorizado
 # ------------------------------------------------------------------------------
-log_test "TC-02" "${GW1} intenta publicar en el topic de ${GW2} (msh/EU_868/2/e/SFNarrow/${GW2})"
+log_test "TC-02" "Usuario público meshdev publica en canal autorizado (msh/EU_868/2/e/SFNarrow/!gwpublic)"
 SUB_OUT="/tmp/snm_sub_tc02_$$"
 rm -f "${SUB_OUT}"
-mosquitto_sub -h 127.0.0.1 -p 1885 -t "msh/EU_868/2/e/SFNarrow/${GW2}" -C 1 -W 2 > "${SUB_OUT}" 2>/dev/null &
+mosquitto_sub -h 127.0.0.1 -p 1885 -t "msh/EU_868/2/e/SFNarrow/!gwpublic" -C 1 -W 3 > "${SUB_OUT}" 2>/dev/null &
 SUB_PID=$!
 sleep 0.5
-mosquitto_pub -h 127.0.0.1 -p 1883 -u "${GW1}" -P "${GW_PASS}" -t "msh/EU_868/2/e/SFNarrow/${GW2}" -m "suplantacion" 2>/dev/null || true
+mosquitto_pub -h 127.0.0.1 -p 1883 -u "meshdev" -P "large4cats" -t "msh/EU_868/2/e/SFNarrow/!gwpublic" -m "meshdev_payload" 2>/dev/null || true
 wait ${SUB_PID} 2>/dev/null || true
 
-if [[ -f "${SUB_OUT}" ]] && grep -q "suplantacion" "${SUB_OUT}"; then
-    fail "Vulnerabilidad: ${GW1} pudo publicar en el topic de ${GW2}."
-else
+if [[ -f "${SUB_OUT}" ]] && grep -q "meshdev_payload" "${SUB_OUT}"; then
     pass
+else
+    fail "El mensaje del usuario público meshdev no fue recibido por el observador local en 1885."
 fi
 rm -f "${SUB_OUT}"
 

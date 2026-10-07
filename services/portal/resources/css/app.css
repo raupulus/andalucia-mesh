@@ -454,3 +454,32 @@ p.lead {
   box-shadow: var(--sombra-1);
 }
 
+/* ==============================================================================
+ * Enlace accesible para saltar al contenido principal
+ * Oculto fuera de pantalla por defecto para no interferir en el diseño visual;
+ * visible con foco de teclado para usuarios de tecnologías de asistencia.
+ * ============================================================================== */
+.salto-accesible {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  z-index: 9999;
+  padding: 0.6rem 1.2rem;
+  background-color: var(--color-enlace);
+  color: #FFFFFF !important;
+  font-family: var(--fuente-inter);
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: var(--radio-md);
+  box-shadow: var(--sombra-3);
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+
+.salto-accesible:focus {
+  top: 1rem;
+  left: 1rem;
+  outline: 3px solid var(--color-acento);
+  outline-offset: 2px;
+}
+

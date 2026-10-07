@@ -11,8 +11,8 @@ Que un operador con un nodo con internet empiece a subir datos preguntando solo 
 ### Pasos
 
 1. **Requisito:** nodo con WiFi o Ethernet (o proxy MQTT por la app del móvil) y configurado según `/configura-tu-nodo`.
-2. **Pide tu usuario:** correo a `PROJECT_CONTACT` con el id del nodo (`!xxxxxxxx`) y la zona aproximada. Recibes usuario (tu id) y contraseña propios.
-3. **Aplica los ajustes** de la tabla.
+2. **Conexión directa:** aplica las credenciales comunitarias públicas de solo subida (`meshdev` / `large4cats`) en la app de tu nodo.
+3. **Aplica los ajustes** de la tabla de abajo.
 4. **Comprueba:** en unos minutos tu nodo aparece en MeshView y PotatoMesh; puedes verlo en `/revisa-tu-nodo`.
 
 ### Ajustes
@@ -21,11 +21,11 @@ Que un operador con un nodo con internet empiece a subir datos preguntando solo 
 |---|---|---|
 | MQTT activado | Sí | Fijo |
 | Servidor | `mqtt.${PROJECT_DOMAIN}` | `config/proyecto.php` → `mqtt.host_publico` |
-| Puerto | `1883` (o `8883` con TLS) | Fijo (`../mosquitto/README.md`) |
-| Usuario / contraseña | Los tuyos (`!<id>` / la enviada) | — |
+| Puerto | `8883` (con TLS) | Fijo (`../mosquitto/README.md`) |
+| Usuario / contraseña | `meshdev` / `large4cats` | Credencial comunitaria abierta de solo subida |
 | Cifrado | Activado | Fijo |
 | JSON | Desactivado | Fijo |
-| TLS | Opcional (puerto 8883) | Fijo |
+| TLS | Activado (puerto 8883) | Fijo |
 | Root topic | `{MQTT_TOPIC_ROOT}` (`msh/EU_868`), **escrito a mano**: con un servidor propio el firmware no añade la región | `MQTT_TOPIC_ROOT` |
 | Map reporting | Activado | Fijo |
 | Canales: uplink | Activado en el canal primario `{PRIMARY_CHANNEL}` y en los canales de la lista que use el nodo | `PRIMARY_CHANNEL`, `ALLOWED_CHANNELS` |
@@ -64,4 +64,4 @@ Una línea sobre qué se hace con los datos y enlace a `/legal/privacidad`; "si 
 4. **Dado** un lector de pantalla, **cuando** llega al ajuste de downlink, **entonces** oye "Desactivado en todos, importante" y no solo un color.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

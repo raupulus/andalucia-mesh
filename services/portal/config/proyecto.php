@@ -18,15 +18,15 @@ return [
     'contacto' => env('PROJECT_CONTACT', 'public@raupulus.dev'),
     'zona_horaria' => env('TZ', 'Europe/Madrid'),
 
-    // Parámetros de radio LoRa
+    // Parámetros de radio LoRa (SFNarrow oficial)
     'lora' => [
         'region' => env('LORA_REGION', 'EU_868'),
-        'bandwidth' => (float) env('LORA_BANDWIDTH', 62.5),
+        'bandwidth' => (float) env('LORA_BANDWIDTH', 62),
         'bandwidth_khz' => (string) env('LORA_BANDWIDTH_KHZ', '62.5'),
         'spread_factor' => (int) env('LORA_SPREAD_FACTOR', 7),
         'coding_rate' => (int) env('LORA_CODING_RATE', 5),
-        'frequency_slot' => (int) env('LORA_FREQUENCY_SLOT', 20),
-        'frequency_mhz' => (string) env('LORA_FREQUENCY_MHZ', '869.525'),
+        'frequency_slot' => (int) env('LORA_FREQUENCY_SLOT', 4),
+        'frequency_mhz' => (string) env('LORA_FREQUENCY_MHZ', '869.618'),
         'hop_limit' => (int) env('LORA_HOP_LIMIT', 3),
         'preambulo' => (int) env('INGESTA_LORA_PREAMBULO', 16),
         'infra_roles' => array_filter(array_map('trim', explode(',', env('INFRA_ROLES', 'ROUTER,ROUTER_LATE,REPEATER')))),
@@ -39,12 +39,14 @@ return [
         'clave_defecto' => env('CHANNEL_KEY_DEFAULT', 'AQ=='),
     ],
 
-    // Conexión pública a Mosquitto
+    // Conexión pública a Mosquitto para gateways
     'mqtt' => [
         'host_publico' => 'mqtt.' . $projectDomain,
         'puerto_plano' => 1883,
         'puerto_tls' => 8883,
         'topic_root' => env('MQTT_TOPIC_ROOT', 'msh/EU_868'),
+        'gateway_user' => env('MQTT_GATEWAY_USER', 'meshdev'),
+        'gateway_password' => env('MQTT_GATEWAY_PASSWORD', 'large4cats'),
     ],
 
     // Configuración del Mapa Provincial

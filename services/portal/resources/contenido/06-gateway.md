@@ -33,29 +33,27 @@ Un gateway es un nodo con internet que sube a nuestro servidor lo que oye por ra
 
 - Un nodo con WiFi o Ethernet, o que pueda usar la app del móvil como puente para MQTT.
 - Que esté configurado según la guía [Configura tu nodo](/configura-tu-nodo).
-- Un usuario y una contraseña propios. Te los damos nosotros.
+- Conexión directa: puedes conectar tu pasarela de inmediato usando las credenciales comunitarias abiertas de solo subida.
 
 ### Pasos
 
-1. **Pide tu usuario.** Escribe a {PROJECT_CONTACT} con el asunto "Alta de gateway", el id de tu nodo (`!xxxxxxxx`; lo ves en la app del nodo) y tu zona aproximada (pueblo o comarca).
-2. **Recibe tus credenciales.** Tu usuario es el id de tu nodo y la contraseña es solo para ti. No la compartas.
-3. **Aplica los ajustes** de la tabla de abajo.
-4. **Comprueba.** En unos minutos tu nodo aparece en MeshView y PotatoMesh.
-
-**Botón primario:** "Pedir mi usuario" → `mailto:{PROJECT_CONTACT}?subject=Alta%20de%20gateway`
+1. **Abre los ajustes de MQTT** en la app de Meshtastic de tu nodo (`Module Configuration → MQTT`).
+2. **Aplica los parámetros** de la tabla de abajo.
+3. **Verifica.** En pocos minutos tu nodo aparecerá subiendo paquetes en MeshView y PotatoMesh.
 
 ### Ajustes
 
 | Ajuste | Valor |
 |---|---|
 | MQTT activado | Sí |
-| Servidor | `mqtt.{PROJECT_DOMAIN}` [Copiar] |
-| Puerto | `1883`, o `8883` con TLS |
-| Usuario / contraseña | Los tuyos: `!<id>` y la que te enviamos |
+| Servidor (Address) | `mqtt.{PROJECT_DOMAIN}` |
+| Puerto | `8883` (con TLS obligatorio) |
+| Usuario (Username) | `{MQTT_GATEWAY_USER}` |
+| Contraseña (Password) | `{MQTT_GATEWAY_PASSWORD}` |
 | Cifrado | Activado |
 | JSON | Desactivado |
-| TLS | Opcional |
-| Root topic | `{MQTT_TOPIC_ROOT}` [Copiar] |
+| TLS | Activado |
+| Root topic | `{MQTT_TOPIC_ROOT}` |
 | Map reporting | Activado |
 | Uplink | Activado en `{PRIMARY_CHANNEL}` y en los canales de la lista que uses |
 | Downlink | Desactivado en todos los canales · chip `aviso` "Siempre desactivado" |
@@ -75,27 +73,26 @@ Todos son canales públicos: sus mensajes se ven en PotatoMesh y MeshView y los 
 - **Cifrado activado:** los paquetes suben tal y como viajan por la radio. Solo desciframos los canales que usan la clave pública por defecto.
 - **JSON desactivado:** el firmware actual ya no lo usa y el servidor no lo acepta.
 - **Root topic `{MQTT_TOPIC_ROOT}`:** escríbelo a mano. Con un servidor que no es el de fábrica, el firmware no añade la región por su cuenta.
-- **TLS opcional:** usa el puerto `8883` si tu nodo lo admite; algunos dan problemas con TLS y por eso el `1883` sigue abierto.
+- **TLS obligatorio (puerto 8883):** toda la comunicación con el broker se realiza cifrada de extremo a extremo para evitar espionajes y manipulaciones en tránsito.
 - **Map reporting:** tu nodo publica de vez en cuando su información y su posición para los mapas.
 - **OK to MQTT:** marca tus paquetes como "se pueden subir". Los gateways solo suben los paquetes de los nodos que lo tienen activado.
 - **Ignore MQTT:** tu nodo descarta los paquetes que otros han hecho pasar por internet, así no los repite por radio.
 
-### Usuario propio y sin downlink
+### Acceso seguro y sin downlink
 
-- Con tu propio usuario, nadie puede publicar en nombre de tu nodo, y si algo va mal sabemos de qué gateway viene.
-- El servidor solo acepta subidas: ningún gateway puede recibir nada de él. Aunque actives el downlink por error, no te llegará nada que tu nodo pueda emitir por radio. Aun así, déjalo desactivado.
+- El servidor solo acepta subidas: ningún gateway puede recibir nada de él. Aunque actives el downlink por error, no te llegará nada que tu nodo pueda emitir por radio. Aun así, déjalo siempre desactivado.
 
 ### Preguntas frecuentes
 
-**Mi nodo no aparece.** Revisa que el root topic sea exactamente `{MQTT_TOPIC_ROOT}`, que el uplink esté activado y que los nombres de tus canales coincidan con la lista, mayúsculas incluidas. Si sigue sin aparecer, escríbenos con el id de tu nodo y lo miramos en los registros del servidor.
+**Mi nodo no aparece.** Revisa que el root topic sea exactamente `{MQTT_TOPIC_ROOT}`, que el puerto sea `8883` con TLS, que el uplink esté activado y que los nombres de tus canales coincidan con la lista, mayúsculas incluidas. Si sigue sin aparecer, consúltanos en {PROJECT_CONTACT}.
 
-**¿Puedo conectarme con un usuario compartido?** No. Cada gateway tiene su propio usuario; las credenciales compartidas desaparecen al terminar la migración.
+**¿Puedo conectarme con las credenciales públicas?** Sí, las credenciales `{MQTT_GATEWAY_USER}` / `{MQTT_GATEWAY_PASSWORD}` están abiertas a toda la comunidad con permisos estrictos de solo subida a canales autorizados.
 
-**¿Puedo subir otros canales?** Solo los de la lista. Si crees que falta alguno, escríbenos.
+**¿Puedo subir otros canales?** Solo los de la lista autorizada. Si crees que falta alguno para la región, escríbenos.
 
 **¿Qué pasa si mi gateway se apaga?** Nada grave. Si deja de publicar un rato, el sistema abre una alerta de infraestructura que se cierra sola cuando vuelve.
 
-**Quiero dejar de subir datos.** Desactiva MQTT en tu nodo y avísanos para dar de baja tu usuario.
+**Quiero dejar de subir datos.** Desactiva el módulo MQTT en la app de tu nodo.
 
 ### Qué hacemos con tus datos
 

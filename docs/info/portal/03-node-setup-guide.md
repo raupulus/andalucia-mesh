@@ -81,4 +81,4 @@ Banderas de posición desactivadas, posición inteligente desactivada, precisió
 4. **Dado** un enlace `/configura-tu-nodo#intervalos`, **cuando** se abre, **entonces** la página se posiciona en la tabla de intervalos.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08
