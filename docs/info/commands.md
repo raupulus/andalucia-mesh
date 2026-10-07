@@ -19,6 +19,10 @@ Catálogo de comandos, scripts de compilación, ejecución, pruebas y tareas ope
 | `infrastructure/postgresql/check-db.sh` | Verifica el estado del clúster PostgreSQL y bases de datos | Bash, psql, pg_isready |
 | `infrastructure/nginx/install.sh` | Instala sitios, snippets y streams en Nginx nativo | Bash, root / sudo, nginx |
 | `infrastructure/nginx/certbot-setup.sh [opciones]` | Emite certificados Let's Encrypt mediante reto webroot | Bash, root / sudo, certbot |
+| `integrations/mosquitto/install.sh` | Instala Mosquitto nativo, inicializa credenciales y configura listeners | Bash, root / sudo, mosquitto |
+| `integrations/mosquitto/tools/generate-acl.sh [--init]` | Generador atómico de ACLs para gateways, microservicios y diagnóstico local | Bash |
+| `integrations/mosquitto/tools/mqtt-users.sh <comando>` | Gestión de credenciales para gateways Meshtastic y microservicios internos | Bash, mosquitto_passwd |
+| `integrations/mosquitto/tools/test-acl.sh` | Batería de pruebas automatizadas de ACL, bloqueo de downlink y límites | Bash, mosquitto-clients |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-07

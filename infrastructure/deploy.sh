@@ -93,17 +93,18 @@ deploy_native() {
     local name="$1"
     case "${name}" in
         mosquitto)
-            log "[INFO] Comprobando configuración de Mosquitto nativo..."
-            if command -v mosquitto >/dev/null 2>&1; then
-                if [[ -f "/etc/mosquitto/conf.d/snm.conf" ]]; then
-                    mosquitto -c /etc/mosquitto/conf.d/snm.conf -t
-                fi
+            log "[INFO] Comprobando y actualizando configuración de Mosquitto nativo..."
+            if ! command -v mosquitto >/dev/null 2>&1 || [[ ! -f "/etc/mosquitto/conf.d/snm.conf" ]]; then
+                log "[INFO] Ejecutando instalador nativo de Mosquitto..."
+                "${BASE_DIR}/integrations/mosquitto/install.sh"
+            else
+                "${BASE_DIR}/integrations/mosquitto/tools/generate-acl.sh"
+                sudo cp -f "${BASE_DIR}/integrations/mosquitto/config/mosquitto.conf" /etc/mosquitto/conf.d/snm.conf
+                sudo mosquitto -c /etc/mosquitto/conf.d/snm.conf -t 2>/dev/null || mosquitto -c /etc/mosquitto/conf.d/snm.conf -t
                 if command -v systemctl >/dev/null 2>&1; then
                     sudo systemctl reload mosquitto 2>/dev/null || systemctl reload mosquitto 2>/dev/null || true
                     log "[OK] Mosquitto recargado correctamente."
                 fi
-            else
-                log "[AVISO] mosquitto no instalado en este entorno."
             fi
             ;;
         postgresql)
