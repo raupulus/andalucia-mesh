@@ -42,7 +42,7 @@ internet ─1883─────────────────────�
 | Mosquitto (TLS) | `mqtt.${PROJECT_DOMAIN}:8883` | `127.0.0.1:1883` | — (nativo) |
 
 > [!NOTE]
-> **Compatibilidad con Cloudflare (TR-01):** El certificado gratuito de Cloudflare solo cubre un nivel (`*.dominio.tld`). Si `meshview` se publica con proxy naranja y `${PROJECT_DOMAIN}` es un subdominio (ej. `mesh.dominio.tld`), `MESHVIEW_DOMAIN` debe configurarse en un solo nivel (ej. `meshview.dominio.tld`) para evitar errores SSL.
+> **Compatibilidad con Cloudflare (TR-01 y TR-05):** El certificado gratuito de Cloudflare solo cubre un nivel (`*.dominio.tld`). Si `meshview` se publica con proxy naranja y `${PROJECT_DOMAIN}` es un subdominio (ej. `mesh.dominio.tld`), `MESHVIEW_DOMAIN` debe configurarse en un solo nivel (ej. `meshview.dominio.tld`) para evitar errores SSL. Asimismo, debido a que Cloudflare puede conectar al origen por HTTP (puerto 80), los bloques de Nginx para el puerto 80 proxifican directamente a los servicios internos en lugar de forzar redirección 301 incondicional, evitando bucles infinitos de redirección (`ERR_TOO_MANY_REDIRECTS`).
 
 ### Archivos en el repositorio: `infrastructure/nginx/`
 
