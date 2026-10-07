@@ -394,6 +394,39 @@ pre code {
   color: var(--color-texto-2);
 }
 
+/* ==============================================================================
+ * Borde inferior de navbar: Bandera de Andalucía (verde, blanca, verde)
+ * ============================================================================== */
+.borde-bandera-andalucia {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  line-height: 0;
+  user-select: none;
+}
+
+.borde-bandera-andalucia span {
+  display: block;
+  height: 1.5px;
+  width: 100%;
+}
+
+.borde-bandera-andalucia .linea-verde {
+  background-color: #007A33;
+}
+
+.borde-bandera-andalucia .linea-blanca {
+  background-color: #FFFFFF;
+}
+
+[data-theme="dark"] .borde-bandera-andalucia .linea-verde {
+  background-color: #00A850;
+}
+
+[data-theme="dark"] .borde-bandera-andalucia .linea-blanca {
+  background-color: #FFFFFF;
+}
+
 .prose ol,
 .prose ul {
   padding-left: 1.5rem;

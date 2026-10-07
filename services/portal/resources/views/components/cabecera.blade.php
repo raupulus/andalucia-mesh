@@ -1,6 +1,6 @@
 @props(['activa' => null])
 
-<header class="cabecera" style="background-color: var(--color-superficie); border-bottom: 1px solid var(--color-borde); position: sticky; top: 0; z-index: 100;">
+<header class="cabecera" style="background-color: var(--color-superficie); position: sticky; top: 0; z-index: 100;">
     <div class="contenedor" style="display: flex; align-items: center; justify-content: space-between; height: 4.5rem;">
         <!-- Logotipo e Identidad -->
         <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--color-texto);">
@@ -37,7 +37,7 @@
     </div>
 
     <!-- Menú Desplegable Móvil -->
-    <div id="menu-movil" style="display: none; background-color: var(--color-superficie); border-bottom: 1px solid var(--color-borde); padding: 1rem 1.25rem;">
+    <div id="menu-movil" style="display: none; background-color: var(--color-superficie); padding: 1rem 1.25rem;">
         <nav aria-label="Navegación móvil" style="display: flex; flex-direction: column; gap: 0.75rem;">
             @foreach(config('proyecto.navegacion') as $item)
                 <a href="{{ $item['url'] }}" style="text-decoration: none; font-size: 1rem; font-weight: 500; color: var(--color-texto); padding: 0.5rem 0;">
@@ -45,5 +45,12 @@
                 </a>
             @endforeach
         </nav>
+    </div>
+
+    <!-- Borde inferior con la bandera de Andalucía (verde, blanca, verde) -->
+    <div class="borde-bandera-andalucia" aria-hidden="true">
+        <span class="linea-verde"></span>
+        <span class="linea-blanca"></span>
+        <span class="linea-verde"></span>
     </div>
 </header>

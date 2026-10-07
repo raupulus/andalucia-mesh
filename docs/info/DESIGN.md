@@ -218,7 +218,7 @@ Alto 40 px, radio 8 px. Un solo botón primario por pantalla.
 
 ### Cabecera y pie
 
-- Cabecera: `fondo`, logo propio a la izquierda, navegación en `texto` y conmutador claro/oscuro a la derecha; en móvil, menú desplegable. Borde inferior 1 px `borde`.
+- Cabecera: `fondo`, logo propio a la izquierda, navegación en `texto` y conmutador claro/oscuro a la derecha; en móvil, menú desplegable. Borde inferior rematado con las tres líneas representativas de la bandera de Andalucía (verde, blanca, verde finitas de 1,5 px).
 - Pie: `superficie-sutil`, texto y enlaces en `texto-2` (subrayados, no verdes); enlaces legales, aviso de proyecto independiente y línea de autoría "Un proyecto de Raúl Caro Pastorino (@raupulus)".
 
 ## 10. Prohibido (para que nadie se pase)

@@ -93,7 +93,7 @@ return [
             'titulo' => 'MeshView',
             'descripcion' => 'Visor técnico detallado con mapa topológico, nodos, enlaces y métricas de paquetes en directo.',
             'url' => 'https://' . env('MESHVIEW_DOMAIN', 'meshview.' . $projectDomain),
-            'imagen' => '/img/servicios/meshview.svg',
+            'imagen' => '/img/servicios/meshview.webp',
             'servicio_clave' => 'meshview',
         ],
         [
@@ -101,7 +101,7 @@ return [
             'titulo' => 'PotatoMesh',
             'descripcion' => 'Mapa web ligero y ágil optimizado para dispositivos móviles y consulta rápida en exteriores.',
             'url' => 'https://potato.' . $projectDomain,
-            'imagen' => '/img/servicios/potatomesh.svg',
+            'imagen' => '/img/servicios/potatomesh.webp',
             'servicio_clave' => 'potatomesh',
         ],
         [
@@ -109,7 +109,7 @@ return [
             'titulo' => 'Rankings y Actividad',
             'descripcion' => 'Estadísticas de consumo del espectro, nodos en riesgo, calidad de enlaces directos y mix de tráfico.',
             'url' => '/rankings',
-            'imagen' => '/img/servicios/rankings.svg',
+            'imagen' => '/img/servicios/rankings.webp',
             'servicio_clave' => null,
         ],
     ],
