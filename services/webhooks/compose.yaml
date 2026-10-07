@@ -20,10 +20,7 @@ services:
       - no-new-privileges:true
     volumes:
       - alertas-socket:/run/snm:ro
-      - type: bind
-        source: ${WEBHOOKS_CONFIG_FILE:-./config/webhooks.yaml}
-        target: /app/config/webhooks.yaml
-        read_only: true
+      - ${WEBHOOKS_CONFIG_HOST:-./config/webhooks.yaml}:/app/config/webhooks.yaml:ro
     networks:
       - mesh
     healthcheck:
