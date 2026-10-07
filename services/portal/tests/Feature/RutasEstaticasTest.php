@@ -1,0 +1,81 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature;
+
+use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\TestCase;
+
+class RutasEstaticasTest extends TestCase
+{
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function proveedorRutasInstitucionales(): array
+    {
+        return [
+            'proyecto' => ['/proyecto'],
+            'quien-lo-impulsa' => ['/quien-lo-impulsa'],
+            'como-se-gestiona' => ['/como-se-gestiona'],
+            'configura-tu-nodo' => ['/configura-tu-nodo'],
+            'conecta-tu-gateway' => ['/conecta-tu-gateway'],
+            'bots' => ['/bots'],
+            'firmware' => ['/firmware'],
+            'api' => ['/api'],
+            'aviso-legal' => ['/legal/aviso-legal'],
+            'privacidad' => ['/legal/privacidad'],
+            'cookies' => ['/legal/cookies'],
+        ];
+    }
+
+    #[DataProvider('proveedorRutasInstitucionales')]
+    public function test_rutas_institucionales_devuelven_200_y_cero_cookies(string $ruta): void
+    {
+        $response = $this->get($ruta);
+
+        $response->assertStatus(200);
+        $response->assertHeaderMissing('Set-Cookie');
+
+        // Metadatos de SEO y Open Graph
+        $response->assertSee('<meta property="og:title"', false);
+        $response->assertSee('<meta property="og:description"', false);
+        $response->assertSee('<meta property="og:image"', false);
+        $response->assertSee('<meta name="twitter:card"', false);
+        $response->assertSee('lang="es"', false);
+    }
+
+    public function test_quien_lo_impulsa_muestra_bloque_de_autoria(): void
+    {
+        $response = $this->get('/quien-lo-impulsa');
+
+        $response->assertStatus(200);
+        $response->assertSee(config('autoria.nick'));
+        $response->assertSee(config('autoria.email'));
+    }
+
+    public function test_sitemap_xml_cumple_estructura(): void
+    {
+        $response = $this->get('/sitemap.xml');
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/xml; charset=utf-8');
+        $response->assertSee('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', false);
+        $response->assertSee('/configura-tu-nodo', false);
+        $response->assertSee('/legal/privacidad', false);
+        $response->assertHeaderMissing('Set-Cookie');
+    }
+
+    public function test_robots_txt_bloquea_admin_y_api(): void
+    {
+        $response = $this->get('/robots.txt');
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'text/plain; charset=utf-8');
+        $response->assertSee("User-agent: *", false);
+        $response->assertSee("Disallow: /admin", false);
+        $response->assertSee("Disallow: /api/v1", false);
+        $response->assertSee("Sitemap: https://" . config('proyecto.dominio') . "/sitemap.xml", false);
+        $response->assertHeaderMissing('Set-Cookie');
+    }
+}

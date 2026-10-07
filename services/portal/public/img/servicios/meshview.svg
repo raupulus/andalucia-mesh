@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" width="320" height="180" fill="none">
+  <rect width="320" height="180" fill="none"/>
+  <!-- Conexiones de malla -->
+  <line x1="80" y1="90" x2="160" y2="45" stroke="#2C2D3C" stroke-width="2" stroke-dasharray="4 4" opacity="0.4"/>
+  <line x1="80" y1="90" x2="140" y2="135" stroke="#2C2D3C" stroke-width="2" stroke-dasharray="4 4" opacity="0.4"/>
+  <line x1="160" y1="45" x2="240" y2="90" stroke="#2C2D3C" stroke-width="2" stroke-dasharray="4 4" opacity="0.4"/>
+  <line x1="140" y1="135" x2="240" y2="90" stroke="#2C2D3C" stroke-width="2" stroke-dasharray="4 4" opacity="0.4"/>
+  <line x1="160" y1="45" x2="140" y2="135" stroke="#67EA94" stroke-width="2.5"/>
+  <!-- Nodos -->
+  <circle cx="80" cy="90" r="14" fill="#2C2D3C"/>
+  <circle cx="80" cy="90" r="7" fill="#67EA94"/>
+  <circle cx="160" cy="45" r="16" fill="#2C2D3C"/>
+  <circle cx="160" cy="45" r="8" fill="#FFFFFF"/>
+  <circle cx="140" cy="135" r="16" fill="#2C2D3C"/>
+  <circle cx="140" cy="135" r="8" fill="#67EA94"/>
+  <circle cx="240" cy="90" r="14" fill="#2C2D3C"/>
+  <circle cx="240" cy="90" r="7" fill="#FFFFFF"/>
+  <!-- Ondas RF -->
+  <circle cx="160" cy="45" r="28" stroke="#67EA94" stroke-width="1.5" opacity="0.6"/>
+  <circle cx="140" cy="135" r="28" stroke="#67EA94" stroke-width="1.5" opacity="0.6"/>
+</svg>

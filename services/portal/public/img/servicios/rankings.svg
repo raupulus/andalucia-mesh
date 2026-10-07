@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" width="320" height="180" fill="none">
+  <rect width="320" height="180" fill="none"/>
+  <!-- Barras de ranking / analítica -->
+  <rect x="90" y="100" width="24" height="45" rx="4" fill="#2C2D3C" opacity="0.8"/>
+  <rect x="125" y="70" width="24" height="75" rx="4" fill="#2C2D3C" opacity="0.8"/>
+  <rect x="160" y="45" width="24" height="100" rx="4" fill="#67EA94"/>
+  <rect x="195" y="85" width="24" height="60" rx="4" fill="#2C2D3C" opacity="0.8"/>
+  <rect x="230" y="115" width="24" height="30" rx="4" fill="#2C2D3C" opacity="0.8"/>
+  <!-- Línea base -->
+  <line x1="75" y1="145" x2="265" y2="145" stroke="#2C2D3C" stroke-width="2" opacity="0.3"/>
+</svg>

@@ -1,0 +1,390 @@
+/* ==============================================================================
+ * app.css (services/portal/resources/css/app.css)
+ *
+ * Sistema visual oficial de Andalucía Mesh según docs/info/DESIGN.md.
+ * Estética Material sobria y oxigenada, contraste AAA WCAG 2.1 en ambos modos.
+ * ============================================================================== */
+
+:root {
+  /* Superficies */
+  --color-fondo: #FFFFFF;
+  --color-superficie: #FFFFFF;
+  --color-superficie-elevada: #FFFFFF;
+  --color-superficie-sutil: #F7F8FA;
+  --color-borde: #E0E1EB;
+  --color-borde-control: #8D8EA6;
+
+  /* Texto */
+  --color-texto: #2C2D3C;
+  --color-texto-2: #515267;
+  --color-texto-3: #6E708C;
+  --color-enlace: #15612F;
+  --color-foco: #15612F;
+
+  /* Acento */
+  --color-acento: #67EA94;
+  --color-sobre-acento: #2C2D3C;
+  --color-acento-suave: #E9FCEF;
+
+  /* Estados y severidades (chips) */
+  --color-critico-texto: #9B1E15;
+  --color-critico-fondo: #FDECEC;
+  --color-aviso-texto: #794700;
+  --color-aviso-fondo: #FEF4E2;
+  --color-info-texto: #18509B;
+  --color-info-fondo: #EAF2FD;
+  --color-correcto-texto: #15612F;
+  --color-correcto-fondo: #E9FCEF;
+
+  /* Mapa provincial */
+  --mapa-verde: #82EEA7;
+  --mapa-naranja: #F59E0B;
+  --mapa-rojo: #E5484D;
+  --mapa-nodata: #E0E1EB;
+  --mapa-trazo-provincia: #FFFFFF;
+  --mapa-contorno-andalucia: #515267;
+  --mapa-burbuja-fondo: #FFFFFF;
+  --mapa-burbuja-borde: #2C2D3C;
+  --mapa-burbuja-texto: #2C2D3C;
+  --mapa-burbuja-cadiz-borde: #15612F;
+
+  /* Elevaciones */
+  --sombra-1: 0 1px 3px rgba(44, 45, 60, 0.08);
+  --sombra-2: 0 4px 12px rgba(44, 45, 60, 0.12);
+  --sombra-3: 0 8px 24px rgba(44, 45, 60, 0.16);
+
+  /* Radios */
+  --radio-sm: 4px;
+  --radio-md: 8px;
+  --radio-lg: 12px;
+  --radio-full: 9999px;
+
+  /* Tipografía */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+[data-theme="dark"] {
+  /* Superficies */
+  --color-fondo: #1F2029;
+  --color-superficie: #2C2D3C;
+  --color-superficie-elevada: #363748;
+  --color-superficie-sutil: #17181F;
+  --color-borde: #3D3E4D;
+  --color-borde-control: #7E819B;
+
+  /* Texto */
+  --color-texto: #F0F0F5;
+  --color-texto-2: #C7C8D4;
+  --color-texto-3: #9FA0B4;
+  --color-enlace: #67EA94;
+  --color-foco: #67EA94;
+
+  /* Acento */
+  --color-acento: #67EA94;
+  --color-sobre-acento: #2C2D3C;
+  --color-acento-suave: #1C3A28;
+
+  /* Estados y severidades */
+  --color-critico-texto: #FFB4AE;
+  --color-critico-fondo: #4A2326;
+  --color-aviso-texto: #FFD48A;
+  --color-aviso-fondo: #47360F;
+  --color-info-texto: #A9C9FF;
+  --color-info-fondo: #1E3150;
+  --color-correcto-texto: #9CF1BA;
+  --color-correcto-fondo: #1C3A28;
+
+  /* Mapa provincial */
+  --mapa-verde: #82EEA7;
+  --mapa-naranja: #F59E0B;
+  --mapa-rojo: #E5484D;
+  --mapa-nodata: #3D3E4D;
+  --mapa-trazo-provincia: #1F2029;
+  --mapa-contorno-andalucia: #C7C8D4;
+  --mapa-burbuja-fondo: #1F2029;
+  --mapa-burbuja-borde: #F0F0F5;
+  --mapa-burbuja-texto: #F0F0F5;
+  --mapa-burbuja-cadiz-borde: #67EA94;
+
+  /* Elevaciones */
+  --sombra-1: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --sombra-2: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --sombra-3: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* ==============================================================================
+ * Estilos base y reset
+ * ============================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-sans);
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: var(--color-enlace);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  filter: brightness(1.15);
+}
+
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: 2px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-texto);
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+h1 { font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -0.01em; margin-bottom: 0.75rem; }
+h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+
+p {
+  margin-bottom: 1rem;
+}
+
+p.lead {
+  font-size: 1.2rem;
+  color: var(--color-texto-2);
+  line-height: 1.5;
+}
+
+/* Contenedores y espaciados */
+.contenedor {
+  width: 100%;
+  max-width: 1140px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.seccion {
+  padding-top: 3.5rem;
+  padding-bottom: 3.5rem;
+}
+
+/* Botones */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radio-md);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.btn-primario {
+  background-color: var(--color-acento);
+  color: var(--color-sobre-acento);
+}
+
+.btn-primario:hover {
+  box-shadow: var(--sombra-2);
+  transform: translateY(-1px);
+}
+
+.btn-secundario {
+  background-color: var(--color-superficie);
+  color: var(--color-texto);
+  border-color: var(--color-borde-control);
+}
+
+.btn-secundario:hover {
+  background-color: var(--color-superficie-sutil);
+}
+
+/* Tarjetas */
+.tarjeta {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  box-shadow: var(--sombra-1);
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tarjeta-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-2);
+}
+
+/* Chips de estado */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radio-full);
+  line-height: 1.2;
+}
+
+.chip-critico { background-color: var(--color-critico-fondo); color: var(--color-critico-texto); }
+.chip-aviso { background-color: var(--color-aviso-fondo); color: var(--color-aviso-texto); }
+.chip-info { background-color: var(--color-info-fondo); color: var(--color-info-texto); }
+.chip-correcto { background-color: var(--color-correcto-fondo); color: var(--color-correcto-texto); }
+
+/* Banner de emergencias */
+.banner-emergencias {
+  background-color: var(--color-aviso-fondo);
+  color: var(--color-aviso-texto);
+  border-left: 4px solid var(--mapa-naranja);
+  padding: 1rem 1.25rem;
+  border-radius: var(--radio-md);
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+
+/* Tablas */
+.tabla-accesible {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.tabla-accesible th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-superficie-sutil);
+  color: var(--color-texto-2);
+  border-bottom: 2px solid var(--color-borde);
+  font-weight: 600;
+}
+
+.tabla-accesible td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-borde);
+  color: var(--color-texto);
+}
+
+.tabla-accesible tr:hover td {
+  background-color: var(--color-superficie-sutil);
+}
+
+/* Trama diagonal para "sin datos" */
+.trama-nodata {
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(141, 142, 166, 0.25) 5px, rgba(141, 142, 166, 0.25) 10px);
+}
+
+/* ==========================================================================
+   Mapa de Andalucía SVG y componentes interactivos
+   ========================================================================== */
+
+.mapa-andalucia-svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.04));
+  user-select: none;
+}
+
+.provincia-path {
+  stroke: var(--color-borde);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  cursor: pointer;
+  transition: fill 0.2s ease, stroke 0.2s ease, filter 0.2s ease;
+  outline: none;
+}
+
+.provincia-path:hover,
+.provincia-path:focus-visible {
+  stroke: var(--color-acento);
+  stroke-width: 3;
+  filter: brightness(1.08);
+}
+
+.provincia-path.nivel-green {
+  fill: var(--color-mapa-verde);
+}
+
+.provincia-path.nivel-orange {
+  fill: var(--color-mapa-naranja);
+}
+
+.provincia-path.nivel-red {
+  fill: var(--color-mapa-rojo);
+}
+
+.provincia-path.nivel-nodata {
+  fill: url(#trama-sin-datos);
+}
+
+/* Burbujas numéricas */
+.burbuja-fondo {
+  fill: var(--color-superficie);
+  stroke: var(--color-borde-control);
+  stroke-width: 2;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
+  transition: transform 0.2s ease;
+}
+
+.burbuja-cadiz .burbuja-fondo {
+  stroke: var(--color-acento);
+  stroke-width: 3;
+}
+
+.burbuja-texto {
+  font-family: var(--fuente-inter);
+  font-weight: 700;
+  font-size: 15px;
+  fill: var(--color-texto);
+  font-variant-numeric: tabular-nums;
+  dominant-baseline: middle;
+}
+
+/* Selector de ventana temporal */
+.btn-ventana {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radio-sm);
+  border: none;
+  background: transparent;
+  color: var(--color-texto-2);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-ventana:hover {
+  color: var(--color-texto);
+}
+
+.btn-ventana.activo {
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  box-shadow: var(--sombra-1);
+}
+

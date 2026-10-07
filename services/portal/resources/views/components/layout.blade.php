@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ str_contains($title ?? '', config('proyecto.nombre')) ? $title : (($title ? $title . ' — ' : '') . config('proyecto.nombre')) }}</title>
+    <meta name="description" content="{{ $description ?? config('proyecto.seo.descripcion_defecto') }}">
+
+    <!-- Open Graph & Metadatos Sociales -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ config('proyecto.nombre') }}">
+    <meta property="og:title" content="{{ $title ?? config('proyecto.nombre') }}">
+    <meta property="og:description" content="{{ $description ?? config('proyecto.seo.descripcion_defecto') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ asset(config('proyecto.seo.imagen_defecto')) }}">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $title ?? config('proyecto.nombre') }}">
+    <meta name="twitter:description" content="{{ $description ?? config('proyecto.seo.descripcion_defecto') }}">
+    <meta name="twitter:image" content="{{ asset(config('proyecto.seo.imagen_defecto')) }}">
+
+    <!-- Favicon & Color de tema -->
+    <meta name="theme-color" content="#2C2D3C" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+
+    <!-- Evitar parpadeo de modo oscuro antes de la primera pintura (FOUC) -->
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('snm_theme');
+                if (!theme) {
+                    theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {}
+        })();
+    </script>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{ $styles ?? '' }}
+</head>
+<body>
+    <a href="#contenido-principal" class="salto-accesible">Saltar al contenido principal</a>
+
+    <x-cabecera />
+
+    <main id="contenido-principal" class="flex-grow">
+        {{ $slot }}
+    </main>
+
+    <x-pie />
+
+    {{ $scripts ?? '' }}
+</body>
+</html>

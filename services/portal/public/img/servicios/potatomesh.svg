@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" width="320" height="180" fill="none">
+  <rect width="320" height="180" fill="none"/>
+  <!-- Marcador de mapa central -->
+  <path d="M160 35 C135 35 115 55 115 80 C115 112 160 148 160 148 C160 148 205 112 205 80 C205 55 185 35 160 35 Z" fill="#2C2D3C"/>
+  <circle cx="160" cy="80" r="16" fill="#67EA94"/>
+  <!-- Ondas concéntricas de señal -->
+  <circle cx="160" cy="80" r="38" stroke="#2C2D3C" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.3"/>
+  <circle cx="160" cy="80" r="58" stroke="#67EA94" stroke-width="2" opacity="0.5"/>
+</svg>
