@@ -1,0 +1,13 @@
+# /srv/webhooks/webhooks.yaml (sin secretos, los secretos van en .env)
+# Ejemplo de configuración de destinos para entrega de alertas mediante Webhooks.
+
+destinos:
+  - nombre: radio-club-cadiz
+    url: https://alertas.example.org/snm
+    riesgos: [medio, alto]
+    tipos: [infraestructura]
+    provincias: [ES-CA, ES-SE]
+
+  - nombre: monitor-nodo-propio
+    url: https://hooks.example.net/entrada
+    nodos: ["!a1b2c3d4", "!0badc0de"]

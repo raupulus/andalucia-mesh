@@ -1,0 +1,54 @@
+[project]
+name = "snm-bot-telegram"
+version = "0.1.0"
+description = "Bot de Telegram para alertas y estado de red de Andalucía Mesh"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiogram>=3.31.0",
+    "psycopg[binary]>=3.3.6",
+    "psycopg-pool>=3.3.3",
+    "aiohttp>=3.14.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.7.0",
+    "python-ulid>=3.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.25.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.9.0",
+    "mypy>=1.14.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["bot_telegram", "nucleo"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = ["psycopg", "psycopg.*", "psycopg_pool"]
+ignore_missing_imports = true
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM"]
+ignore = ["E501"]

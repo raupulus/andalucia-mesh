@@ -21,10 +21,14 @@ htmlcov/
 .env.*
 !.env.example
 peers.json
+webhooks.yaml
+!webhooks.example.yaml
+!services/webhooks/config/webhooks.yaml
 /credenciales/
 /datos/
 /certificados/
 acme.json
 
 # Temporales
+/logs/
 .tmp*

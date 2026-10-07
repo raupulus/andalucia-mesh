@@ -1,0 +1,3 @@
+"""Paquete principal del bot de Discord."""
+
+__version__ = "1.0.0"

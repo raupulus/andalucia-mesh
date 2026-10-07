@@ -1,0 +1,6 @@
+# ==============================================================================
+# webhooks.yaml (services/webhooks/config/webhooks.yaml)
+# Configuración inicial por defecto de destinos para webhooks salientes.
+# En producción este archivo o /srv/webhooks/webhooks.yaml se monta en /app/config/webhooks.yaml
+# ==============================================================================
+destinos: []

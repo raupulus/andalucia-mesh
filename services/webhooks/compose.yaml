@@ -1,0 +1,47 @@
+services:
+  webhooks:
+    build: .
+    image: snm-webhooks:${VERSION:-latest}
+    container_name: webhooks
+    restart: unless-stopped
+    env_file:
+      - path: /srv/comun/.env
+        required: false
+      - path: /srv/webhooks/.env
+        required: false
+      - path: .env
+        required: false
+    user: "10501:10500"
+    group_add: ["10500"]
+    read_only: true
+    tmpfs: [/tmp]
+    mem_limit: 96m
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - alertas-socket:/run/snm:ro
+      - type: bind
+        source: ${WEBHOOKS_CONFIG_FILE:-./config/webhooks.yaml}
+        target: /app/config/webhooks.yaml
+        read_only: true
+    networks:
+      - mesh
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=3).status == 200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  alertas-socket:
+    external: true
+
+networks:
+  mesh:
+    external: true

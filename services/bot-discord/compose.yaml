@@ -1,0 +1,43 @@
+services:
+  bot-discord:
+    build: .
+    image: snm-bot-discord:${VERSION:-latest}
+    container_name: bot-discord
+    restart: unless-stopped
+    env_file:
+      - path: /srv/comun/.env
+        required: false
+      - path: /srv/bot-discord/.env
+        required: false
+      - path: .env
+        required: false
+    user: "10501:10500"
+    group_add: ["10500"]
+    read_only: true
+    tmpfs: [/tmp]
+    mem_limit: 128m
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - alertas-socket:/run/snm:ro
+    networks:
+      - mesh
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=3).status == 200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  alertas-socket:
+    external: true
+
+networks:
+  mesh:
+    external: true
