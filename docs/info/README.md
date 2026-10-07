@@ -22,12 +22,12 @@ Documentación técnica canónica del proyecto. Todavía no hay código: cada do
 
 | Pieza | Documentación | Código | Estado |
 |---|---|---|---|
-| Infraestructura | [infrastructure/](infrastructure/README.md): [servidor](infrastructure/01-server.md), [PostgreSQL](infrastructure/02-postgresql.md), [Nginx y DNS](infrastructure/03-nginx-dns.md), [operación](infrastructure/04-operations.md) | `infrastructure/` | Especificado |
-| Broker MQTT (Mosquitto) | [mosquitto/](mosquitto/README.md) | `integrations/mosquitto/` | Especificado |
-| MeshView | [meshview/](meshview/README.md) | `integrations/meshview/` | Especificado |
-| PotatoMesh | [potatomesh/](potatomesh/README.md) | `integrations/potatomesh/` | Especificado |
-| adaptador-potato | [potatomesh/adaptador-potato.md](potatomesh/adaptador-potato.md) | `services/adaptador-potato/` | Especificado |
-| sync-peers | [potatomesh/sync-peers.md](potatomesh/sync-peers.md) | `services/sync-peers/` | Especificado |
+| Infraestructura | [infrastructure/](infrastructure/README.md): [servidor](infrastructure/01-server.md), [PostgreSQL](infrastructure/02-postgresql.md), [Nginx y DNS](infrastructure/03-nginx-dns.md), [operación](infrastructure/04-operations.md) | `infrastructure/` | Desplegado y verificado |
+| Broker MQTT (Mosquitto) | [mosquitto/](mosquitto/README.md) | `integrations/mosquitto/` | Desplegado y verificado |
+| MeshView | [meshview/](meshview/README.md) | `integrations/meshview/` | Desplegado y verificado |
+| PotatoMesh | [potatomesh/](potatomesh/README.md) | `integrations/potatomesh/` | Desplegado y verificado |
+| adaptador-potato | [potatomesh/adaptador-potato.md](potatomesh/adaptador-potato.md) | `services/adaptador-potato/` | Desplegado y verificado |
+| sync-peers | [potatomesh/sync-peers.md](potatomesh/sync-peers.md) | `services/sync-peers/` | Desplegado y verificado |
 | Ingesta | [ingesta/](ingesta/README.md): [entrada y descifrado](ingesta/01-input-decryption.md), [decodificación y deduplicación](ingesta/02-decoding-dedup.md), [provincias y registros](ingesta/03-provinces-registry.md), [persistencia y retención](ingesta/04-storage-retention.md), [vistas contrato](ingesta/05-contract-views.md), [flujo `decoded`](ingesta/06-decoded-stream.md) | `services/ingesta/` | Especificado |
 | Portal | [portal/](portal/README.md): módulos 01–14 y [páginas](portal/pages/README.md) | `services/portal/` | Especificado |
 | Detector de alertas | [detector-alertas/](detector-alertas/README.md): [motor](detector-alertas/01-rule-engine.md), [catálogo de reglas](detector-alertas/02-rule-catalog.md), [socket y persistencia](detector-alertas/03-socket-persistence.md) | `services/detector-alertas/` | Especificado |

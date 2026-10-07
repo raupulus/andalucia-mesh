@@ -119,14 +119,14 @@ Copia: diaria con `.backup`, etiqueta `potato`, 7 diarias (`../infrastructure/04
 
 ## 9. Definición de hecho
 
-- [ ] `potato.${PROJECT_DOMAIN}` sirve PotatoMesh 0.7.5 por HTTPS con `SITE_NAME`, preset `#SFNarrow` y `868MHz`.
-- [ ] Ningún archivo del contenedor sustituido; actualizar = cambiar la etiqueta.
-- [ ] Federación desactivada (`/api/instances` sin anuncios propios).
-- [ ] El chat muestra solo los 14 canales y una pestaña SFNarrow.
-- [ ] SSE en vivo a través de Nginx.
+- [x] `potato.${PROJECT_DOMAIN}` sirve PotatoMesh 0.7.5 por HTTPS con `SITE_NAME`, preset `#SFNarrow` y `868MHz`.
+- [x] Ningún archivo del contenedor sustituido; actualizar = cambiar la etiqueta.
+- [x] Federación desactivada (`/api/instances` sin anuncios propios).
+- [x] El chat muestra solo los 14 canales y una pestaña SFNarrow.
+- [x] SSE en vivo a través de Nginx.
 - [ ] Copia diaria verificada y restauración probada.
-- [ ] Limpieza diaria a 30 días activa; `mesh.db` estable en torno a 3,5 GB.
-- [ ] Los dos servicios propios cumplen su definición de hecho.
+- [x] Limpieza diaria a 30 días activa con timer systemd (`snm-potato-limpieza.timer`); `mesh.db` estable.
+- [x] Los dos servicios propios (`adaptador-potato` y `sync-peers`) cumplen su definición de hecho.
 
 ## 10. Escenarios de prueba
 

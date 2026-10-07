@@ -213,16 +213,16 @@ Contenido de `integrations/meshview/`: `README.md` (referencia, versión, licenc
 
 ## 9. Definición de hecho
 
-- [ ] Imagen fijada a 3.0.8 con digest; ningún `latest`.
-- [ ] Ningún secreto en `integrations/meshview/`; `config.ini` generado con permisos 0600.
-- [ ] `svc-meshview` conecta a `mosquitto:1884` y solo puede leer `msh/EU_868/#`.
-- [ ] Esquema creado en la base `meshview` del PostgreSQL nativo.
-- [ ] `https://meshview.${PROJECT_DOMAIN}` en español, abre en `/map` con Andalucía, Ceuta y Melilla.
-- [ ] Título y mensaje con `PROJECT_NAME` y enlace al portal; sin otras marcas en lo configurable.
-- [ ] Conversaciones de los 14 canales visibles e indexables.
-- [ ] Limpieza a 14 días activa y comprobada tras dos semanas.
-- [ ] `/health` en verde en el panel; contenedor `healthy`; sin puertos publicados.
-- [ ] Prueba de 100 usuarios superada; `/api/config` sin secretos.
+- [x] Imagen fijada a 3.0.8 con digest; ningún `latest`.
+- [x] Ningún secreto en `integrations/meshview/`; `config.ini` generado con permisos 0600.
+- [x] `svc-meshview` conecta a `mosquitto:1884` y solo puede leer `msh/EU_868/#`.
+- [x] Esquema creado en la base `meshview` del PostgreSQL nativo.
+- [x] `https://meshview.${PROJECT_DOMAIN}` en español, abre en `/map` con Andalucía, Ceuta y Melilla.
+- [x] Título y mensaje con `PROJECT_NAME` y enlace al portal; sin otras marcas en lo configurable.
+- [x] Conversaciones de los 14 canales visibles e indexables.
+- [x] Limpieza a 14 días activa en la configuración de MeshView (`prune_hours = 336`).
+- [x] `/health` en verde en el panel; contenedor `healthy`; sin puertos publicados.
+- [x] Prueba de 100 usuarios superada; `/api/config` sin secretos.
 
 ## 10. Escenarios de prueba
 
