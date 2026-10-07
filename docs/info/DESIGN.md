@@ -60,6 +60,8 @@ Texto ≥ 7:1 sobre su propio fondo en los dos modos. Siempre icono + palabra ("
 | `aviso` | `#794700` / `#FEF4E2` | 7,09:1 | `#FFD48A` / `#47360F` | 8,34:1 |
 | `info` | `#18509B` / `#EAF2FD` | 7,00:1 | `#A9C9FF` / `#1E3150` | 7,75:1 |
 | `correcto` | `#15612F` / `#E9FCEF` | 7,06:1 | `#9CF1BA` / `#1C3A28` | 9,32:1 |
+| `neutro` | `#6E708C` / `#F7F8FA` (borde `#E0E1EB`) | 4,82:1 | `#9FA0B4` / `#17181F` (borde `#3D3E4D`) | 5,27:1 |
+
 
 ### Mapa de provincias
 
