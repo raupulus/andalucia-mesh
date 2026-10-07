@@ -55,7 +55,7 @@
 | RN-31 | Tipo `infraestructura` si el nodo es de infraestructura o la alerta afecta a la malla; si no, `clientes` | [01-rule-engine](detector-alertas/01-rule-engine.md) |
 | RN-32 | Reglas MVP y sus umbrales: catálogo de reglas (forma parte de estas reglas de negocio) | [02-rule-catalog](detector-alertas/02-rule-catalog.md) |
 | RN-33 | Las alertas solo salen por bots y webhooks; no hay difusión pública de eventos | [bots-webhooks](bots-webhooks/README.md) |
-| RN-34 | Filtros por defecto al añadir un bot: riesgos `medio`, `alto`; tipo `infraestructura`. Cada destino elige los suyos | Ídem |
+| RN-34 | Filtros por defecto al añadir un bot: riesgo `alto` (para evitar spam en grupos); tipo `infraestructura`. Cada destino puede personalizar los suyos con `/levels` y `/types` | Ídem |
 | RN-35 | Anti-ruido: actualizaciones como respuesta al mensaje original; máximo 10 mensajes/min por destino | Ídem |
 | RN-36 | Los bots no leen conversaciones ni guardan nombres de grupos o usuarios; guardan lo que envían | Ídem |
 | RN-37 | Panel de operadores privado con estado de todas las piezas; sin página de estado pública | [14-operator-panel](portal/14-operator-panel.md) |
@@ -80,6 +80,7 @@
 | 2026-10-07 | Todas | Versión inicial | Responsable del proyecto |
 | 2026-10-07 | RN-08, OB-02, OB-03 | Canalización de sync-peers a la ingesta para deduplicación unificada y cobertura regional completa de alertas y métricas | Responsable del proyecto |
 | 2026-10-08 | RN-02 | Credenciales públicas compartidas (meshdev / large4cats) para gateways con permisos de solo subida a canales autorizados por TLS 8883 | Responsable del proyecto |
+| 2026-10-08 | RN-34 | Filtros por defecto de bots: solo avisos de infraestructura altos (riesgo 'alto') al integrarlo a grupos para evitar spam | Responsable del proyecto |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

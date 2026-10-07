@@ -23,6 +23,7 @@ Registro de funcionalidades y conceptos que han sido decididos formalmente pero 
 | Página de reporte de ideas y sugerencias | Formulario público en el portal para el envío de sugerencias e ideas de la comunidad, con persistencia en el backend de Laravel y gestión desde `/admin` |
 | Sección visual de malas prácticas y problemas frecuentes | Diapositivas o carrusel gráfico didáctico en el portal sobre errores que saturan la red: saturación por rol ROUTER, cuándo elegir CLIENT vs CLIENT_MUTE, telemetría excesiva, Range Test emitiendo por el canal principal, etc. |
 | Indicación de provincia de origen en reportes del bot | Al emitir alertas, avisos o informes en los bots (Telegram/Discord), indicar expresamente la provincia de la que procede la transmisión o el reporte (a partir del nodo o del gateway por el que entra) |
+| Capturas reales de la app (iOS/iPhone) en las guías | Tomar capturas de la app oficial de Meshtastic en iPhone/iOS para ilustrar visualmente cada ajuste en `/configura-tu-nodo` y guías del portal junto al texto explicativo |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

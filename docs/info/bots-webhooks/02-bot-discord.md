@@ -59,7 +59,7 @@ Respuesta de `/subscribe` (riesgos y tipos por defecto desde `BOT_RIESGOS_DEFECT
 
 ```
 ✅ Este canal recibirá las alertas de Sur Nodos en Mallas.
-Riesgos: medio, alto · Tipos: infraestructura (por defecto)
+Riesgos: alto · Tipos: infraestructura (por defecto)
 Cámbialos con /levels y /types. Ayuda: /help
 ```
 

@@ -140,7 +140,7 @@ return [
     'bots' => [
         'telegram_username' => env('TELEGRAM_BOT_USERNAME', 'AndaluciaMesh_bot'),
         'discord_invite_url' => env('DISCORD_INVITE_URL', 'https://discord.gg/andalucia-mesh'),
-        'riesgos_defecto' => env('BOT_RIESGOS_DEFECTO', 'medio, alto'),
+        'riesgos_defecto' => env('BOT_RIESGOS_DEFECTO', 'alto'),
         'tipos_defecto' => env('BOT_TIPOS_DEFECTO', 'infraestructura'),
     ],
 

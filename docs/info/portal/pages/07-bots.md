@@ -141,7 +141,7 @@ Riesgos activos en este canal: medio, alto
 `/settings`
 
 ```
-Este canal recibe alertas de riesgo medio y alto, de tipo infraestructura.
+Este canal recibe alertas de riesgo alto, de tipo infraestructura.
 Activo desde el {fecha}.
 ```
 
@@ -204,7 +204,7 @@ Los bots solo guardan el identificador de cada grupo o canal donde están, sus f
 | `{TELEGRAM_BOT_USERNAME}` | `config/proyecto.php` desde `.env` (`../06-bots-page.md`) |
 | `{DISCORD_INVITE_URL}` | `config/proyecto.php` desde `.env` |
 | Nombres y descripciones de riesgos y tipos | `GET /api/v1/alerts/catalog` (TTL 1 h). Los textos de las tablas de "Qué avisan" son el borrador de la descripción pública que debe servir el catálogo (`clasificacion.yaml`), tomado de `../../detector-alertas/README.md` |
-| `{BOT_RIESGOS_DEFECTO}`, `{BOT_TIPOS_DEFECTO}` | Configuración del portal con los mismos nombres y valores que los bots: `medio, alto` e `infraestructura` (`../../bots-webhooks/README.md`) |
+| `{BOT_RIESGOS_DEFECTO}`, `{BOT_TIPOS_DEFECTO}` | Configuración del portal con los mismos nombres y valores que los bots: `alto` e `infraestructura` (`../../bots-webhooks/README.md`) |
 | Comandos y quién puede usarlos | Texto en `resources/contenido/bots.md`; si cambian en los bots, se cambian aquí |
 | Ejemplos de respuesta | Formato orientativo con los campos de `GET /api/v1/stats/summary` y `GET /api/v1/routers`; el formato definitivo está en `../../bots-webhooks/01-bot-telegram.md` y `02-bot-discord.md` y esta página lo copia. Son imágenes o texto generados a partir del formato, nunca de una conversación real |
 | Ejemplo de aviso | Formato de `../../bots-webhooks/README.md` con datos inventados marcados como ejemplo |

@@ -104,7 +104,7 @@
 | `API_RATE_LIMIT_PER_MINUTE` / `API_RATE_LIMIT_EXEMPT` | `60` / IP pública del servidor y `172.30.0.0/24` | Propia | No |
 | `TELEGRAM_BOT_USERNAME` / `DISCORD_INVITE_URL` | usuario del bot / enlace de invitación | Propia | No |
 | `HOSTING_PROVIDER` / `HOSTING_LOCATION` | Proveedor del servidor / ubicación del centro de datos (textos legales) | Propia | No |
-| `BOT_RIESGOS_DEFECTO` / `BOT_TIPOS_DEFECTO` | `medio,alto` / `infraestructura` | Propia | No |
+| `BOT_RIESGOS_DEFECTO` / `BOT_TIPOS_DEFECTO` | `alto` / `infraestructura` | Propia | No |
 | `AUTORUN_ENABLED` | `true` en `portal`, `false` en `portal-tareas` | Propia | No |
 
 ## 6. Datos
@@ -192,4 +192,4 @@ Actualización: nueva etiqueta git → `deploy.sh portal`.
 6. Las decisiones de detalle de la API y el panel están en sus módulos (11–14).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

@@ -43,7 +43,7 @@ Un destino es un chat `group`, `supergroup` o `channel` (`destino.clase`); `plat
 
 ```
 Hola. Avisaré aquí de los problemas de la malla de Sur Nodos en Mallas.
-Riesgos: medio, alto · Tipos: infraestructura (por defecto)
+Riesgos: alto · Tipos: infraestructura (por defecto)
 Los administradores pueden cambiarlos con /levels y /types. Ayuda: /help
 ```
 

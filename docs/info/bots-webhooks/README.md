@@ -310,7 +310,7 @@ Agrupado por provincia (orden alfabético del nombre) y, dentro, por nombre cort
 
 ```
 ⚙️ Configuración de este chat
-Riesgos: medio, alto (por defecto)
+Riesgos: alto (por defecto)
 Tipos: infraestructura (por defecto)
 Activo desde el 02/10/2026
 Avisos enviados aquí: 37 (último: hoy 12:03)
@@ -349,7 +349,7 @@ Más información: https://mesh.example.org/bots
 
 | Filtro | Valores | Por defecto al añadir el bot |
 |---|---|---|
-| Riesgos | Los de `risks[]` del catálogo (`bajo`, `medio`, `alto`) | `medio`, `alto` (`BOT_RIESGOS_DEFECTO`) |
+| Riesgos | Los de `risks[]` del catálogo (`bajo`, `medio`, `alto`) | `alto` (`BOT_RIESGOS_DEFECTO`) |
 | Tipos | Los de `types[]` del catálogo (`infraestructura`, `clientes`) | `infraestructura` (`BOT_TIPOS_DEFECTO`) |
 
 - Un destino que nunca ha cambiado un filtro guarda `NULL` y usa el valor por defecto vigente; `/settings` lo muestra como "(por defecto)". Cambiar el defecto en `.env` cambia todos esos destinos.
@@ -420,7 +420,7 @@ Cada `compose.yaml` carga `/srv/comun/.env` y después su `.env` propio.
 | `DB_PASSWORD` | — | Propia | **Sí** |
 | `LOG_LEVEL` | `INFO` | Propia | No |
 | `RETENCION_DIAS` | `365` | Propia | No |
-| `BOT_RIESGOS_DEFECTO` | `medio,alto` | Propia (bots) | No |
+| `BOT_RIESGOS_DEFECTO` | `alto` | Propia (bots) | No |
 | `BOT_TIPOS_DEFECTO` | `infraestructura` | Propia (bots) | No |
 | `BOT_MAX_MENSAJES_MINUTO` | `10` | Propia (bots) | No |
 | `BOT_MAX_MENSAJES_SEGUNDO` | `25` | Propia (bots) | No |
@@ -721,4 +721,4 @@ Actualizar: cambiar la etiqueta de la imagen en `compose.yaml` y repetir el paso
 13. **Retención 1 año** para envíos y entregas; destinos inactivos se borran al año de su baja.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08
