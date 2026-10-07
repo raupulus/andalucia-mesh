@@ -35,6 +35,9 @@ Registro de decisiones deliberadas de arquitectura, diseño y convenciones técn
 | DT-27 | Uso de `topic write` en lugar de `pattern write` para map reports en `acl-gateways` | El topic `msh/EU_868/2/map/#` no contiene `%u` ni `%c` (el gateway se identifica dentro del protobuf). `pattern` genera un warning en el broker si no contiene variables de cliente. |
 | DT-28 | Ejecución no transaccional de agregados continuos en TimescaleDB | `CREATE MATERIALIZED VIEW ... WITH (timescaledb.continuous)` no puede ejecutarse dentro de un bloque explícito `BEGIN ... COMMIT`. El ejecutor de migraciones analiza las sentencias SQL y las ejecuta individualmente fuera de bloques de transacción. |
 | DT-29 | Propiedad estricta de objetos en base de datos `snm_ingest` | El usuario de aplicación `snm_ingest` debe ser el propietario de todas las tablas, vistas materializadas y procedimientos almacenados (no el superusuario `postgres`) para permitir migraciones automatizadas e introspección sin elevar privilegios. |
+| DT-30 | Cero cookies y sesiones en navegación pública del portal (`removeFromGroup('web', [...])`) | Privacidad absoluta para visitantes; elimina la necesidad legal de banner de cookies y simplifica la caché HTTP en CDN/proxy. Solo `/admin` emite cookies de sesión y CSRF. |
+| DT-31 | Ejecución síncrona de `ComprobarServicios` en `portal-tareas` (`php artisan schedule:work`) | Auditoría de salud ejecutada inline en ~250ms en cada tick del planificador sin requerir un worker de colas (`queue:work`) dedicado. |
+| DT-32 | Proxy inverso Nginx con soporte dual HTTP/HTTPS hacia `127.0.0.1:8100` y `trustProxies('*')` en Laravel | Permite compatibilidad con CDN/Cloudflare tanto en modo Flexible (conexión por puerto 80) como Universal/Full SSL (443) evitando bucles de redirección 301. |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-07

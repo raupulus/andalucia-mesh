@@ -155,14 +155,14 @@ Actualización: nueva etiqueta git → `deploy.sh portal`.
 
 ## 9. Definición de hecho
 
-- [ ] Todas las rutas de §4.1 responden; las públicas sin ninguna cookie.
-- [ ] Textos desde `resources/contenido/` con variables de configuración; nada escrito a mano.
-- [ ] Ninguna petición a terceros desde las páginas públicas.
-- [ ] Con `ingest` o `alertas` caídas, las páginas cargan y avisan del bloque afectado.
-- [ ] API según 11–13, con prueba de contrato de los bots.
-- [ ] Panel con MFA y estado de los 13 destinos.
-- [ ] `DESIGN.md` cumplido en claro y oscuro; Lighthouse ≥ 90.
-- [ ] Créditos legales (software y "© Instituto Geográfico Nacional") en el aviso legal.
+- [x] Todas las rutas de §4.1 responden; las públicas sin ninguna cookie.
+- [x] Textos desde `resources/contenido/` con variables de configuración; nada escrito a mano.
+- [x] Ninguna petición a terceros desde las páginas públicas.
+- [x] Con `ingest` o `alertas` caídas, las páginas cargan y avisan del bloque afectado.
+- [x] API según 11–13, con prueba de contrato de los bots.
+- [x] Panel con MFA y estado de los 13 destinos.
+- [x] `DESIGN.md` cumplido en claro y oscuro; Lighthouse ≥ 90.
+- [x] Créditos legales (software y "© Instituto Geográfico Nacional") en el aviso legal.
 
 ## 10. Escenarios de prueba
 
