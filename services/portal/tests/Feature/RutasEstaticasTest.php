@@ -104,4 +104,36 @@ class RutasEstaticasTest extends TestCase
         $response->assertSee("Sitemap: https://" . config('proyecto.dominio') . "/sitemap.xml", false);
         $response->assertHeaderMissing('Set-Cookie');
     }
+
+    public function test_paginas_legales_estan_completas_sin_placeholders(): void
+    {
+        $rutas = ['/legal/cookies', '/legal/privacidad', '/legal/aviso-legal'];
+
+        foreach ($rutas as $ruta) {
+            $response = $this->get($ruta);
+            $response->assertStatus(200);
+            $response->assertHeaderMissing('Set-Cookie');
+
+            $contenido = (string) $response->getContent();
+            $this->assertStringNotContainsString('[completar', $contenido);
+            $this->assertStringNotContainsString('[fecha de publicación]', $contenido);
+            $this->assertStringContainsString('8 de octubre de 2026', $contenido);
+        }
+
+        // Verificaciones específicas
+        $cookies = (string) $this->get('/legal/cookies')->getContent();
+        $this->assertStringContainsString('andalucia_mesh_session', $cookies);
+        $this->assertStringContainsString('XSRF-TOKEN', $cookies);
+        $this->assertStringContainsString('snm_theme', $cookies);
+
+        $aviso = (string) $this->get('/legal/aviso-legal')->getContent();
+        $this->assertStringContainsString('PotatoMesh', $aviso);
+        $this->assertStringContainsString('MeshView', $aviso);
+        $this->assertStringContainsString('public@raupulus.dev', $aviso);
+
+        $privacidad = (string) $this->get('/legal/privacidad')->getContent();
+        $this->assertStringContainsString('public@raupulus.dev', $privacidad);
+        $this->assertStringContainsString('OK to MQTT', $privacidad);
+    }
 }
+

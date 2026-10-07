@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function actualizarMapa(datos) {
         datosActuales = datos;
 
+        const total = typeof datos.total_andalucia === 'number' ? datos.total_andalucia : 0;
         if (totalNodosEl && typeof datos.total_andalucia === 'number') {
             totalNodosEl.textContent = new Intl.NumberFormat('es-ES').format(datos.total_andalucia);
         }
@@ -122,20 +123,52 @@ document.addEventListener('DOMContentLoaded', () => {
         if (datos.provinces && Array.isArray(datos.provinces)) {
             datos.provinces.forEach(p => {
                 const grupo = document.getElementById(`prov-${p.code}`);
-                if (!grupo) return;
+                if (grupo) {
+                    const path = grupo.querySelector('.provincia-path');
+                    const textoBurbuja = grupo.querySelector('.burbuja-texto');
 
-                const path = grupo.querySelector('.provincia-path');
-                const textoBurbuja = grupo.querySelector('.burbuja-texto');
+                    if (textoBurbuja) {
+                        textoBurbuja.textContent = p.nodes;
+                    }
 
-                if (textoBurbuja) {
-                    textoBurbuja.textContent = p.nodes;
+                    if (path) {
+                        path.classList.remove('nivel-green', 'nivel-orange', 'nivel-red', 'nivel-nodata');
+                        path.classList.add(`nivel-${p.level || 'nodata'}`);
+                        const satText = p.avg !== null ? `${p.avg}%` : 'sin datos';
+                        path.setAttribute('aria-label', `${p.name}: ${p.nodes} nodos, saturación ${satText}`);
+                    }
                 }
 
-                if (path) {
-                    path.classList.remove('nivel-green', 'nivel-orange', 'nivel-red', 'nivel-nodata');
-                    path.classList.add(`nivel-${p.level || 'nodata'}`);
-                    const satText = p.avg !== null ? `${p.avg}%` : 'sin datos';
-                    path.setAttribute('aria-label', `${p.name}: ${p.nodes} nodos, saturación ${satText}`);
+                // Actualizar fila de la tabla accesible
+                const fila = document.getElementById(`fila-prov-${p.code}`);
+                if (fila) {
+                    const colNodos = fila.querySelector('.col-nodos');
+                    const colPct = fila.querySelector('.col-pct');
+                    const colAvg = fila.querySelector('.col-avg');
+                    const colEstado = fila.querySelector('.col-estado');
+
+                    if (colNodos) {
+                        colNodos.textContent = new Intl.NumberFormat('es-ES').format(p.nodes);
+                    }
+                    if (colPct) {
+                        const pct = total > 0 ? ((p.nodes / total) * 100).toFixed(1) : '0';
+                        colPct.textContent = `${pct} %`;
+                    }
+                    if (colAvg) {
+                        colAvg.textContent = p.avg !== null && p.avg !== undefined ? `${p.avg} %` : '—';
+                    }
+                    if (colEstado) {
+                        const nivel = p.level === 'green' ? 'correcto' :
+                                      (p.level === 'orange' ? 'aviso' :
+                                      (p.level === 'red' ? 'critico' : 'neutro'));
+                        const icono = nivel === 'correcto' ? '✓' :
+                                      (nivel === 'aviso' ? '▲' :
+                                      (nivel === 'critico' ? '✕' : '—'));
+                        const texto = p.level === 'green' ? 'Holgado' :
+                                      (p.level === 'orange' ? 'Cargado' :
+                                      (p.level === 'red' ? 'Saturado' : 'Sin datos'));
+                        colEstado.innerHTML = `<span class="chip chip-${nivel}"><span aria-hidden="true" style="font-weight: 800; font-size: 0.75rem;">${icono}</span> <span>${texto}</span></span>`;
+                    }
                 }
             });
         }

@@ -39,7 +39,7 @@ Ver la malla de Andalucía de un vistazo, sin peticiones a terceros, con una alt
 - Leyenda con los cuatro colores y, debajo, el texto fijo de cómo se calcula:
 
   > "Cómo calculamos la saturación de cada provincia: con las coordenadas buscamos todos los nodos que están dentro de la provincia; sacamos la media de la ocupación del canal de los routers por un lado y la de todos los nodos CLIENT y CLIENT_BASE juntos por otro; y sumamos con pesos: routers 60 % y CLIENT con CLIENT_BASE 40 % (estos dos van juntos en una sola media). Los CLIENT_MUTE no cuentan porque suelen estar en interior o peor comunicados y su medida sale más baja de lo real. Se usa el último dato de cada nodo en las 12 últimas horas."
-- **Tabla accesible** debajo (provincia · nodos · carga media · estado en texto), siempre presente (plegable en móvil).
+- **Tabla accesible** debajo (provincia · nodos · % total · saturación media · estado en texto mediante chip visual y accesible: verde `Holgado`, naranja `Cargado`, rojo `Saturado` y neutro sutil `Sin datos`), siempre presente (desplegada por defecto) y sincronizada reactivamente con el conmutador de ventana temporal.
 - Notas: `notes` de la API ("Solo nodos cuya posición llega con OK to MQTT…") y, si `outside_andalucia` > 0, "y {outside_andalucia} fuera de Andalucía".
 
 ### Estados

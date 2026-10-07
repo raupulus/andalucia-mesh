@@ -83,4 +83,24 @@ class PortadaYMapaTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Últimas 24 horas', false);
     }
+
+    /**
+     * Comprueba que las filas de la tabla accesible tienen chips con estado y clases semánticas correctas.
+     */
+    public function test_tabla_accesible_muestra_chips_con_estado_y_colores_correctos(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        // Cada provincia tiene su fila con id fila-prov-ES-*
+        $response->assertSee('id="fila-prov-ES-CA"', false);
+        $response->assertSee('class="col-estado"', false);
+
+        // Los chips deben renderizarse con alguna de las clases de estado (correcto, aviso, critico o neutro)
+        $contenido = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/chip-(correcto|aviso|critico|neutro)/', $contenido);
+        // Los estados textuales posibles en la tabla
+        $this->assertMatchesRegularExpression('/(Holgado|Cargado|Saturado|Sin datos)/', $contenido);
+    }
 }
+

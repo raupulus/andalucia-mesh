@@ -81,4 +81,4 @@ No es un servicio de emergencias; sin garantía de entrega ni disponibilidad; da
 4. **Dado** cualquier página del portal, **cuando** se inspecciona el HTML, **entonces** no hay coordenadas de nodos.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

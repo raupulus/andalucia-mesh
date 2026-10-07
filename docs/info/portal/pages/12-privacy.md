@@ -34,7 +34,7 @@ Cada `###` es un H2 de la página.
 
 **H1:** Política de privacidad
 
-Última actualización: [fecha de publicación]
+Última actualización: 8 de octubre de 2026
 
 En resumen:
 
@@ -151,4 +151,4 @@ Notas para desarrollo:
 - Se nombran OpenStreetMap y CARTO como destinatarios de la IP al cargar mapas: es información legal obligatoria, no uso de marca.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

@@ -28,36 +28,38 @@ Cada `###` es un H2 de la página.
 
 **H1:** Política de cookies
 
-Última actualización: [fecha de publicación]
+Última actualización: 8 de octubre de 2026
 
 Las páginas públicas de este portal no instalan ninguna cookie ni usan rastreadores. Por eso no verás ningún aviso de cookies.
 
 ### Qué guardamos en tu navegador
 
-Solo tu preferencia de modo claro u oscuro, si la cambias con el botón de la cabecera. Se guarda en el almacenamiento local de tu navegador, no es una cookie, no se envía a nuestro servidor y no sirve para identificarte.
+Solo tu preferencia de modo claro u oscuro, si la cambias con el botón de la cabecera. Se guarda en el almacenamiento local de tu navegador (`localStorage` con la clave `snm_theme`), no es una cookie, no se envía a nuestro servidor y no sirve para identificarte. Si no la modificas, la web adopta de forma automática el tema de tu sistema operativo.
 
 ### Panel de administración
 
-La zona `/admin` es privada y solo la usan los administradores del proyecto. Usa dos cookies técnicas, necesarias para iniciar sesión de forma segura y exentas de consentimiento:
+La zona `/admin` es privada y está reservada en exclusiva para los administradores y operadores del proyecto. Solo si accedes a dicha zona o inicias sesión en ella, se utilizan dos cookies técnicas esenciales para el funcionamiento seguro de la sesión, plenamente exentas de consentimiento previo:
 
 | Cookie | Para qué | Duración |
 |---|---|---|
-| Sesión | Mantener la sesión iniciada | [completar en desarrollo] |
-| Protección CSRF | Evitar que otra web envíe formularios en tu nombre | [completar en desarrollo] |
+| `andalucia_mesh_session` | Mantener la sesión técnica de autenticación del operador | 120 minutos de inactividad o hasta cerrar el navegador |
+| `XSRF-TOKEN` | Evitar que otra web envíe formularios no autorizados en tu nombre (protección anti-CSRF) | Sesión activa (máx. 120 minutos) |
 
-Si no eres administrador, nunca se instalan en tu navegador.
+Si eres un usuario visitante de la web pública, estas cookies nunca se instalan en tu navegador.
 
 ### PotatoMesh y MeshView
 
-Son servicios del proyecto con el software de sus autores, en sus propios subdominios. Sus mapas se descargan de servidores de cartografía de terceros (OpenStreetMap y CARTO), que reciben tu dirección IP. PotatoMesh, además, guarda en tu navegador una copia de los datos de la malla para cargar más rápido. Más detalle en la [política de privacidad](/legal/privacidad).
+Son servicios del proyecto basados en software libre de sus respectivos autores, desplegados en sus propios subdominios. No instalan cookies publicitarias ni de seguimiento. 
+
+PotatoMesh utiliza tecnologías de almacenamiento local del navegador (`IndexedDB` y `localStorage`) para guardar una copia de trabajo de los paquetes y nodos de la malla con el fin de agilizar la carga en dispositivos móviles. Sus mapas se descargan desde servidores de cartografía de terceros (OpenStreetMap y CARTO), que reciben tu dirección IP técnica para poder entregarte las imágenes del mapa. Más detalle en la [política de privacidad](/legal/privacidad).
 
 ### Analítica
 
-No hay. Si algún día se añade, será sin cookies y alojada en nuestro propio servidor; si eso no fuera posible, te pediríamos permiso antes.
+No utilizamos Google Analytics, ni Meta Pixel, ni ningún servicio externo de analítica o rastreo. Si en el futuro se incorporasen métricas agregadas de uso, se harían mediante soluciones autoalojadas y respetuosas con la privacidad sin cookies; si alguna requiriese consentimiento previo, se te solicitaría con antelación expresa.
 
 ### Cómo borrarlo
 
-Puedes borrar las cookies y el almacenamiento local desde la configuración de tu navegador. Si borras la preferencia de modo, la web volverá a usar la de tu sistema.
+Puedes borrar las cookies y el almacenamiento local en cualquier instante desde la configuración de tu navegador (habitualmente en la sección de Privacidad y Seguridad o Datos de Sitios). Si borras la preferencia de modo, la web volverá a usar el tema por defecto de tu sistema.
 
 ## Datos dinámicos y configuración
 
@@ -67,15 +69,10 @@ Puedes borrar las cookies y el almacenamiento local desde la configuración de t
 | Preferencia de modo | Almacenamiento local, según `../../DESIGN.md` §4 |
 | Texto | `resources/contenido/legal/cookies.md` |
 
-Notas para desarrollo:
-
-- Completar el nombre exacto y la duración de las cookies de `/admin` según la configuración de sesión del portal.
-- Comprobar en las versiones fijadas de PotatoMesh y MeshView qué guardan en el navegador (cookies, almacenamiento local, IndexedDB) y reflejarlo aquí. PotatoMesh guarda una copia de datos en IndexedDB.
-- Criterio de aceptación: las páginas públicas no depositan cookies (comprobado con las herramientas del navegador); `/admin`, solo cookies técnicas.
-
 ## Supuestos aplicados
 
 - Se nombran OpenStreetMap y CARTO (mismo criterio que en `12-privacy.md`).
+- Cookies técnicas de sesión identificadas exactamente con la configuración de Laravel en `/admin`.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

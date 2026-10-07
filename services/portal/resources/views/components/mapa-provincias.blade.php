@@ -293,21 +293,21 @@
                                 default => 'neutro',
                             };
                         @endphp
-                        <tr style="border-bottom: 1px solid var(--color-borde);">
+                        <tr id="fila-prov-{{ $codigo }}" data-code="{{ $codigo }}" style="border-bottom: 1px solid var(--color-borde);">
                             <td style="padding: 0.6rem; font-weight: 500;">
                                 {{ $nombre }} {{ $codigo === 'ES-CA' ? '(Foco)' : '' }}
                             </td>
-                            <td style="padding: 0.6rem; text-align: right; font-variant-numeric: tabular-nums;">
+                            <td class="col-nodos" style="padding: 0.6rem; text-align: right; font-variant-numeric: tabular-nums;">
                                 {{ number_format((int) $nodos, 0, ',', '.') }}
                             </td>
-                            <td style="padding: 0.6rem; text-align: right; font-variant-numeric: tabular-nums;">
+                            <td class="col-pct" style="padding: 0.6rem; text-align: right; font-variant-numeric: tabular-nums;">
                                 {{ $pct }} %
                             </td>
-                            <td style="padding: 0.6rem; text-align: right; font-variant-numeric: tabular-nums;">
+                            <td class="col-avg" style="padding: 0.6rem; text-align: right; font-variant-numeric: tabular-nums;">
                                 {{ $avg !== null ? $avg . ' %' : '—' }}
                             </td>
-                            <td style="padding: 0.6rem;">
-                                <x-chip-estado :tipo="$chipTipo" :texto="$estadoTexto" />
+                            <td class="col-estado" style="padding: 0.6rem;">
+                                <x-chip-estado :nivel="$chipTipo" :texto="$estadoTexto" />
                             </td>
                         </tr>
                     @endforeach

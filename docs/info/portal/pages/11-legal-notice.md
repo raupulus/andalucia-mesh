@@ -25,7 +25,7 @@ Cada `###` es un H2 de la página.
 
 **H1:** Aviso legal
 
-Última actualización: [fecha de publicación]
+Última actualización: 8 de octubre de 2026
 
 ### 1. Titular
 
@@ -33,47 +33,53 @@ Este sitio web, `{PROJECT_DOMAIN}`, y los servicios publicados en sus subdominio
 
 Contacto: {PROJECT_CONTACT}
 
-El proyecto no desarrolla ninguna actividad económica: no cobra por nada ni acepta donaciones.
+El proyecto no desarrolla ninguna actividad económica: no comercializa productos ni servicios, no cobra suscripciones ni acepta donaciones económicas.
 
 ### 2. Objeto
 
-Informar sobre la malla de radio LoRa de Cádiz y Andalucía y ofrecer herramientas para verla y cuidarla: mapas, estadísticas, rankings, alertas, bots, una API pública y guías de configuración.
+Informar sobre la malla de radio LoRa de Cádiz y Andalucía y ofrecer herramientas abiertas para observarla y mantenerla: mapas cartográficos, métricas de calidad de enlace, estadísticas provinciales, rankings de actividad, catálogo de alertas operativas, bots de notificación, una API pública y guías prácticas de configuración de equipos.
 
 ### 3. Condiciones de uso
 
-- El uso es libre y gratuito, sin registro. Solo el panel de administración es privado.
-- Te comprometes a usar el sitio de buena fe: no intentar entrar en zonas privadas, no superar los límites de la API ni sobrecargar el servidor, y no usar los datos para localizar, molestar o perjudicar a nadie.
-- Las credenciales de cada gateway son personales y no se pueden compartir. Podemos dar de baja un gateway que envíe datos falsos o que perjudique a la malla.
-- Podemos cambiar, suspender o cerrar cualquier servicio en cualquier momento.
+- El uso del portal y de sus consultas públicas es libre y gratuito para toda la comunidad, sin requerir registro previo de usuario. El acceso a la consola de administración `/admin` está restringido exclusivamente a tareas de soporte y mantenimiento técnico de los operadores.
+- Te comprometes a hacer un uso diligente y de buena fe: no intentar vulnerar zonas privadas del sistema, respetar los límites de frecuencia de peticiones de la API pública para evitar la sobrecarga de la infraestructura, y abstenerte de utilizar la información para geolocalizar, hostigar o menoscabar los derechos de ningún usuario u operador.
+- Las credenciales asignadas para la interconexión de gateways son personales e intransferibles. La administración se reserva la facultad de suspender o dar de baja el acceso de cualquier gateway que inyecte telemetría falseada o dañina para la estabilidad de la malla.
+- Dado el carácter voluntario y no retribuido del servicio, podemos actualizar, suspender o cesar cualquiera de las herramientas publicadas en cualquier instante.
 
 ### 4. Exclusión de responsabilidad
 
-- **No es un servicio de emergencias.** No se garantiza que un mensaje llegue a su destino ni que la red o las webs estén disponibles. En una emergencia, llama al 112.
-- **Datos tal cual.** Lo que se muestra puede estar incompleto, ser aproximado o contener errores: las posiciones tienen una precisión reducida y hay nodos que no aparecen.
-- **Avisos orientativos.** Las alertas se generan de forma automática. Son una ayuda para mantener la red y no implican culpa ni mala fe de quien opera el nodo.
-- **Normativa de radio.** Cada persona es responsable de que su equipo cumpla la normativa radioeléctrica aplicable a la banda de 868 MHz, incluida la potencia y el ciclo de trabajo.
-- **Mensajes de los canales públicos.** Los escriben sus autores. El proyecto solo los muestra tal y como se emitieron por radio y no responde de su contenido.
-- **Enlaces externos.** No respondemos del contenido de los sitios de terceros a los que se enlaza.
+- **No es un servicio de emergencias.** Las redes de radio comunitaria experimental y este portal web no sustituyen en ningún caso a los canales oficiales de socorro. No se garantiza la entrega de paquetes ni la disponibilidad ininterrumpida de las transmisiones. Ante situaciones de urgencia vital o emergencias, contacta de inmediato con el número de emergencias 112.
+- **Datos tal cual.** La información se presenta según se recibe por ondas de radio: puede estar incompleta, diferir temporalmente de la realidad o contener imprecisiones derivadas de la propagación o de configuraciones con precisión geográfica deliberadamente atenuada.
+- **Avisos orientativos.** Las alertas se generan de forma automatizada mediante reglas analíticas para facilitar la detección de incidencias comunes en la red; su emisión es meramente orientativa y no prejuzga la intención ni la pericia del operador del nodo.
+- **Normativa de telecomunicaciones.** Cada titular de una estación de radio es responsable exclusivo de que su dispositivo opere dentro de los parámetros legalmente autorizados para la banda ISM de 868 MHz en España y la Unión Europea, respetando las limitaciones de potencia radiada (PIRE) y ciclo de trabajo (*duty cycle*).
+- **Mensajes de los canales públicos.** Los mensajes transmitidos en canales comunitarios reflejan exclusivamente la opinión y expresión de sus emisores. El sistema se limita a procesar de forma automática y transparente paquetes transmitidos por radiofrecuencia con clave abierta por defecto.
+- **Enlaces externos.** No nos responsabilizamos de los contenidos, servicios ni políticas de privacidad de plataformas y sitios web externos enlazados desde nuestras páginas.
 
 ### 5. Proyecto independiente
 
-{PROJECT_NAME} es un proyecto independiente. No está afiliado ni respaldado por los proyectos de software ni por los fabricantes de los equipos que usa, ni por otras comunidades de la malla.
+{PROJECT_NAME} es una iniciativa ciudadana e independiente sin vinculación societaria, laboral ni de patrocinio con el proyecto oficial Meshtastic, con fabricantes de hardware ni con otras asociaciones o redes en malla.
 
-### 6. Propiedad intelectual
+### 6. Propiedad intelectual y licencias
 
-- Los textos, el diseño y el logo de este sitio son de Raúl Caro Pastorino. Los textos se publican bajo licencia CC BY 4.0, igual que los datos de la API; el diseño y el logo no se licencian.
-- PotatoMesh se usa bajo su licencia Apache-2.0, y MeshView, bajo la licencia indicada en su repositorio. Enlace a cada proyecto.
-- El resto del software libre con el que funciona el proyecto se usa según sus propias licencias: Laravel y Filament (MIT), Nginx (BSD-2-Clause), Mosquitto (EPL-2.0/EDL-1.0), PostgreSQL (licencia PostgreSQL), TimescaleDB (Timescale License, edición Community), MeshView (AGPL-3.0) y PotatoMesh (Apache-2.0), con enlace a cada proyecto. Los servicios propios que usan las definiciones oficiales del protocolo se publican con licencia GPL-3.0.
-- Límites provinciales: © Instituto Geográfico Nacional (CNIG), bajo CC BY 4.0, simplificados para el mapa.
-- Los mensajes y los nombres de los nodos pertenecen a quienes los emiten.
+- **Contenidos y marca:** Los textos explicativos de este portal se publican bajo licencia Creative Commons Reconocimiento 4.0 Internacional ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.es)), al igual que los datos servidos a través de la API pública. El diseño visual, la maquetación y el logotipo de {PROJECT_NAME} son titularidad exclusiva de Raúl Caro Pastorino y quedan reservados todos los derechos.
+- **Cartografía oficial:** Los límites provinciales y contornos geográficos mostrados en los mapas proceden de las delimitaciones cartográficas del Instituto Geográfico Nacional ([CNIG/IGN](https://www.ign.es)), reutilizados bajo licencia [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.es) y simplificados técnicamente para optimizar su representación web.
+- **Software libre de terceros:**
+  - [PotatoMesh](https://github.com/cameronfabbri/PotatoMesh): mapa web ágil de visualización de nodos LoRa, publicado bajo licencia Apache 2.0.
+  - [MeshView](https://github.com/pdxlocations/MeshView): analizador y visor topológico de redes en malla, publicado bajo licencia AGPL-3.0.
+  - [Laravel](https://laravel.com) y [Filament](https://filamentphp.com): entorno de desarrollo web y panel de administración, bajo licencia MIT.
+  - [Eclipse Mosquitto](https://mosquitto.org): servidor de mensajería MQTT, bajo licencias EPL-2.0 y EDL-1.0.
+  - [PostgreSQL](https://www.postgresql.org) y [TimescaleDB](https://www.timescale.com): motor de base de datos relacional y series temporales (licencias PostgreSQL y Timescale Community Edition).
+  - [Nginx](https://nginx.org): servidor proxy inverso y terminador TLS, bajo licencia BSD de 2 cláusulas.
+  - Servicios propios del proyecto que integran definiciones del protocolo oficial de radio se licencian bajo GNU GPL v3.0.
+- **Emisiones y mensajes en malla:** Los nombres públicos de los nodos, sus identificadores y los mensajes transmitidos en canales abiertos pertenecen a sus respectivos emisores y operadores.
 
 ### 7. Privacidad y cookies
 
-Cómo tratamos los datos: [política de privacidad](/legal/privacidad). Qué guardamos en tu navegador: [política de cookies](/legal/cookies).
+Para conocer en detalle el tratamiento de información técnica y el ejercicio de tus derechos, consulta nuestra [política de privacidad](/legal/privacidad) y nuestra [política de cookies](/legal/cookies).
 
-### 8. Ley aplicable
+### 8. Ley aplicable y jurisdicción
 
-Este aviso se rige por la legislación española.
+Este aviso legal y las relaciones entre el portal y sus usuarios se rigen por la legislación civil y administrativa española.
 
 ## Datos dinámicos y configuración
 
@@ -92,4 +98,4 @@ Este aviso se rige por la legislación española.
 - La sección de software de terceros nombra cada proyecto con su licencia y enlace: es atribución exigida por las licencias, no uso de marca (la regla de marcas no aplica a créditos).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08
