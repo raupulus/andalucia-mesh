@@ -205,7 +205,7 @@ async def main() -> None:
                 port=config.MQTT_PORT,
                 username=config.MQTT_USER,
                 password=config.MQTT_PASSWORD,
-                client_id="ingesta",
+                identifier="snm-ingesta",
                 clean_session=True,
                 keepalive=60,
             ) as client:
