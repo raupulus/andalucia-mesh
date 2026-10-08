@@ -328,6 +328,12 @@
                 transform: translateY(-1px);
             }
 
+            .fi-ra-btn-lg {
+                padding: 0.85rem 1.85rem;
+                font-size: 0.95rem;
+                border-radius: 0.625rem;
+            }
+
             /* Ficha de nodo conectado */
             .fi-ra-node-banner {
                 background: linear-gradient(135deg, rgba(0, 122, 51, 0.08) 0%, rgba(103, 234, 148, 0.06) 100%);
@@ -493,10 +499,10 @@
             }
 
             .fi-ra-tab-content {
-                padding: 2rem;
+                padding: 2.25rem 2.5rem;
                 display: flex;
                 flex-direction: column;
-                gap: 1.5rem;
+                gap: 2rem;
             }
 
             /* Tarjetas de Selección de Roles */
@@ -569,6 +575,159 @@
                 color: #C7C8D4;
             }
 
+            /* Barra de Acción Oxigenada para Roles y Mantenimiento */
+            .fi-ra-action-bar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 2rem;
+                padding: 1.75rem 2.25rem;
+                border-radius: 1rem;
+                background-color: #F8F9FA;
+                border: 1.5px solid #E0E1EB;
+                margin-top: 2rem;
+            }
+            .dark .fi-ra-action-bar {
+                background-color: #1A1B23;
+                border-color: #353644;
+            }
+            .fi-ra-action-bar-info {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                flex: 1 1 320px;
+            }
+            .fi-ra-action-bar-title {
+                font-size: 1rem;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                color: #2C2D3C;
+            }
+            .dark .fi-ra-action-bar-title {
+                color: #F0F0F5;
+            }
+            .fi-ra-action-bar-btn {
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                gap: 1rem;
+                margin-left: auto;
+            }
+            @media (max-width: 640px) {
+                .fi-ra-action-bar {
+                    flex-direction: column;
+                    align-items: stretch;
+                    padding: 1.25rem;
+                    gap: 1.25rem;
+                }
+                .fi-ra-action-bar-btn {
+                    width: 100%;
+                    margin-left: 0;
+                }
+                .fi-ra-action-bar-btn button {
+                    width: 100%;
+                }
+            }
+
+            .fi-ra-reboot-box {
+                padding: 2rem 2.25rem;
+                border-radius: 1rem;
+                background-color: rgba(245, 158, 11, 0.08);
+                border: 1.5px solid rgba(245, 158, 11, 0.35);
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            .fi-ra-reboot-footer-bar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 2rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid rgba(245, 158, 11, 0.25);
+                margin-top: 0.75rem;
+            }
+            @media (max-width: 640px) {
+                .fi-ra-reboot-footer-bar {
+                    flex-direction: column;
+                    align-items: stretch;
+                    gap: 1.25rem;
+                }
+                .fi-ra-reboot-footer-bar button {
+                    width: 100%;
+                }
+            }
+
+            /* Banner de notificación integrado */
+            .fi-ra-notification-banner {
+                padding: 1rem 1.35rem;
+                border-radius: 0.875rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+                animation: fi-ra-fadein 0.25s ease-out;
+            }
+            .fi-ra-notif-success {
+                background-color: rgba(16, 185, 129, 0.12);
+                border: 1.5px solid rgba(16, 185, 129, 0.4);
+                color: #065F46;
+            }
+            .dark .fi-ra-notif-success {
+                color: #A7F3D0;
+                border-color: rgba(16, 185, 129, 0.5);
+            }
+            .fi-ra-notif-error {
+                background-color: rgba(239, 68, 68, 0.12);
+                border: 1.5px solid rgba(239, 68, 68, 0.4);
+                color: #991B1B;
+            }
+            .dark .fi-ra-notif-error {
+                color: #FECACA;
+                border-color: rgba(239, 68, 68, 0.5);
+            }
+            .fi-ra-notif-warning {
+                background-color: rgba(245, 158, 11, 0.12);
+                border: 1.5px solid rgba(245, 158, 11, 0.4);
+                color: #92400E;
+            }
+            .dark .fi-ra-notif-warning {
+                color: #FDE68A;
+                border-color: rgba(245, 158, 11, 0.5);
+            }
+            .fi-ra-notif-info {
+                background-color: rgba(59, 130, 246, 0.12);
+                border: 1.5px solid rgba(59, 130, 246, 0.4);
+                color: #1E40AF;
+            }
+            .dark .fi-ra-notif-info {
+                color: #BFDBFE;
+                border-color: rgba(59, 130, 246, 0.5);
+            }
+            .fi-ra-notif-close {
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 1.35rem;
+                font-weight: bold;
+                line-height: 1;
+                opacity: 0.6;
+                transition: opacity 0.15s ease;
+                padding: 0.2rem 0.5rem;
+            }
+            .fi-ra-notif-close:hover {
+                opacity: 1;
+            }
+            @keyframes fi-ra-fadein {
+                from { opacity: 0; transform: translateY(-4px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
             /* Tarjetas de Acción de Sondeo y Unicast */
             .fi-ra-action-grid {
                 display: grid;
@@ -579,6 +738,11 @@
                 .fi-ra-action-grid-3 {
                     grid-template-columns: repeat(3, 1fr);
                 }
+                .fi-ra-action-grid-4 {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+            @media (min-width: 1024px) {
                 .fi-ra-action-grid-4 {
                     grid-template-columns: repeat(4, 1fr);
                 }
@@ -1007,7 +1171,8 @@
                     </div>
                 </div>
 
-                <div>
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                    {{-- Badge de estado del router --}}
                     <template x-if="selectedRouterStatus">
                         <span class="fi-ra-badge"
                               :class="{
@@ -1018,6 +1183,18 @@
                               x-text="`Estado: ${selectedRouterStatus.toUpperCase()}`">
                         </span>
                     </template>
+
+                    {{-- Indicador de clave pública en NodeDB local --}}
+                    <template x-if="targetHasPublicKeyInLocalRadio()">
+                        <span class="fi-ra-badge fi-ra-badge-managed" title="Clave pública registrada en memoria del nodo local.">
+                            🔒 Enlace Verificado
+                        </span>
+                    </template>
+                    <template x-if="!targetHasPublicKeyInLocalRadio() && (selectedRouterHex || manualNodeInput)">
+                        <span class="fi-ra-badge fi-ra-badge-known" title="Transmisión directa por radioenlace LoRa.">
+                            📡 Enlace LoRa Directo
+                        </span>
+                    </template>
                 </div>
             </div>
 
@@ -1025,6 +1202,21 @@
             <div x-show="!selectedRouterHex && !manualNodeInput" class="p-3 rounded-lg text-xs" style="background-color: rgba(148, 163, 184, 0.08); border: 1px dashed rgba(148, 163, 184, 0.3); color: #64748B;">
                 <span>💡 {{ __('admin.gestion_routers.target_none_selected') }}</span>
             </div>
+        </div>
+
+        {{-- Banner de Notificaciones del Sistema Meshtastic (Éxito, Error o Advertencia) --}}
+        <div x-show="notification.show" x-transition class="fi-ra-notification-banner"
+             :class="{
+                 'fi-ra-notif-success': notification.type === 'success',
+                 'fi-ra-notif-error': notification.type === 'error',
+                 'fi-ra-notif-warning': notification.type === 'warning',
+                 'fi-ra-notif-info': notification.type === 'info'
+             }">
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1;">
+                <span class="text-xl" x-text="notification.type === 'success' ? '✅' : (notification.type === 'error' ? '❌' : (notification.type === 'warning' ? '⚠️' : 'ℹ️'))"></span>
+                <span class="text-sm font-semibold leading-normal" x-text="notification.message"></span>
+            </div>
+            <button type="button" @click="dismissNotification()" class="fi-ra-notif-close" title="Cerrar aviso">×</button>
         </div>
 
         {{-- 4. Contenedor de Pestañas de Acciones Operativas --}}
@@ -1112,17 +1304,32 @@
                         </div>
                     </div>
 
-                    <div class="pt-2">
-                        <button type="button" @click="applyRemoteRole()" :disabled="roleSending || connectionStatus !== 'connected' || (!selectedRouterNodeNum && !manualNodeInput)" class="fi-ra-btn fi-ra-btn-primary">
-                            <span x-show="!roleSending">🚀 {{ __('admin.gestion_routers.btn_apply_role') }}</span>
-                            <span x-show="roleSending">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
-                        </button>
-
-                        <div x-show="connectionStatus !== 'connected'" class="text-xs mt-2 flex items-center gap-1.5" style="color: #D97706;">
-                            <span>⚠️</span> <span>{{ __('admin.gestion_routers.connect_prompt_hint') }}</span>
+                    <div class="fi-ra-action-bar">
+                        <div class="fi-ra-action-bar-info">
+                            <div class="fi-ra-action-bar-title">
+                                <span>Orden preparada:</span>
+                                <span class="font-mono text-emerald-700 dark:text-emerald-400 font-bold" x-text="`Cambiar rol a ${getRoleName(selectedRole)}`"></span>
+                            </div>
+                            <div x-show="selectedRouterHex || manualNodeInput" class="text-xs text-gray-500 dark:text-gray-400">
+                                <span>Destino:</span>
+                                <strong class="font-mono text-emerald-600 dark:text-emerald-400" x-text="selectedRouterHex || manualNodeInput"></strong>
+                                <template x-if="selectedRouterName">
+                                    <span class="text-gray-600 dark:text-gray-300" x-text="` · ${selectedRouterName}`"></span>
+                                </template>
+                            </div>
+                            <div x-show="connectionStatus !== 'connected'" class="text-xs flex items-center gap-1.5 text-amber-700 dark:text-amber-400 font-medium">
+                                <span>⚠️</span> <span>{{ __('admin.gestion_routers.connect_prompt_hint') }}</span>
+                            </div>
+                            <div x-show="connectionStatus === 'connected' && !selectedRouterNodeNum && !manualNodeInput" class="text-xs flex items-center gap-1.5 text-amber-700 dark:text-amber-400 font-medium">
+                                <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
+                            </div>
                         </div>
-                        <div x-show="connectionStatus === 'connected' && !selectedRouterNodeNum && !manualNodeInput" class="text-xs mt-2 flex items-center gap-1.5" style="color: #D97706;">
-                            <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
+
+                        <div class="fi-ra-action-bar-btn">
+                            <button type="button" @click="applyRemoteRole()" :disabled="roleSending || connectionStatus !== 'connected' || (!selectedRouterNodeNum && !manualNodeInput)" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-lg">
+                                <span x-show="!roleSending">🚀 {{ __('admin.gestion_routers.btn_apply_role') }}</span>
+                                <span x-show="roleSending">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1134,8 +1341,13 @@
                             <span>⭐</span> {{ __('admin.gestion_routers.favorites_title') }}
                         </h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                            {{ __('admin.gestion_routers.favorites_desc') }}
+                            {{ __('admin.gestion_routers.favorites_desc') }} Los routers priorizan la retransmisión de sus favoritos y facilitan la administración remota.
                         </p>
+                    </div>
+
+                    {{-- Nota de contexto sobre favoritos --}}
+                    <div class="p-3 rounded-lg text-xs" style="background-color: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); color: #1E40AF;">
+                        <span>ℹ️</span> <strong>Nodos Favoritos:</strong> Los repetidores y routers priorizan la retransmisión de paquetes y telemetría de sus nodos favoritos en la malla LoRa.
                     </div>
 
                     <div class="fi-ra-form-grid" style="grid-template-columns: 2fr 1fr;">
@@ -1167,10 +1379,10 @@
                         <div class="fi-ra-label" style="margin-bottom: 0.6rem;">{{ __('admin.gestion_routers.session_favorites_heading') }}</div>
                         <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
                             <template x-for="fav in sessionFavorites" :key="fav">
-                                <span class="fi-ra-badge fi-ra-badge-managed font-mono" style="padding: 0.4rem 0.75rem;">
+                                <span class="fi-ra-badge fi-ra-badge-managed font-mono cursor-pointer" style="padding: 0.4rem 0.75rem;" title="Haz clic para cargar este ID en el campo de texto" @click="favoriteNodeInput = fav">
                                     <span>⭐</span>
                                     <span x-text="fav"></span>
-                                    <button type="button" @click="favoriteNodeInput = fav; applyRemoteFavorite('remove')" style="margin-left: 0.5rem; background: none; border: none; cursor: pointer; color: #E5484D; font-weight: bold;">×</button>
+                                    <button type="button" @click.stop="favoriteNodeInput = fav; applyRemoteFavorite('remove')" style="margin-left: 0.5rem; background: none; border: none; cursor: pointer; color: #E5484D; font-weight: bold;" title="Quitar de favoritos">×</button>
                                 </span>
                             </template>
                         </div>
@@ -1193,7 +1405,7 @@
                             <div class="fi-ra-action-icon">📡</div>
                             <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_poll_nodeinfo') }}</div>
                             <div class="fi-ra-action-desc">
-                                Solicita a todos los nodos en cobertura que emitan su nombre, modelo y datos básicos de identificación.
+                                Anuncia la identidad de tu nodo local a toda la malla (^all). Los routers cercanos registrarán tu clave pública y actualizarán su NodeDB.
                             </div>
                         </button>
 
@@ -1201,7 +1413,7 @@
                             <div class="fi-ra-action-icon">📍</div>
                             <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_poll_position') }}</div>
                             <div class="fi-ra-action-desc">
-                                Pide a los nodos con GPS o posición fija configurada que transmitan sus coordenadas actuales.
+                                Transmite tus coordenadas GPS o posición fija configurada a toda la malla (^all).
                             </div>
                         </button>
 
@@ -1209,7 +1421,7 @@
                             <div class="fi-ra-action-icon">🔋</div>
                             <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_poll_telemetry') }}</div>
                             <div class="fi-ra-action-desc">
-                                Solicita datos energéticos (batería, voltaje) y porcentaje de saturación de canal (ChUtil / AirUtil).
+                                Emite tus métricas de batería, voltaje y saturación de canal (ChUtil / AirUtil) a la malla (^all).
                             </div>
                         </button>
                     </div>
@@ -1239,7 +1451,7 @@
                         <button type="button" @click="sendUnicastRequest('nodeinfo')" :disabled="unicastSending || connectionStatus !== 'connected'" class="fi-ra-action-card">
                             <div class="fi-ra-action-icon">ℹ️</div>
                             <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_req_nodeinfo') }}</div>
-                            <div class="fi-ra-action-desc">Identidad, modelo de hardware y roles.</div>
+                            <div class="fi-ra-action-desc">Identidad, modelo de hardware y roles del nodo.</div>
                         </button>
 
                         <button type="button" @click="sendUnicastRequest('position')" :disabled="unicastSending || connectionStatus !== 'connected'" class="fi-ra-action-card">
@@ -1257,8 +1469,38 @@
                         <button type="button" @click="sendUnicastRequest('traceroute')" :disabled="unicastSending || connectionStatus !== 'connected'" class="fi-ra-action-card">
                             <div class="fi-ra-action-icon">🔄</div>
                             <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_req_traceroute') }}</div>
-                            <div class="fi-ra-action-desc">Rastreo de saltos / ruta de retorno.</div>
+                            <div class="fi-ra-action-desc">Rastreo de saltos y calidad SNR de retorno (30s).</div>
                         </button>
+                    </div>
+
+                    {{-- Caja de estado reactivo y resultados de Traceroute (espera de 30s) --}}
+                    <div x-show="tracerouteActive || tracerouteResult" class="p-4 rounded-xl border transition-all mt-3"
+                         :style="tracerouteActive ? 'background-color: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.3);' : 'background-color: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.3);'">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="text-xs font-bold uppercase tracking-wider flex items-center gap-2"
+                                 :style="tracerouteActive ? 'color: #2563EB;' : 'color: #059669;'">
+                                <span x-show="tracerouteActive" class="animate-spin inline-block">🔄</span>
+                                <span x-show="!tracerouteActive">📍</span>
+                                <span>Ruta Traceroute hacia <strong class="font-mono" x-text="tracerouteTargetHex"></strong></span>
+                            </div>
+                            <template x-if="tracerouteActive">
+                                <span class="font-mono text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300">
+                                    <span x-text="tracerouteCountdown"></span>s restantes
+                                </span>
+                            </template>
+                        </div>
+
+                        <template x-if="tracerouteActive">
+                            <div class="text-xs text-gray-600 dark:text-gray-300">
+                                Emitiendo sonda de enrutamiento por radiofrecuencia a través de los nodos de la malla... Esperando hasta 30 segundos a que los paquetes de ida y vuelta completen el recorrido.
+                            </div>
+                        </template>
+
+                        <template x-if="tracerouteResult">
+                            <div class="mt-2 p-3 rounded-lg bg-white/70 dark:bg-black/30 font-mono text-xs font-bold text-emerald-800 dark:text-emerald-300 border border-emerald-500/20"
+                                 x-text="tracerouteResult">
+                            </div>
+                        </template>
                     </div>
 
                     <div x-show="connectionStatus !== 'connected'" class="text-xs mt-1 flex items-center gap-1.5" style="color: #D97706;">
@@ -1280,32 +1522,34 @@
                         </p>
                     </div>
 
-                    <div class="p-6 rounded-xl" style="background-color: rgba(245, 158, 11, 0.08); border: 1.5px solid rgba(245, 158, 11, 0.3); display: flex; flex-direction: column; gap: 1rem;">
-                        <div class="font-bold text-sm text-amber-800 dark:text-amber-300 flex items-center gap-2">
+                    <div class="fi-ra-reboot-box">
+                        <div class="font-bold text-base text-amber-800 dark:text-amber-300 flex items-center gap-2">
                             <span>⚠️</span> {{ __('admin.gestion_routers.reboot_heading') }}
                         </div>
-                        <p class="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+                        <p class="text-xs text-amber-800/80 dark:text-amber-200/80 leading-relaxed">
                             {{ __('admin.gestion_routers.reboot_desc') }}
                         </p>
 
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <label class="fi-ra-label" style="margin: 0;">{{ __('admin.gestion_routers.delay_secs_label') }}:</label>
-                            <input type="number" min="1" max="600" x-model="rebootSeconds" class="fi-ra-input font-mono" style="width: 6rem; padding: 0.4rem 0.6rem;" />
-                            <span class="text-xs text-gray-500 dark:text-gray-400">segundos</span>
+                        <div class="fi-ra-reboot-footer-bar">
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <label class="fi-ra-label" style="margin: 0; font-size: 0.875rem;">{{ __('admin.gestion_routers.delay_secs_label') }}:</label>
+                                <input type="number" min="1" max="600" x-model="rebootSeconds" class="fi-ra-input font-mono" style="width: 6.5rem; text-align: center; padding: 0.5rem 0.75rem;" />
+                                <span class="text-xs text-gray-600 dark:text-gray-300 font-semibold">segundos</span>
+                            </div>
+
+                            <div class="fi-ra-action-bar-btn">
+                                <button type="button" @click="applyRemoteReboot()" :disabled="rebootSending || connectionStatus !== 'connected' || (!selectedRouterNodeNum && !manualNodeInput)" class="fi-ra-btn fi-ra-btn-warning fi-ra-btn-lg">
+                                    <span x-show="!rebootSending">⚠️ {{ __('admin.gestion_routers.btn_apply_reboot') }}</span>
+                                    <span x-show="rebootSending">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
+                                </button>
+                            </div>
                         </div>
 
-                        <div style="padding-top: 0.5rem;">
-                            <button type="button" @click="applyRemoteReboot()" :disabled="rebootSending || connectionStatus !== 'connected' || (!selectedRouterNodeNum && !manualNodeInput)" class="fi-ra-btn fi-ra-btn-warning">
-                                <span x-show="!rebootSending">⚠️ {{ __('admin.gestion_routers.btn_apply_reboot') }}</span>
-                                <span x-show="rebootSending">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
-                            </button>
-
-                            <div x-show="connectionStatus !== 'connected'" class="text-xs mt-2 flex items-center gap-1.5" style="color: #D97706;">
-                                <span>⚠️</span> <span>{{ __('admin.gestion_routers.connect_prompt_hint') }}</span>
-                            </div>
-                            <div x-show="connectionStatus === 'connected' && !selectedRouterNodeNum && !manualNodeInput" class="text-xs mt-2 flex items-center gap-1.5" style="color: #D97706;">
-                                <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
-                            </div>
+                        <div x-show="connectionStatus !== 'connected'" class="text-xs flex items-center gap-1.5 text-amber-800 dark:text-amber-300 font-medium">
+                            <span>⚠️</span> <span>{{ __('admin.gestion_routers.connect_prompt_hint') }}</span>
+                        </div>
+                        <div x-show="connectionStatus === 'connected' && !selectedRouterNodeNum && !manualNodeInput" class="text-xs flex items-center gap-1.5 text-amber-800 dark:text-amber-300 font-medium">
+                            <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
                         </div>
                     </div>
                 </div>

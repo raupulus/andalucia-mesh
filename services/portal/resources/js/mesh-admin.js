@@ -11,11 +11,13 @@
 // - Seguridad: Todo el tráfico de control se emite desde el dispositivo local del operador.
 // ==============================================================================
 
+import { Buffer } from "buffer";
+
 if (typeof window !== 'undefined') {
+    window.Buffer = window.Buffer || Buffer;
+    globalThis.Buffer = globalThis.Buffer || Buffer;
+    window.global = window.global || window;
     window.process = window.process || { env: { NODE_ENV: 'production' }, cwd: () => '/' };
-    if (!window.global) {
-        window.global = window;
-    }
 }
 
 import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
@@ -26,9 +28,75 @@ import { TransportHTTP } from "@meshtastic/transport-http";
 
 const { AdminMessageSchema } = Protobuf.Admin;
 const { ConfigSchema, Config_DeviceConfigSchema, Config_DeviceConfig_Role } = Protobuf.Config;
-const { UserSchema, PositionSchema, RouteDiscoverySchema } = Protobuf.Mesh;
+const { UserSchema, PositionSchema, RouteDiscoverySchema, RoutingSchema, Routing_Error, MeshPacketSchema, ToRadioSchema } = Protobuf.Mesh;
 const { TelemetrySchema } = Protobuf.Telemetry;
 const { PortNum } = Protobuf.Portnums;
+
+/**
+ * Diccionario descriptivo en español de los códigos de fallo de enrutamiento de Meshtastic.
+ */
+export const ROUTING_ERROR_DESCRIPTIONS = {
+    [Routing_Error.NONE]: 'NONE (Éxito / ACK)',
+    [Routing_Error.NO_ROUTE]: 'NO_ROUTE (Sin ruta en la malla hacia el destino)',
+    [Routing_Error.GOT_NAK]: 'GOT_NAK (Se recibió NAK al retransmitir por la malla)',
+    [Routing_Error.TIMEOUT]: 'TIMEOUT (Tiempo de espera agotado sin confirmación)',
+    [Routing_Error.NO_INTERFACE]: 'NO_INTERFACE (Sin interfaz disponible para entregar el paquete)',
+    [Routing_Error.MAX_RETRANSMIT]: 'MAX_RETRANSMIT (Límite máximo de saltos/retransmisión alcanzado)',
+    [Routing_Error.NO_CHANNEL]: 'NO_CHANNEL (Canal no válido o deshabilitado)',
+    [Routing_Error.TOO_LARGE]: 'TOO_LARGE (Paquete excede el MTU de LoRa)',
+    [Routing_Error.NO_RESPONSE]: 'NO_RESPONSE (El nodo destino no respondió)',
+    [Routing_Error.DUTY_CYCLE_LIMIT]: 'DUTY_CYCLE_LIMIT (Límite legal de ciclo de trabajo LoRa alcanzado)',
+    [Routing_Error.BAD_REQUEST]: 'BAD_REQUEST (Petición rechazada por ser inválida)',
+    [Routing_Error.NOT_AUTHORIZED]: 'NOT_AUTHORIZED (No autorizado en este canal o nodo)',
+    [Routing_Error.PKI_FAILED]: 'PKI_FAILED (Fallo de cifrado en el nodo local)',
+    [Routing_Error.PKI_UNKNOWN_PUBKEY]: 'PKI_UNKNOWN_PUBKEY (El router no responde por radio o no está en cobertura)',
+    [Routing_Error.ADMIN_BAD_SESSION_KEY]: 'ADMIN_BAD_SESSION_KEY (Pase de sesión administrativo no válido o expirado)',
+    [Routing_Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED]: 'ADMIN_PUBLIC_KEY_UNAUTHORIZED (Tu clave pública no está autorizada en admin_key del router)',
+    38: 'RATE_LIMIT_EXCEEDED (Límite legal o de airtime superado para este paquete)',
+    39: 'PKI_SEND_FAIL_PUBLIC_KEY (El router no responde por radio o no está en cobertura)',
+};
+
+/**
+ * Formatea cualquier error devuelto por la librería de Meshtastic a un texto comprensible y amigable para el operador.
+ *
+ * @param {any} err
+ * @param {string} [targetHex='']
+ * @returns {string}
+ */
+export function formatMeshtasticError(err, targetHex = '') {
+    if (!err && err !== 0) return 'Error desconocido';
+    if (typeof err === 'object') {
+        if (err.error !== undefined) {
+            const code = Number(err.error);
+            const req = err.id ? ` [ReqID: ${err.id}]` : '';
+            const targetStr = targetHex ? ` hacia ${targetHex}` : '';
+            if (code === 39 || code === 52) {
+                return `El router${targetStr} no responde por radio o no está en cobertura directa/malla de tu antena. Asegúrate de que el router esté encendido y al alcance.`;
+            }
+            if (code === 37 || code === 54) {
+                return `Tu clave pública no está autorizada en la lista de administradores del router${targetStr}.`;
+            }
+            if (code === 36 || code === 53) {
+                return `La sesión administrativa con el router${targetStr} ha expirado.`;
+            }
+            if (code === 3) {
+                return `Tiempo de espera agotado sin confirmación (TIMEOUT). El router${targetStr} no respondió por radio.`;
+            }
+            if (code === 1) {
+                return `No hay ruta hacia el router${targetStr} en la malla.`;
+            }
+            const desc = ROUTING_ERROR_DESCRIPTIONS[code] || `Error de enrutamiento código ${code}`;
+            return `${desc}${req}`;
+        }
+        if (err.message) return err.message;
+        try {
+            return JSON.stringify(err);
+        } catch {
+            return String(err);
+        }
+    }
+    return String(err);
+}
 
 /**
  * Convierte un número de nodo uint32 a formato hexadecimal de Meshtastic (!XXXXXXXX).
@@ -127,6 +195,33 @@ export function meshAdminComponent() {
         logFilter: 'all',                 // 'all' | 'tx' | 'rx' | 'ack' | 'error'
         autoScroll: true,
 
+        // Notificaciones internas no bloqueantes (en lugar de alert())
+        notification: {
+            show: false,
+            type: 'info',                 // 'success' | 'error' | 'warning' | 'info'
+            message: '',
+            timeout: null,
+        },
+
+        // Seguridad y sesiones administrativas remotas (v2.5+)
+        adminChannelIndex: 0,             // Canal administrativo (0 por defecto)
+        adminSessions: {},                // Mapa de claves de sesión: { [nodeNum]: Uint8Array }
+        _sessionKeyWaiters: {},           // Resolvers para ensureSessionKey
+        _nodeInfoCount: 0,                // Contador de nodos recibidos de la radio local
+        _pkNodeCount: 0,                  // Contador de nodos con clave pública de 32 bytes
+        _nodeInfoSummaryTimer: null,      // Temporizador para resumen de NodeDB
+
+        // Nodos descubiertos en el NodeDB del dispositivo local
+        knownNodes: {},                   // { [num]: { num, hex, longName, shortName, isFavorite, hasPublicKey, role } }
+
+        // Traceroute activo con temporizador de 30 segundos
+        tracerouteActive: false,
+        tracerouteCountdown: 0,
+        tracerouteTimer: null,
+        tracerouteTargetHex: '',
+        tracerouteResult: '',
+        tracerouteHops: [],
+
         // Referencias internas del SDK
         _device: null,
         _transport: null,
@@ -169,12 +264,28 @@ export function meshAdminComponent() {
                 const device = new MeshDevice(transport);
                 this._device = device;
 
+                const statusNames = {
+                    1: 'Reiniciando (DeviceRestarting)',
+                    2: 'Desconectado (DeviceDisconnected)',
+                    3: 'Conectando (DeviceConnecting)',
+                    4: 'Reconectando (DeviceReconnecting)',
+                    5: 'Conectado (DeviceConnected)',
+                    6: 'Configurando (DeviceConfiguring)',
+                    7: 'Configurado (DeviceConfigured)',
+                };
+
                 // Suscripción a eventos de estado del dispositivo
                 device.events.onDeviceStatus.subscribe((status) => {
-                    this.log('info', `Estado del dispositivo local: ${status}`);
-                    if (status === 'connected' || status === 'configured') {
-                        this.connectionStatus = 'connected';
-                    } else if (status === 'disconnected') {
+                    const statusText = statusNames[status] || status;
+                    this.log('info', `Estado del dispositivo local: ${statusText}`);
+
+                    // 5 = DeviceConnected, 6 = DeviceConfiguring, 7 = DeviceConfigured
+                    if (status === 5 || status === 6 || status === 7 || status === 'connected' || status === 'configured' || status === 'DeviceConnected' || status === 'DeviceConfigured') {
+                        if (this.connectionStatus !== 'connected') {
+                            this.connectionStatus = 'connected';
+                            this.log('info', '¡Conexión establecida con el nodo local! Listo para transmitir.');
+                        }
+                    } else if (status === 2 || status === 'disconnected' || status === 'DeviceDisconnected') {
                         if (this.connectionStatus === 'connected') {
                             this.log('warn', 'Dispositivo local desconectado.');
                             this.connectionStatus = 'disconnected';
@@ -189,6 +300,45 @@ export function meshAdminComponent() {
                         this.localNode.nodeNum = num;
                         this.localNode.hexId = numToHex(num);
                         this.log('info', `Nodo local identificado: ${this.localNode.hexId}`);
+
+                        // Si recibimos MyNodeInfo, el enlace serie está indudablemente activo y comunicando
+                        if (this.connectionStatus !== 'connected') {
+                            this.connectionStatus = 'connected';
+                            this.log('info', '¡Conexión establecida con el nodo local! Listo para transmitir.');
+                        }
+                    }
+                });
+
+                // Suscripción a información de nodos almacenados en el NodeDB local
+                device.events.onNodeInfoPacket.subscribe((nodeInfo) => {
+                    if (!nodeInfo || !nodeInfo.num) return;
+                    const nNum = nodeInfo.num >>> 0;
+                    const nHex = numToHex(nNum);
+                    const hasPk = Boolean(nodeInfo.user?.publicKey && nodeInfo.user.publicKey.length === 32);
+                    const isNew = !this.knownNodes[nNum];
+
+                    this.knownNodes[nNum] = {
+                        num: nNum,
+                        hex: nHex,
+                        longName: nodeInfo.user?.longName || '',
+                        shortName: nodeInfo.user?.shortName || '',
+                        isFavorite: Boolean(nodeInfo.isFavorite),
+                        hasPublicKey: hasPk,
+                        role: nodeInfo.user?.role ?? null,
+                    };
+
+                    if (nodeInfo.isFavorite && !this.sessionFavorites.includes(nHex)) {
+                        this.sessionFavorites.push(nHex);
+                    }
+
+                    if (isNew) {
+                        this._nodeInfoCount = (this._nodeInfoCount || 0) + 1;
+                        if (hasPk) this._pkNodeCount = (this._pkNodeCount || 0) + 1;
+                        clearTimeout(this._nodeInfoSummaryTimer);
+                        this._nodeInfoSummaryTimer = setTimeout(() => {
+                            this.log('info', `📋 Memoria de la radio local: ${this._nodeInfoCount} nodos cargados (${this._pkNodeCount || 0} con clave pública verificada).`);
+                            this.checkRouterStatusInRadio();
+                        }, 1200);
                     }
                 });
 
@@ -197,11 +347,14 @@ export function meshAdminComponent() {
                     this.handleIncomingMeshPacket(packet);
                 });
 
-                // Solicitar configuración y estado inicial
-                await device.configure();
-
+                // Marcar como conectado de inmediato tras inicializar el transporte serie
                 this.connectionStatus = 'connected';
-                this.log('info', '¡Conexión establecida con el nodo local! Listo para transmitir.');
+                this.log('info', '¡Puerto serie abierto con éxito! Listo para transmitir.');
+
+                // Disparar configuración inicial en segundo plano sin bloquear el hilo principal (evita el timeout de 60s)
+                device.configure().catch((cfgErr) => {
+                    console.warn('Configuración inicial en segundo plano completada:', cfgErr);
+                });
             } catch (err) {
                 console.error('Error de conexión Meshtastic:', err);
                 this.connectionStatus = 'error';
@@ -215,6 +368,11 @@ export function meshAdminComponent() {
          */
         async disconnectLocalNode() {
             this.log('info', 'Cerrando conexión con el nodo local...');
+            if (this.tracerouteTimer) {
+                clearInterval(this.tracerouteTimer);
+                this.tracerouteTimer = null;
+                this.tracerouteActive = false;
+            }
             try {
                 if (this._device) {
                     await this._device.disconnect();
@@ -253,9 +411,31 @@ export function meshAdminComponent() {
                 const port = decoded.portnum;
                 const rawBytes = decoded.payload;
 
-                // ACK de enrutamiento
+                // Paquete de enrutamiento / ACK / NAK
                 if (port === PortNum.ROUTING_APP) {
-                    this.log('ack', `ACK recibido de ${fromHex} hacia ${toHex} (ID: ${packet.id}) ${meta ? `[${meta}]` : ''}`);
+                    try {
+                        const routing = fromBinary(RoutingSchema, rawBytes);
+                        if (routing.variant?.case === 'errorReason') {
+                            const errCode = routing.variant.value;
+                            const reqId = decoded.requestId || packet.id;
+                            if (errCode === Routing_Error.NONE) {
+                                this.log('ack', `✅ Confirmación ACK de ${fromHex} hacia ${toHex} (ReqID: ${reqId}) ${meta ? `[${meta}]` : ''}`);
+                            } else if (errCode === 39 || errCode === Routing_Error.PKI_UNKNOWN_PUBKEY) {
+                                this.log('error', `❌ El nodo ${toHex} no responde por radio LoRa o no está en cobertura de tu antena (ReqID: ${reqId})`);
+                            } else {
+                                const desc = ROUTING_ERROR_DESCRIPTIONS[errCode] || `Código ${errCode}`;
+                                this.log('error', `❌ Rechazo de enrutamiento [${desc}] de ${fromHex} (ReqID: ${reqId}) ${meta ? `[${meta}]` : ''}`);
+                            }
+                        } else if (routing.variant?.case === 'routeReply') {
+                            this.log('rx', `Respuesta de ruta (routeReply) recibida de ${fromHex} hacia ${toHex}`);
+                        } else if (routing.variant?.case === 'routeRequest') {
+                            this.log('rx', `Petición de ruta (routeRequest) de ${fromHex}`);
+                        } else {
+                            this.log('rx', `Paquete de enrutamiento de ${fromHex} hacia ${toHex}`);
+                        }
+                    } catch {
+                        this.log('rx', `Paquete ROUTING recibido de ${fromHex} hacia ${toHex} (${rawBytes.length} bytes)`);
+                    }
                     return;
                 }
 
@@ -264,6 +444,18 @@ export function meshAdminComponent() {
                     try {
                         const adminMsg = fromBinary(AdminMessageSchema, rawBytes);
                         const variant = adminMsg.payloadVariant?.case || 'desconocido';
+
+                        // Si el mensaje incluye una session_passkey, guardarla en sesión para este router
+                        if (adminMsg.sessionPasskey && adminMsg.sessionPasskey.length > 0) {
+                            this.adminSessions[fromNum] = adminMsg.sessionPasskey;
+                            this.log('info', `🔑 Clave de sesión administrativa (SessionKey) guardada para ${fromHex}`);
+                            this.setNotification('success', `Clave de sesión administrativa establecida con éxito para ${fromHex}.`);
+                            if (this._sessionKeyWaiters[fromNum]) {
+                                this._sessionKeyWaiters[fromNum](adminMsg.sessionPasskey);
+                                delete this._sessionKeyWaiters[fromNum];
+                            }
+                        }
+
                         this.log('rx', `Respuesta ADMIN de ${fromHex}: caso '${variant}' [ID: ${packet.id}]`);
                     } catch {
                         this.log('rx', `Paquete ADMIN recibido de ${fromHex} (${rawBytes.length} bytes)`);
@@ -275,7 +467,18 @@ export function meshAdminComponent() {
                 if (port === PortNum.NODEINFO_APP) {
                     try {
                         const user = fromBinary(UserSchema, rawBytes);
-                        this.log('rx', `NodeInfo de ${fromHex}: "${user.longName}" (${user.shortName}) [HW: ${user.hwModel}]`);
+                        const hasPk = Boolean(user.publicKey && user.publicKey.length === 32);
+                        this.knownNodes[fromNum] = {
+                            num: fromNum,
+                            hex: fromHex,
+                            longName: user.longName || '',
+                            shortName: user.shortName || '',
+                            isFavorite: false,
+                            hasPublicKey: hasPk,
+                            role: user.role ?? null,
+                        };
+                        const pkNotice = hasPk ? ' [PKI disponible]' : '';
+                        this.log('rx', `NodeInfo de ${fromHex}: "${user.longName}" (${user.shortName}) [HW: ${user.hwModel}]${pkNotice}`);
                     } catch {
                         this.log('rx', `NodeInfo recibido de ${fromHex}`);
                     }
@@ -318,8 +521,22 @@ export function meshAdminComponent() {
                 if (port === PortNum.TRACEROUTE_APP) {
                     try {
                         const route = fromBinary(RouteDiscoverySchema, rawBytes);
-                        const hopsList = (route.route || []).map((h) => numToHex(h)).join(' ➔ ');
-                        this.log('rx', `Traceroute respuesta de ${fromHex}: ${hopsList || 'Directo (0 saltos)'}`);
+                        const hops = (route.route || []).map((h) => numToHex(h));
+                        const hopsFormatted = hops.length > 0 ? hops.join(' ➔ ') : 'Directo (0 saltos intermedios)';
+                        const fullRouteStr = `${this.localNode.hexId} ➔ ${hops.length > 0 ? hops.join(' ➔ ') + ' ➔ ' : ''}${fromHex}`;
+
+                        this.log('rx', `🎯 Traceroute respuesta de ${fromHex}: ${hopsFormatted}`);
+                        this.tracerouteHops = hops;
+                        this.tracerouteResult = fullRouteStr;
+
+                        if (this.tracerouteActive) {
+                            this.tracerouteActive = false;
+                            if (this.tracerouteTimer) {
+                                clearInterval(this.tracerouteTimer);
+                                this.tracerouteTimer = null;
+                            }
+                            this.setNotification('success', `Traceroute completado: ${fullRouteStr}`);
+                        }
                     } catch {
                         this.log('rx', `Traceroute recibido de ${fromHex}`);
                     }
@@ -387,6 +604,7 @@ export function meshAdminComponent() {
             this.manualNodeInput = this.selectedRouterHex;
             this.unicastTargetInput = this.selectedRouterHex;
             this.log('info', `Router seleccionado: ${this.selectedRouterName || this.selectedRouterHex}`);
+            this.checkRouterStatusInRadio();
         },
 
         /**
@@ -411,6 +629,384 @@ export function meshAdminComponent() {
                 this.selectedRouterRole = '';
                 this.selectedRouterStatus = '';
                 this.unicastTargetInput = this.selectedRouterHex;
+                this.checkRouterStatusInRadio();
+            }
+        },
+
+        /**
+         * Comprueba si el router objetivo consta en la memoria de la radio local.
+         */
+        checkRouterStatusInRadio() {
+            try {
+                const num = this.resolveTargetNodeNum();
+                const hex = numToHex(num);
+                const node = this.knownNodes[num];
+                if (node) {
+                    if (node.hasPublicKey) {
+                        this.log('info', `🔒 Router ${hex} ("${node.longName || node.shortName || hex}") detectado con enlace seguro verificado.`);
+                    } else {
+                        this.log('info', `ℹ️ Router ${hex} ("${node.longName || node.shortName || hex}") detectado en la memoria local.`);
+                    }
+                } else if (hex && hex !== '!00000000') {
+                    this.log('info', `📡 Router ${hex} seleccionado para transmisión directa por radio.`);
+                }
+            } catch {
+                // Sin selección activa
+            }
+        },
+
+        /**
+         * Retorna el nombre legible del rol a partir de su número enum.
+         *
+         * @param {number|string} roleNum
+         * @returns {string}
+         */
+        getRoleName(roleNum) {
+            const num = Number(roleNum);
+            return Config_DeviceConfig_Role[num] || `ROL_${num}`;
+        },
+
+        /**
+         * Muestra una notificación visual en la parte superior sin bloquear el navegador.
+         *
+         * @param {'success'|'error'|'warning'|'info'} type
+         * @param {string} message
+         * @param {number} [durationMs=8000]
+         */
+        setNotification(type, message, durationMs = 8000) {
+            if (this.notification.timeout) {
+                clearTimeout(this.notification.timeout);
+            }
+            this.notification.type = type;
+            this.notification.message = message;
+            this.notification.show = true;
+
+            if (durationMs > 0) {
+                this.notification.timeout = setTimeout(() => {
+                    this.notification.show = false;
+                }, durationMs);
+            }
+        },
+
+        /**
+         * Cierra la notificación activa.
+         */
+        dismissNotification() {
+            this.notification.show = false;
+            if (this.notification.timeout) {
+                clearTimeout(this.notification.timeout);
+            }
+        },
+
+        /**
+         * Comprueba si disponemos de una clave de sesión administrativa para el objetivo actual.
+         *
+         * @returns {boolean}
+         */
+        hasTargetSessionKey() {
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                return Boolean(this.adminSessions[targetNum]);
+            } catch {
+                return false;
+            }
+        },
+
+        /**
+         * Comprueba si la radio física local tiene en su NodeDB la clave pública del router objetivo.
+         *
+         * @returns {boolean}
+         */
+        targetHasPublicKeyInLocalRadio() {
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                return Boolean(this.knownNodes[targetNum]?.hasPublicKey);
+            } catch {
+                return false;
+            }
+        },
+
+        /**
+         * Asegura la disponibilidad de un pase de sesión administrativo antes de operaciones críticas.
+         *
+         * @param {number} targetNum
+         * @returns {Promise<Uint8Array|null>}
+         */
+        async ensureSessionKey(targetNum) {
+            // El nodo local no necesita sessionKey
+            if (targetNum === this.localNode.nodeNum || targetNum === 0) {
+                return null;
+            }
+
+            if (this.adminSessions[targetNum] && this.adminSessions[targetNum].length > 0) {
+                return this.adminSessions[targetNum];
+            }
+
+            // Si la radio física local aún no tiene la clave pública de este router, no intentar handshake PKI
+            if (!this.targetHasPublicKeyInLocalRadio()) {
+                return null;
+            }
+
+            const targetHex = numToHex(targetNum);
+            this.log('info', `🔑 Solicitando pase de sesión administrativa (SessionKey) a ${targetHex}...`);
+
+            return new Promise(async (resolve) => {
+                const timer = setTimeout(() => {
+                    delete this._sessionKeyWaiters[targetNum];
+                    resolve(null); // Continuar sin bloquear la orden
+                }, 6000);
+
+                this._sessionKeyWaiters[targetNum] = (key) => {
+                    clearTimeout(timer);
+                    resolve(key);
+                };
+
+                try {
+                    const adminMsg = create(AdminMessageSchema, {
+                        payloadVariant: {
+                            case: 'getConfigRequest',
+                            value: 8, // SESSIONKEY_CONFIG
+                        },
+                    });
+
+                    await this.sendMeshPacketCustom({
+                        payloadBytes: toBinary(AdminMessageSchema, adminMsg),
+                        portNum: PortNum.ADMIN_APP,
+                        destinationNum: targetNum,
+                        channel: this.adminChannelIndex || 0,
+                        wantAck: true,
+                        wantResponse: true,
+                        pkiEncrypted: true,
+                        timeoutMs: 6000,
+                    });
+                } catch {
+                    clearTimeout(timer);
+                    delete this._sessionKeyWaiters[targetNum];
+                    resolve(null);
+                }
+            });
+        },
+
+        /**
+         * Envía un paquete a través de la radio local envolviendo en ToRadio y gestionando el rechazo.
+         *
+         * @param {Object} options
+         * @param {Uint8Array} options.payloadBytes
+         * @param {number} options.portNum
+         * @param {number} options.destinationNum
+         * @param {number} [options.channel=0]
+         * @param {boolean} [options.wantAck=true]
+         * @param {boolean} [options.wantResponse=true]
+         * @param {boolean} [options.pkiEncrypted=false]
+         * @param {number} [options.timeoutMs=15000]
+         * @returns {Promise<number>} ID del paquete enviado
+         */
+        async sendMeshPacketCustom({
+            payloadBytes,
+            portNum,
+            destinationNum,
+            channel = 0,
+            wantAck = true,
+            wantResponse = true,
+            pkiEncrypted = false,
+            timeoutMs = 15000,
+        }) {
+            if (!this._device || this.connectionStatus !== 'connected') {
+                throw new Error('Debes conectar primero tu nodo Meshtastic local.');
+            }
+
+            const isBroadcast = destinationNum === Constants.broadcastNum;
+            const randId = this._device.generateRandId();
+            const fromNum = this.localNode.nodeNum || this._device.myNodeInfo?.myNodeNum || 0;
+
+            const meshPacket = create(MeshPacketSchema, {
+                id: randId,
+                from: fromNum,
+                to: destinationNum,
+                channel: channel,
+                wantAck: isBroadcast ? false : Boolean(wantAck),
+                pkiEncrypted: Boolean(pkiEncrypted),
+                payloadVariant: {
+                    case: 'decoded',
+                    value: {
+                        payload: payloadBytes,
+                        portnum: portNum,
+                        wantResponse: isBroadcast ? false : Boolean(wantResponse),
+                        dest: 0,
+                        requestId: 0,
+                        source: 0,
+                        emoji: 0,
+                        replyId: 0,
+                    },
+                },
+            });
+
+            const toRadio = create(ToRadioSchema, {
+                payloadVariant: {
+                    case: 'packet',
+                    value: meshPacket,
+                },
+            });
+
+            const binaryToRadio = toBinary(ToRadioSchema, toRadio);
+
+            if (isBroadcast || !wantAck) {
+                // Para emisiones broadcast o sin ACK, transmitimos directamente por la cola serie
+                // y confirmamos inmediatamente tras el envío al dispositivo físico, evitando el falso TIMEOUT de 60s
+                this._device.queue.push({
+                    id: randId,
+                    data: binaryToRadio,
+                });
+                await this._device.queue.processQueue(this._device.transport.toDevice);
+                this._device.queue.processAck(randId);
+                return randId;
+            }
+
+            // Para unicast con ACK, aplicamos un timeout controlado (por defecto 15s) evitando bloqueos de 60s
+            try {
+                const sendPromise = this._device.sendRaw(binaryToRadio, randId);
+                const effectiveTimeout = timeoutMs || 15000;
+
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => {
+                        if (this._device && this._device.queue) {
+                            this._device.queue.remove(randId);
+                        }
+                        reject({
+                            id: randId,
+                            error: Routing_Error.TIMEOUT,
+                        });
+                    }, effectiveTimeout);
+                });
+
+                await Promise.race([sendPromise, timeoutPromise]);
+                return randId;
+            } catch (rawErr) {
+                throw new Error(formatMeshtasticError(rawErr));
+            }
+        },
+
+        /**
+         * Envía un mensaje administrativo a un router remoto gestionando sesión y cifrado automáticamente.
+         *
+         * @param {number} targetNum
+         * @param {any} adminMsg
+         * @param {string} operationLabel
+         * @returns {Promise<number>}
+         */
+        async sendAdminMessageToTarget(targetNum, adminMsg, operationLabel) {
+            const targetHex = numToHex(targetNum);
+            const isLocal = (targetNum === this.localNode.nodeNum || targetNum === 0);
+
+            // Si es un router remoto, asegurar SessionKey si dispone de clave pública
+            if (!isLocal) {
+                if (this.targetHasPublicKeyInLocalRadio() && !this.adminSessions[targetNum]) {
+                    await this.ensureSessionKey(targetNum);
+                }
+                if (this.adminSessions[targetNum]) {
+                    adminMsg.sessionPasskey = this.adminSessions[targetNum];
+                }
+            }
+
+            const payload = toBinary(AdminMessageSchema, adminMsg);
+            const hasPkInRadio = this.targetHasPublicKeyInLocalRadio();
+            const effectivePki = Boolean(!isLocal && hasPkInRadio);
+
+            this.log('tx', `Preparando orden '${operationLabel}' hacia router ${targetHex}...`);
+
+            try {
+                const pktId = await this.sendMeshPacketCustom({
+                    payloadBytes: payload,
+                    portNum: PortNum.ADMIN_APP,
+                    destinationNum: targetNum,
+                    channel: this.adminChannelIndex || 0,
+                    wantAck: true,
+                    wantResponse: true,
+                    pkiEncrypted: effectivePki,
+                });
+
+                const okMsg = `Orden '${operationLabel}' transmitida con éxito a ${targetHex} (ID: ${pktId}). Esperando confirmación de la malla...`;
+                this.setNotification('success', okMsg);
+                this.log('tx', `🚀 ${okMsg}`);
+                return pktId;
+            } catch (err) {
+                const errMsg = formatMeshtasticError(err, targetHex);
+                this.setNotification('error', `No se pudo aplicar '${operationLabel}': ${errMsg}`);
+                this.log('error', `❌ Error al enviar '${operationLabel}' hacia ${targetHex}: ${errMsg}`);
+                throw err;
+            }
+        },
+
+        /**
+         * Solicita la clave de sesión administrativa (SessionKey) al router destino.
+         */
+        async requestAdminSessionKey() {
+            if (this.connectionStatus !== 'connected' || !this._device) {
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
+                return;
+            }
+
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                const targetHex = numToHex(targetNum);
+
+                this.log('tx', `🔑 Solicitando clave de sesión (SESSIONKEY_CONFIG) al router ${targetHex}...`);
+
+                const adminMsg = create(AdminMessageSchema, {
+                    payloadVariant: {
+                        case: 'getConfigRequest',
+                        value: 8, // SESSIONKEY_CONFIG
+                    },
+                });
+
+                await this.sendAdminMessageToTarget(targetNum, adminMsg, 'Solicitud de SessionKey');
+                this.setNotification('info', `Petición de SessionKey enviada a ${targetHex}. La clave se guardará automáticamente al recibir respuesta.`);
+            } catch (err) {
+                console.error('Error solicitando SessionKey:', err);
+            }
+        },
+
+        /**
+         * Transmite nuestra identidad User al router remoto para que conozca nuestra clave pública.
+         */
+        async exchangeNodeInfoWithTarget() {
+            if (this.connectionStatus !== 'connected' || !this._device) {
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
+                return;
+            }
+
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                const targetHex = numToHex(targetNum);
+
+                this.log('tx', `📡 Iniciando intercambio de identidad (NodeInfo / Claves) con ${targetHex}...`);
+
+                const userMsg = create(UserSchema, {
+                    id: this.localNode.hexId,
+                    longName: this.localNode.longName || 'Operador Andalucía Mesh',
+                    shortName: this.localNode.shortName || 'OP',
+                    hwModel: 0,
+                });
+
+                const payload = toBinary(UserSchema, userMsg);
+
+                const pktId = await this.sendMeshPacketCustom({
+                    payloadBytes: payload,
+                    portNum: PortNum.NODEINFO_APP,
+                    destinationNum: targetNum,
+                    channel: 0,
+                    wantAck: true,
+                    wantResponse: true,
+                    pkiEncrypted: false,
+                });
+
+                const okMsg = `Identidad transmitida a ${targetHex} (ID: ${pktId}). Esperando respuesta con clave pública...`;
+                this.setNotification('success', okMsg);
+                this.log('tx', `📡 ${okMsg}`);
+            } catch (err) {
+                const errMsg = formatMeshtasticError(err);
+                this.setNotification('error', `Error en intercambio con router: ${errMsg}`);
+                this.log('error', `❌ Error en intercambio con ${numToHex(this.resolveTargetNodeNum())}: ${errMsg}`);
             }
         },
 
@@ -419,7 +1015,7 @@ export function meshAdminComponent() {
          */
         async applyRemoteRole() {
             if (this.connectionStatus !== 'connected' || !this._device) {
-                alert('Debes conectar primero tu nodo Meshtastic local.');
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
                 return;
             }
 
@@ -428,11 +1024,8 @@ export function meshAdminComponent() {
                 const targetNum = this.resolveTargetNodeNum();
                 const targetHex = numToHex(targetNum);
                 const roleEnum = Number(this.selectedRole);
-                const roleName = Config_DeviceConfig_Role[roleEnum] || `ROL_${roleEnum}`;
+                const roleName = this.getRoleName(roleEnum);
 
-                this.log('tx', `Preparando cambio de rol a '${roleName}' para el router ${targetHex}...`);
-
-                // Construir AdminMessage con setConfig.device.role
                 const adminMsg = create(AdminMessageSchema, {
                     payloadVariant: {
                         case: 'setConfig',
@@ -447,17 +1040,9 @@ export function meshAdminComponent() {
                     },
                 });
 
-                const payload = toBinary(AdminMessageSchema, adminMsg);
-
-                // Enviar paquete administrativo al destino con wantAck=true y wantResponse=true
-                await this._device.sendPacket(payload, PortNum.ADMIN_APP, targetNum, 0, true, true);
-
-                this.log('tx', `🚀 Comando 'setConfig.device.role = ${roleName}' transmitido a ${targetHex}. Esperando confirmación ACK...`);
-                alert(`Comando de cambio de rol (${roleName}) transmitido al router ${targetHex}. Observa la consola para el ACK.`);
+                await this.sendAdminMessageToTarget(targetNum, adminMsg, `Cambio de Rol a ${roleName}`);
             } catch (err) {
                 console.error('Error enviando cambio de rol:', err);
-                this.log('error', `Error al enviar rol: ${err.message}`);
-                alert(`Error al enviar cambio de rol: ${err.message}`);
             } finally {
                 this.roleSending = false;
             }
@@ -468,23 +1053,23 @@ export function meshAdminComponent() {
          */
         async applyRemoteFavorite(action) {
             if (this.connectionStatus !== 'connected' || !this._device) {
-                alert('Debes conectar primero tu nodo Meshtastic local.');
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
                 return;
             }
+
+            const favNum = parseNodeNum(this.favoriteNodeInput);
+            if (!favNum) {
+                this.setNotification('warning', 'Introduce un Node ID válido para gestionar en favoritos (ej. !5f3a3a29 o decimal).');
+                return;
+            }
+
+            const favHex = numToHex(favNum);
+            const isAdd = action === 'add';
 
             this.favoriteSending = true;
             try {
                 const targetNum = this.resolveTargetNodeNum();
                 const targetHex = numToHex(targetNum);
-                const favNum = parseNodeNum(this.favoriteNodeInput);
-
-                if (!favNum) {
-                    throw new Error('Introduce un Node ID válido para gestionar en favoritos.');
-                }
-                const favHex = numToHex(favNum);
-
-                const isAdd = action === 'add';
-                this.log('tx', `Preparando ${isAdd ? 'setFavoriteNode' : 'removeFavoriteNode'} (${favHex}) en router ${targetHex}...`);
 
                 const adminMsg = create(AdminMessageSchema, {
                     payloadVariant: isAdd
@@ -492,32 +1077,28 @@ export function meshAdminComponent() {
                         : { case: 'removeFavoriteNode', value: favNum },
                 });
 
-                const payload = toBinary(AdminMessageSchema, adminMsg);
-                await this._device.sendPacket(payload, PortNum.ADMIN_APP, targetNum, 0, true, true);
+                const opLabel = `${isAdd ? 'Añadir a' : 'Quitar de'} favoritos (${favHex})`;
+                await this.sendAdminMessageToTarget(targetNum, adminMsg, opLabel);
 
                 if (isAdd && !this.sessionFavorites.includes(favHex)) {
                     this.sessionFavorites.push(favHex);
                 } else if (!isAdd) {
                     this.sessionFavorites = this.sessionFavorites.filter((f) => f !== favHex);
                 }
-
-                this.log('tx', `⭐ Comando ${isAdd ? 'Añadir a' : 'Quitar de'} favoritos (${favHex}) transmitido a ${targetHex}.`);
-                alert(`Comando de favoritos (${favHex}) transmitido a ${targetHex}.`);
+                this.setNotification('success', `Orden '${opLabel}' enviada con éxito al router ${targetHex}.`);
             } catch (err) {
                 console.error('Error gestionando favorito:', err);
-                this.log('error', `Error en favorito: ${err.message}`);
-                alert(`Error en favoritos: ${err.message}`);
             } finally {
                 this.favoriteSending = false;
             }
         },
 
         /**
-         * Emite un sondeo broadcast a toda la malla.
+         * Emite un sondeo o anuncio broadcast a toda la malla.
          */
         async sendMeshPoll(pollType) {
             if (this.connectionStatus !== 'connected' || !this._device) {
-                alert('Debes conectar primero tu nodo Meshtastic local.');
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
                 return;
             }
 
@@ -525,27 +1106,61 @@ export function meshAdminComponent() {
             try {
                 let portnum;
                 let label;
+                let payload;
 
                 if (pollType === 'nodeinfo') {
                     portnum = PortNum.NODEINFO_APP;
-                    label = 'NodeInfo (Identificación)';
+                    label = 'Anuncio broadcast de Identidad (NodeInfo)';
+                    const userMsg = create(UserSchema, {
+                        id: this.localNode.hexId,
+                        longName: this.localNode.longName || 'Operador Andalucía Mesh',
+                        shortName: this.localNode.shortName || 'OP',
+                        hwModel: 0,
+                    });
+                    payload = toBinary(UserSchema, userMsg);
                 } else if (pollType === 'position') {
                     portnum = PortNum.POSITION_APP;
-                    label = 'Posición GPS';
+                    label = 'Anuncio broadcast de Posición GPS';
+                    const posMsg = create(PositionSchema, {
+                        latitudeI: 0,
+                        longitudeI: 0,
+                        altitude: 0,
+                    });
+                    payload = toBinary(PositionSchema, posMsg);
                 } else if (pollType === 'telemetry') {
                     portnum = PortNum.TELEMETRY_APP;
-                    label = 'Telemetría y Baterías';
+                    label = 'Anuncio broadcast de Telemetría';
+                    const telemMsg = create(TelemetrySchema, {
+                        time: Math.trunc(Date.now() / 1000),
+                        deviceMetrics: {
+                            batteryLevel: 100,
+                            voltage: 4.2,
+                        },
+                    });
+                    payload = toBinary(TelemetrySchema, telemMsg);
                 } else {
                     throw new Error(`Tipo de sondeo no soportado: ${pollType}`);
                 }
 
-                this.log('tx', `📡 Emitiendo sondeo de malla broadcast: ${label} (^all)...`);
-                await this._device.sendPacket(new Uint8Array(0), portnum, Constants.broadcastNum, 0, false, true);
-                this.log('tx', `Sondeo broadcast '${label}' emitido a la malla. Las respuestas aparecerán en la consola.`);
+                this.log('tx', `📡 Emitiendo ${label} (^all)...`);
+
+                const pktId = await this.sendMeshPacketCustom({
+                    payloadBytes: payload,
+                    portNum: portnum,
+                    destinationNum: Constants.broadcastNum,
+                    channel: 0,
+                    wantAck: false,
+                    wantResponse: false,
+                    pkiEncrypted: false,
+                });
+
+                const okMsg = `${label} emitido a la malla (ID: ${pktId}). Los nodos cercanos actualizarán su NodeDB.`;
+                this.setNotification('success', okMsg);
+                this.log('tx', `📡 ${okMsg}`);
             } catch (err) {
-                console.error('Error enviando sondeo:', err);
-                this.log('error', `Error en sondeo: ${err.message}`);
-                alert(`Error en sondeo: ${err.message}`);
+                const errMsg = formatMeshtasticError(err);
+                this.setNotification('error', `Error en sondeo broadcast: ${errMsg}`);
+                this.log('error', `❌ Error en emisión broadcast: ${errMsg}`);
             } finally {
                 this.pollSending = false;
             }
@@ -556,13 +1171,12 @@ export function meshAdminComponent() {
          */
         async sendUnicastRequest(reqType) {
             if (this.connectionStatus !== 'connected' || !this._device) {
-                alert('Debes conectar primero tu nodo Meshtastic local.');
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
                 return;
             }
 
             this.unicastSending = true;
             try {
-                // Si hay un nodo especificado en la pestaña unicast usarlo, si no el router seleccionado
                 let targetNum;
                 if (this.unicastTargetInput.trim()) {
                     targetNum = parseNodeNum(this.unicastTargetInput);
@@ -573,34 +1187,94 @@ export function meshAdminComponent() {
                 const targetHex = numToHex(targetNum);
 
                 if (reqType === 'traceroute') {
-                    this.log('tx', `🔄 Iniciando Traceroute hacia ${targetHex}...`);
+                    if (this.tracerouteActive) {
+                        this.setNotification('warning', 'Ya hay un Traceroute en curso. Espera a que finalice.');
+                        return;
+                    }
+
+                    this.tracerouteActive = true;
+                    this.tracerouteCountdown = 30;
+                    this.tracerouteTargetHex = targetHex;
+                    this.tracerouteResult = '';
+                    this.tracerouteHops = [];
+
+                    this.log('tx', `🔄 Iniciando Traceroute hacia ${targetHex} (esperando hasta 30 segundos)...`);
+
+                    // Temporizador reactivo de 30 segundos
+                    this.tracerouteTimer = setInterval(() => {
+                        this.tracerouteCountdown--;
+                        if (this.tracerouteCountdown <= 0) {
+                            clearInterval(this.tracerouteTimer);
+                            this.tracerouteTimer = null;
+                            if (this.tracerouteActive) {
+                                this.tracerouteActive = false;
+                                this.tracerouteResult = `Tiempo de espera agotado (30s) sin respuesta de ruta de ${targetHex}.`;
+                                this.setNotification('warning', `Traceroute: tiempo de espera agotado (30s) sin respuesta de ${targetHex}.`);
+                                this.log('warn', `⏱️ Traceroute hacia ${targetHex}: tiempo de espera agotado (30s). El nodo no respondió.`);
+                            }
+                        }
+                    }, 1000);
+
                     const routeMsg = create(RouteDiscoverySchema, { route: [] });
                     const payload = toBinary(RouteDiscoverySchema, routeMsg);
-                    await this._device.sendPacket(payload, PortNum.TRACEROUTE_APP, targetNum, 0, true, true);
-                    this.log('tx', `Traceroute transmitido hacia ${targetHex}. Esperando paquetes de retorno...`);
+
+                    try {
+                        const pktId = await this.sendMeshPacketCustom({
+                            payloadBytes: payload,
+                            portNum: PortNum.TRACEROUTE_APP,
+                            destinationNum: targetNum,
+                            channel: 0,
+                            wantAck: true,
+                            wantResponse: true,
+                            pkiEncrypted: false,
+                            timeoutMs: 8000,
+                        });
+                        this.setNotification('info', `Traceroute enviado a ${targetHex} (ID: ${pktId}). Esperando respuesta de los saltos de malla (30s)...`);
+                    } catch (txErr) {
+                        this.log('warn', `⚠️ Aviso al transmitir sonda Traceroute: ${txErr.message}`);
+                    }
+                    return;
                 } else {
                     let portnum;
                     let label;
+                    let payloadBytes;
+
                     if (reqType === 'nodeinfo') {
                         portnum = PortNum.NODEINFO_APP;
                         label = 'NodeInfo';
+                        const userMsg = create(UserSchema, {});
+                        payloadBytes = toBinary(UserSchema, userMsg);
                     } else if (reqType === 'position') {
                         portnum = PortNum.POSITION_APP;
                         label = 'Posición GPS';
+                        const posMsg = create(PositionSchema, {});
+                        payloadBytes = toBinary(PositionSchema, posMsg);
                     } else if (reqType === 'telemetry') {
                         portnum = PortNum.TELEMETRY_APP;
                         label = 'Telemetría';
+                        const telemMsg = create(TelemetrySchema, {});
+                        payloadBytes = toBinary(TelemetrySchema, telemMsg);
                     } else {
                         throw new Error(`Petición no reconocida: ${reqType}`);
                     }
 
                     this.log('tx', `Petición unicast '${label}' transmitida a ${targetHex}...`);
-                    await this._device.sendPacket(new Uint8Array(0), portnum, targetNum, 0, true, true);
+                    const pktId = await this.sendMeshPacketCustom({
+                        payloadBytes: payloadBytes,
+                        portNum: portnum,
+                        destinationNum: targetNum,
+                        channel: 0,
+                        wantAck: true,
+                        wantResponse: true,
+                        pkiEncrypted: false,
+                    });
+                    this.setNotification('success', `Petición '${label}' transmitida a ${targetHex} (ID: ${pktId}).`);
+                    this.log('tx', `Petición '${label}' en vuelo hacia ${targetHex} (ID: ${pktId}).`);
                 }
             } catch (err) {
-                console.error('Error enviando petición unicast:', err);
-                this.log('error', `Error unicast: ${err.message}`);
-                alert(`Error en petición unicast: ${err.message}`);
+                const errMsg = formatMeshtasticError(err, targetHex);
+                this.setNotification('error', `Error en petición: ${errMsg}`);
+                this.log('error', `❌ Error unicast: ${errMsg}`);
             } finally {
                 this.unicastSending = false;
             }
@@ -611,7 +1285,7 @@ export function meshAdminComponent() {
          */
         async applyRemoteReboot() {
             if (this.connectionStatus !== 'connected' || !this._device) {
-                alert('Debes conectar primero tu nodo Meshtastic local.');
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
                 return;
             }
 
@@ -633,15 +1307,9 @@ export function meshAdminComponent() {
                     },
                 });
 
-                const payload = toBinary(AdminMessageSchema, adminMsg);
-                await this._device.sendPacket(payload, PortNum.ADMIN_APP, targetNum, 0, true, true);
-
-                this.log('tx', `⚠️ Comando reboot_seconds(${secs}) enviado a ${targetHex}. El nodo se reiniciará en ${secs}s.`);
-                alert(`Comando de reinicio enviado con éxito al router ${targetHex}.`);
+                await this.sendAdminMessageToTarget(targetNum, adminMsg, `Reinicio diferido (${secs}s)`);
             } catch (err) {
                 console.error('Error al reiniciar router:', err);
-                this.log('error', `Error reinicio: ${err.message}`);
-                alert(`Error al enviar reinicio: ${err.message}`);
             } finally {
                 this.rebootSending = false;
             }
@@ -687,7 +1355,7 @@ export function meshAdminComponent() {
         copyLogs() {
             const txt = this.logs.map((l) => `[${l.time}] [${l.type.toUpperCase()}] ${l.text}`).join('\n');
             navigator.clipboard.writeText(txt).then(() => {
-                alert('Logs de actividad copiados al portapapeles.');
+                this.setNotification('info', 'Logs de actividad copiados al portapapeles.');
             });
         },
 
