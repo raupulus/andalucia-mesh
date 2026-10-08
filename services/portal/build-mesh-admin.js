@@ -19,12 +19,23 @@ async function bundleMeshAdmin() {
   await build({
     configFile: false,
     publicDir: false,
+    define: {
+      'process.env.NODE_ENV': JSON.stringify('production'),
+      'process.env': '{}',
+      'process.cwd': '(() => "/")',
+      'process': '({ env: { NODE_ENV: "production" }, cwd: () => "/" })',
+    },
     build: {
       lib: {
         entry: resolve(__dirname, 'resources/js/mesh-admin.js'),
         name: 'MeshAdminBundle',
         formats: ['iife'],
         fileName: () => 'mesh-admin.bundle.js'
+      },
+      rollupOptions: {
+        output: {
+          banner: 'if (typeof window !== "undefined") { window.process = window.process || { env: { NODE_ENV: "production" }, cwd: function() { return "/"; } }; if (!window.global) { window.global = window; } }',
+        }
       },
       outDir: resolve(__dirname, 'public/js'),
       emptyOutDir: false,

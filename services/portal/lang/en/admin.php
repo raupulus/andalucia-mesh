@@ -437,7 +437,6 @@ return [
         'andalucia_optgroup' => 'Andalusia Coordinated Routers',
         'manual_node_label' => 'Option B: Or Enter Node ID Manually (!hex or dec)',
         'manual_node_placeholder' => 'E.g.: !2df0a1b2 or 770744754',
-        'manual_node_hint' => 'Allows managing new nodes, repeaters under deployment, or nodes not yet in the official database.',
         'target_none_selected' => 'Select a router on the left or type its ID in the manual field to begin administering it.',
         'connect_prompt_hint' => 'First connect your local physical node in Step 1 to transmit this radio command.',
         'select_prompt_hint' => 'Select a router or enter its ID in Step 2 to enable transmitting.',

@@ -989,7 +989,6 @@
                 <div class="fi-ra-form-group">
                     <label class="fi-ra-label">{{ __('admin.gestion_routers.manual_node_label') }}</label>
                     <input type="text" x-model="manualNodeInput" @input="onManualInputChange()" placeholder="{{ __('admin.gestion_routers.manual_node_placeholder') }}" class="fi-ra-input font-mono" />
-                    <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('admin.gestion_routers.manual_node_hint') }}</span>
                 </div>
             </div>
 

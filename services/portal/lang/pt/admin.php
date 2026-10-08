@@ -437,7 +437,6 @@ return [
         'andalucia_optgroup' => 'Routers Coordenados da Andaluzia',
         'manual_node_label' => 'Opção B: Ou insira Node ID Manualmente (!hex ou dec)',
         'manual_node_placeholder' => 'Ex: !2df0a1b2 ou 770744754',
-        'manual_node_hint' => 'Permite gerir nós novos, repetidores em instalação ou nós que ainda não constem na base de dados.',
         'target_none_selected' => 'Selecione um router no menu à esquerda ou escreva o seu ID no campo manual para começar a operá-lo.',
         'connect_prompt_hint' => 'Ligue primeiro o seu nó local físico no Passo 1 para transmitir este comando por rádio.',
         'select_prompt_hint' => 'Selecione um router ou escreva o seu ID no Passo 2 para poder transmitir a ordem.',

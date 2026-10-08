@@ -163,9 +163,11 @@ Consola de operaciones y control administrativo de routers de la malla (`/admin/
   - Terminal interactiva integrada con registro cronológico de eventos: eventos de conexión física, paquetes transmitidos (`TX ➡️`), paquetes recibidos (`RX ⬅️`), confirmaciones de entrega (`ACK ✅`) y fallos.
   - Descodificación en caliente de telemetría (batería, voltaje, ChUtil), posiciones GPS, respuestas `AdminMessage` y rutas de Traceroute.
   - Filtros por tipo de tráfico, limpieza de terminal y copiado directo al portapapeles.
-- **Empaquetado y eliminación de dependencias de CDN:**
+- **Empaquetado, compatibilidad de navegador y eliminación de dependencias de CDN:**
   - Bundle compilado con Vite en formato IIFE autónomo (`resources/js/mesh-admin.js` -> `public/js/mesh-admin.bundle.js` mediante `npm run build:mesh-admin` / `build-mesh-admin.js`) e integración de `@meshtastic/core`, `@meshtastic/transport-web-serial`, `@meshtastic/transport-web-bluetooth` y `@bufbuild/protobuf` como dependencias locales versionadas.
+  - Inyección de shims y polyfills para `window.process` y `window.global` tanto en el banner de salida del bundle como en `define` de Vite, garantizando compatibilidad total en entornos de navegador puro sin Node.js runtime.
   - La carga mediante `/js/mesh-admin.bundle.js` es completamente síncrona, port-agnóstica (inmune a puertos locales como 9000 o 80 en `APP_URL`) y expone `window.meshAdmin` de forma inmediata antes de la evaluación del árbol reactivo de Alpine.js.
+  - **Mecanismo de permisos Web Serial:** Por políticas de seguridad de Chromium/Web Serial, la ventana modal de selección de puerto USB/COM (`navigator.serial.requestPort()`) no puede saltar de forma automática al cargar la página; requiere estrictamente un gesto físico de usuario (clic en el botón «⚡ Conectar al Nodo Local»), idéntico al comportamiento del cliente oficial `client.meshtastic.org`.
   - Compilación autónoma de `configurador.js` (`npm run build:configurador`) eliminando las dependencias externas a `esm.sh` para garantizar funcionamiento autónomo e inmune a cortes de CDN externos.
 
 ### Usuarios y Perfil de Operador

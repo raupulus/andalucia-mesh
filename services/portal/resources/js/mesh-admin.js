@@ -11,6 +11,13 @@
 // - Seguridad: Todo el tráfico de control se emite desde el dispositivo local del operador.
 // ==============================================================================
 
+if (typeof window !== 'undefined') {
+    window.process = window.process || { env: { NODE_ENV: 'production' }, cwd: () => '/' };
+    if (!window.global) {
+        window.global = window;
+    }
+}
+
 import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
 import { MeshDevice, Protobuf, Constants } from "@meshtastic/core";
 import { TransportWebSerial } from "@meshtastic/transport-web-serial";
@@ -652,12 +659,18 @@ export function meshAdminComponent() {
             }
 
             if (this.autoScroll) {
-                this.$nextTick(() => {
+                const scrollConsole = () => {
                     const consoleEl = document.getElementById('meshAdminConsole');
                     if (consoleEl) {
                         consoleEl.scrollTop = consoleEl.scrollHeight;
                     }
-                });
+                };
+
+                if (typeof this.$nextTick === 'function') {
+                    this.$nextTick(scrollConsole);
+                } else {
+                    setTimeout(scrollConsole, 50);
+                }
             }
         },
 
