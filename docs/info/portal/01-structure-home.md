@@ -19,7 +19,7 @@ Que quien llega por el enlace o el QR entienda en 10 segundos qué es esto, vea 
 | Sugerencias | `/sugerencias` | `SuggestionController` | Buzón ciudadano con Turnstile y categorías |
 | Resto | Ver `README.md` §4.1 | Su módulo | Su documento en `pages/` |
 
-Navegación principal: Inicio · Configura tu nodo · MQTT (`/conecta-tu-gateway`) · Rankings · Alertas · Bots · Desplegable **Extras** (`/configurador`, `/revisa-tu-nodo`, `/hardware`, `/api` ["API/Websockets"], `/sugerencias`, `/faq`). Pie: El proyecto · Quién lo impulsa · Cómo se gestiona · Sugerencias · Firmware y apps · API · Aviso legal · Privacidad · Cookies · tarjeta rectangular de código fuente con enlaces a GitLab (principal) y GitHub (mirror) · línea de autoría (`05-authorship.md`). Por defecto la interfaz se presenta en modo oscuro (`data-theme="dark"`), respetando el modo claro solo cuando el sistema operativo tiene explícitamente activada la preferencia `prefers-color-scheme: light` o el usuario seleccionó un tema en `localStorage`.
+Navegación principal: Inicio · Configura tu nodo · MQTT (`/conecta-tu-gateway`) · Rankings · Alertas · Bots · Desplegable **Extras** (`/configurador`, `/revisa-tu-nodo`, `/hardware`, `/paginas` ["Páginas"], `/api` ["API/Websockets"], `/sugerencias`, `/faq`). Pie: El proyecto · Quién lo impulsa · Cómo se gestiona · Sugerencias · Firmware y apps · API · Aviso legal · Privacidad · Cookies · tarjeta rectangular de código fuente con enlaces a GitLab (principal) y GitHub (mirror) · línea de autoría (`05-authorship.md`). Por defecto la interfaz se presenta en modo oscuro (`data-theme="dark"`), respetando el modo claro solo cuando el sistema operativo tiene explícitamente activada la preferencia `prefers-color-scheme: light` o el usuario seleccionó un tema en `localStorage`.
 
 ### Portada (orden fijo)
 
@@ -31,9 +31,10 @@ Navegación principal: Inicio · Configura tu nodo · MQTT (`/conecta-tu-gateway
 6. Configura tu nodo, resumen (`03-node-setup-guide.md`).
 7. Sube los datos de tu nodo, resumen (`04-gateway-connection.md`).
 8. **Tarjeta horizontal de diagnóstico: Revisa tu nodo**, con ilustración de lupa sobre PCB en formato 1:1 a la izquierda, texto descriptivo y botón verde centrado enlazando a `/revisa-tu-nodo`.
-9. Quién está detrás (`05-authorship.md`): tarjeta vertical centrada y oxigenada con el logotipo de `raupulus.dev` enlazado a la web personal y botón a `/quien-lo-impulsa`.
-10. Aviso "no es un servicio de emergencias".
-11. Pie común.
+9. **Últimas Páginas y Divulgación** (`16-custom-pages.md`): bloque con las 4 últimas páginas activas en tarjetas compactas (2 columnas en escritorio, 1 en móvil) con imagen a la izquierda, franja de Andalucía, badges verdes de keywords y botón verde centrado enlazando a `/paginas`.
+10. Quién está detrás (`05-authorship.md`): tarjeta vertical centrada y oxigenada con el logotipo de `raupulus.dev` enlazado a la web personal y botón a `/quien-lo-impulsa`.
+11. Aviso "no es un servicio de emergencias".
+12. Pie común.
 
 Bots, alertas y API no llevan tarjeta: van en navegación y pie.
 
@@ -51,11 +52,11 @@ Bots, alertas y API no llevan tarjeta: van en navegación y pie.
 
 ### SEO y Accesibilidad W3C
 
-- `sitemap.xml` generado dinámicamente mediante el paquete `spatie/laravel-sitemap` a partir de las rutas públicas registradas en la aplicación (excluyendo áreas privadas y rutas paramétricas como `/alertas/{id}` o `/revisa-tu-nodo/{id}`). Comando CLI `php artisan portal:sitemap` para exportación estática opcional. Archivos de directivas de rastreo: `robots.txt` y `robots.xml` (`Disallow: /admin`, `Disallow: /api/v1`, `Sitemap:`), acompañados de directivas avanzadas en cabecera `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">`.
-- Servidor web: la arquitectura opera bajo Nginx (en host y contenedor `serversideup/php:8.4-fpm-nginx`), por lo que `.htaccess` no aplica en producción. Las reglas de rewrite, proxies y bloqueo de archivos ocultos se gestionan directamente en la configuración de Nginx.
+- `sitemap.xml` generado dinámicamente mediante el paquete `spatie/laravel-sitemap` a partir de las rutas públicas registradas en la aplicación (incluyendo `/paginas` y los slugs dinámicos activos de `custom_pages`, y excluyendo áreas privadas y rutas paramétricas como `/alertas/{id}` o `/revisa-tu-nodo/{id}`). Comando CLI `php artisan portal:sitemap` para exportación estática opcional. Archivos de directivas de rastreo: `robots.txt` y `robots.xml` (`Disallow: /admin`, `Disallow: /api/v1`, `Sitemap:`), acompañados de directivas avanzadas en cabecera `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">`.
+- Servidor web: la arquitectura opera bajo Nginx (en host y contenedor `serversideup/php:8.5-fpm-nginx`), por lo que `.htaccess` no aplica en producción. Las reglas de rewrite, proxies y bloqueo de archivos ocultos se gestionan directamente en la configuración de Nginx.
 - Etiquetas `hreflang` multilingües dinámicas para `es`, `en`, `pt` y `x-default` enlazando a las variantes idiomáticas correspondientes.
 - Metadatos sociales completos: Open Graph con `og:locale`, `og:locale:alternate` (`es_ES`, `pt_PT`, `en_GB`), dimensiones `1200x630`, MIME type `image/png` y `og:image:alt`; Twitter Card en formato `summary_large_image` con atribución de autoría `twitter:site` y `twitter:creator` (`@raupulus`).
-- Datos estructurados Schema.org (JSON-LD): entidad global `WebSite` y `Organization` en `x-layout`, y esquema semántico dinámico `FAQPage` con preguntas y respuestas (`Question`, `Answer`) en `/faq`.
+- Datos estructurados Schema.org (JSON-LD): entidad global `WebSite` y `Organization` en `x-layout`, esquema semántico dinámico `FAQPage` con preguntas y respuestas (`Question`, `Answer`) en `/faq`, y esquema `Article` en cada página individual `/paginas/{slug}`.
 - Conformidad W3C y WCAG 2.1 AAA: `dir="ltr"` en el elemento raíz `<html>`, atributos dimensionales `width` y `height` en imágenes para prevención de Cumulative Layout Shift (CLS), y atributos `alt=""` con `aria-hidden="true"` en logotipos e iconos decorativos adyacentes a texto para evitar duplicidad de lectura en lectores de pantalla (criterio WCAG H67 / Fallo F39).
 - `lang="es|en|pt"` dinámico según idioma activo (RN-48), `meta theme-color` según modo. Selector de idiomas accesible en navbar con solo icono redondo de bandera (Andalucía para `es`, Portugal para `pt`, Reino Unido para `en`) que despliega el menú en orden estricto (español/portugués/inglés) y cero cookies (RN-06).
 

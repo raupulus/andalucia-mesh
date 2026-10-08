@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomPage;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Route as LaravelRoute;
 use Illuminate\Support\Facades\Route;
@@ -116,6 +117,28 @@ class SitemapController extends Controller
             $sitemap->add($tag);
         }
 
+        // Añadir páginas dinámicas activas del portal (/paginas/{slug})
+        try {
+            $paginas = CustomPage::active()->get();
+            foreach ($paginas as $pagina) {
+                $pageUrl = $baseUrl.'/paginas/'.$pagina->slug;
+
+                if (isset($urlsAgregadas[$pageUrl])) {
+                    continue;
+                }
+                $urlsAgregadas[$pageUrl] = true;
+
+                $tag = Url::create($pageUrl)
+                    ->setPriority(0.7)
+                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+                    ->setLastModificationDate($pagina->updated_at ?? now());
+
+                $sitemap->add($tag);
+            }
+        } catch (\Throwable) {
+            // Silencioso en caso de pruebas sin base de datos
+        }
+
         return $sitemap;
     }
 
@@ -162,7 +185,7 @@ class SitemapController extends Controller
             return ['priority' => 0.8, 'frequency' => Url::CHANGE_FREQUENCY_HOURLY];
         }
 
-        if (in_array($clean, ['configura-tu-nodo', 'conecta-tu-gateway', 'proyecto', 'revisa-tu-nodo'], true)) {
+        if (in_array($clean, ['configura-tu-nodo', 'conecta-tu-gateway', 'proyecto', 'revisa-tu-nodo', 'paginas', 'hardware'], true)) {
             return ['priority' => 0.8, 'frequency' => Url::CHANGE_FREQUENCY_WEEKLY];
         }
 

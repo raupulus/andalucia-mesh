@@ -730,4 +730,34 @@
         background-color: rgba(255, 255, 255, 0.12) !important;
         color: #9CF1BA !important;
     }
+
+    /* ==============================================================================
+     * Guía Visual de Webhooks y Criterios de Detección (RN-11, RN-32, RN-39)
+     * ============================================================================== */
+    .fi-wh-guide {
+        margin-top: 2rem !important;
+        margin-bottom: 2.5rem !important;
+        width: 100% !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1.75rem !important;
+    }
+
+    .fi-wh-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%) !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 1rem !important;
+        padding: 1.25rem 1.5rem !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+
+    .dark .fi-wh-header {
+        background: linear-gradient(135deg, #181924 0%, #202230 50%, #1a1b26 100%) !important;
+        border-color: #373a4d !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+    }
 </style>

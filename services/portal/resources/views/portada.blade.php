@@ -176,6 +176,73 @@
             </div>
         </section>
 
+        <!-- 5.5. Sección: Últimas Páginas y Divulgación (2 por fila, máx 4) -->
+        @if(isset($ultimasPaginas) && $ultimasPaginas->isNotEmpty())
+            <section class="seccion" style="padding-bottom: 3.5rem;" aria-label="{{ __('portal.pages.home_title') }}">
+                <div style="margin-bottom: 2rem; text-align: center;">
+                    <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--color-texto-1); letter-spacing: -0.02em;">
+                        {{ __('portal.pages.home_title') }}
+                    </h2>
+                    <p style="color: var(--color-texto-2); font-size: 1.1rem; max-width: 620px; margin: 0 auto;">
+                        {{ __('portal.pages.home_subtitle') }}
+                    </p>
+                </div>
+
+                <div class="grid-paginas-portada">
+                    @foreach($ultimasPaginas as $pag)
+                        <article class="tarjeta-pagina-compacta">
+                            <!-- Imagen a la izquierda -->
+                            <div class="tarjeta-pagina-img-wrapper">
+                                <a href="{{ route('paginas.show', ['slug' => $pag->slug]) }}{{ $langQuery }}" tabindex="-1" aria-hidden="true" style="display: block; width: 100%; height: 100%;">
+                                    <img src="{{ $pag->cover_image_url }}" alt="{{ $pag->title }}" loading="lazy" width="170" height="150">
+                                </a>
+                            </div>
+
+                            <!-- Franja Andalucía (verde/blanca/verde) -->
+                            <div class="franja-andalucia-vertical" aria-hidden="true">
+                                <span class="franja-andalucia-verde"></span>
+                                <span class="franja-andalucia-blanca"></span>
+                                <span class="franja-andalucia-verde"></span>
+                            </div>
+
+                            <!-- Cuerpo de la tarjeta compacta -->
+                            <div class="tarjeta-pagina-cuerpo">
+                                <div>
+                                    <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.25rem; line-height: 1.35;">
+                                        <a href="{{ route('paginas.show', ['slug' => $pag->slug]) }}{{ $langQuery }}" style="color: inherit; text-decoration: none;">
+                                            {{ $pag->title }}
+                                        </a>
+                                    </h3>
+                                    <time datetime="{{ $pag->created_at->toIso8601String() }}" style="display: block; color: var(--color-texto-3); font-size: 0.8rem; margin-bottom: 0.5rem;">
+                                        {{ $pag->formatted_date }}
+                                    </time>
+                                    <p style="color: var(--color-texto-2); font-size: 0.9rem; line-height: 1.5; margin-bottom: 0.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        {{ $pag->description }}
+                                    </p>
+                                </div>
+
+                                <div class="tarjeta-pagina-footer">
+                                    <div class="tarjeta-pagina-keywords" aria-label="{{ __('portal.pages.keywords_label') }}">
+                                        @if(!empty($pag->keywords))
+                                            @foreach(array_slice($pag->keywords, 0, 3) as $kw)
+                                                <span class="badge-keyword">{{ $kw }}</span>
+                                            @endforeach
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+
+                <div style="display: flex; justify-content: center; margin-top: 1rem;">
+                    <a href="{{ route('paginas.index') }}{{ $langQuery }}" class="btn-verde">
+                        {{ __('portal.pages.btn_view_all') }}
+                    </a>
+                </div>
+            </section>
+        @endif
+
         <!-- 6. Resumen: Quién está detrás (Tarjeta Vertical Centrada y Oxigenada) -->
         <section class="seccion" style="border-top: 1px solid var(--color-borde); padding-top: 4rem; padding-bottom: 4rem;">
             <div class="tarjeta tarjeta-quien-detras" style="max-width: 680px; margin: 0 auto; padding: 3rem 2.5rem; text-align: center; display: flex; flex-direction: column; align-items: center; background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio-lg); box-shadow: var(--sombra-1);">

@@ -9,6 +9,8 @@ use App\Models\WebhookDestination;
 use App\Servicios\WebhooksClient;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\View;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
@@ -24,6 +26,19 @@ class EditWebhookDestination extends EditRecord
     public function getSubheading(): ?string
     {
         return __('admin.webhooks.edit_subheading');
+    }
+
+    /**
+     * Renderiza el formulario de edición con sus botones de acción y, debajo, la guía visual explicativa.
+     */
+    public function content(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                $this->getFormContentComponent(),
+                $this->getRelationManagersContentComponent(),
+                View::make('filament.webhooks.guide-alertas'),
+            ]);
     }
 
     protected function getHeaderActions(): array

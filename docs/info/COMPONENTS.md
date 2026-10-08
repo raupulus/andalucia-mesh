@@ -42,5 +42,21 @@ Catálogo de componentes reutilizables de interfaz de usuario de Andalucía Mesh
 - **Propósito:** Banner de llamada de atención y seguridad advirtiendo que la red ciudadana no constituye un servicio de emergencias ni sustituye al 112.
 - **Ranuras:** Personalizable o con texto por defecto.
 
+## Patrones y Componentes de Páginas Dinámicas
+
+### `.tarjeta-pagina-horizontal` / `.tarjeta-pagina-compacta`
+- **Propósito:** Presentación de artículos y páginas en formato horizontal ocupando el ancho completo (catálogo `/paginas`) o compacto en cuadrícula 2x2 (portada `/`).
+- **Composición:**
+  - Contenedor de imagen izquierda con `object-fit: cover` y efecto zoom suave al hover (`transform: scale(1.04)`).
+  - Separador `.franja-andalucia-vertical`: franja verde/blanca/verde de 9px (se transforma a horizontal de 9px en pantallas móviles <= 680px).
+  - Borde dual verde y blanco con contraste accesible en modo claro (`border: 1.5px solid #007A33; box-shadow: 0 0 0 1.5px #FFFFFF, 0 0 0 3px rgba(0, 122, 51, 0.25)`) y modo oscuro (`box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.2), 0 0 0 3px rgba(0, 122, 51, 0.4)`).
+  - Cuerpo con título H2/H3, fecha en formato europeo legible, descripción resumida y badges verdes de palabras clave alineados en la esquina inferior derecha.
+
+### `.badge-keyword`
+- **Propósito:** Píldora visual para palabras clave y temas de páginas (`#007A33` sobre texto blanco `#FFFFFF`, ratio de contraste 7.36:1, superando WCAG AAA).
+
+### `.btn-verde`
+- **Propósito:** Botón de acción principal verde Andalucía (`#007A33`) con texto blanco y realce interactivo para llamadas a la acción directas como el botón de catálogo en la portada.
+
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

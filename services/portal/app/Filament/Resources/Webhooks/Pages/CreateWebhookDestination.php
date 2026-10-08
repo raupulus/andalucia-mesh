@@ -7,6 +7,8 @@ namespace App\Filament\Resources\Webhooks\Pages;
 use App\Filament\Resources\Webhooks\WebhookDestinationResource;
 use App\Servicios\WebhooksClient;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Components\View;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
@@ -22,6 +24,18 @@ class CreateWebhookDestination extends CreateRecord
     public function getSubheading(): ?string
     {
         return __('admin.webhooks.create_subheading');
+    }
+
+    /**
+     * Renderiza el formulario con sus botones de acción y, debajo, la guía visual explicativa.
+     */
+    public function content(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                $this->getFormContentComponent(),
+                View::make('filament.webhooks.guide-alertas'),
+            ]);
     }
 
     protected function handleRecordCreation(array $data): Model

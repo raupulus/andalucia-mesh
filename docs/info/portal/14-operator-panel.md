@@ -133,6 +133,15 @@ Recurso `UserResource` (`/admin/users`, base `portal`):
 
 La página de edición de perfil personal (`/admin/profile`, `EditProfile`) utiliza un modal amplio para escritorio (`Width::FourExtraLarge`, 56rem / 896px) en lugar del ancho compacto de login, con avatar circular centrado horizontalmente y distribución en dos columnas (`sm: 2`) para optimizar la ergonomía en pantallas grandes.
 
+### Páginas y Artículos (`CustomPageResource`)
+
+Gestión y publicación de páginas y artículos divulgativos (base `portal`, tabla `custom_pages`):
+- **Formulario estructurado en dos secciones:**
+  - «Información General»: Título (genera slug automático en creación), Slug único y obligatorio (`alphaDash`, validación de unicidad), Descripción (resumen/lead hasta 500 caracteres) y Contenido completo mediante `MarkdownEditor` (soporte de estilos de texto, listas, encabezados, citas y bloques de código).
+  - «Multimedia y Metadatos»: Imagen de portada (`FileUpload` en disco `public` dentro de `paginas/` con editor de recorte), Etiquetas temáticas (`TagsInput` para keywords en formato array JSON) y conmutador de visibilidad (`is_active`).
+- **Tabla interactiva:**
+  - Miniatura de portada, Título con subtítulo de ruta (`/paginas/{slug}`), Badges verdes de keywords, Conmutador directo de estado activo (`ToggleColumn`), Fecha de creación y Acciones de fila (Ver en sitio público abriendo en pestaña nueva, Editar y Eliminar).
+
 ## Contratos propios
 
 ### Tablas (base `portal`)
@@ -147,6 +156,7 @@ La página de edición de perfil personal (`/admin/profile`, `EditProfile`) util
 | `faqs` | `id`, `question`, `answer`, `is_active`, `sort_order`, `created_at`, `updated_at` |
 | `webhook_destinations` | `id`, `name` único, `url`, `host`, `active` bool, `disabled_reason` null, `consecutive_failures`, `pending_deliveries`, `last_ok_at`, `risks` json, `types` json, `provinces` json, `nodes` json, `created_at`, `updated_at` |
 | `coordinated_routers` | `id`, `node_id` único, `short_name`, `long_name`, `province`, `role`, `approved` bool, `is_gateway` bool, `hw_model`, `notes`, `last_seen_at`, `created_at`, `updated_at` |
+| `custom_pages` | `id`, `title`, `slug` único, `description`, `content` markdown, `keywords` json, `featured_image`, `is_active` bool, `created_at`, `updated_at` |
 
 ### Configuración
 

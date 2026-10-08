@@ -322,7 +322,7 @@ class WebhookDestinationTest extends TestCase
         $this->actingAs($operador);
 
         Livewire::test(CreateWebhookDestination::class)
-            ->assertSee(__('admin.webhooks.section_guide'))
+            ->assertSee(__('admin.webhooks.guide_engine_badge'))
             ->assertSee(__('admin.webhooks.guide_risks_title'))
             ->assertSee(__('admin.webhooks.guide_types_title'))
             ->assertSee(__('admin.webhooks.guide_wildcard_notice'));

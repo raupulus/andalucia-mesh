@@ -27,6 +27,7 @@ return [
         'hardware' => 'Hardware',
         'api' => 'API/Websockets',
         'faq' => 'FAQ',
+        'pages' => 'Páginas',
         'theme_toggle' => 'Alternar tema claro ou escuro',
         'mobile_menu' => 'Abrir menu de navegação',
         'visual_appearance' => 'Aparência visual:',
@@ -620,5 +621,20 @@ return [
         'sidebar_heading' => 'Categorias',
         'showing_count' => 'A mostrar :count de :total artigos',
         'opens_new_tab' => 'abre num novo separador',
+    ],
+
+    'pages' => [
+        'nav_title' => 'Páginas',
+        'index_title' => 'Páginas e Artigos',
+        'index_subtitle' => 'Guias, artigos de divulgação e novidades sobre a rede em malha comunitária na Andaluzia.',
+        'home_title' => 'Páginas e Divulgação',
+        'home_subtitle' => 'Artigos, guias técnicas e novidades sobre a rede comunitária.',
+        'btn_view_all' => 'Ver todas as páginas',
+        'btn_back' => 'Voltar às páginas',
+        'no_pages' => 'Ainda não foram publicadas páginas ou artigos nesta secção.',
+        'empty_desc' => 'Em breve publicaremos guias técnicas, artigos de divulgação e novidades da comunidade.',
+        'published_on' => 'Publicado em :date',
+        'keywords_label' => 'Tópicos e palavras-chave:',
+        'share' => 'Partilhar',
     ],
 ];

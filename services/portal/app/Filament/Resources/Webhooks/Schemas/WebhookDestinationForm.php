@@ -11,7 +11,6 @@ use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
@@ -28,17 +27,6 @@ class WebhookDestinationForm
         return $schema
             ->columns(1)
             ->components([
-                Section::make(__('admin.webhooks.section_guide'))
-                    ->description(__('admin.webhooks.section_guide_desc'))
-                    ->icon(Heroicon::OutlinedInformationCircle)
-                    ->columnSpanFull()
-                    ->collapsible()
-                    ->collapsed(false)
-                    ->schema([
-                        View::make('filament.webhooks.guide-alertas')
-                            ->columnSpanFull(),
-                    ]),
-
                 Section::make(__('admin.webhooks.section_general'))
                     ->description(__('admin.webhooks.section_general_desc'))
                     ->icon(Heroicon::OutlinedCog6Tooth)

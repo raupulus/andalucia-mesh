@@ -13,12 +13,16 @@
         $ogLocale = $localeMap[$currentLocale] ?? 'es_ES';
         $pageTitle = str_contains($title ?? '', config('proyecto.nombre')) ? $title : (($title ? $title . ' — ' : '') . config('proyecto.nombre'));
         $metaDesc = $description ?? config('proyecto.seo.descripcion_defecto');
+        $metaImage = (!empty($image)) ? $image : asset(config('proyecto.seo.imagen_defecto'));
         $canonicalUrl = request()->fullUrl();
         $baseUrl = url()->current();
     @endphp
 
     <title>{{ $pageTitle }}</title>
     <meta name="description" content="{{ $metaDesc }}">
+    @if(!empty($keywords))
+    <meta name="keywords" content="{{ is_array($keywords) ? implode(', ', $keywords) : $keywords }}">
+    @endif
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <link rel="canonical" href="{{ $canonicalUrl }}">
 
@@ -34,7 +38,7 @@
     <meta property="og:title" content="{{ $title ?? config('proyecto.nombre') }}">
     <meta property="og:description" content="{{ $metaDesc }}">
     <meta property="og:url" content="{{ $canonicalUrl }}">
-    <meta property="og:image" content="{{ asset(config('proyecto.seo.imagen_defecto')) }}">
+    <meta property="og:image" content="{{ $metaImage }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:type" content="image/png">
@@ -55,7 +59,7 @@
     <meta name="twitter:creator" content="{{ $twitterHandle }}">
     <meta name="twitter:title" content="{{ $title ?? config('proyecto.nombre') }}">
     <meta name="twitter:description" content="{{ $metaDesc }}">
-    <meta name="twitter:image" content="{{ asset(config('proyecto.seo.imagen_defecto')) }}">
+    <meta name="twitter:image" content="{{ $metaImage }}">
     <meta name="twitter:image:alt" content="{{ config('proyecto.nombre') }} — {{ $metaDesc }}">
 
     <!-- Datos estructurados Schema.org (JSON-LD) -->

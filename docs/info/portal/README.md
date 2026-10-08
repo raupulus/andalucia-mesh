@@ -29,6 +29,7 @@
 | 06.13 | [`13-nodes-alerts-api.md`](13-nodes-alerts-api.md) | `nodes*` y `alerts*` | Media |
 | 06.14 | [`14-operator-panel.md`](14-operator-panel.md) | `/admin`: estado de servicios, recursos de solo lectura, operadores | Media |
 | 06.15 | [`15-hardware-catalog.md`](15-hardware-catalog.md) | Catálogo de hardware recomendado: front interactivo `/hardware`, recorte 1:1 y gestión en `/admin` | Media |
+| 06.16 | [`16-custom-pages.md`](16-custom-pages.md) | Páginas y artículos dinámicos: catálogo `/paginas`, tarjetas horizontales, SEO Article y gestión en `/admin` | Media |
 | — | [`pages/`](pages/README.md) | Contenido y borrador del texto de cada página pública | — |
 | — | [`DESIGN.md`](../DESIGN.md) | Sistema visual | — |
 

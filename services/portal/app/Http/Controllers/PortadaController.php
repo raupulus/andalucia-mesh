@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Data\Ingest\Provincias;
+use App\Models\CustomPage;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Throwable;
@@ -40,10 +41,21 @@ class PortadaController extends Controller
 
         $tarjetas = config('proyecto.tarjetas', []);
 
+        $ultimasPaginas = collect();
+        try {
+            $ultimasPaginas = CustomPage::active()
+                ->recent()
+                ->limit(4)
+                ->get();
+        } catch (Throwable) {
+            // Fallback silencioso en caso de pruebas sin migraciones
+        }
+
         return view('portada', [
             'tarjetas' => $tarjetas,
             'datosMapa' => $datosMapa,
             'ventana' => $ventana,
+            'ultimasPaginas' => $ultimasPaginas,
         ]);
     }
 }

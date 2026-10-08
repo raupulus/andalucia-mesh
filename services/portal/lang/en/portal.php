@@ -27,6 +27,7 @@ return [
         'hardware' => 'Hardware',
         'api' => 'API/Websockets',
         'faq' => 'FAQ',
+        'pages' => 'Pages',
         'theme_toggle' => 'Toggle light or dark theme',
         'mobile_menu' => 'Open navigation menu',
         'visual_appearance' => 'Visual appearance:',
@@ -620,5 +621,20 @@ return [
         'sidebar_heading' => 'Categories',
         'showing_count' => 'Showing :count of :total items',
         'opens_new_tab' => 'opens in a new tab',
+    ],
+
+    'pages' => [
+        'nav_title' => 'Pages',
+        'index_title' => 'Pages and Articles',
+        'index_subtitle' => 'Guides, educational articles and updates about the community mesh network in Andalusia.',
+        'home_title' => 'Pages & Articles',
+        'home_subtitle' => 'Articles, technical guides and updates on the community network.',
+        'btn_view_all' => 'View all pages',
+        'btn_back' => 'Back to pages',
+        'no_pages' => 'No pages or articles published yet in this section.',
+        'empty_desc' => 'Technical guides, educational articles, and community updates will be published soon.',
+        'published_on' => 'Published on :date',
+        'keywords_label' => 'Topics and keywords:',
+        'share' => 'Share',
     ],
 ];

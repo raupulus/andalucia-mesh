@@ -56,7 +56,7 @@ Este documento define las normas operativas, la estructura del proyecto y el pro
         ├── meshconfig/
         ├── potatomesh/          README + adaptador-potato, sync-peers
         ├── ingesta/             README + módulos 01–06
-        ├── portal/              README + módulos 01–15 + pages/
+        ├── portal/              README + módulos 01–16 + pages/
         ├── detector-alertas/    README + módulos 01–03
         ├── bots-webhooks/       README + 01-bot-telegram, 02-bot-discord, 03-webhooks
         └── chat-ws/
@@ -98,7 +98,7 @@ El repositorio contiene muchas aplicaciones independientes. **No se carga toda l
 | `services/adaptador-potato/` | `docs/info/potatomesh/adaptador-potato.md` | Resto |
 | `services/sync-peers/` | `docs/info/potatomesh/sync-peers.md` | Resto |
 | `services/ingesta/` | `docs/info/ingesta/README.md` + el módulo 01–06 afectado | Portal, detector, bots |
-| `services/portal/` (web) | `docs/info/portal/README.md` + módulo 01–10 afectado + su página en `docs/info/portal/pages/` + `DESIGN.md` y `COMPONENTS.md` si hay interfaz | Ingesta, detector, bots |
+| `services/portal/` (web) | `docs/info/portal/README.md` + módulo 01–10, 15–16 afectado + su página en `docs/info/portal/pages/` + `DESIGN.md` y `COMPONENTS.md` si hay interfaz | Ingesta, detector, bots |
 | `services/portal/` (API) | `docs/info/portal/11-public-api.md` + el módulo 12 o 13 afectado | Páginas, diseño |
 | `services/portal/` (panel `/admin`) | `docs/info/portal/14-operator-panel.md` | Páginas, API |
 | `services/detector-alertas/` | `docs/info/detector-alertas/README.md` + módulo 01–03 afectado | Portal, bots |
@@ -130,7 +130,7 @@ El repositorio contiene muchas aplicaciones independientes. **No se carga toda l
 | `mosquitto/`, `meshview/`, `meshconfig/`, `chat-ws/` | Una ficha por pieza |
 | `potatomesh/` | Instancia (`README`), `adaptador-potato.md`, `sync-peers.md` |
 | `ingesta/` | Ficha + entrada y descifrado, decodificación y deduplicación, provincias y registros, persistencia y retención, vistas contrato, flujo `decoded` |
-| `portal/` | Ficha + módulos web (01–10), API (11–13), panel (14) y `pages/` (contenido de cada página pública) |
+| `portal/` | Ficha + módulos web (01–10, 15–16), API (11–13), panel (14) y `pages/` (contenido de cada página pública) |
 | `detector-alertas/` | Ficha + motor de reglas, catálogo de reglas, socket y persistencia |
 | `bots-webhooks/` | Núcleo común (`README`) + Telegram, Discord y webhooks |
 

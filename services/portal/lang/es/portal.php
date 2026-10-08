@@ -27,6 +27,7 @@ return [
         'hardware' => 'Hardware',
         'api' => 'API/Websockets',
         'faq' => 'FAQ',
+        'pages' => 'Páginas',
         'theme_toggle' => 'Cambiar tema claro u oscuro',
         'mobile_menu' => 'Abrir menú de navegación',
         'visual_appearance' => 'Apariencia visual:',
@@ -620,5 +621,20 @@ return [
         'sidebar_heading' => 'Categorías',
         'showing_count' => 'Mostrando :count de :total artículos',
         'opens_new_tab' => 'abre en una pestaña nueva',
+    ],
+
+    'pages' => [
+        'nav_title' => 'Páginas',
+        'index_title' => 'Páginas y Artículos',
+        'index_subtitle' => 'Guías, artículos divulgativos y novedades sobre la red mallada comunitaria en Andalucía.',
+        'home_title' => 'Páginas y Divulgación',
+        'home_subtitle' => 'Artículos, guías técnicas y novedades sobre la red comunitaria.',
+        'btn_view_all' => 'Ver todas las páginas',
+        'btn_back' => 'Volver a páginas',
+        'no_pages' => 'Aún no se han publicado páginas o artículos en esta sección.',
+        'empty_desc' => 'Próximamente publicaremos guías técnicas, artículos divulgativos y novedades de la comunidad.',
+        'published_on' => 'Publicado el :date',
+        'keywords_label' => 'Temas y palabras clave:',
+        'share' => 'Compartir',
     ],
 ];
