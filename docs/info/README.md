@@ -35,7 +35,7 @@ Documentación técnica canónica del proyecto. Todavía no hay código: cada do
 | Portal | [portal/](portal/README.md): módulos 01–16 y [páginas](portal/pages/README.md) | `services/portal/` | Desplegado y verificado |
 | Detector de alertas | [detector-alertas/](detector-alertas/README.md): [motor](detector-alertas/01-rule-engine.md), [catálogo de reglas](detector-alertas/02-rule-catalog.md), [socket y persistencia](detector-alertas/03-socket-persistence.md) | `services/detector-alertas/` | Desplegado y verificado |
 | Bots y webhooks | [bots-webhooks/](bots-webhooks/README.md): [Telegram](bots-webhooks/01-bot-telegram.md), [Discord](bots-webhooks/02-bot-discord.md), [webhooks](bots-webhooks/03-webhooks.md) | `services/bot-telegram/`, `services/bot-discord/`, `services/webhooks/` | Desplegado y verificado |
-| Chat en directo | [chat-ws/](chat-ws/README.md) | `services/chat-ws/` | Especificado |
+| Chat en directo | [chat-ws/](chat-ws/README.md) | `services/chat-ws/` | Desplegado y verificado |
 
 ## Formato de los documentos de pieza
 
@@ -46,4 +46,4 @@ Ficha de desarrollo: 1 Contexto · 2 Alcance · 3 Stack y versiones · 4 Contrat
 Consulte [apis/README.md](apis/README.md).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

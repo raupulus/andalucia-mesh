@@ -20,11 +20,12 @@
 
 | Componente | Versión |
 |---|---|
-| Python | 3.13 sobre `python:3.13-slim-trixie` (fijar parche al crear) |
-| `websockets` | Fijar al crear (última probada); servidor asíncrono con `permessage-deflate` |
-| `aiomqtt` | Fijar al crear |
-| `aiohttp` | Fijar al crear (`/health`) |
-| `uv`, `pytest`, `pytest-asyncio` | `pyproject.toml` + `uv.lock` |
+| Python | 3.13 sobre `python:3.13-slim` |
+| `websockets` | `17.2` (`websockets>=13.0`); servidor asíncrono con `permessage-deflate` |
+| `aiomqtt` | `2.5.1` (`aiomqtt>=2.3.0`, identificador `snm-chat-ws` según TR-04) |
+| `aiohttp` | `3.14.4` (`aiohttp>=3.11.0`) para endpoint `/health` en puerto 8080 |
+| `pydantic`, `pydantic-settings` | `>=2.10.0` / `>=2.7.0` para configuración tipada |
+| `uv`, `pytest`, `pytest-asyncio`, `pytest-cov`, `mypy`, `ruff` | `pyproject.toml` + `uv.lock` con tipado estricto `mypy --strict` |
 
 ## 4. Contratos
 
@@ -133,43 +134,43 @@ Pasos:
 Copia: no hay datos que copiar.
 
 ## 9. Definición de hecho
-
-- [ ] `wss://${PROJECT_DOMAIN}/ws/chat` acepta conexiones y responde `hello` con los 14 canales.
-- [ ] Solo llegan textos de difusión de los canales suscritos; nunca mensajes directos ni otros tipos.
-- [ ] Un canal fuera de la lista recibe `unknown_channel`.
-- [ ] Límites por IP, globales y de cliente lento funcionando.
-- [ ] El servicio no puede publicar en MQTT (ACL de solo lectura) y no guarda textos ni IP.
-- [ ] Documentado en `/api` y vigilado en el panel.
-
-## 10. Escenarios de prueba
-
-- **Dado** un cliente suscrito a `Cadiz`, **cuando** la ingesta publica un texto de `Cadiz`, **entonces** lo recibe en < 3 s desde la radio; uno de `Sevilla` no le llega.
-- **Dado** un cliente que pide `["Cadiz", "Madrid"]`, **cuando** se suscribe, **entonces** recibe `subscribed` con `Cadiz` y `error unknown_channel` con `Madrid`.
-- **Dado** 15 mensajes en `sos` en la última hora, **cuando** un cliente se suscribe a `sos`, **entonces** recibe `history` con los 15 en orden.
-- **Dado** un mensaje de texto directo a un nodo, **cuando** llega a `decoded`, **entonces** no se difunde.
-- **Dado** un cliente que no lee, **cuando** se acumulan 500 mensajes, **entonces** se cierra con 1013 y los demás clientes no se retrasan.
-- **Dado** MQTT caído 2 min, **cuando** se consulta `/health`, **entonces** `503`; al volver, los clientes siguen conectados y reciben lo nuevo.
-- **Dado** un cliente que envía `{"type": "publish", …}`, **cuando** llega, **entonces** `invalid_message` y no ocurre nada más.
-
-## 11. Riesgos y limitaciones
-
-- El historial se pierde al reiniciar (no hay base de datos, a propósito).
-- Si cae la ingesta no hay mensajes nuevos (depende de `decoded`).
-- Solo se ve lo que llega con OK to MQTT a nuestros gateways.
-- Abuso por muchas conexiones: mitigado con límites por IP y globales.
-
-## 12. Referencias
-
-- `../integration.md` §2, §4, §5, §6, §11, §12.
-- `../ingesta/06-decoded-stream.md` (formato `text`).
-
-## Decisiones de detalle
-
-1. Ruta `/ws/chat` en el dominio principal (sin subdominio nuevo).
-2. Claves en inglés, como la API pública; códigos de cierre estándar de WebSocket.
-3. Historial de 20 mensajes por canal en memoria, máximo 24 h.
-4. Sin comprobar `Origin` ni autenticar: los datos ya son públicos y el servicio es de solo lectura.
-5. Se incluye el canal `sos` (está en la lista admitida).
-
----
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+ 
+- [x] `wss://${PROJECT_DOMAIN}/ws/chat` acepta conexiones y responde `hello` con los 14 canales.
+- [x] Solo llegan textos de difusión de los canales suscritos; nunca mensajes directos ni otros tipos.
+- [x] Un canal fuera de la lista recibe `unknown_channel`.
+- [x] Límites por IP, globales y de cliente lento funcionando.
+- [x] El servicio no puede publicar en MQTT (ACL de solo lectura) y no guarda textos ni IP.
+- [x] Documentado en `/api` y vigilado en el panel.
+ 
+ ## 10. Escenarios de prueba
+ 
+ - **Dado** un cliente suscrito a `Cadiz`, **cuando** la ingesta publica un texto de `Cadiz`, **entonces** lo recibe en < 3 s desde la radio; uno de `Sevilla` no le llega.
+ - **Dado** un cliente que pide `["Cadiz", "Madrid"]`, **cuando** se suscribe, **entonces** recibe `subscribed` con `Cadiz` y `error unknown_channel` con `Madrid`.
+ - **Dado** 15 mensajes en `sos` en la última hora, **cuando** un cliente se suscribe a `sos`, **entonces** recibe `history` con los 15 en orden.
+ - **Dado** un mensaje de texto directo a un nodo, **cuando** llega a `decoded`, **entonces** no se difunde.
+ - **Dado** un cliente que no lee, **cuando** se acumulan 500 mensajes, **entonces** se cierra con 1013 y los demás clientes no se retrasan.
+ - **Dado** MQTT caído 2 min, **cuando** se consulta `/health`, **entonces** `503`; al volver, los clientes siguen conectados y reciben lo nuevo.
+ - **Dado** un cliente que envía `{"type": "publish", …}`, **cuando** llega, **entonces** `invalid_message` y no ocurre nada más.
+ 
+ ## 11. Riesgos y limitaciones
+ 
+ - El historial se pierde al reiniciar (no hay base de datos, a propósito).
+ - Si cae la ingesta no hay mensajes nuevos (depende de `decoded`).
+ - Solo se ve lo que llega con OK to MQTT a nuestros gateways.
+ - Abuso por muchas conexiones: mitigado con límites por IP y globales.
+ 
+ ## 12. Referencias
+ 
+ - `../integration.md` §2, §4, §5, §6, §11, §12.
+ - `../ingesta/06-decoded-stream.md` (formato `text`).
+ 
+ ## Decisiones de detalle
+ 
+ 1. Ruta `/ws/chat` en el dominio principal (sin subdominio nuevo).
+ 2. Claves en inglés, como la API pública; códigos de cierre estándar de WebSocket.
+ 3. Historial de 20 mensajes por canal en memoria, máximo 24 h.
+ 4. Sin comprobar `Origin` ni autenticar: los datos ya son públicos y el servicio es de solo lectura.
+ 5. Se incluye el canal `sos` (está en la lista admitida).
+ 
+ ---
+ > Creado: 2026-10-07 · Última revisión: 2026-10-09

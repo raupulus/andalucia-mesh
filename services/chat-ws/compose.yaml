@@ -1,0 +1,42 @@
+# ==============================================================================
+# compose.yaml (services/chat-ws/)
+#
+# Microservicio chat-ws para Andalucía Mesh.
+# Servidor WebSocket de streaming público de solo lectura para canales de chat.
+# Publica el puerto 8000 en 127.0.0.1:8090 (proxy Nginx en /ws/).
+# El puerto de salud 8080 es accesible internamente en la red 'mesh'.
+# ==============================================================================
+
+services:
+  chat-ws:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: snm-chat-ws:0.1.0
+    container_name: chat-ws
+    restart: unless-stopped
+    networks:
+      - mesh
+    ports:
+      - "127.0.0.1:8090:8000"
+    expose:
+      - "8080"
+    env_file:
+      - path: /srv/comun/.env
+        required: false
+      - path: /srv/chat-ws/.env
+        required: false
+      - path: .env
+        required: false
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    read_only: true
+    user: "10501:10500"
+    stop_grace_period: 30s
+    mem_limit: 256m
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  mesh:
+    external: true
