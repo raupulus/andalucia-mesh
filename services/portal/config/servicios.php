@@ -99,4 +99,15 @@ return [
             'fase' => 8,
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | API Interna de Webhooks (Gestión Dinámica de Destinos)
+    |--------------------------------------------------------------------------
+    */
+    'webhooks_api' => [
+        'url' => env('WEBHOOKS_INTERNAL_URL', 'http://webhooks:8080'),
+        'secret' => env('INTERNAL_API_SECRET', ''),
+        'timeout' => (int) env('WEBHOOKS_INTERNAL_TIMEOUT', 5),
+    ],
 ];

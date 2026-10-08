@@ -8,7 +8,7 @@ from detector.modelos import PaqueteDecodificado
 from detector.motor.bases import LineasBase
 from detector.motor.ciclo import GestorCicloVida
 from detector.motor.estado import EstadoMotor
-from detector.motor.protocolos import Contexto, Tick, TransicionAlerta
+from detector.motor.protocolos import Alerta, Contexto, Tick, TransicionAlerta
 from detector.motor.recarga import GestorRecarga
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ class MotorAlertas:
 
         # 2. Evaluar reglas suscritas al portnum del paquete
         for rule_id, rule in self.recarga.reglas_activas.items():
-            if not rule.suscrita_a or pkt.portnum in rule.suscrita_a or "all" in rule.suscrita_a:
+            if rule.suscrita_a and (pkt.portnum in rule.suscrita_a or "all" in rule.suscrita_a):
                 rule_cfg = self.recarga.reglas_config.get(rule_id, {})
                 rule_model = rule.Config.model_validate(rule_cfg)
 
@@ -77,6 +77,7 @@ class MotorAlertas:
 
                 for alt in alertas_generadas:
                     info_dict = None
+                    datos_dict = dict(alt.datos)
                     if nodo_estado:
                         info_dict = {
                             "corto": nodo_estado.short,
@@ -84,9 +85,23 @@ class MotorAlertas:
                             "rol": nodo_estado.role,
                             "provincia": nodo_estado.province,
                         }
+                        if "provincia" not in datos_dict:
+                            datos_dict["provincia"] = nodo_estado.province or "FUERA"
+                        if "dentro_andalucia" not in datos_dict:
+                            datos_dict["dentro_andalucia"] = nodo_estado.dentro_andalucia
+
+                    alt_final = Alerta(
+                        regla=alt.regla,
+                        riesgo=alt.riesgo,
+                        mensaje=alt.mensaje,
+                        nodo=alt.nodo,
+                        nodos=alt.nodos,
+                        datos=datos_dict,
+                        tipo=alt.tipo,
+                    )
 
                     t = self.ciclo.procesar_alerta_regla(
-                        alerta=alt,
+                        alerta=alt_final,
                         ahora=ref_time,
                         clasificador=self.recarga.clasificador,  # type: ignore[arg-type]
                         silencios=self.recarga.silencios,
@@ -158,10 +173,10 @@ class MotorAlertas:
         tick_ev = Tick(ahora=ref_time)
 
         # 2. Evaluar reglas de temporizador (suscrita_a vacío: ausencias)
-        for rule_id, rule in self.recarga.reglas_activas.items():
-            if not rule.suscrita_a:
+        for rule_id, timer_rule in self.recarga.reglas_activas.items():
+            if not timer_rule.suscrita_a:
                 rule_cfg = self.recarga.reglas_config.get(rule_id, {})
-                rule_model = rule.Config.model_validate(rule_cfg)
+                rule_model = timer_rule.Config.model_validate(rule_cfg)
 
                 ctx = Contexto(
                     ahora=ref_time,
@@ -177,7 +192,7 @@ class MotorAlertas:
                 )
 
                 try:
-                    alertas_ausencias = rule.comprobar(ctx)
+                    alertas_ausencias = timer_rule.comprobar(ctx)
                 except Exception as e:
                     logger.error("Error en comprobar (tick) de regla '%s': %s", rule_id, e)
                     continue
@@ -185,6 +200,7 @@ class MotorAlertas:
                 for alt in alertas_ausencias:
                     nodo_estado = self.estado.nodes.get(alt.nodo)
                     info_dict = None
+                    datos_dict = dict(alt.datos)
                     if nodo_estado:
                         info_dict = {
                             "corto": nodo_estado.short,
@@ -192,13 +208,27 @@ class MotorAlertas:
                             "rol": nodo_estado.role,
                             "provincia": nodo_estado.province,
                         }
+                        if "provincia" not in datos_dict:
+                            datos_dict["provincia"] = nodo_estado.province or "FUERA"
+                        if "dentro_andalucia" not in datos_dict:
+                            datos_dict["dentro_andalucia"] = nodo_estado.dentro_andalucia
+
+                    alt_final = Alerta(
+                        regla=alt.regla,
+                        riesgo=alt.riesgo,
+                        mensaje=alt.mensaje,
+                        nodo=alt.nodo,
+                        nodos=alt.nodos,
+                        datos=datos_dict,
+                        tipo=alt.tipo,
+                    )
 
                     t = self.ciclo.procesar_alerta_regla(
-                        alerta=alt,
+                        alerta=alt_final,
                         ahora=ref_time,
                         clasificador=self.recarga.clasificador,  # type: ignore[arg-type]
                         silencios=self.recarga.silencios,
-                        afecta_malla=rule.afecta_malla,
+                        afecta_malla=timer_rule.afecta_malla,
                         rol=nodo_estado.role if nodo_estado else None,
                         is_gateway=nodo_estado.is_gateway if nodo_estado else False,
                         nodo_info=info_dict,
@@ -230,7 +260,7 @@ class MotorAlertas:
             )
 
             try:
-                sigue = rule.sigue_activa(ctx, abierta)
+                sigue = active_rule.sigue_activa(ctx, abierta)
             except Exception as e:
                 logger.error("Error en sigue_activa (tick) de regla '%s': %s", abierta.regla, e)
                 continue

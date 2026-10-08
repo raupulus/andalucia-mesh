@@ -6,7 +6,7 @@ import time
 import aiohttp
 
 from nucleo.base import GestorBase
-from webhooks.configuracion import ConfiguracionWebhooks
+from webhooks.configuracion import ConfiguracionWebhooks, DestinoWebhook
 from webhooks.cuerpo import calcular_firma_hmac, construir_cuerpo_webhook
 from webhooks.red_segura import resolver_y_validar_host
 
@@ -69,12 +69,44 @@ async def orden_reactivar(config: ConfiguracionWebhooks, gestor_base: GestorBase
 
 async def orden_probar(config: ConfiguracionWebhooks, nombre: str) -> None:
     """Envía un ping de prueba firmado de forma inmediata sin encolar."""
-    destinos = config.cargar_destinos()
-    dest_map = {d.nombre: d for d in destinos}
-    cfg_destino = dest_map.get(nombre)
+    cfg_destino: DestinoWebhook | None = None
+    gestor_base = GestorBase(config, "webhooks-cli")
+    try:
+        await gestor_base.conectar()
+        async with gestor_base.conexion() as conn, conn.cursor() as cur:
+            await cur.execute(
+                """
+                SELECT nombre, url, host, url_hash, riesgos, tipos, provincias, nodos, secreto
+                FROM destino
+                WHERE nombre = %s
+                """,
+                (nombre,),
+            )
+            fila = await cur.fetchone()
+            if fila:
+                cfg_destino = DestinoWebhook(
+                    nombre=fila[0],
+                    url=fila[1],
+                    host=fila[2],
+                    url_hash=fila[3],
+                    riesgos=list(fila[4]) if fila[4] else None,
+                    tipos=list(fila[5]) if fila[5] else None,
+                    provincias=list(fila[6]) if fila[6] else None,
+                    nodos=list(fila[7]) if fila[7] else None,
+                    secreto=fila[8] or "",
+                )
+    except Exception:
+        pass
+    finally:
+        await gestor_base.cerrar()
 
     if not cfg_destino:
-        print(f"ERROR: Destino '{nombre}' no encontrado en webhooks.yaml o variables de entorno.")
+        destinos = config.cargar_destinos()
+        dest_map = {d.nombre: d for d in destinos}
+        cfg_destino = dest_map.get(nombre)
+
+    if not cfg_destino:
+        print(f"ERROR: Destino '{nombre}' no encontrado en base de datos ni en webhooks.yaml.")
         sys.exit(1)
 
     redes_bloqueadas = config.parsear_redes_bloqueadas()

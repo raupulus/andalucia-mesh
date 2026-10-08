@@ -47,10 +47,10 @@ El portal es la **única pieza** del proyecto con internacionalización y traduc
 
 | Componente | Versión |
 |---|---|
-| PHP | 8.4 |
-| Laravel | 13 (exacta en `composer.lock`) |
-| Filament | 5 (exacta en `composer.lock`), solo en `/admin` |
-| Imagen base | `serversideup/php:8.4-fpm-nginx` con etiqueta fijada (fijar al crear: la última probada de la serie 8.4) |
+| PHP | 8.5 |
+| Laravel | 13 (exacta en `composer.lock`: 13.35.0) |
+| Filament | 5 (exacta en `composer.lock`: 5.10.1), solo en `/admin` |
+| Imagen base | `serversideup/php:8.5-fpm-nginx` con etiqueta fijada (fijar al crear: la última probada de la serie 8.5) |
 | Front público | Blade + CSS propio con los tokens de `DESIGN.md` como variables CSS; JS mínimo (sondeo, mapa, copiar, conmutador de tema) compilado con Vite al construir la imagen |
 | Cliente MQTT del panel | Librería PHP MQTT fijada al crear (solo comprueba conexión) |
 | Pruebas | Pest/PHPUnit; Larastan; Pint |

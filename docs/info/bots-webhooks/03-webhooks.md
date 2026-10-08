@@ -12,14 +12,23 @@
 
 ### Alta, cambio y baja (operador)
 
+Existen dos vías para gestionar los destinos de webhooks:
+
+#### 1. Vía dinámica desde el Panel de Operadores (`/admin`) — *Recomendada*
+Los operadores autenticados gestionan altas, bajas, edición de filtros, reactivación tras suspensiones y pruebas inmediatas de `ping` firmado directamente desde la interfaz Filament en `services/portal/` (`WebhookDestinationResource`).
+- El portal se comunica con `webhooks` a través de la API HTTP interna (`http://webhooks:8080/internal/...`) en la red Docker `mesh`.
+- Autenticación protegida mediante la cabecera `X-Internal-Secret: ${INTERNAL_API_SECRET}`.
+- El motor de entregas actualiza su caché en memoria en caliente sin necesidad de reiniciar contenedores ni escribir en la base de datos de webhooks desde el portal.
+
+#### 2. Vía manual mediante archivo (`webhooks.yaml` y `.env`)
 1. El integrador escribe a `PROJECT_CONTACT` con la URL (`https`) y los filtros que quiere.
 2. El operador elige un `nombre` y añade la entrada a `/srv/webhooks/webhooks.yaml` (el repositorio solo lleva `webhooks.example.yaml`).
 3. Genera el secreto (`openssl rand -hex 32`) y lo guarda en `/srv/webhooks/.env` como `WEBHOOK_<NOMBRE>_SECRETO` (nombre en mayúsculas, `-` → `_`).
-4. `docker compose up -d --force-recreate` (relee `.env` y YAML; el cursor evita pérdidas).
+4. `docker compose up -d --force-recreate` (relee `.env` y YAML; el cursor evita pérdidas). Al arrancar, el microservicio sincroniza los destinos del YAML en la tabla `destino`.
 5. Entrega el secreto al integrador por un canal privado.
 6. `docker compose exec webhooks python -m webhooks probar <nombre>`: el integrador confirma que recibe el `ping` y que la firma cuadra.
 
-**Cambio:** editar YAML o secreto y repetir el paso 4. Al rotar el secreto no hay periodo con dos secretos: el receptor lo cambia a la vez y lo rechazado en esa ventana se reintenta (hasta ~6 min). **Baja:** quitar la entrada y su secreto y repetir el paso 4 (destino `retirado`).
+**Cambio:** editar YAML o secreto y repetir el paso 4, o editar directamente desde el panel `/admin`. **Baja:** eliminar el destino desde el panel `/admin` (pasa a `retirado` y purga pendientes) o quitarlo de `webhooks.yaml`.
 
 ```yaml
 # /srv/webhooks/webhooks.yaml (sin secretos)
@@ -90,6 +99,19 @@ Cada `fallida` suma 1 a `fallos_seguidos`; al llegar a `WEBHOOKS_FALLOS_DESACTIV
 - **Al enviar:** resolvedor propio de aiohttp que resuelve A y AAAA y **rechaza la entrega** si alguna dirección no es global (`ipaddress`: `is_global` falso; en IPv6 con IPv4 mapeada se mira la IPv4), está en `64:ff9b::/96` (NAT64) o en `WEBHOOKS_IPS_BLOQUEADAS` (IPs públicas del propio servidor). La conexión usa solo esas direcciones ya validadas: no hay segunda resolución (evita *DNS rebinding*). Sin proxy (`trust_env=False`).
 - Bloqueado así: `0.0.0.0/8`, `10/8`, `100.64/10`, `127/8`, `169.254/16`, `172.16/12` (incluida la red `mesh` y PostgreSQL en `172.30.0.1`), `192.168/16`, rangos de documentación y multidifusión, `::1`, `fc00::/7`, `fe80::/10`, `ff00::/8`.
 - En registros y en la base solo aparece el host de la URL, nunca la ruta ni la consulta (pueden llevar tokens del integrador).
+
+### API interna de administración HTTP
+
+Expuesta en el mismo puerto que `/health` (8080 en la red Docker `mesh`), protegida por la cabecera `X-Internal-Secret: ${INTERNAL_API_SECRET}` para consumo exclusivo del Portal:
+
+| Método y Ruta | Descripción |
+|---|---|
+| `GET /internal/destinos` | Lista todos los destinos con URL, host, estado, filtros, fallos seguidos, pendientes y último OK |
+| `POST /internal/destinos` | Da de alta un nuevo destino validando regex, formato HTTPS, reglas SSRF y secreto (≥ 32 caracteres) |
+| `PUT /internal/destinos/{nombre}` | Modifica la URL, filtros o secreto de un destino existente |
+| `DELETE /internal/destinos/{nombre}` | Marca el destino como inactivo `retirado` y purga sus entregas pendientes |
+| `POST /internal/destinos/{nombre}/probar` | Envía un `ping` firmado fuera de cola y devuelve `{ok, status_code, duration_ms, error}` |
+| `POST /internal/destinos/{nombre}/reactivar` | Reactiva el destino (`activo=true`, `fallos_seguidos=0`) y despierta el despachador |
 
 ### Órdenes de operador
 
@@ -170,19 +192,24 @@ Cada `fallida` suma 1 a `fallos_seguidos`; al llegar a `WEBHOOKS_FALLOS_DESACTIV
 | `WEBHOOKS_CONCURRENCIA` | `10` | Propia | No |
 | `WEBHOOKS_FALLOS_DESACTIVAR` | `20` | Propia | No |
 | `WEBHOOKS_IPS_BLOQUEADAS` | IPv4 pública y `/64` IPv6 del servidor (p. ej. `203.0.113.10,2001:db8:1:2::/64`) | Propia | No |
-| `WEBHOOK_<NOMBRE>_SECRETO` | — (una por destino) | Propia | **Sí** |
+| `INTERNAL_API_SECRET` | Token compartido para endpoints internos en red `mesh` | Común / Propia | **Sí** |
+| `WEBHOOK_<NOMBRE>_SECRETO` | — (opcional si se usa YAML estático) | Propia | **Sí** |
 
 **Datos** (base `webhooks`; además `cursor` con `cliente = webhooks` y `esquema_migraciones` de `README.md` §6):
 
 | Tabla `destino` | Tipo | Notas |
 |---|---|---|
 | `id` | `bigint` identidad, PK | |
-| `nombre` | `text` único | El del YAML |
+| `nombre` | `text` único | Identificador del destino |
+| `url` | `text` | URL completa HTTPS (migración 002) |
 | `host` | `text` | Solo el host de la URL |
-| `url_hash` | `text` | SHA-256 de la URL (detecta cambios sin guardarla) |
+| `url_hash` | `text` | SHA-256 de la URL |
+| `secreto` | `text` | Clave secreta HMAC-SHA256 (migración 002) |
+| `riesgos` / `tipos` | `text[]` nulo | Filtros por riesgo y tipo de alerta (migración 002) |
+| `provincias` / `nodos` | `text[]` nulo | Filtros territoriales e identificadores (migración 002) |
 | `activo` / `motivo_baja` | `boolean` / `text` nulo | `fallos`, `gone`, `retirado` |
-| `fallos_seguidos` | `smallint` | |
-| `ultimo_ok`, `alta_en`, `baja_en`, `actualizado_en` | `timestamptz` | |
+| `fallos_seguidos` | `smallint` | Consecutivos para auto-suspensión |
+| `ultimo_ok`, `alta_en`, `baja_en`, `actualizado_en` | `timestamptz` | Trazabilidad temporal |
 
 | Tabla `entrega` | Tipo | Notas |
 |---|---|---|
@@ -237,4 +264,4 @@ Cada `fallida` suma 1 a `fallos_seguidos`; al llegar a `WEBHOOKS_FALLOS_DESACTIV
 10. **Reinicio a mitad.** Dadas 5 entregas pendientes, cuando se reinicia el contenedor, entonces salen en orden con el mismo cuerpo y la misma firma que antes, sin filas nuevas.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

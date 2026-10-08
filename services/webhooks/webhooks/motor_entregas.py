@@ -57,6 +57,7 @@ class MotorEntregas:
         )
 
         await self.sincronizar_destinos_db()
+        await self.recargar_destinos_db()
         self._tarea_despacho = asyncio.create_task(self._bucle_despacho())
         logger.info("Motor de entregas de webhooks iniciado con %d destinos.", len(self.destinos_map))
 
@@ -81,13 +82,16 @@ class MotorEntregas:
         self._evento_despertar.set()
 
     async def sincronizar_destinos_db(self) -> None:
-        """Sincroniza los destinos de webhooks.yaml con la tabla destino."""
+        """Sincroniza los destinos de webhooks.yaml con la tabla destino sin alterar los creados por API."""
+        if not self.destinos_map:
+            return
+
         async with self.gestor_base.conexion() as conn, conn.transaction(), conn.cursor() as cur:
             # Consultar destinos existentes en base de datos
             await cur.execute("SELECT id, nombre, url_hash, activo, motivo_baja FROM destino")
             existentes_db = {fila[1]: fila for fila in await cur.fetchall()}
 
-            # 1. Procesar destinos del YAML
+            # Procesar destinos cargados desde webhooks.yaml
             for nombre, d in self.destinos_map.items():
                 if nombre in existentes_db:
                     _db_id, _db_nom, db_hash, db_activo, db_motivo = existentes_db[nombre]
@@ -99,51 +103,64 @@ class MotorEntregas:
                         await cur.execute(
                             """
                             UPDATE destino
-                            SET host = %s, url_hash = %s, activo = true, motivo_baja = NULL,
+                            SET host = %s, url_hash = %s, url = %s, secreto = %s,
+                                riesgos = %s, tipos = %s, provincias = %s, nodos = %s,
+                                activo = true, motivo_baja = NULL,
                                 fallos_seguidos = 0, actualizado_en = now()
                             WHERE nombre = %s
                             """,
-                            (d.host, d.url_hash, nombre),
+                            (d.host, d.url_hash, d.url, d.secreto, d.riesgos, d.tipos, d.provincias, d.nodos, nombre),
                         )
-                    elif cambio_url:
+                    else:
                         await cur.execute(
                             """
                             UPDATE destino
-                            SET host = %s, url_hash = %s, actualizado_en = now()
+                            SET host = %s, url_hash = %s, url = %s, secreto = %s,
+                                riesgos = %s, tipos = %s, provincias = %s, nodos = %s,
+                                actualizado_en = now()
                             WHERE nombre = %s
                             """,
-                            (d.host, d.url_hash, nombre),
+                            (d.host, d.url_hash, d.url, d.secreto, d.riesgos, d.tipos, d.provincias, d.nodos, nombre),
                         )
                 else:
-                    # Insertar nuevo destino
+                    # Insertar nuevo destino desde YAML
                     await cur.execute(
                         """
-                        INSERT INTO destino (nombre, host, url_hash, activo, alta_en, actualizado_en)
-                        VALUES (%s, %s, %s, true, now(), now())
+                        INSERT INTO destino (
+                            nombre, host, url, url_hash, riesgos, tipos, provincias, nodos, secreto,
+                            activo, alta_en, actualizado_en
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, true, now(), now())
                         """,
-                        (nombre, d.host, d.url_hash),
+                        (nombre, d.host, d.url, d.url_hash, d.riesgos, d.tipos, d.provincias, d.nodos, d.secreto),
                     )
 
-            # 2. Destinos en base de datos que ya no están en el YAML -> retirados
-            for nombre_db, fila in existentes_db.items():
-                if nombre_db not in self.destinos_map:
-                    db_id = fila[0]
-                    await cur.execute(
-                        """
-                        UPDATE destino
-                        SET activo = false, motivo_baja = 'retirado', baja_en = now(), actualizado_en = now()
-                        WHERE id = %s
-                        """,
-                        (db_id,),
-                    )
-                    await cur.execute(
-                        """
-                        UPDATE entrega
-                        SET estado = 'caducada', ultimo_error = 'Destino retirado de webhooks.yaml'
-                        WHERE destino_id = %s AND estado = 'pendiente'
-                        """,
-                        (db_id,),
-                    )
+    async def recargar_destinos_db(self) -> None:
+        """Carga o actualiza en memoria todos los destinos activos desde la base de datos."""
+        async with self.gestor_base.conexion() as conn, conn.cursor() as cur:
+            await cur.execute(
+                """
+                SELECT nombre, url, host, url_hash, riesgos, tipos, provincias, nodos, secreto
+                FROM destino
+                WHERE activo = true
+                """
+            )
+            filas = await cur.fetchall()
+
+        nuevo_map: dict[str, DestinoWebhook] = {}
+        for nombre, url, host, url_hash, riesgos, tipos, provincias, nodos, secreto in filas:
+            nuevo_map[nombre] = DestinoWebhook(
+                nombre=nombre,
+                url=url,
+                host=host,
+                url_hash=url_hash,
+                riesgos=list(riesgos) if riesgos else None,
+                tipos=list(tipos) if tipos else None,
+                provincias=list(provincias) if provincias else None,
+                nodos=list(nodos) if nodos else None,
+                secreto=secreto or "",
+            )
+        self.destinos_map = nuevo_map
+        logger.info("Caché en memoria de destinos actualizada: %d destinos activos.", len(self.destinos_map))
 
     async def procesar_transicion(
         self,

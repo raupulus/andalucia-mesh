@@ -31,7 +31,7 @@
 | ID | Regla | Dónde |
 |---|---|---|
 | RN-10 | Router = rol en `INFRA_ROLES` (`ROUTER`, `ROUTER_LATE`, `REPEATER`). Nodo de infraestructura = router o gateway. `CLIENT_BASE` no es infraestructura | [integration §13](integration.md) |
-| RN-11 | Saturación de provincia = 0,6 × media de routers + 0,4 × media conjunta de `CLIENT` y `CLIENT_BASE`; `CLIENT_MUTE` no cuenta; último dato de cada nodo en 12 h; nodos situados en la provincia por coordenadas; si falta un grupo, su peso pasa al otro | [02-province-map](portal/02-province-map.md) |
+| RN-11 | Saturación de provincia = 0,6 × media de routers + 0,4 × media conjunta de `CLIENT` y `CLIENT_BASE`; otros roles se ignoran. Umbrales: > 20 % bajo, > 30 % medio, > 40 % alto | [02-province-map](portal/02-province-map.md), [detector-alertas](detector-alertas/02-rule-catalog.md) |
 | RN-12 | Colores del mapa: verde ≤ 20 %, naranja > 20 % y < 40 %, rojo ≥ 40 %, gris sin datos. El mapa muestra bajo la leyenda cómo se calcula | [02-province-map](portal/02-province-map.md) |
 | RN-13 | Mapa: ventana de 7 días por defecto, opción de 24 h | [02-province-map](portal/02-province-map.md) |
 | RN-14 | Rankings por hora, día, semana y mes en hora local, periodo en curso y anterior; no se suman días para obtener semanas o meses | [12-stats-api](portal/12-stats-api.md) |
@@ -53,13 +53,14 @@
 |---|---|---|
 | RN-30 | Riesgos `bajo`, `medio`, `alto` y tipos `infraestructura`, `clientes`, ampliables solo por configuración | [detector-alertas](detector-alertas/README.md) |
 | RN-31 | Tipo `infraestructura` si el nodo es de infraestructura o la alerta afecta a la malla; si no, `clientes` | [01-rule-engine](detector-alertas/01-rule-engine.md) |
-| RN-32 | Reglas MVP y sus umbrales: catálogo de reglas (forma parte de estas reglas de negocio) | [02-rule-catalog](detector-alertas/02-rule-catalog.md) |
+| RN-32 | Reglas de anomalías y umbrales: batería baja en routers (< 60 % medio, < 40 % crítico) y clientes (< 35 % bajo, < 15 % medio); reinicios (3 en 5 min medio, ≥ 5 en 10 min alto; resolución 30 min); saturación LoRa (60 % routers / 40 % clientes: > 20 % bajo, > 30 % medio, > 40 % alto); texto (> 5/min bajo, 6-10 medio, > 10 alto); telemetría (≥ 2/min bajo, > 50/h alto); sondeos (^all: 1 bajo, ≥ 3/15m medio, ≥ 5/15m alto); atardecer (20:00 h peninsular solar < 60 % medio, < 40 % alto); traceroute (10-19/30m medio, ≥ 20/30m alto); tráfico privado (> 10/10m o > 30/h medio, > 60/h alto); posición GPS (4/5m bajo, 8/10m medio, 20/15m alto); router sin coordinar en Andalucía | [02-rule-catalog](detector-alertas/02-rule-catalog.md) |
 | RN-33 | Las alertas solo salen por bots y webhooks; no hay difusión pública de eventos | [bots-webhooks](bots-webhooks/README.md) |
 | RN-34 | Filtros por defecto al añadir un bot: riesgo `alto` (para evitar spam en grupos); tipo `infraestructura`; nodos de fuera de Andalucía excluidos por defecto (solo Andalucía). Cada destino puede personalizar los suyos con `/levels`, `/types` y `/disableExterior` / `/enableExterior` | Ídem |
 | RN-35 | Anti-ruido: actualizaciones como respuesta al mensaje original; máximo 10 mensajes/min por destino | Ídem |
 | RN-36 | Los bots no leen conversaciones ni guardan nombres de grupos o usuarios; guardan lo que envían | Ídem |
 | RN-37 | Panel de operadores privado con estado de todas las piezas; sin página de estado pública | [14-operator-panel](portal/14-operator-panel.md) |
 | RN-38 | Los comandos de consulta de routers (`/battery` y `/routers`) agrupan obligatoriamente por provincia andaluza y nunca muestran nodos ubicados fuera de Andalucía | [bots-webhooks](bots-webhooks/README.md) |
+| RN-39 | Ámbito geográfico y coordinación de infraestructura: toda alerta identifica si el nodo pertenece a Andalucía (`dentro_andalucia: true`) y su provincia (`ES-AL`..`ES-SE`); las anomalías de gobernanza (`router-role`) y solares (`sunset-battery`) descartan estrictamente nodos de fuera (`FUERA`). El panel operador gestiona la infraestructura coordinada agrupada por provincias andaluzas | [portal](portal/14-operator-panel.md), [detector-alertas](detector-alertas/02-rule-catalog.md) |
 
 ## 6. Portal, API y chat
 
@@ -88,6 +89,7 @@
 | 2026-10-08 | RN-08, RN-09 | Persistencia estricta en UTC y visualización obligatoria en 24h peninsular (Europe/Madrid) con formato europeo; aislamiento frente a federaciones externas (PotatoMesh FEDERATION=0 forzado en compose) y registro de personalizaciones | Responsable del proyecto |
 | 2026-10-08 | RN-38 | Formateo estético y agrupación provincial obligatoria en /battery y /routers, con exclusión estricta de nodos de fuera de Andalucía | Responsable del proyecto |
 | 2026-10-08 | RN-48 | Soporte multidioma (ES/EN/PT) exclusivo para el portal (frontend y panel de operadores), con español por defecto y bandera de Andalucía en el selector | Responsable del proyecto |
+| 2026-10-08 | RN-11, RN-32, RN-39 | Reajuste integral de umbrales del detector de alertas (baterías 60/40 y 35/15; reinicios 3/5m y 5/10m; saturación 60% routers / 40% clientes; ráfagas de telemetría y texto; sondeos; 20:00 h solar; traceroute; tráfico privado; posiciones GPS continuas) y nuevo módulo Filament de routers coordinados agrupado por provincias andaluzas con descarte de nodos exteriores | Responsable del proyecto |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

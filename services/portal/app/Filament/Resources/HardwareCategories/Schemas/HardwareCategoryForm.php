@@ -13,7 +13,6 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
-
 /**
  * Esquema del formulario de gestión de categorías de hardware en Filament con soporte multi-idioma (ES/EN/PT).
  */

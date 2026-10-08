@@ -7,6 +7,18 @@ from datetime import UTC, datetime, timedelta
 from detector.modelos import PaqueteDecodificado
 
 
+ANDALUCIA_PROVINCES = frozenset({
+    "ES-AL",  # Almería
+    "ES-CA",  # Cádiz
+    "ES-CO",  # Córdoba
+    "ES-GR",  # Granada
+    "ES-H",   # Huelva
+    "ES-J",   # Jaén
+    "ES-MA",  # Málaga
+    "ES-SE",  # Sevilla
+})
+
+
 @dataclass
 class EstadoNodo:
     """Estado y series temporales operativas de un nodo individual."""
@@ -22,9 +34,15 @@ class EstadoNodo:
     first_seen: datetime = field(default_factory=lambda: datetime.now(UTC))
     last_seen: datetime = field(default_factory=lambda: datetime.now(UTC))
 
+    @property
+    def dentro_andalucia(self) -> bool:
+        """Indica si el nodo está geolocalizado dentro de Andalucía."""
+        return bool(self.province and self.province.strip().upper() in ANDALUCIA_PROVINCES)
+
     # Reinicios y actividad de telemetría
     last_uptime_seconds: int | None = None
     reboots_24h: deque[datetime] = field(default_factory=lambda: deque(maxlen=100))
+    nodeinfo_timestamps_1h: deque[datetime] = field(default_factory=lambda: deque(maxlen=100))
 
     # Batería: tuplas de (timestamp, battery_level, voltage)
     battery_samples: deque[tuple[datetime, int, float]] = field(default_factory=lambda: deque(maxlen=80))
@@ -32,6 +50,14 @@ class EstadoNodo:
     # Paquetes y ritmo de emisión
     packet_timestamps_10m: deque[datetime] = field(default_factory=lambda: deque(maxlen=500))
     hourly_packets: dict[int, int] = field(default_factory=dict)  # epoch_hour -> count (últimas 168 h)
+
+    # Series especializadas para reglas de anomalías
+    text_messages_10m: deque[datetime] = field(default_factory=lambda: deque(maxlen=100))
+    telemetry_emissions_1h: deque[tuple[datetime, str]] = field(default_factory=lambda: deque(maxlen=500))
+    traceroute_timestamps_1h: deque[datetime] = field(default_factory=lambda: deque(maxlen=100))
+    broadcast_polls_1h: deque[tuple[datetime, str]] = field(default_factory=lambda: deque(maxlen=100))
+    private_chaff_1h: deque[datetime] = field(default_factory=lambda: deque(maxlen=200))
+    position_timestamps_1h: deque[datetime] = field(default_factory=lambda: deque(maxlen=200))
 
     # Intervalos propios entre emisiones sucesivas (últimos 50 intervalos en segundos)
     intervals: deque[float] = field(default_factory=lambda: deque(maxlen=50))
@@ -77,9 +103,45 @@ class EstadoNodo:
         if pkt.hop_start is not None and pkt.hop_start > 0:
             self.hop_starts.append(pkt.hop_start)
 
-        # Emisión a broadcast (^all)
-        if pkt.to in ("^all", "ffffffff", "*"):
+        # Emisión a broadcast (^all) y detección de sondeos indiscriminados
+        payload = pkt.payload or {}
+        es_broadcast = pkt.to in ("^all", "ffffffff", "*")
+        if es_broadcast:
             self.all_emissions.append((ahora, pkt.portnum))
+            # Identificar si es un sondeo o petición broadcast
+            es_sondeo = bool(
+                payload.get("request_id")
+                or payload.get("want_response")
+                or pkt.portnum in ("traceroute", "routing")
+                or (pkt.portnum == "telemetry" and not any(k in payload for k in ("device_metrics", "environment_metrics", "power_metrics", "air_quality_metrics", "local_stats")))
+            )
+            if es_sondeo:
+                self.broadcast_polls_1h.append((ahora, pkt.portnum))
+
+        # Registro por tipo de aplicación (portnum)
+        if pkt.portnum == "text":
+            self.text_messages_10m.append(ahora)
+        elif pkt.portnum == "position":
+            self.position_timestamps_1h.append(ahora)
+            self.telemetry_emissions_1h.append((ahora, "position"))
+        elif pkt.portnum == "nodeinfo":
+            self.nodeinfo_timestamps_1h.append(ahora)
+            self.telemetry_emissions_1h.append((ahora, "nodeinfo"))
+        elif pkt.portnum == "telemetry":
+            variant = "device_metrics"
+            if "environment_metrics" in payload:
+                variant = "environment_metrics"
+            elif "power_metrics" in payload:
+                variant = "power_metrics"
+            elif "air_quality_metrics" in payload:
+                variant = "air_quality_metrics"
+            elif "local_stats" in payload:
+                variant = "local_stats"
+            self.telemetry_emissions_1h.append((ahora, variant))
+        elif pkt.portnum == "traceroute":
+            self.traceroute_timestamps_1h.append(ahora)
+        elif pkt.portnum == "other":
+            self.private_chaff_1h.append(ahora)
 
         # Ritmo de paquetes (10 min y horario)
         self.packet_timestamps_10m.append(ahora)
@@ -93,7 +155,6 @@ class EstadoNodo:
                 del self.hourly_packets[h]
 
         # Procesar telemetría
-        payload = pkt.payload or {}
         dm = payload.get("device_metrics") or {}
         ls = payload.get("local_stats") or {}
 

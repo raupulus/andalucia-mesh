@@ -2,7 +2,7 @@
 # Dockerfile (services/portal)
 #
 # Imagen de producción para el Portal Web Laravel y Daemon de Tareas.
-# Basada en serversideup/php:8.4-fpm-nginx con compilación de assets en Node.js.
+# Basada en serversideup/php:8.5-fpm-nginx con compilación de assets en Node.js.
 # ==============================================================================
 
 # --- Etapa 1: Compilación de Assets de Frontend ---
@@ -19,7 +19,7 @@ COPY resources resources
 RUN npm run build
 
 # --- Etapa 2: Imagen Final PHP-FPM + Nginx ---
-FROM serversideup/php:8.4-fpm-nginx AS final
+FROM serversideup/php:8.5-fpm-nginx AS final
 
 USER root
 

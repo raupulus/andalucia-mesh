@@ -10,6 +10,7 @@ from detector.entrada import EntradaMQTT
 from detector.modelos import DeviceMetrics, FromNodeInfo, PaqueteDecodificado, PaquetePayload
 from detector.motor.motor import MotorAlertas
 from detector.persistencia import GestorPersistencia
+from detector.reglas.router_role import ReglaRouterRole
 from detector.salud import ServidorSalud
 from detector.socket_alertas import ServidorSocketAlertas
 
@@ -37,6 +38,9 @@ def test_motor_flujo_completo_alertas_y_resolucion() -> None:
     settings = Settings()
     motor = MotorAlertas(settings=settings)
     motor.inicializar()
+    regla_rtr = motor.recarga.reglas_activas.get("router-role")
+    if isinstance(regla_rtr, ReglaRouterRole):
+        regla_rtr.config.routers_coordinados.append("!router1")
 
     t0 = datetime(2026, 10, 1, 10, 0, 0, tzinfo=UTC)
 
@@ -228,4 +232,35 @@ async def test_tarea_retencion_ejecucion() -> None:
     assert alertas == 15
     assert snapshots == 2
     assert retencion.ultima_ejecucion is not None
+
+
+def test_ejecutar_tick_no_resuelve_alertas_abiertas_indebidamente() -> None:
+    """Verifica que el ciclo de reloj no resuelva alertas abiertas de otras reglas (evita error de sombra)."""
+    settings = Settings()
+    motor = MotorAlertas(settings=settings)
+    motor.inicializar()
+
+    t0 = datetime(2026, 10, 1, 10, 0, 0, tzinfo=UTC)
+
+    # 1. Crear alerta hops-high
+    pkt = PaqueteDecodificado(
+        packet_id=500,
+        from_node_id="!node_hops",
+        from_node=FromNodeInfo(short="HOPS", role="CLIENT"),
+        portnum="telemetry",
+        rx_first=t0,
+        hop_start=6,
+    )
+    trans = motor.procesar_paquete(pkt, ahora=t0)
+    assert len(trans) == 1
+    assert trans[0].transicion == "abierta"
+    assert "hops-high:!node_hops" in motor.ciclo.alertas_abiertas
+
+    # 2. Ejecutar tick a los 60s -> la alerta hops-high DEBE permanecer abierta
+    t1 = t0 + timedelta(seconds=60)
+    trans_tick = motor.ejecutar_tick(t1)
+    resoluciones_hops = [t for t in trans_tick if t.alerta.regla == "hops-high" and t.transicion == "resuelta"]
+    assert len(resoluciones_hops) == 0
+    assert "hops-high:!node_hops" in motor.ciclo.alertas_abiertas
+
 

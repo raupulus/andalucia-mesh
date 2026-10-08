@@ -179,4 +179,4 @@ Si es tu nodo, revisa la guía [Configura tu nodo](/configura-tu-nodo). Si crees
 - `/alertas` y las fichas `/alertas/{id}` son indexables (criterio: todo es público); las fichas no van en `sitemap.xml` por volumen.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

@@ -482,4 +482,3 @@ class HardwareCatalogoTest extends TestCase
         $this->assertGreaterThan($cat1->sort_order, $cat2->sort_order);
     }
 }
-

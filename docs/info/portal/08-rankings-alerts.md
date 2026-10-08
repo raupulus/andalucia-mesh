@@ -67,4 +67,4 @@ Refresco de la lista abierta cada 30 s (solo si el usuario no ha pulsado "Ver m�
 5. **Dado** un lector de pantalla, **cuando** recorre nodos en peligro, **entonces** oye el riesgo en texto ("riesgo alto").
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

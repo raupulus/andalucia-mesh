@@ -9,28 +9,98 @@ general:
   actualizacion_min: 15        # intervalo mínimo para actualizaciones a la baja
   nodos_max_lista: 500         # tope máximo de IDs en alertas de malla (all)
 
-# --- Reglas MVP (Activas) ---
+# --- Reglas de Supervisión Activas ---
 reboot-loop:
   activa: true
-  ventana_min: 60
+  ventana_media_min: 5
+  umbral_medio: 3              # 3 reinicios en 5 min -> riesgo medio
+  ventana_alta_min: 10
+  umbral_alto: 5               # >= 5 reinicios en 10 min -> riesgo alto (alerta roja)
+  resolver_min: 30             # se sanea a los 30 min sin nuevos reinicios
   uptime_arranque_s: 180
-  resolver_min: 120
-  umbral:
-    infraestructura:
-      alto: 3
-    clientes:
-      bajo: 3
 
 battery-low:
   activa: true
   muestras_minimas: 2
-  resolver: 50
+  resolver: 60                 # recuperación al superar 60%
   umbral:
     infraestructura:
-      medio: 40
-      alto: 20
+      medio: 60                # router < 60% -> medio
+      alto: 40                 # router < 40% -> alto (crítico)
     clientes:
-      bajo: 20
+      bajo: 35                 # cliente < 35% -> bajo
+      medio: 15                # cliente < 15% -> medio
+
+chutil-high:
+  activa: true
+  bajo: 20.0                   # canal > 20% -> bajo
+  medio: 30.0                  # canal > 30% -> medio
+  alto: 40.0                   # canal > 40% -> alto
+  resolver: 18.0
+  peso_routers: 0.6            # 60% peso cálculo a routers
+  peso_clientes: 0.4           # 40% peso cálculo a clientes
+
+text-flood:
+  activa: true
+  ventana_s: 60
+  umbral_bajo: 5               # > 5 mensajes en 1 min -> bajo
+  umbral_medio: 6              # 6 a 10 mensajes en 1 min -> medio
+  umbral_alto: 10              # > 10 mensajes en 1 min -> alto
+  resolver_min: 5
+
+telemetry-burst:
+  activa: true
+  ventana_1m_s: 60
+  umbral_1m_bajo: 2            # >= 2 en 1 min -> bajo (ráfaga combinada o acelerada)
+  ventana_1h_s: 3600
+  umbral_1h_alto: 50           # > 50 emisiones por hora -> alto
+  resolver_min: 15
+
+poll-abuse:
+  activa: true
+  ventana_min: 15
+  umbral_bajo: 1               # 1 sondeo broadcast -> bajo
+  umbral_medio: 3              # >= 3 en 15 min -> medio
+  umbral_alto: 5               # >= 5 en 15 min -> alto
+  resolver_min: 30
+
+sunset-battery:
+  activa: true
+  hora_evaluacion: 20          # 20:00 h locales peninsulares
+  umbral_medio: 60             # router < 60% al anochecer -> medio
+  umbral_alto: 40              # router < 40% al anochecer -> alto
+  resolver: 60
+  tz: Europe/Madrid
+
+traceroute-flood:
+  activa: true
+  ventana_min: 30
+  umbral_medio: 10             # 10 a 19 en 30 min -> medio
+  umbral_alto: 20              # >= 20 en 30 min -> alto
+  resolver_min: 30
+
+private-chaff:
+  activa: true
+  ventana_10m_min: 10
+  umbral_10m_medio: 10         # > 10 paquetes privados en 10 min -> medio
+  ventana_1h_min: 60
+  umbral_1h_medio: 30          # > 30 paquetes privados por hora -> medio
+  umbral_1h_alto: 60           # > 60 paquetes privados por hora -> alto
+  resolver_min: 30
+
+position-flood:
+  activa: true
+  ventana_5m_min: 5
+  umbral_5m_bajo: 4            # >= 4 en 5 min -> bajo
+  ventana_10m_min: 10
+  umbral_10m_medio: 8          # >= 8 en 10 min -> medio
+  ventana_15m_min: 15
+  umbral_15m_alto: 20          # >= 20 en 15 min -> alto
+  resolver_min: 30
+
+router-role:
+  activa: true
+  routers_coordinados: []      # IDs de routers coordinados aprobados en Andalucía
 
 infra-silent:
   activa: true
@@ -72,19 +142,12 @@ hops-high:
   alto_desde: 7
   resolver_paquetes: 2
 
-# --- Reglas de Ampliación (Inactivas hasta calibración con telemetría real) ---
+# --- Reglas de Ampliación Futuras (Inactivas hasta telemetría específica) ---
 battery-drain:
   activa: false
   voltaje_vacio: 3.3
   dias_proyeccion: 3
   ventana_h: 72
-
-chutil-high:
-  activa: false
-  medio: 20
-  alto: 40
-  resolver: 20
-  muestras_minimas: 2
 
 airtime-high:
   activa: false
@@ -103,12 +166,6 @@ noise-high:
   duracion_min: 60
   resolver_db: 5
 
-text-flood:
-  activa: false
-  mensajes: 10
-  ventana_min: 5
-  resolver_min: 30
-
 config-intervals:
   activa: false
   tolerancia: 0.5
@@ -123,10 +180,6 @@ config-intervals:
     telemetria_entorno: 4
   telemetria_energia:
     maximo_24h: 2
-
-router-role:
-  activa: false
-  routers_coordinados: []
 
 new-node-burst:
   activa: false

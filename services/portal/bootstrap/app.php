@@ -10,6 +10,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
@@ -38,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
             StartSession::class,
             ShareErrorsFromSession::class,
             ValidateCsrfToken::class,
+            PreventRequestForgery::class,
         ]);
 
         // Registrar middleware de detección de idioma sin cookies (RN-48)

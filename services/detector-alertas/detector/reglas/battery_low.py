@@ -12,11 +12,11 @@ class ConfigBatteryLow(BaseModel):
 
     activa: bool = True
     muestras_minimas: int = 2
-    resolver: int = 50
+    resolver: int = 60
     umbral: dict[str, dict[str, int]] = Field(
         default_factory=lambda: {
-            "infraestructura": {"medio": 40, "alto": 20},
-            "clientes": {"bajo": 20},
+            "infraestructura": {"medio": 60, "alto": 40},
+            "clientes": {"bajo": 35, "medio": 15},
         }
     )
 
@@ -47,7 +47,14 @@ class ReglaBatteryLow:
         if any(bat > 100 for _, bat, _ in ultimas):
             return []
 
-        es_infra = ctx.es_infraestructura(ctx.nodo.node_id)
+        rol = (ctx.nodo.role or "").strip().upper()
+        es_infra = ctx.es_infraestructura(ctx.nodo.node_id) or rol in ctx.bases.infra_roles
+        es_cliente = rol in ("CLIENT", "CLIENT_BASE")
+
+        # Los demás tipos de nodos (sensores, trackers, etc.) no afectan a la malla
+        if not es_infra and not es_cliente:
+            return []
+
         umbrales_infra = self.config.umbral.get("infraestructura", {})
         umbrales_cli = self.config.umbral.get("clientes", {})
 
@@ -55,8 +62,8 @@ class ReglaBatteryLow:
         umbral_aplicado: int = 0
 
         if es_infra:
-            alto_u = umbrales_infra.get("alto", 20)
-            medio_u = umbrales_infra.get("medio", 40)
+            alto_u = umbrales_infra.get("alto", 40)
+            medio_u = umbrales_infra.get("medio", 60)
             if all(bat < alto_u for _, bat, _ in ultimas):
                 riesgo = "alto"
                 umbral_aplicado = alto_u
@@ -64,8 +71,12 @@ class ReglaBatteryLow:
                 riesgo = "medio"
                 umbral_aplicado = medio_u
         else:
-            bajo_u = umbrales_cli.get("bajo", 20)
-            if all(bat < bajo_u for _, bat, _ in ultimas):
+            medio_u = umbrales_cli.get("medio", 15)
+            bajo_u = umbrales_cli.get("bajo", 35)
+            if all(bat < medio_u for _, bat, _ in ultimas):
+                riesgo = "medio"
+                umbral_aplicado = medio_u
+            elif all(bat < bajo_u for _, bat, _ in ultimas):
                 riesgo = "bajo"
                 umbral_aplicado = bajo_u
 
@@ -82,6 +93,9 @@ class ReglaBatteryLow:
                         "bateria": ult_bat,
                         "voltaje": round(ult_volt, 2),
                         "umbral": umbral_aplicado,
+                        "rol": rol,
+                        "provincia": ctx.nodo.province or "FUERA",
+                        "dentro_andalucia": ctx.nodo.dentro_andalucia,
                         "muestras": self.config.muestras_minimas,
                     },
                 )
@@ -90,10 +104,16 @@ class ReglaBatteryLow:
         return []
 
     def sigue_activa(self, ctx: Contexto, abierta: AlertaAbierta) -> bool:
-        """Determina si la alerta sigue activa o si la batería se ha recuperado por encima de 50%."""
+        """Determina si la alerta sigue activa o si la batería se ha recuperado."""
         nodo = ctx.estado.nodes.get(abierta.nodo)
         if nodo is None or not nodo.battery_samples:
             return True
 
         _, ult_bat, _ = nodo.battery_samples[-1]
-        return not (ult_bat > self.config.resolver or ult_bat > 100)
+        if ult_bat > 100:
+            return False
+
+        rol = (nodo.role or "").strip().upper()
+        es_infra = ctx.es_infraestructura(nodo.node_id) or rol in ctx.bases.infra_roles
+        umbral_resolucion = self.config.resolver if es_infra else 35
+        return not (ult_bat > umbral_resolucion)

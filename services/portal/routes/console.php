@@ -36,4 +36,3 @@ Schedule::job(new ComprobarServicios)
 Schedule::command('portal:sitemap')
     ->dailyAt('04:00')
     ->withoutOverlapping();
-

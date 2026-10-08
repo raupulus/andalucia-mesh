@@ -24,12 +24,12 @@ Catálogo de comandos, scripts de compilación, ejecución, pruebas y tareas ope
 | `integrations/mosquitto/tools/generate-acl.sh [--init]` | Generador atómico de ACLs para gateways, microservicios y diagnóstico local | Bash |
 | `integrations/mosquitto/tools/mqtt-users.sh <comando>` | Gestión de credenciales para gateways Meshtastic y microservicios internos | Bash, mosquitto_passwd |
 | `integrations/mosquitto/tools/test-acl.sh` | Batería de pruebas automatizadas de ACL, bloqueo de downlink y límites | Bash, mosquitto-clients |
-| `php artisan portal:mapa` | Proyecta el GeoJSON provincial en SVG interactivo calculando centroides y polos | PHP 8.4, Laravel, `services/portal/` |
-| `php artisan portal:qr` | Genera los códigos QR vectoriales del portal (`public/qr.svg`, `public/qr.pdf`) | PHP 8.4, Laravel, `services/portal/` |
-| `php artisan portal:sitemap` | Genera el archivo sitemap.xml en `public/` dinamizando las rutas públicas registradas | PHP 8.4, Laravel, `services/portal/` |
-| `php artisan portal:vistas` | Verifica la existencia y tipos de las vistas contrato `api_*` en `snm_ingest` | PHP 8.4, Laravel, `services/portal/` |
-| `php artisan operador:crear {email} {nombre}` | Da de alta un operador en el panel `/admin` solicitando contraseña de 12+ chars | PHP 8.4, Laravel, `services/portal/` |
-| `php artisan operador:desactivar {email}` | Revoca el acceso y desactiva a un operador técnico en `/admin` | PHP 8.4, Laravel, `services/portal/` |
+| `php artisan portal:mapa` | Proyecta el GeoJSON provincial en SVG interactivo calculando centroides y polos | PHP 8.5, Laravel, `services/portal/` |
+| `php artisan portal:qr` | Genera los códigos QR vectoriales del portal (`public/qr.svg`, `public/qr.pdf`) | PHP 8.5, Laravel, `services/portal/` |
+| `php artisan portal:sitemap` | Genera el archivo sitemap.xml en `public/` dinamizando las rutas públicas registradas | PHP 8.5, Laravel, `services/portal/` |
+| `php artisan portal:vistas` | Verifica la existencia y tipos de las vistas contrato `api_*` en `snm_ingest` | PHP 8.5, Laravel, `services/portal/` |
+| `php artisan operador:crear {email} {nombre}` | Da de alta un operador en el panel `/admin` solicitando contraseña de 12+ chars | PHP 8.5, Laravel, `services/portal/` |
+| `php artisan operador:desactivar {email}` | Revoca el acceso y desactiva a un operador técnico en `/admin` | PHP 8.5, Laravel, `services/portal/` |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

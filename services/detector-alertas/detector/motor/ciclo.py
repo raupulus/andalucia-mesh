@@ -63,6 +63,7 @@ class GestorCicloVida:
                 # Reabrir alerta previa con su ID original
                 reciente.reaperturas += 1
                 reciente.estado = "abierta"
+                reciente.abierta_en = ahora
                 reciente.resuelta_en = None
                 reciente.riesgo = riesgo
                 reciente.tipo = tipo

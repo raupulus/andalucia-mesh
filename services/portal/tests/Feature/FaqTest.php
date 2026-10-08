@@ -320,4 +320,3 @@ class FaqTest extends TestCase
         $response->assertSee('Es una red de radio en malla abierta basada en Meshtastic.', false);
     }
 }
-

@@ -43,6 +43,7 @@ class ConfiguracionWebhooks(ConfiguracionBase):
     webhooks_concurrencia: int = 10
     webhooks_fallos_desactivar: int = 20
     webhooks_ips_bloqueadas: str = ""
+    internal_api_secret: str = ""
 
     def parsear_redes_bloqueadas(self) -> list[ipaddress.IPv4Network | ipaddress.IPv6Network]:
         """Convierte la cadena de IPs y subredes bloqueadas en objetos de red."""

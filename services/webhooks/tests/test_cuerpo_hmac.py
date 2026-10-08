@@ -1,6 +1,7 @@
 """Prueba unitaria del cálculo de HMAC y correspondencia con el vector de prueba canónico."""
 
 from datetime import UTC, datetime
+from typing import Any
 
 from webhooks.cuerpo import calcular_firma_hmac, construir_cuerpo_webhook
 
@@ -35,7 +36,7 @@ def test_vector_prueba_canonico() -> None:
 
 def test_cuerpo_alerta_completa() -> None:
     """Verifica la serialización de una alerta completa con claves en inglés."""
-    alerta = {
+    alerta: dict[str, Any] = {
         "id": "01JABCDXYZ7Q8R9S0T1V2W3X4Y",
         "regla": "reboot-loop",
         "riesgo": "alto",

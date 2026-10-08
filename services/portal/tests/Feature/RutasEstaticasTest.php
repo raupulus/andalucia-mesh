@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use Illuminate\Console\Scheduling\Event;
+use Illuminate\Console\Scheduling\Schedule;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -96,17 +98,16 @@ class RutasEstaticasTest extends TestCase
 
     public function test_sitemap_esta_programado_para_regeneracion_nocturna(): void
     {
-        $schedule = app(\Illuminate\Console\Scheduling\Schedule::class);
+        $schedule = app(Schedule::class);
         $events = collect($schedule->events());
 
-        $sitemapEvent = $events->first(function (\Illuminate\Console\Scheduling\Event $event) {
+        $sitemapEvent = $events->first(function (Event $event) {
             return str_contains($event->command ?? '', 'portal:sitemap');
         });
 
         $this->assertNotNull($sitemapEvent, 'El comando portal:sitemap debe estar registrado en el scheduler.');
         $this->assertSame('0 4 * * *', $sitemapEvent->expression);
     }
-
 
     public function test_robots_txt_bloquea_admin_y_api(): void
     {

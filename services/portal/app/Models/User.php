@@ -20,6 +20,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     use Notifiable;
 
+    public const ROLE_SUPERADMIN = 'superadmin';
+
+    public const ROLE_ADMIN = 'admin';
+
+    public const ROLES = [
+        self::ROLE_SUPERADMIN => 'Superadministrador',
+        self::ROLE_ADMIN => 'Administrador',
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -28,6 +37,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     protected $fillable = [
         'name',
         'email',
+        'role',
         'avatar_url',
         'password',
         'activo',
@@ -67,6 +77,22 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function canAccessPanel(Panel $panel): bool
     {
         return (bool) $this->activo;
+    }
+
+    /**
+     * Determina si el usuario es superadministrador de la plataforma.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === self::ROLE_SUPERADMIN;
+    }
+
+    /**
+     * Determina si el usuario tiene rol de administrador estándar.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
     }
 
     /**

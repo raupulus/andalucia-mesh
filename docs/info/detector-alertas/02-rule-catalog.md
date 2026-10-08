@@ -14,12 +14,13 @@ Leyenda: **MVP** = esta entrega, activa; **Ampl.** = ampliación, se implementa 
 
 | Id | Fase | Detecta | Riesgo por tipo | Base dinámica | Resolución | Campos |
 |---|---|---|---|---|---|---|
-| `reboot-loop` | MVP | Bucle de reinicio. Reinicio = `uptime_seconds` menor que el anterior, o < 180 s sin otro reinicio contado en esos 180 s | Infra: `alto` ≥ 3 en 60 min · Cliente: `bajo` ≥ 3 en 60 min | — | 120 min sin reinicios | `dm.uptime_seconds`, `ls.uptime_seconds`, `rx_first` |
-| `battery-low` | MVP | Batería baja en 2 muestras seguidas (`battery_level` 1–100; > 100 = alimentado; `0` con `voltage` 0 = sin sensor, se ignora) | Infra: `medio` < 40 %, `alto` < 20 % · Cliente: `bajo` < 20 % | — | > 50 % | `dm.battery_level`, `dm.voltage` |
+| `reboot-loop` | MVP | Bucle de reinicio anómalo (uptime menor que el anterior o < 100 s tras reinicio) | `medio` ≥ 3 en 5 min · `alto` ≥ 5 en 10 min | — | 30 min sin reinicios | `dm.uptime_seconds`, `ls.uptime_seconds`, `rx_first` |
+| `battery-low` | MVP | Batería baja confirmada en 2 muestras seguidas (batería 1–100 %; > 100 = alimentado; otros roles se ignoran) | Routers: `medio` < 60 %, `alto` < 40 % · Clientes: `bajo` < 35 %, `medio` < 15 % | — | > 70 % en routers, > 45 % en clientes | `dm.battery_level`, `dm.voltage`, `fn.role` |
+| `sunset-battery` | MVP | Router solar que llega a las 20:00 h peninsulares con carga insuficiente (excluye nodos fuera de Andalucía `FUERA`) | Infra: `medio` < 60 %, `alto` < 40 % | — | > 70 % o luz solar | `dm.battery_level`, `fn.role`, `fn.province` (tick 20:00) |
+| `chutil-high` | MVP | Canal saturado calculando saturación provincial (60 % peso routers, 40 % peso clientes) | Red: `bajo` > 20 %, `medio` > 30 %, `alto` > 40 % | — | ≤ 20 % | `dm.channel_utilization`, `fn.role`, `fn.province` |
 | `infra-silent` | MVP | Router que deja de oírse | Infra: `medio` > max(6 h, 3 × intervalo típico) · `alto` > 24 h | Intervalo típico del nodo | Se vuelve a oír | `from`, `fn.role`, `rx_first` (tick) |
 | `gateway-offline` | MVP | Gateway que deja de publicar | Infra: `medio` > max(15 min, 3 × intervalo típico) · `alto` > 120 min | Intervalo típico del gateway | Vuelve a publicar | `rx[].gateway`, `rx[].at`, `fn.is_gateway` (tick) |
 | `battery-drain` | Ampl. | Router solar que no recarga | Infra: `medio` | Proyección lineal del voltaje de 72 h hasta 3,3 V en < 3 días | Pendiente de 24 h ≥ 0 | `dm.voltage` |
-| `chutil-high` | Ampl. | Canal saturado según un router (2 muestras) | Infra: `medio` > 20 % · `alto` ≥ 40 % (cortes del mapa) | Saturación ponderada de la provincia en `datos` | ≤ 20 % | `dm.channel_utilization`, `fn.province` |
 | `airtime-high` | Ampl. | Cerca del ciclo de trabajo del 10 % horario de EU_868 | Red: `medio` > 7 % · `alto` > 10 % (probable `override_duty_cycle`) | — | < 5 % | `dm.air_util_tx` |
 | `tx-dropped` | Ampl. | Cola de transmisión desbordada (solo infraestructura) | Infra: `medio` > 20 descartes/h | — | 120 min sin incrementos | `ls.num_tx_dropped` |
 | `noise-high` | Ampl. | Interferencia (solo infraestructura) | Infra: `medio` | ≥ 10 dB sobre su mediana de 7 días durante 60 min | < mediana + 5 dB | `ls.noise_floor` |
@@ -28,52 +29,48 @@ Leyenda: **MVP** = esta entrega, activa; **Ampl.** = ampliación, se implementa 
 
 | Id | Fase | Detecta | Riesgo | Base dinámica | Resolución | Campos |
 |---|---|---|---|---|---|---|
-| `flood` | MVP | Un nodo emite demasiados paquetes propios (spam o firmware desbocado), sin contar `routing` | Red: `medio` > max(30, 5 × ritmo) en 10 min · `alto` > max(100, 15 × ritmo) | Ritmo típico del nodo | 30 min bajo el umbral `medio` | `from`, `portnum`, `rx_first` |
-| `rafaga-masiva` | MVP | Muchos nodos emiten a la vez (p. ej. 200 respondiendo telemetría a un sondeo) | Red: `alto`, `nodo: "all"` | Nodos por 2 min a esa hora; umbral max(50, 5 × base) | 15 min bajo el umbral | `from`, `portnum`, `rx_first` |
-| `hops-high` | MVP | Límite de saltos excesivo en origen | Red/nodo: `bajo` con `hop_start` = 6 · `alto` con `hop_start` ≥ 7 (3 recomendado; 4–5 válidos según la guía) | — | 2 paquetes seguidos con `hop_start` ≤ 5 | `hop_start` (se ignoran `null` y 0) |
-| `text-flood` | Ampl. | Spam de texto de un nodo | Red: `medio` > 10 mensajes en 5 min | — | 30 min sin exceso | `portnum=text`, `from`, `channel` |
-| `config-intervals` | Ampl. | Intervalos de emisión más cortos que las recomendaciones del portal (tabla abajo) | Red: `bajo`, una alerta por nodo con todos los intervalos cortos en `datos` | Nodo fijo o móvil según su desplazamiento en 24 h | 24 h dentro de los intervalos | `portnum`, `to`, `payload.*_metrics`, `payload.latitude_i/longitude_i` |
-| `router-role` | Ampl. | Rol de router no coordinado (fuera de `routers_coordinados`) | Infra: `bajo` | — | Entra en la lista o cambia de rol | `fn.role` |
+| `text-flood` | MVP | Inundación de mensajes de texto en canales públicos | Red/Cliente: `bajo` > 5/min · `medio` 6–10/min · `alto` > 10/min | — | 15 min sin exceso | `portnum=text_message_app`, `from`, `to` |
+| `telemetry-burst` | MVP | Ráfaga excesiva de telemetría (distingue 5 variantes + nodeinfo + posición; `ráfaga_combinada` vs `constante_acelerada`) | Red/Cliente: `bajo` ≥ 2 en 1 min · `alto` > 50 en 1 hora | — | 30 min sin exceso | `portnum=telemetry`, `nodeinfo`, `position` |
+| `poll-abuse` | MVP | Peticiones de sondeo masivas a toda la malla (`^all`) solicitando batería o nodeinfo | Red/Cliente: `bajo` 1 sondeo · `medio` ≥ 3 en 15 min · `alto` ≥ 5 en 15 min | — | 30 min sin sondeos | `portnum=nodeinfo_app`, `telemetry_app`, `to="^all"` |
+| `traceroute-flood` | MVP | Abuso y saturación por traceroutes reiterados | Red/Cliente: `medio` 10–19 en 30 min · `alto` ≥ 20 en 30 min | — | 45 min sin exceso | `portnum=traceroute_app`, `from` |
+| `private-chaff` | MVP | Tráfico cifrado privado o de sensores sobre la malla pública obligando a los repetidores a reenviarlo | Red/Cliente: `medio` > 10 en 10 min o > 30/h · `alto` > 60/h | — | 30 min sin exceso | `portnum=other`, `from` |
+| `position-flood` | MVP | Posiciones GPS aceleradas emitidas de forma continuada | Red/Cliente: `bajo` ≥ 4 en 5 min · `medio` ≥ 8 en 10 min · `alto` ≥ 20 en 15 min | — | 30 min dentro de norma | `portnum=position_app`, `from` |
+| `router-role` | MVP | Rol ROUTER/REPEATER no coordinado en Andalucía (excluye nodos fuera de Andalucía `FUERA`) | Infra: `medio` si no figura en `routers_coordinados` | — | Entra en coordinación o cambia a CLIENT | `fn.role`, `fn.province` |
+| `hops-high` | MVP | Límite de saltos excesivo en origen | Red/nodo: `bajo` con `hop_start` = 6 · `alto` con `hop_start` ≥ 7 (3 recomendado; 4–5 válidos) | — | 2 paquetes seguidos con `hop_start` ≤ 5 | `hop_start` |
+| `flood` | MVP | Un nodo emite demasiados paquetes propios (spam o firmware desbocado) | Red: `medio` > max(30, 5 × ritmo) en 10 min · `alto` > max(100, 15 × ritmo) | Ritmo típico del nodo | 30 min bajo el umbral `medio` | `from`, `portnum`, `rx_first` |
+| `rafaga-masiva` | MVP | Muchos nodos emiten a la vez en la malla | Red: `alto`, `nodo: "all"` | Nodos por 2 min a esa hora; umbral max(50, 5 × base) | 15 min bajo el umbral | `from`, `portnum`, `rx_first` |
+| `config-intervals` | Ampl. | Intervalos de emisión más cortos que las recomendaciones del portal | Red: `bajo` | Nodo fijo o móvil según desplazamiento en 24 h | 24 h dentro de los intervalos | `portnum`, `to`, `payload.*_metrics` |
 | `new-node-burst` | Ampl. | Aparición masiva de ids nuevos (no vistos en 90 días) | Red: `medio`, `nodo: "all"` | > max(20, 5 × nuevos habituales) en 10 min | 60 min bajo el umbral | `from` |
 
-`config-intervals`, alineado con `../portal/03-node-setup-guide.md` (cuenta solo emisiones `to: "^all"`; mediana de las últimas 20; mínimo 3 intervalos):
+### C. Ámbito geográfico y provincial
 
-| Paquete | Recomendación del portal | Alerta si la mediana es menor que |
-|---|---|---|
-| `nodeinfo` | 72 h | 36 h |
-| `position`, nodo fijo (desplazamiento 24 h < 500 m) | 72 h | 36 h |
-| `position`, nodo móvil | 1 h como mínimo | 30 min |
-| `telemetry` con `device_metrics` | ≥ 4 h solar, ≥ 6 h troncal, desactivada enchufado | 2 h (el detector no distingue solar, troncal o enchufado: aplica la más permisiva) |
-| `telemetry` con `environment_metrics` | Desactivada o > 4 h | 2 h |
-| `telemetry` con `power_metrics` | Desactivada | Cualquier emisión: ≥ 3 en 24 h |
+Todas las alertas emitidas por el motor incorporan obligatoriamente en su carga JSON los metadatos geográficos:
+- `provincia`: Código ISO (`ES-AL`, `ES-CA`, `ES-CO`, `ES-GR`, `ES-H`, `ES-J`, `ES-MA`, `ES-SE`, o `FUERA` si no pertenece a la comunidad andaluza).
+- `dentro_andalucia`: Booleano estricto (`true` solo si la provincia es una de las 8 de Andalucía).
+- Las reglas de gobernanza comunitaria (`router-role`) y operativas solares (`sunset-battery`) descartan de forma tajante a los nodos de fuera de Andalucía (`FUERA`), preservando la autonomía y competencia de las comunidades colindantes (Murcia, Extremadura, Castilla-La Mancha, Portugal).
 
-Umbral = recomendación × `tolerancia` (0,5). Un nodo que sigue la guía no dispara ninguna regla del bloque B.
-
-### C. Suplantación e inyección
-
-| Id | Fase | Detecta | Riesgo | Base / ventana | Resolución | Campos |
-|---|---|---|---|---|---|---|
-| `mqtt-into-rf` | Ampl. | Paquetes con `via_mqtt` oídos por radio (alguien reinyecta internet en la malla) | Red: `medio`, `nodo: "all"`, `nodos` = gateways que los oyen | ≥ 5 en 60 min | 6 h sin casos | `via_mqtt`, `rx[].gateway` |
-| `ok-to-mqtt-violation` | Ampl. | Gateway que sube paquetes ajenos sin el bit OK to MQTT | Infra (el gateway): `medio` | ≥ 3 en 24 h | 24 h sin casos | `ok_to_mqtt` (`false`; `null` se ignora), `from`, `rx[].gateway` |
-| `impossible-jump` | Ampl. | Velocidad implícita > 300 km/h entre posiciones separadas > 1 km | Cliente: `bajo` · Infra: `medio` | — | 24 h sin saltos | `payload.latitude_i/longitude_i`, `rx_first` |
-| `duplicate-pubkey` | Ampl. | Misma clave pública en ids distintos | Red: `alto`; `nodo` = id menor, el resto en `datos.ids` | 7 días | 7 días sin coincidencia | `portnum=nodeinfo`, `payload.public_key` |
-| `identity-conflict` | Ampl. | Mismo id con otra clave pública | Red: `medio` | < 24 h | 24 h sin cambios | `payload.public_key` |
-
-`topic-mismatch` no existe: la ACL del broker solo deja publicar a cada gateway en su propio topic (`%u`) y `decoded` no lleva el `gateway_id` del sobre.
-
-### Datos y mensaje de las reglas MVP
+### D. Datos y mensaje de las reglas principales
 
 `{corto}` = `short` del nodo o, si falta, su id. Toda resolución añade `datos.cierre`.
 
 | Regla | `datos` | `mensaje` |
 |---|---|---|
-| `reboot-loop` | `reinicios`, `ventana_min`, `uptime_minimo_s`, `umbral` | `{corto} se ha reiniciado {reinicios} veces en la última hora` |
-| `battery-low` | `bateria`, `voltaje`, `umbral`, `muestras` | `{corto} tiene la batería al {bateria} %` |
+| `reboot-loop` | `reinicios_5m`, `reinicios_10m`, `ventana_min`, `umbral` | `{corto} sufre un bucle de reinicios: {reinicios_5m} en 5m` |
+| `battery-low` | `bateria`, `voltaje`, `rol`, `umbral`, `muestras` | `{corto} ({rol}) tiene la batería al {bateria} %` |
+| `chutil-high` | `chutil_provincial`, `provincia`, `chutil_nodo`, `peso_routers`, `peso_clientes` | `Canal saturado en {provincia}: {chutil_provincial}% de ocupación` |
+| `text-flood` | `mensajes_1m`, `ventana_s`, `umbral` | `{corto} emite un exceso de texto: {mensajes_1m} mensajes en 1 minuto` |
+| `telemetry-burst` | `tipo_anomalia`, `emisiones_1m`, `emisiones_1h`, `distribucion` | `{corto} emite ráfaga excesiva de telemetría ({tipo_anomalia})` |
+| `poll-abuse` | `sondeos_15m`, `tipo_sondeo`, `destino` | `{corto} abusa de sondeos masivos a la malla (^all)` |
+| `sunset-battery` | `bateria_actual`, `hora_evaluacion`, `provincia`, `umbral` | `{corto} llega al anochecer con solo el {bateria_actual} % de batería` |
+| `traceroute-flood` | `traceroutes_30m`, `ventana_min`, `umbral` | `{corto} satura la malla con {traceroutes_30m} traceroutes en 30 min` |
+| `private-chaff` | `paquetes_privados_10m`, `paquetes_privados_1h` | `{corto} emite tráfico privado o sensores en el canal público` |
+| `position-flood` | `posiciones_5m`, `posiciones_10m`, `posiciones_15m` | `{corto} transmite posiciones GPS repetitivas cada pocos minutos` |
+| `router-role` | `rol`, `provincia`, `aprobado` | `{corto} emite como {rol} en {provincia} sin coordinar con la comunidad` |
 | `infra-silent` | `ultimo_visto`, `silencio_h`, `intervalo_tipico_s`, `umbral_h` | `{corto} no se oye desde hace {silencio_h} h` |
 | `gateway-offline` | `ultimo_mensaje`, `silencio_min`, `intervalo_tipico_s`, `umbral_min` | `El gateway {corto} no publica desde hace {silencio_min} min` |
+| `hops-high` | `hop_start`, `recomendado`, `maximo_valido` | `{corto} usa {hop_start} saltos (recomendado 3, máximo 5)` |
 | `flood` | `paquetes`, `ventana_min`, `ritmo_tipico`, `umbral`, `por_tipo` | `{corto} ha emitido {paquetes} paquetes en {ventana_min} min` |
 | `rafaga-masiva` | `nodos_total`, `ventana_s`, `base`, `umbral`, `por_tipo` | `{nodos_total} nodos han emitido a la vez en {ventana_s} s` |
-| `hops-high` | `hop_start`, `recomendado`, `maximo_valido` | `{corto} usa {hop_start} saltos (recomendado 3, máximo 5)` |
 
 ### `reglas.yaml` de arranque
 
@@ -84,34 +81,115 @@ general:
   reapertura_min: 60
   actualizacion_min: 15
   nodos_max_lista: 500
-# --- MVP ---
-reboot-loop:     {activa: true, ventana_min: 60, uptime_arranque_s: 180, resolver_min: 120,
-                  umbral: {infraestructura: {alto: 3}, clientes: {bajo: 3}}}
-battery-low:     {activa: true, muestras_minimas: 2, resolver: 50,
-                  umbral: {infraestructura: {medio: 40, alto: 20}, clientes: {bajo: 20}}}
-infra-silent:    {activa: true, medio: {minimo_h: 6, factor_intervalo: 3}, alto_h: 24}
-gateway-offline: {activa: true, medio: {minimo_min: 15, factor_intervalo: 3}, alto_min: 120}
-flood:           {activa: true, ventana_min: 10, excluir: [routing], resolver_min: 30,
-                  medio: {minimo: 30, factor_ritmo: 5}, alto: {minimo: 100, factor_ritmo: 15}}
-rafaga-masiva:   {activa: true, ventana_s: 120, nodos_minimos: 50, factor_linea_base: 5, resolver_min: 15}
-hops-high:       {activa: true, bajo_desde: 6, alto_desde: 7, resolver_paquetes: 2}
-# --- Ampliación (activa: false hasta implementarlas y calibrarlas) ---
-battery-drain:        {activa: false, voltaje_vacio: 3.3, dias_proyeccion: 3, ventana_h: 72}
-chutil-high:          {activa: false, medio: 20, alto: 40, resolver: 20, muestras_minimas: 2}
-airtime-high:         {activa: false, medio: 7, alto: 10, resolver: 5}
-tx-dropped:           {activa: false, medio_por_hora: 20, resolver_min: 120}
-noise-high:           {activa: false, db_sobre_mediana: 10, duracion_min: 60, resolver_db: 5}
-text-flood:           {activa: false, mensajes: 10, ventana_min: 5, resolver_min: 30}
-config-intervals:     {activa: false, tolerancia: 0.5, muestras_minimas: 3, resolver_h: 24, movil_desde_m: 500,
-                       recomendado_h: {nodeinfo: 72, posicion_fijo: 72, posicion_movil: 1, telemetria_dispositivo: 4, telemetria_entorno: 4},
-                       telemetria_energia: {maximo_24h: 2}}
-router-role:          {activa: false, routers_coordinados: []}
-new-node-burst:       {activa: false, minimo: 20, factor_linea_base: 5, ventana_min: 10, resolver_min: 60}
-mqtt-into-rf:         {activa: false, paquetes_minimos: 5, ventana_min: 60, resolver_h: 6}
-ok-to-mqtt-violation: {activa: false, paquetes_minimos: 3, ventana_h: 24, resolver_h: 24}
-impossible-jump:      {activa: false, velocidad_kmh: 300, distancia_minima_km: 1, resolver_h: 24}
-duplicate-pubkey:     {activa: false, ventana_dias: 7}
-identity-conflict:    {activa: false, ventana_h: 24}
+
+# --- Reglas activas ---
+reboot-loop:
+  activa: true
+  ventana_5m: 300
+  ventana_10m: 600
+  umbral_medio: 3
+  umbral_alto: 5
+  resolver_min: 30
+
+battery-low:
+  activa: true
+  muestras_minimas: 2
+  router: {medio: 60, alto: 40, resolver: 70}
+  cliente: {bajo: 35, medio: 15, resolver: 45}
+
+chutil-high:
+  activa: true
+  peso_routers: 0.60
+  peso_clientes: 0.40
+  bajo: 20.0
+  medio: 30.0
+  alto: 40.0
+  resolver: 20.0
+
+text-flood:
+  activa: true
+  ventana_s: 60
+  bajo: 5
+  medio_max: 10
+  resolver_min: 15
+
+telemetry-burst:
+  activa: true
+  umbral_1m: 2
+  umbral_1h: 50
+  resolver_min: 30
+
+poll-abuse:
+  activa: true
+  bajo: 1
+  medio: 3
+  alto: 5
+  ventana_s: 900
+  resolver_min: 30
+
+sunset-battery:
+  activa: true
+  hora_evaluacion: 20
+  medio: 60
+  alto: 40
+  resolver: 70
+
+traceroute-flood:
+  activa: true
+  ventana_s: 1800
+  medio: 10
+  alto: 20
+  resolver_min: 45
+
+private-chaff:
+  activa: true
+  medio_10m: 10
+  medio_1h: 30
+  alto_1h: 60
+  resolver_min: 30
+
+position-flood:
+  activa: true
+  bajo_5m: 4
+  medio_10m: 8
+  alto_15m: 20
+  resolver_min: 30
+
+router-role:
+  activa: true
+  routers_coordinados: []
+
+hops-high:
+  activa: true
+  bajo_desde: 6
+  alto_desde: 7
+  resolver_paquetes: 2
+
+infra-silent:
+  activa: true
+  medio: {minimo_h: 6, factor_intervalo: 3}
+  alto_h: 24
+
+gateway-offline:
+  activa: true
+  medio: {minimo_min: 15, factor_intervalo: 3}
+  alto_min: 120
+
+flood:
+  activa: true
+  ventana_min: 10
+  excluir: [routing]
+  resolver_min: 30
+  medio: {minimo: 30, factor_ritmo: 5}
+  alto: {minimo: 100, factor_ritmo: 15}
+
+rafaga-masiva:
+  activa: true
+  ventana_s: 120
+  nodos_minimos: 50
+  factor_linea_base: 5
+  resolver_min: 15
+
 silencios: []
 ```
 

@@ -99,11 +99,39 @@ Gestión dinámica de integradores de webhooks (base `portal`, tabla local repli
   - «Configuración del Destino»: Nombre (`^[a-z0-9-]{1,40}$`, obligatorio y de solo lectura en edición), URL HTTPS completa y Secreto HMAC-SHA256 (mínimo 32 caracteres) con máscara de contraseña revelable y acción de generación automática de clave segura aleatoria de 64 caracteres hexadecimales.
   - «Filtros de Entrega»: Selección múltiple con descripciones detalladas bajo cada opción y texto de ayuda para riesgos (`bajo`, `medio`, `alto`), tipos (`infraestructura`, `clientes`), provincias (`ES-AL`, `ES-CA`, etc.) y etiquetas de nodos Meshtastic (`^![0-9a-f]{8}$`).
 
+### Routers Coordinados (`CoordinatedRouterResource`)
+
+Gestión y gobernanza comunitaria de la infraestructura de repetidores en Andalucía (base `portal`, tabla `coordinated_routers`):
+- **Objetivo:** Registrar formalmente qué repetidores y routers (`ROUTER`, `ROUTER_LATE`, `REPEATER`) están coordinados y aprobados por la comunidad andaluza, sirviendo de lista blanca para la regla `router-role` del detector de anomalías.
+- **Agrupación y filtros por provincia:**
+  - La tabla está agrupada por defecto por provincia andaluza (`Group::make('province')->defaultGroup('province')`), presentando el nombre oficial de cada provincia (`Cádiz`, `Sevilla`, `Málaga`, etc.) como encabezado de sección.
+  - Filtro por provincia y filtro por estado de aprobación (`approved`: Aprobado / Pendiente).
+- **Columnas operativas:** Identificador hex (`node_id`), nombre corto (`short_name`), nombre largo (`long_name`), provincia con badge, rol configurado, interruptor directo o badge de aprobación (`approved`), indicador de pasarela (`is_gateway`), modelo de hardware (`hw_model`), notas del operador (`notes`) y fecha del último contacto (`last_seen_at`).
+- **Acción «Sincronizar de la Malla»:**
+  - Acción en cabecera que consulta la vista de contrato `api_routers` de la base de ingesta y vuelca/actualiza automáticamente los nodos detectados con rol de infraestructura.
+  - **Filtro geográfico estricto:** Solo importa y actualiza routers situados dentro de las 8 provincias de Andalucía (`ES-AL` .. `ES-SE`), descartando de forma tajante cualquier nodo fuera de la comunidad (`FUERA`), cuya coordinación y supervisión corresponde a las comunidades autónomas vecinas o Portugal.
+- **Edición manual:** Permite registrar nuevos routers de forma anticipada antes de su despliegue físico o añadir anotaciones de operador sobre ubicación, responsable o cota de instalación.
+
 ### Usuarios y Perfil de Operador
 
-Recurso `Operadores` (base `portal`): listar, desactivar/activar, forzar nuevo TOTP. Crear solo por comando (evita que un panel comprometido cree cuentas).
+Recurso `UserResource` (`/admin/users`, base `portal`):
+- **Modelo de roles:** Dos niveles de privilegio: `superadmin` (superadministrador) y `admin` (administrador estándar).
+- **Superadmin:**
+  - Visualización completa en tabla: avatar, nombre, rol (badge destacado), correo electrónico, indicador de cuenta activa y fecha de último acceso.
+  - Filtros por rol y estado activo.
+  - Creación de nuevos usuarios (`CreateUser`) con nombre, correo, rol, contraseña segura y subida de avatar.
+  - Edición de cuentas existentes (`EditUser`) con actualización de datos, cambio opcional de contraseña y reasignación de rol.
+  - Eliminación de usuarios con salvaguarda que impide la autoeliminación de la cuenta propia para evitar bloqueos accidentales.
+- **Admin (acceso restringido para operadores estándar):**
+  - Acceso de solo lectura al listado (`ListUsers`) para constancia de operadores existentes.
+  - **Privacidad estricta:** Solo visualiza avatar y nombre. Las columnas de correo electrónico (`email`), rol (`role`), estado (`activo`) y fecha de acceso quedan ocultas.
+  - Sin botones de acción de fila (editar o borrar) y sin botón de cabecera para crear nuevos usuarios. Las filas no son clicables como enlace.
+- **Autorización y seguridad en capas:**
+  - Control mediante `App\Policies\UserPolicy` registrado en `AppServiceProvider` y métodos de autorización del recurso (`canCreate`, `canEdit`, `canDelete`, `canView`, `canViewAny`).
+  - Cualquier intento de acceso directo por URL a `/admin/users/create` o `/admin/users/{id}/edit` por parte de un usuario con rol `admin` devuelve inmediatamente `403 Forbidden`.
+- **Comando de consola:** `php artisan operador:crear {email} {nombre} {--password=} {--role=admin}` permite dar de alta o actualizar operadores desde el servidor, admitiendo la asignación explícita de `--role=superadmin` o `--role=admin`.
 
-La página de edición de perfil (`/admin/profile`, `EditProfile`) utiliza un modal amplio para escritorio (`Width::FourExtraLarge`, 56rem / 896px) en lugar del ancho compacto de login, con avatar circular centrado horizontalmente y distribución en dos columnas (`sm: 2`) para optimizar la ergonomía en pantallas grandes.
+La página de edición de perfil personal (`/admin/profile`, `EditProfile`) utiliza un modal amplio para escritorio (`Width::FourExtraLarge`, 56rem / 896px) en lugar del ancho compacto de login, con avatar circular centrado horizontalmente y distribución en dos columnas (`sm: 2`) para optimizar la ergonomía en pantallas grandes.
 
 ## Contratos propios
 
@@ -111,13 +139,14 @@ La página de edición de perfil (`/admin/profile`, `EditProfile`) utiliza un mo
 
 | Tabla | Columnas clave |
 |---|---|
-| `users` | `id`, `name`, `email` único, `password`, `avatar_url` null, `activo` bool, campos de MFA de Filament, `ultimo_acceso` |
+| `users` | `id`, `name`, `email` único, `role` (`superadmin` \| `admin`), `password`, `avatar_url` null, `activo` bool, campos de MFA de Filament, `ultimo_acceso` |
 | `estado_servicio` | `servicio` PK, `ok` bool, `fallos_seguidos` int, `codigo` int null, `latencia_ms` int null, `motivo` text null, `detalle` jsonb null, `comprobado_en` timestamptz |
 | `estado_servicio_cambio` | `id`, `servicio`, `ok`, `motivo`, `en`; purga diaria > 90 días |
 | `tareas_latido` | `tarea` PK, `ultima_ejecucion` |
 | `suggestions` | `id`, `category`, `content`, `status`, `operator_notes`, `ip_hash`, `created_at`, `updated_at` |
 | `faqs` | `id`, `question`, `answer`, `is_active`, `sort_order`, `created_at`, `updated_at` |
 | `webhook_destinations` | `id`, `name` único, `url`, `host`, `active` bool, `disabled_reason` null, `consecutive_failures`, `pending_deliveries`, `last_ok_at`, `risks` json, `types` json, `provinces` json, `nodes` json, `created_at`, `updated_at` |
+| `coordinated_routers` | `id`, `node_id` único, `short_name`, `long_name`, `province`, `role`, `approved` bool, `is_gateway` bool, `hw_model`, `notes`, `last_seen_at`, `created_at`, `updated_at` |
 
 ### Configuración
 

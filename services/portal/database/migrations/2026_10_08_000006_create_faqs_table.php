@@ -13,14 +13,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('faqs', function (Blueprint $table) {
-            $table->id();
-            $table->jsonb('question');
-            $table->jsonb('answer');
-            $table->boolean('is_active')->default(true)->index();
-            $table->integer('sort_order')->default(0)->index();
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('faqs')) {
+            Schema::create('faqs', function (Blueprint $table) {
+                $table->id();
+                $table->jsonb('question');
+                $table->jsonb('answer');
+                $table->boolean('is_active')->default(true)->index();
+                $table->integer('sort_order')->default(0)->index();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

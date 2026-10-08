@@ -82,11 +82,11 @@ class LayoutYConfigTest extends TestCase
         }
 
         $cssContent = (string) file_get_contents(resource_path('css/app.css'));
-        $this->assertStringContainsString("@font-face", $cssContent);
+        $this->assertStringContainsString('@font-face', $cssContent);
         $this->assertStringContainsString("font-family: 'Ubuntu'", $cssContent);
         $this->assertStringContainsString("font-family: 'Inter'", $cssContent);
         $this->assertStringContainsString("font-family: 'Ubuntu Mono'", $cssContent);
-        $this->assertStringContainsString("--font-titulos", $cssContent);
+        $this->assertStringContainsString('--font-titulos', $cssContent);
     }
 
     /**

@@ -12,7 +12,7 @@ Registro de funcionalidades y conceptos que han sido decididos formalmente pero 
 | Mapa de cobertura medida | A partir de enlaces directos nodo ↔ gateway con SNR |
 | Informe semanal por los bots | Nodos nuevos, rankings, alertas resueltas |
 | Alta y baja de gateways desde el panel | Definir cómo el portal entrega la configuración a Mosquitto sin escribir en su base |
-| Gestión de destinos de webhooks y edición de textos desde el panel | Administración dinámica en Filament de suscripciones webhook (sin tocar YAML por SSH) y CMS Markdown para textos del portal sin redesplegar ([ver detalle](#gestion-de-webhooks-y-edicion-de-contenidos-desde-el-panel-admin)) |
+| Edición de contenidos y textos desde el panel (CMS) | Administración en Filament de los textos de páginas públicas con fallback a Markdown ([ver detalle](#edicion-de-contenidos-y-textos-desde-el-panel-admin)) |
 | Reglas de ampliación del detector | Tras calibrar el MVP (`docs/info/detector-alertas/02-rule-catalog.md`) |
 | Revisión del margen costero de ingesta | Evaluar ampliación del margen de 500 m en costas para evitar nodos legítimos marcados como FUERA |
 | Inclusión de Ceuta y Melilla como provincias | Tratar Ceuta y Melilla como provincias de pleno derecho en polígonos, rankings y mapa (conexión natural hacia la península) |
@@ -56,25 +56,14 @@ Página y herramienta pública de autoservicio en el portal para verificar si un
   - Ayuda visual o modal sobre cómo localizar el `Node ID` en la app oficial de Meshtastic.
   - Acordeón interactivo de preguntas frecuentes: significado del bloqueo, motivos para proteger el canal común, cómo evitar reincidencias y funcionamiento del sistema de protección.
 
-### Gestión de webhooks y edición de contenidos desde el panel (/admin)
+### Edición de contenidos y textos desde el panel (/admin)
 
-Dos funcionalidades orientadas a eliminar la dependencia de acceso SSH y redeploys para tareas operativas frecuentes:
-
-1. **Gestión dinámica de destinos de webhooks:**
-   - **Problema actual:** Dar de alta un webhook exige entrar por consola al servidor, editar manualmente `/srv/webhooks/webhooks.yaml` y `.env` (secreto HMAC), y reiniciar contenedores con `docker compose up -d --force-recreate`.
-   - **Solución en `/admin`:**
-     - Interfaz CRUD en Filament para añadir, pausar, editar y eliminar destinos de integradores.
-     - Configuración de filtros (riesgos, tipos, provincias y nodos específicos) y generación automática de secretos criptográficos seguros.
-     - Botón de prueba interactivo (*Test / Ping*) para verificar conectividad y firma antes de activar el webhook.
-     - **Desacoplamiento técnico:** Para no vulnerar el principio de aislamiento escribiendo directamente en la base de datos de `webhooks`, el portal se comunica con el servicio Python mediante una API interna de administración en `aiohttp` (puerto interno autenticado con token de servicio) o mediante sincronización de volumen/señal de recarga en caliente (*hot-reload*).
-
-2. **Edición dinámica de textos y contenidos del portal (CMS):**
-   - **Problema actual:** Los textos de las páginas públicas (`/configura-tu-nodo`, `/conecta-tu-gateway`, aviso legal, quién lo impulsa, etc.) residen en ficheros Markdown estáticos en `resources/contenido/*.md`. Cualquier ajuste, errata o ampliación requiere editar código fuente en git, crear un commit y reconstruir/redesplegar la imagen Docker del portal.
-   - **Solución en `/admin`:**
-     - Gestor de contenidos en Filament con editor visual Markdown y pestañas multi-idioma (ES / EN / PT).
-     - Persistencia de textos en la base de datos del portal (`page_contents`) manteniendo como *fallback* automático los ficheros Markdown del repositorio si no existe versión personalizada.
-     - Soporte para interpolación de variables del sistema (`{PROJECT_NAME}`, `{LORA_REGION}`, etc.).
-     - Invalidación automática de caché de vistas al guardar cambios, garantizando actualización inmediata sin caída de rendimiento.
+- **Problema actual:** Los textos de las páginas públicas (`/configura-tu-nodo`, `/conecta-tu-gateway`, aviso legal, quién lo impulsa, etc.) residen en ficheros Markdown estáticos en `resources/contenido/*.md`. Cualquier ajuste, errata o ampliación requiere editar código fuente en git, crear un commit y reconstruir/redesplegar la imagen Docker del portal.
+- **Solución en `/admin`:**
+  - Gestor de contenidos en Filament con editor visual Markdown y pestañas multi-idioma (ES / EN / PT).
+  - Persistencia de textos en la base de datos del portal (`page_contents`) manteniendo como *fallback* automático los ficheros Markdown del repositorio si no existe versión personalizada.
+  - Soporte para interpolación de variables del sistema (`{PROJECT_NAME}`, `{LORA_REGION}`, etc.).
+  - Invalidación automática de caché de vistas al guardar cambios, garantizando actualización inmediata sin caída de rendimiento.
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

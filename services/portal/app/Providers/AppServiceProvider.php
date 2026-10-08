@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Policies\UserPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Request;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
@@ -30,6 +33,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Gate::policy(User::class, UserPolicy::class);
+
         if ($this->app->environment('production') || str_starts_with((string) config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }

@@ -106,7 +106,7 @@ Umbral dinámico: `max(mínimo_fijo, k × base)`. Sin `general.historia_minima_h
 ```
 
 - **Clave:** `regla + nodo` (con `all`, `regla + all`). Una abierta por clave.
-- **Abrir:** `comprobar` devuelve una alerta para una clave sin abierta → `abierta` con `id` ULID nuevo. Si la misma clave se resolvió hace < `general.reapertura_min` (60) → se reabre esa: mismo `id`, `resuelta_en = null`, `reaperturas + 1`, transición `abierta`.
+- **Abrir:** `comprobar` devuelve una alerta para una clave sin abierta → `abierta` con `id` ULID nuevo. Si la misma clave se resolvió hace < `general.reapertura_min` (60) → se reabre esa: mismo `id`, `abierta_en = ahora`, `resuelta_en = null`, `reaperturas + 1`, transición `abierta`.
 - **Actualizar:** riesgo mayor → `actualizada` inmediata. Riesgo menor o `len(nodos)` ±20 % respecto a la última transición → `actualizada` solo si han pasado `general.actualizacion_min` (15) desde la última transición. Si no, se refrescan `mensaje` y `datos` en la tabla (máx. 1/min) sin transición.
 - **Resolver:** `sigue_activa == False` → `resuelta`, `datos.cierre = "condicion"`. Otros cierres: `fuera_de_seguimiento` y `regla_desactivada`.
 - `nodo_info` se toma del registro en cada transición; `actualizada_en` = hora de la última transición.
@@ -158,4 +158,4 @@ Cada `SNAPSHOT_S` y en `SIGTERM`: estado de nodos, gateways, ids conocidos y bas
 - Dado `reglas.yaml` con un riesgo inexistente / Cuando se guarda / Entonces sigue la configuración anterior y `/health.config` muestra el error.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

@@ -58,10 +58,10 @@ def test_regla_reboot_loop() -> None:
         abierta_en=t0,
     )
 
-    # A los 60 min sigue activa
-    ctx_60m = Contexto(
-        ahora=t0 + timedelta(minutes=60),
-        evento=Tick(ahora=t0 + timedelta(minutes=60)),
+    # A los 15 min sigue activa (< 30 min de saneamiento)
+    ctx_15m = Contexto(
+        ahora=t0 + timedelta(minutes=15),
+        evento=Tick(ahora=t0 + timedelta(minutes=15)),
         nodo=nodo,
         estado=estado,
         bases=bases,
@@ -69,12 +69,12 @@ def test_regla_reboot_loop() -> None:
         general=ConfigGeneral(),
         es_infraestructura=lambda _: True,
     )
-    assert regla.sigue_activa(ctx_60m, abierta) is True
+    assert regla.sigue_activa(ctx_15m, abierta) is True
 
-    # A los 125 min se resuelve
-    ctx_125m = Contexto(
-        ahora=t0 + timedelta(minutes=125),
-        evento=Tick(ahora=t0 + timedelta(minutes=125)),
+    # A los 35 min se sanea automáticamente (>= 30 min sin nuevos reinicios)
+    ctx_35m = Contexto(
+        ahora=t0 + timedelta(minutes=35),
+        evento=Tick(ahora=t0 + timedelta(minutes=35)),
         nodo=nodo,
         estado=estado,
         bases=bases,
@@ -82,7 +82,7 @@ def test_regla_reboot_loop() -> None:
         general=ConfigGeneral(),
         es_infraestructura=lambda _: True,
     )
-    assert regla.sigue_activa(ctx_125m, abierta) is False
+    assert regla.sigue_activa(ctx_35m, abierta) is False
 
 
 def test_regla_battery_low() -> None:
@@ -92,12 +92,12 @@ def test_regla_battery_low() -> None:
     bases = LineasBase()
     t0 = datetime(2026, 10, 1, 12, 0, 0, tzinfo=UTC)
 
-    # 1. Router al 35% en 2 muestras consecutivas -> medio
+    # 1. Router al 50% en 2 muestras consecutivas -> medio (< 60%)
     r_nodo = estado.obtener_o_crear_nodo("!r1", t0)
     r_nodo.role = "ROUTER"
     r_nodo.battery_samples.extend([
-        (t0 - timedelta(minutes=5), 38, 3.7),
-        (t0, 35, 3.65),
+        (t0 - timedelta(minutes=5), 52, 3.8),
+        (t0, 50, 3.75),
     ])
 
     ctx_r = Contexto(
@@ -114,7 +114,26 @@ def test_regla_battery_low() -> None:
     assert len(alertas_r) == 1
     assert alertas_r[0].riesgo == "medio"
 
-    # 2. Cliente al 18% en 2 muestras -> bajo
+    # Router al 35% (< 40%) -> alto
+    r_nodo.battery_samples.extend([
+        (t0 + timedelta(minutes=10), 38, 3.7),
+        (t0 + timedelta(minutes=15), 35, 3.65),
+    ])
+    ctx_r_alto = Contexto(
+        ahora=t0 + timedelta(minutes=15),
+        evento=Tick(ahora=t0 + timedelta(minutes=15)),
+        nodo=r_nodo,
+        estado=estado,
+        bases=bases,
+        config=ConfigBatteryLow(),
+        general=ConfigGeneral(),
+        es_infraestructura=lambda _: True,
+    )
+    alertas_r_alto = regla.comprobar(ctx_r_alto)
+    assert len(alertas_r_alto) == 1
+    assert alertas_r_alto[0].riesgo == "alto"
+
+    # 2. Cliente al 18% en 2 muestras -> bajo (< 35%)
     c_nodo = estado.obtener_o_crear_nodo("!c1", t0)
     c_nodo.role = "CLIENT"
     c_nodo.battery_samples.extend([
@@ -136,8 +155,8 @@ def test_regla_battery_low() -> None:
     assert len(alertas_c) == 1
     assert alertas_c[0].riesgo == "bajo"
 
-    # 3. Resolución cuando la batería sube a 55%
-    r_nodo.battery_samples.append((t0 + timedelta(hours=1), 55, 3.9))
+    # 3. Resolución cuando la batería sube a 65% (> 60%)
+    r_nodo.battery_samples.append((t0 + timedelta(hours=1), 65, 4.0))
     abierta = AlertaAbierta(
         id="01JAC0Q4M1K2J3H4G5F6E7D8C9",
         regla="battery-low",

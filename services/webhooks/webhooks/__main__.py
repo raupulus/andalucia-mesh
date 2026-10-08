@@ -14,6 +14,7 @@ from nucleo.registro import configurar_registro
 from nucleo.retencion import GestorRetencion
 from nucleo.salud import ServidorSalud
 from nucleo.socket_alertas import ClienteSocketAlertas
+from webhooks.api_interna import registrar_api_interna
 from webhooks.cli import orden_listar, orden_probar, orden_reactivar
 from webhooks.configuracion import ConfiguracionWebhooks
 from webhooks.motor_entregas import MotorEntregas
@@ -137,6 +138,7 @@ async def ejecutar_servicio(config: ConfiguracionWebhooks) -> None:
         }
 
     servidor_salud = ServidorSalud(puerto=config.health_port, proveedor_estado=obtener_estado_salud)
+    registrar_api_interna(servidor_salud.app, config, gestor_base, motor)
     await servidor_salud.iniciar()
 
     # Bucle de espera hasta señal de parada

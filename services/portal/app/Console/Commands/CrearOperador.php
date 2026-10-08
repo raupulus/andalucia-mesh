@@ -15,7 +15,7 @@ class CrearOperador extends Command
      *
      * @var string
      */
-    protected $signature = 'operador:crear {email} {nombre} {--password= : Contraseña inicial (mínimo 8 caracteres)}';
+    protected $signature = 'operador:crear {email} {nombre} {--password= : Contraseña inicial (mínimo 8 caracteres)} {--role=admin : Rol del operador (superadmin o admin)}';
 
     /**
      * The console command description.
@@ -31,6 +31,13 @@ class CrearOperador extends Command
     {
         $email = trim((string) $this->argument('email'));
         $nombre = trim((string) $this->argument('nombre'));
+        $role = strtolower(trim((string) $this->option('role')));
+
+        if (! in_array($role, [User::ROLE_SUPERADMIN, User::ROLE_ADMIN], true)) {
+            $this->error("El rol '{$role}' no es válido. Debe ser 'superadmin' o 'admin'.");
+
+            return Command::FAILURE;
+        }
 
         if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->error("El correo '{$email}' no tiene un formato válido.");
@@ -53,13 +60,14 @@ class CrearOperador extends Command
             ['email' => $email],
             [
                 'name' => $nombre,
+                'role' => $role,
                 'password' => Hash::make($password),
                 'activo' => true,
                 'email_verified_at' => now(),
             ]
         );
 
-        $this->info("Operador '{$user->name}' ({$user->email}) guardado con éxito.");
+        $this->info("Operador '{$user->name}' ({$user->email}) guardado con éxito con rol '{$user->role}'.");
         $this->info('Accede a /admin para iniciar sesión y configurar tu segundo factor de autenticación TOTP.');
 
         return Command::SUCCESS;

@@ -34,9 +34,9 @@ class EditProfile extends BaseEditProfile
     /**
      * Ancho del modal/página ampliado a 4xl (56rem / 896px) para una visualización espaciosa en escritorio.
      */
-    protected Width | string | null $maxWidth = Width::FourExtraLarge;
+    protected Width|string|null $maxWidth = Width::FourExtraLarge;
 
-    public function getMaxWidth(): Width | string | null
+    public function getMaxWidth(): Width|string|null
     {
         return $this->maxWidth ?? Width::FourExtraLarge;
     }
