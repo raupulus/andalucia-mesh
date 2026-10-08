@@ -122,6 +122,7 @@ return [
         ['titulo' => 'Configura tu nodo', 'url' => '/configura-tu-nodo'],
         ['titulo' => 'MQTT', 'url' => '/conecta-tu-gateway'],
         ['titulo' => 'Rankings', 'url' => '/rankings'],
+        ['titulo' => 'Routers', 'url' => '/routers'],
         ['titulo' => 'Alertas', 'url' => '/alertas'],
         ['titulo' => 'Bots', 'url' => '/bots'],
     ],

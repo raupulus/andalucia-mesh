@@ -18,6 +18,7 @@ return [
         'node_setup' => 'Configura o teu nó',
         'gateway' => 'MQTT',
         'rankings' => 'Rankings',
+        'routers' => 'Routers',
         'alerts' => 'Alertas',
         'bots' => 'Bots',
         'extras' => 'Extras',
@@ -656,5 +657,12 @@ return [
         'dismiss' => 'Compreendido',
         'close' => 'Minimizar aviso',
         'reopen' => 'Aviso de testes',
+    ],
+
+    'routers' => [
+        'meta_title' => 'Repetidores e Nós de Infraestrutura — :name',
+        'title' => 'Repetidores e Nós de Infraestrutura',
+        'lead' => 'Supervisão em tempo real dos repetidores e routers da malha: telemetria de bateria, pressão do canal (ChUtil), saturação TX e estado de saúde.',
+        'breadcrumb' => 'Routers',
     ],
 ];

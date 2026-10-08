@@ -11,6 +11,7 @@ use App\Http\Controllers\HardwareController;
 use App\Http\Controllers\PaginaController;
 use App\Http\Controllers\PortadaController;
 use App\Http\Controllers\RankingsController;
+use App\Http\Controllers\RoutersController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SuggestionController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,7 @@ Route::get('/api', [PaginaController::class, 'apiDocs'])->name('pagina.api');
 
 // Páginas dinámicas y herramientas
 Route::get('/rankings', [RankingsController::class, 'index'])->name('rankings');
+Route::get('/routers', [RoutersController::class, 'index'])->name('routers');
 Route::get('/alertas', [AlertasController::class, 'index'])->name('alertas');
 Route::get('/alertas/{id}', [AlertasController::class, 'show'])->name('alertas.show');
 Route::get('/revisa-tu-nodo', [DiagnosticoController::class, 'index'])->name('revisa-nodo');

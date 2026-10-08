@@ -6,6 +6,7 @@
         '/configura-tu-nodo' => 'portal.nav.node_setup',
         '/conecta-tu-gateway' => 'portal.nav.gateway',
         '/rankings' => 'portal.nav.rankings',
+        '/routers' => 'portal.nav.routers',
         '/alertas' => 'portal.nav.alerts',
         '/bots' => 'portal.nav.bots',
         '/configurador' => 'portal.nav.configurator',

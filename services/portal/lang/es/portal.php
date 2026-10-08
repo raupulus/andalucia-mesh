@@ -18,6 +18,7 @@ return [
         'node_setup' => 'Configura tu nodo',
         'gateway' => 'MQTT',
         'rankings' => 'Rankings',
+        'routers' => 'Routers',
         'alerts' => 'Alertas',
         'bots' => 'Bots',
         'extras' => 'Extras',
@@ -657,5 +658,12 @@ return [
         'dismiss' => 'Entendido',
         'close' => 'Minimizar aviso',
         'reopen' => 'Aviso de pruebas',
+    ],
+
+    'routers' => [
+        'meta_title' => 'Repetidores y Nodos de Infraestructura — :name',
+        'title' => 'Repetidores y Nodos de Infraestructura',
+        'lead' => 'Supervisión en tiempo real de los repetidores y routers de la malla: telemetría de batería, canal (ChUtil), saturación TX y estado de salud.',
+        'breadcrumb' => 'Routers',
     ],
 ];

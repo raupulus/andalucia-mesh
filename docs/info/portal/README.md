@@ -66,7 +66,7 @@ El portal es la **única pieza** del proyecto con internacionalización y traduc
 | `/`, `/proyecto`, `/quien-lo-impulsa`, `/como-se-gestiona` | Público | 01, 05 |
 | `/configura-tu-nodo`, `/conecta-tu-gateway` | Público | 03, 04 |
 | `/bots`, `/firmware` | Público | 06, 07 |
-| `/rankings`, `/alertas`, `/alertas/{id}` | Público | 08 |
+| `/rankings`, `/routers`, `/alertas`, `/alertas/{id}` | Público | 08 |
 | `/revisa-tu-nodo`, `/revisa-tu-nodo/{id}` | Público | 09 |
 | `/sugerencias`, `/faq` | Público | 01, 14 |
 | `/legal/aviso-legal`, `/legal/privacidad`, `/legal/cookies` | Público | 10 |
@@ -206,4 +206,4 @@ Actualización: nueva etiqueta git → `deploy.sh portal`.
 6. Las decisiones de detalle de la API y el panel están en sus módulos (11–14).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

@@ -19,7 +19,7 @@ Que quien llega por el enlace o el QR entienda en 10 segundos qué es esto, vea 
 | Sugerencias | `/sugerencias` | `SuggestionController` | Buzón ciudadano con Turnstile y categorías |
 | Resto | Ver `README.md` §4.1 | Su módulo | Su documento en `pages/` |
 
-Navegación principal: Inicio · Configura tu nodo · MQTT (`/conecta-tu-gateway`) · Rankings · Alertas · Bots · Desplegable **Extras** (`/configurador`, `/revisa-tu-nodo`, `/hardware`, `/paginas` ["Páginas"], `/api` ["API/Websockets"], `/sugerencias`, `/faq`). Pie: El proyecto · Quién lo impulsa · Cómo se gestiona · Sugerencias · Firmware y apps · API · Aviso legal · Privacidad · Cookies · tarjeta rectangular de código fuente con enlaces a GitLab (principal) y GitHub (mirror) · línea de autoría (`05-authorship.md`). Por defecto la interfaz se presenta en modo oscuro (`data-theme="dark"`), respetando el modo claro solo cuando el sistema operativo tiene explícitamente activada la preferencia `prefers-color-scheme: light` o el usuario seleccionó un tema en `localStorage`.
+Navegación principal: Inicio · Configura tu nodo · MQTT (`/conecta-tu-gateway`) · Rankings · Routers (`/routers`) · Alertas · Bots · Desplegable **Extras** (`/configurador`, `/revisa-tu-nodo`, `/hardware`, `/paginas` ["Páginas"], `/api` ["API/Websockets"], `/sugerencias`, `/faq`). Pie: El proyecto · Quién lo impulsa · Cómo se gestiona · Sugerencias · Firmware y apps · API · Aviso legal · Privacidad · Cookies · tarjeta rectangular de código fuente con enlaces a GitLab (principal) y GitHub (mirror) · línea de autoría (`05-authorship.md`). Por defecto la interfaz se presenta en modo oscuro (`data-theme="dark"`), respetando el modo claro solo cuando el sistema operativo tiene explícitamente activada la preferencia `prefers-color-scheme: light` o el usuario seleccionó un tema en `localStorage`.
 
 ### Portada (orden fijo)
 
@@ -89,4 +89,4 @@ Bots, alertas y API no llevan tarjeta: van en navegación y pie.
 6. **Dado** un móvil <= 768 px, **cuando** se visualiza el hero, **entonces** se presenta centrado con el logotipo arriba y sin desalineaciones.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

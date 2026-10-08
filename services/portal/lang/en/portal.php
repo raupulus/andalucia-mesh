@@ -18,6 +18,7 @@ return [
         'node_setup' => 'Configure your node',
         'gateway' => 'MQTT',
         'rankings' => 'Rankings',
+        'routers' => 'Routers',
         'alerts' => 'Alerts',
         'bots' => 'Bots',
         'extras' => 'Extras',
@@ -657,5 +658,12 @@ return [
         'dismiss' => 'Understood',
         'close' => 'Minimize notice',
         'reopen' => 'Testing notice',
+    ],
+
+    'routers' => [
+        'meta_title' => 'Repeaters & Infrastructure Nodes — :name',
+        'title' => 'Repeaters & Infrastructure Nodes',
+        'lead' => 'Real-time monitoring of mesh repeaters and routers: battery telemetry, channel pressure (ChUtil), TX airtime saturation, and health status.',
+        'breadcrumb' => 'Routers',
     ],
 ];

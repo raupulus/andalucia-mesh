@@ -1,10 +1,10 @@
 # 06.8 · Rankings y alertas
 
-> Páginas `/rankings` (destino de la tercera tarjeta), `/alertas` y `/alertas/{id}` (enlace que envían los bots). Textos en `pages/08-rankings.md` y `pages/09-alerts.md`. Datos de `12-stats-api.md` y `13-nodes-alerts-api.md`.
+> Páginas `/rankings` (destino de la tercera tarjeta), `/routers` (supervisión de infraestructura), `/alertas` y `/alertas/{id}` (enlace que envían los bots). Textos en `pages/08-rankings.md` y `pages/09-alerts.md`. Datos de `12-stats-api.md` y `13-nodes-alerts-api.md`.
 
 ## Objetivo
 
-Mostrar qué nodos están en peligro ahora, cuáles consumen más tiempo de aire y quién aporta más a la malla por periodos; y dar a cada alerta una ficha pública y compartible.
+Mostrar qué nodos están en peligro ahora, cuáles consumen más tiempo de aire y quién aporta más a la malla por periodos; supervisar los routers y repetidores de infraestructura; y dar a cada alerta una ficha pública y compartible.
 
 ## Especificación
 
@@ -20,6 +20,25 @@ Orden fijo:
 6. **Sobre estos datos:** solo canales de la lista, solo lo que llega con OK to MQTT, periodos en hora de Madrid.
 
 Refresco de 3–5: cada 60 s si el periodo está en curso; nada si está cerrado. Un bloque cuya fuente falla avisa y el resto sigue.
+
+### `/routers`
+
+Supervisión pública del estado de routers de infraestructura y repetidores:
+1. **Selector territorial de ámbito:** Andalucía, España y Ambos acumulados (`?ambito=andalucia|espana|ambos`), con conteos en vivo de routers detectados y selector visual con pills de estado (`✓ ACTIVO` / `＋ SUMAR`), cumpliendo estrictamente con la política de cero cookies (RN-06).
+2. **4 Tarjetas KPI de infraestructura:**
+   - **ChUtil Medio:** Porcentaje de ocupación del canal con estado nominal / saturado y gráfica de tendencia.
+   - **Saturación TX:** Pico y media de tiempo de transmisión al aire de los routers.
+   - **Infraestructura / Alimentación:** Porcentaje y desglose de nodos conectados a red eléctrica vs baterías solares.
+   - **Tráfico / Gateways:** Ratio de paquetes enrutados y gateways MQTT enlazados.
+3. **Tabla de Routers de Infraestructura:**
+   - Listado detallado con indicador visual online/offline (latido en los últimos 45 min).
+   - Identificación del nodo (nombre largo, ID hexadecimal, hardware/modelo y provincia).
+   - Nivel de batería (barra porcentual coloreada, voltaje o pill verde de "Red eléctrica").
+   - Ocupación del canal ChUtil (barra de progreso y badge nominal/precaución/saturado).
+   - Tiempo de emisión al aire TX (porcentaje y badge coloreado).
+   - Última conexión relativa (ej. "hace 5 min").
+   - Acción directa de diagnóstico con enlace a `/revisa-tu-nodo/{id}`.
+4. Soporte multidioma completo (RN-48) en español, inglés y portugués.
 
 ### `/alertas`
 
@@ -65,6 +84,7 @@ Refresco de la lista abierta cada 30 s (solo si el usuario no ha pulsado "Ver m�
 3. **Dado** una clave `ventana_min` en `data` con etiqueta y una `nueva_clave` sin ella, **cuando** se pinta la ficha, **entonces** salen "Ventana (min)" y `nueva_clave`.
 4. **Dado** `/alertas?node=!a1b2c3d4`, **cuando** se carga, **entonces** solo salen alertas de ese nodo y el filtro aparece visible y quitable.
 5. **Dado** un lector de pantalla, **cuando** recorre nodos en peligro, **entonces** oye el riesgo en texto ("riesgo alto").
+6. **Dado** `/routers?ambito=andalucia`, **cuando** se carga la vista, **entonces** muestra los KPIs y nodos de infraestructura filtrados sin emitir cookies de sesión (RN-06).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09
