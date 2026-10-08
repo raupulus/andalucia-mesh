@@ -82,6 +82,8 @@
   - `test_configurador_muestra_aviso_experimental_y_enlace_a_sugerencias`
   - `test_configurador_aviso_experimental_multidioma`
   - `test_configurador_contiene_checkbox_colaboracion_mqtt`
+  - `test_configurador_contiene_opciones_ampliadas_telemetria_y_posicion`
+  - `test_configurador_modo_avanzado_contiene_panel_conexion_directa`
 
 ## Pendiente real
 - [x] Contenedor Docker compilado y corriendo en local (puerto 8420).
@@ -91,6 +93,8 @@
 - [x] Integración completa en el layout Blade del portal con modo oscuro por defecto y navegación oficial.
 - [x] Badge y aviso de herramienta experimental con advertencia de uso bajo su riesgo y enlace directo a sugerencias.
 - [x] Check opcional de colaboración MQTT con exclusión por defecto de parámetros de pasarela si no se activa.
+- [x] Opciones ampliadas de cadencia (12h, 24h, 48h y 72h) en telemetría de dispositivo y posición GPS.
+- [x] Tarjeta de conexión directa dedicada en Modo Avanzado (Workbench) para Web Serial, Bluetooth y HTTP con sincronización de estado, lectura en vivo, comparador Diff y volcado.
 
 ---
 > Creado: 2026-10-08 · Última revisión: 2026-10-09

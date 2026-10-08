@@ -13,7 +13,7 @@ import { MeshDevice, Protobuf } from "@meshtastic/core";
 import { TransportWebSerial } from "@meshtastic/transport-web-serial";
 import { TransportWebBluetooth } from "@meshtastic/transport-web-bluetooth";
 import { TransportHTTP } from "@meshtastic/transport-http";
-import { dump as yamlDump } from "js-yaml";
+import { dump as yamlDump, load as jsYamlLoad } from "js-yaml";
 
 // --- Constantes del protocolo ---
 const PROTOCOL_CONFIG_TYPES = [
@@ -59,6 +59,8 @@ const estado = {
   transporte: null,
   myNodeNum: null,
   myNodeInfo: null,
+  ownerName: "",
+  ownerShort: "",
   sessionPasskey: null,
   configSections: {},
   moduleConfigSections: {},
@@ -85,7 +87,10 @@ export function construirYamlDeseado() {
   const shortName = (document.getElementById("inputShortName")?.value.trim() || "AND1").slice(0, 4);
   const esClientMute = estado.rolSeleccionado === "CLIENT_MUTE";
   const hopLimit = esClientMute ? 4 : 3;
-  const positionSecs = esClientMute ? 21600 : 259200; // 6h para móvil / 72h para fijo
+  const posSelectVal = document.getElementById("posicionSelect")?.value;
+  const positionSecs = (posSelectVal !== undefined && posSelectVal !== "")
+    ? Number(posSelectVal)
+    : (esClientMute ? 21600 : 259200); // 6h para móvil / 72h para fijo por defecto
   const nodeInfoSecs = 259200; // 72h para todos según buenas prácticas
   const txPower = Number(document.querySelector('input[name="txPowerSelect"]:checked')?.value || 27);
   const telemetriaSecs = Number(document.getElementById("telemetriaSelect")?.value || 0);
@@ -351,6 +356,12 @@ export function seleccionarRol(rol) {
   const cardClient = document.getElementById("cardRoleClient");
   if (cardMute) cardMute.classList.toggle("selected", rol === "CLIENT_MUTE");
   if (cardClient) cardClient.classList.toggle("selected", rol === "CLIENT");
+
+  const posSelect = document.getElementById("posicionSelect");
+  if (posSelect) {
+    posSelect.value = rol === "CLIENT_MUTE" ? "21600" : "259200";
+  }
+
   actualizarConfiguracion();
 }
 
@@ -384,6 +395,7 @@ export function copiarComandosCli() {
   const lora = configDoc.config.lora;
   const dev = configDoc.config.device;
   const pos = configDoc.config.position;
+  const telemetriaSecs = Number(document.getElementById("telemetriaSelect")?.value || 0);
 
   const comandos = [
     `# Configuración oficial Andalucía Mesh (SFNarrow)`,
@@ -393,6 +405,7 @@ export function copiarComandosCli() {
     `meshtastic --set lora.channel_num ${lora.channelNum} --set lora.hop_limit ${lora.hopLimit} --set lora.tx_power ${lora.txPower}`,
     `meshtastic --set device.role ${dev.role} --set device.node_info_broadcast_secs ${dev.nodeInfoBroadcastSecs}`,
     `meshtastic --set position.position_broadcast_smart_enabled false --set position.position_flags 0 --set position.position_broadcast_secs ${pos.positionBroadcastSecs}`,
+    `meshtastic --set telemetry.device_update_interval ${telemetriaSecs}`,
     `meshtastic --ch-set name "SFNarrow" --ch-set psk "AQ==" --ch-index 0`
   ];
 
@@ -420,16 +433,153 @@ export function copiarComandosCli() {
   });
 }
 
-// --- Conexión directa al nodo y programación ---
-export async function conectarDispositivo() {
-  const tipoTransporte = document.getElementById("transportSelect")?.value || "serial";
-  const btnConnect = document.getElementById("btnConnectDirect");
-  const btnDisconnect = document.getElementById("btnDisconnectDirect");
+// --- Sincronización de interfaz de conexión ---
+function actualizarUiEstadoConexion(conectado) {
+  estado.nodoConectado = conectado;
+
   const statusPill = document.getElementById("statusPill");
+  if (statusPill) {
+    statusPill.textContent = conectado ? "⚡ Conectado" : "🔌 Desconectado";
+    statusPill.style.background = conectado ? "var(--color-correcto-fondo)" : "";
+    statusPill.style.color = conectado ? "var(--color-correcto-texto)" : "";
+  }
+
+  const wbStatusPill = document.getElementById("workbenchStatusPill");
+  if (wbStatusPill) {
+    wbStatusPill.textContent = conectado ? "⚡ Conectado" : "🔌 Desconectado";
+    wbStatusPill.style.background = conectado ? "var(--color-correcto-fondo)" : "";
+    wbStatusPill.style.color = conectado ? "var(--color-correcto-texto)" : "";
+  }
+
+  const btnConnectDirect = document.getElementById("btnConnectDirect");
+  const btnDisconnectDirect = document.getElementById("btnDisconnectDirect");
+  if (btnConnectDirect) btnConnectDirect.disabled = conectado;
+  if (btnDisconnectDirect) btnDisconnectDirect.disabled = !conectado;
+
+  const btnConnectWb = document.getElementById("btnConnectWorkbench");
+  const btnDisconnectWb = document.getElementById("btnDisconnectWorkbench");
+  const btnDownloadLive = document.getElementById("btnDownloadLive");
+  const btnDownloadLiveHeader = document.getElementById("btnDownloadLiveHeader");
+  const btnUploadConfig = document.getElementById("btnUploadConfig");
+
+  if (btnConnectWb) btnConnectWb.disabled = conectado;
+  if (btnDisconnectWb) btnDisconnectWb.disabled = !conectado;
+  if (btnDownloadLive) btnDownloadLive.disabled = !conectado;
+  if (btnDownloadLiveHeader) btnDownloadLiveHeader.disabled = !conectado;
+  if (btnUploadConfig) btnUploadConfig.disabled = !conectado;
+}
+
+// --- Regenerar vista previa YAML del nodo conectado ---
+function regenerarYamlLive() {
+  const channelsList = Array.from(estado.channelMap.values()).sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+
+  const liveDoc = {
+    owner: estado.ownerName || estado.myNodeInfo?.user?.longName || "Nodo Meshtastic",
+    owner_short: estado.ownerShort || estado.myNodeInfo?.user?.shortName || "MESH",
+    config: estado.configSections,
+    module_config: estado.moduleConfigSections,
+    channels: channelsList.length > 0 ? channelsList : undefined
+  };
+
+  estado.liveConfig = liveDoc;
+  try {
+    const yamlStr = yamlDump(liveDoc, { lineWidth: 120, noRefs: true, sortKeys: false });
+    const liveTextarea = document.getElementById("liveYamlTextarea");
+    if (liveTextarea) {
+      liveTextarea.value = yamlStr;
+    }
+    actualizarDiff();
+  } catch (e) {
+    console.warn("Error serializando live config a YAML:", e);
+  }
+}
+
+// --- Comparador de Diferencias (Diff) visual ---
+export function actualizarDiff() {
+  const liveText = document.getElementById("liveYamlTextarea")?.value.trim() || "";
+  const desiredText = document.getElementById("desiredYamlTextarea")?.value.trim() || "";
+  const badge = document.getElementById("diffBadge");
+  const container = document.getElementById("diffOutputContainer");
+
+  if (!badge || !container) return;
+
+  if (!liveText) {
+    badge.textContent = "Sin comparación activa";
+    badge.className = "badge-tag";
+    badge.style.background = "";
+    badge.style.color = "";
+    container.innerHTML = "<em>Conéctate a tu nodo y lee su configuración para ver las diferencias exactas respecto al estándar SFNarrow.</em>";
+    return;
+  }
+
+  if (liveText === desiredText) {
+    badge.textContent = "✓ Idéntica (Sin cambios)";
+    badge.className = "badge-tag";
+    badge.style.background = "var(--color-correcto-fondo)";
+    badge.style.color = "var(--color-correcto-texto)";
+    container.innerHTML = '<div style="color: var(--color-correcto-texto); padding: 0.5rem 0;">✓ La configuración actual del nodo coincide con la configuración deseada.</div>';
+    return;
+  }
+
+  const liveLines = liveText.split("\n");
+  const desiredLines = desiredText.split("\n");
+  let diffHtml = '<div style="font-family: var(--fuente-mono); font-size: 0.85rem; line-height: 1.5; max-height: 320px; overflow-y: auto; background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-sm); padding: 0.75rem;">';
+  let diffCount = 0;
+
+  const maxLines = Math.max(liveLines.length, desiredLines.length);
+  for (let i = 0; i < maxLines; i++) {
+    const lLine = liveLines[i];
+    const dLine = desiredLines[i];
+    if (lLine !== dLine) {
+      diffCount++;
+      if (lLine !== undefined) {
+        diffHtml += `<div style="background: rgba(220, 38, 38, 0.15); color: #ef4444; padding: 1px 4px; border-radius: 2px;">- ${escapeHtml(lLine)}</div>`;
+      }
+      if (dLine !== undefined) {
+        diffHtml += `<div style="background: rgba(22, 163, 74, 0.15); color: #22c55e; padding: 1px 4px; border-radius: 2px;">+ ${escapeHtml(dLine)}</div>`;
+      }
+    } else {
+      diffHtml += `<div style="color: var(--color-texto-2); padding: 1px 4px;">  ${escapeHtml(lLine || "")}</div>`;
+    }
+  }
+  diffHtml += "</div>";
+
+  badge.textContent = `⚠️ ${diffCount} diferencia${diffCount > 1 ? "s" : ""}`;
+  badge.className = "badge-tag badge-tag-aviso";
+  badge.style.background = "";
+  badge.style.color = "";
+  container.innerHTML = diffHtml;
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// --- Conexión directa al nodo y programación ---
+export async function conectarDispositivo(origen = "assistant") {
+  const isWorkbench = origen === "workbench" || estado.modo === "workbench";
+  const selectId = isWorkbench ? "transportSelectWorkbench" : "transportSelect";
+  const tipoTransporte = document.getElementById(selectId)?.value || "serial";
+
+  if (tipoTransporte === "serial" && !("serial" in navigator)) {
+    const msg = "Web Serial API no está soportada en este navegador. Para conectar directamente por cable USB, utiliza Google Chrome, Microsoft Edge, Brave u Opera en tu ordenador.";
+    alert(msg);
+    logActividad(`Error de compatibilidad: ${msg}`);
+    return;
+  }
+
+  if (tipoTransporte === "bluetooth" && !("bluetooth" in navigator)) {
+    const msg = "Web Bluetooth API no está soportada en este navegador. Utiliza Google Chrome o Microsoft Edge.";
+    alert(msg);
+    logActividad(`Error de compatibilidad: ${msg}`);
+    return;
+  }
+
+  const btnConnect = document.getElementById(isWorkbench ? "btnConnectWorkbench" : "btnConnectDirect");
+  if (btnConnect) btnConnect.disabled = true;
 
   try {
-    if (btnConnect) btnConnect.disabled = true;
-    logActividad(`Iniciando conexión directa por ${tipoTransporte}...`);
+    logActividad(`Iniciando conexión directa por ${tipoTransporte.toUpperCase()}...`);
 
     let transport;
     if (tipoTransporte === "serial") {
@@ -437,7 +587,8 @@ export async function conectarDispositivo() {
     } else if (tipoTransporte === "bluetooth") {
       transport = await TransportWebBluetooth.create();
     } else if (tipoTransporte === "http") {
-      const host = document.getElementById("httpIpInput")?.value.trim() || "meshtastic.local";
+      const inputId = isWorkbench ? "httpIpInputWorkbench" : "httpIpInput";
+      const host = document.getElementById(inputId)?.value.trim() || "meshtastic.local";
       transport = new TransportHTTP(host, false);
     }
 
@@ -446,19 +597,107 @@ export async function conectarDispositivo() {
     estado.dispositivo = device;
     estado.nodoConectado = true;
 
-    if (btnDisconnect) btnDisconnect.disabled = false;
-    if (statusPill) {
-      statusPill.textContent = "⚡ Conectado";
-      statusPill.style.background = "var(--color-correcto-fondo)";
-      statusPill.style.color = "var(--color-correcto-texto)";
+    // Limpiar caché de secciones previas
+    estado.configSections = {};
+    estado.moduleConfigSections = {};
+    estado.channelMap.clear();
+
+    // Suscripción a eventos del dispositivo
+    device.events.onDeviceStatus.subscribe((status) => {
+      logActividad(`Estado del enlace local: ${status}`);
+      if (status === 2 || status === "disconnected" || status === "DeviceDisconnected") {
+        actualizarUiEstadoConexion(false);
+      }
+    });
+
+    device.events.onMyNodeInfo.subscribe((info) => {
+      if (info) {
+        estado.myNodeNum = info.myNodeNum;
+        estado.myNodeInfo = info;
+        const hex = (info.myNodeNum >>> 0).toString(16).padStart(8, "0");
+        logActividad(`Nodo local identificado: !${hex}`);
+        actualizarUiEstadoConexion(true);
+      }
+    });
+
+    device.events.onUserPacket.subscribe((packet) => {
+      if (packet?.data) {
+        if (packet.data.longName) estado.ownerName = packet.data.longName;
+        if (packet.data.shortName) estado.ownerShort = packet.data.shortName;
+        regenerarYamlLive();
+      }
+    });
+
+    device.events.onConfigPacket.subscribe((config) => {
+      if (config?.payloadVariant?.case && config.payloadVariant.value) {
+        const sec = config.payloadVariant.case;
+        try {
+          const json = toJson(Protobuf.Config.ConfigSchema, config);
+          if (json && json[sec]) {
+            estado.configSections[sec] = json[sec];
+          }
+        } catch (e) {
+          console.warn(`Error parseando config.${sec}:`, e);
+        }
+        regenerarYamlLive();
+      }
+    });
+
+    device.events.onModuleConfigPacket.subscribe((moduleConfig) => {
+      if (moduleConfig?.payloadVariant?.case && moduleConfig.payloadVariant.value) {
+        const sec = moduleConfig.payloadVariant.case;
+        try {
+          const json = toJson(Protobuf.ModuleConfig.ModuleConfigSchema, moduleConfig);
+          if (json && json[sec]) {
+            estado.moduleConfigSections[sec] = json[sec];
+          }
+        } catch (e) {
+          console.warn(`Error parseando module_config.${sec}:`, e);
+        }
+        regenerarYamlLive();
+      }
+    });
+
+    device.events.onChannelPacket.subscribe((channel) => {
+      if (channel) {
+        try {
+          const json = toJson(Protobuf.Channel.ChannelSchema, channel);
+          if (json && json.index !== undefined) {
+            estado.channelMap.set(json.index, json);
+          }
+        } catch (e) {
+          console.warn("Error parseando channel:", e);
+        }
+        regenerarYamlLive();
+      }
+    });
+
+    actualizarUiEstadoConexion(true);
+    logActividad("✓ Conexión establecida con éxito con el nodo Meshtastic.");
+    logActividad("Solicitando configuración al dispositivo...");
+
+    // Handshake inicial para volcar ajustes completos
+    try {
+      await device.configure();
+    } catch (err) {
+      console.warn("Aviso en device.configure():", err);
     }
 
-    logActividad("Nodo conectado correctamente. Leyendo parámetros de radio...");
-    alert("¡Nodo conectado! Puedes aplicar la configuración ahora o inspeccionar en el modo Workbench.");
+    try {
+      await device.getOwner();
+    } catch (_) {}
+
+    for (let i = 0; i < 8; i++) {
+      try {
+        await device.getChannel(i);
+      } catch (_) {}
+    }
+
+    alert("¡Nodo conectado con éxito! Leyendo parámetros del dispositivo...");
   } catch (e) {
+    actualizarUiEstadoConexion(false);
     logActividad(`Error de conexión: ${e.message}`);
     alert(`No se pudo conectar al dispositivo: ${e.message}`);
-    if (btnConnect) btnConnect.disabled = false;
   }
 }
 
@@ -471,38 +710,35 @@ export async function desconectarDispositivo() {
         await estado.transporte.disconnect();
       }
     } catch (e) {
-      logActividad(`Error al desconectar: ${e.message}`);
+      logActividad(`Aviso al desconectar: ${e.message}`);
     }
-    estado.transporte = null;
-    estado.dispositivo = null;
-    estado.nodoConectado = false;
-
-    const btnConnect = document.getElementById("btnConnectDirect");
-    const btnDisconnect = document.getElementById("btnDisconnectDirect");
-    const statusPill = document.getElementById("statusPill");
-
-    if (btnConnect) btnConnect.disabled = false;
-    if (btnDisconnect) btnDisconnect.disabled = true;
-    if (statusPill) {
-      statusPill.textContent = "🔌 Desconectado";
-      statusPill.style.background = "";
-      statusPill.style.color = "";
-    }
-    logActividad("Dispositivo desconectado.");
   }
+  estado.transporte = null;
+  estado.dispositivo = null;
+  estado.nodoConectado = false;
+  actualizarUiEstadoConexion(false);
+  logActividad("Dispositivo desconectado.");
 }
 
 // --- Operaciones de Workbench (Modo Avanzado) ---
 export async function descargarConfiguracionNodo() {
   if (!estado.dispositivo || !estado.nodoConectado) {
-    alert("Debes conectar tu nodo primero para leer su configuración.");
+    alert("Debes conectar tu nodo primero por cable USB Serial o Bluetooth para leer su configuración.");
     logActividad("Intento de lectura sin dispositivo conectado.");
     return;
   }
-  logActividad("Leyendo configuración actual del dispositivo...");
-  const textareaLive = document.getElementById("liveYamlTextarea");
-  if (textareaLive) {
-    textareaLive.value = `# Configuración leída del nodo Meshtastic\n# Estado: Conectado\n# ID: ${estado.myNodeNum ?? 'Local'}`;
+  logActividad("Solicitando parámetros actualizados al dispositivo...");
+  try {
+    await estado.dispositivo.configure();
+    await estado.dispositivo.getOwner();
+    for (let i = 0; i < 8; i++) {
+      await estado.dispositivo.getChannel(i);
+    }
+    regenerarYamlLive();
+    logActividad("Configuración leída y volcada en el panel actual.");
+  } catch (err) {
+    logActividad(`Error solicitando configuración: ${err.message}`);
+    alert(`Error al leer del nodo: ${err.message}`);
   }
 }
 
@@ -512,16 +748,147 @@ export function copiarLiveADeseado() {
   if (live && desired) {
     desired.value = live;
     logActividad("Configuración leída copiada a panel deseado.");
+    actualizarDiff();
   }
 }
 
 export async function aplicarDeseadoANodo() {
   if (!estado.dispositivo || !estado.nodoConectado) {
-    alert("Conecta tu nodo por cable USB o Bluetooth para volcar los cambios.");
+    alert("Conecta tu nodo por cable USB Serial o Bluetooth para volcar los cambios.");
     return;
   }
-  logActividad("Aplicando configuración deseada al nodo...");
-  alert("Escribiendo configuración en el nodo. Por favor espera...");
+
+  const desiredYaml = document.getElementById("desiredYamlTextarea")?.value.trim();
+  if (!desiredYaml) {
+    alert("No hay configuración deseada para escribir en el nodo.");
+    return;
+  }
+
+  let doc;
+  try {
+    doc = jsYamlLoad(desiredYaml);
+  } catch (err) {
+    alert(`Error de formato en el YAML deseado: ${err.message}`);
+    return;
+  }
+
+  const btnUpload = document.getElementById("btnUploadConfig");
+  if (btnUpload) btnUpload.disabled = true;
+
+  try {
+    logActividad("Escribiendo configuración deseada en el nodo...");
+
+    // 1. Identidad (Owner)
+    if (doc.owner || doc.owner_short) {
+      const user = create(Protobuf.Mesh.UserSchema, {
+        longName: doc.owner || "MiNodo-Andalucia",
+        shortName: (doc.owner_short || "AND1").slice(0, 4)
+      });
+      await estado.dispositivo.setOwner(user);
+      logActividad("✓ Identidad (Owner) actualizada.");
+    }
+
+    // 2. Secciones de configuración (Device, LoRa, Position)
+    if (doc.config?.device) {
+      const dev = create(Protobuf.Config.Config_DeviceConfigSchema, {
+        role: doc.config.device.role === "CLIENT_MUTE" ? 1 : 0,
+        nodeInfoBroadcastSecs: doc.config.device.nodeInfoBroadcastSecs || 259200
+      });
+      const cfg = create(Protobuf.Config.ConfigSchema, {
+        payloadVariant: { case: "device", value: dev }
+      });
+      await estado.dispositivo.setConfig(cfg);
+      logActividad("✓ Parámetros de Dispositivo (Role / NodeInfo) enviados.");
+    }
+
+    if (doc.config?.lora) {
+      const lora = create(Protobuf.Config.Config_LoRaConfigSchema, {
+        region: 3, // EU_868
+        usePreset: Boolean(doc.config.lora.usePreset),
+        bandwidth: Number(doc.config.lora.bandwidth) || 62,
+        spreadFactor: Number(doc.config.lora.spreadFactor) || 7,
+        codingRate: Number(doc.config.lora.codingRate) || 5,
+        channelNum: Number(doc.config.lora.channelNum) || 4,
+        hopLimit: Number(doc.config.lora.hopLimit) || 4,
+        txPower: Number(doc.config.lora.txPower) || 27,
+        txEnabled: true
+      });
+      const cfg = create(Protobuf.Config.ConfigSchema, {
+        payloadVariant: { case: "lora", value: lora }
+      });
+      await estado.dispositivo.setConfig(cfg);
+      logActividad("✓ Parámetros de Radio LoRa (SFNarrow EU_868) enviados.");
+    }
+
+    if (doc.config?.position) {
+      const pos = create(Protobuf.Config.Config_PositionConfigSchema, {
+        positionBroadcastSmartEnabled: Boolean(doc.config.position.positionBroadcastSmartEnabled),
+        positionBroadcastSecs: Number(doc.config.position.positionBroadcastSecs) || 21600,
+        positionFlags: Number(doc.config.position.positionFlags) || 0
+      });
+      const cfg = create(Protobuf.Config.ConfigSchema, {
+        payloadVariant: { case: "position", value: pos }
+      });
+      await estado.dispositivo.setConfig(cfg);
+      logActividad("✓ Parámetros de Posición enviados.");
+    }
+
+    // 3. Módulos (Telemetry, MQTT)
+    if (doc.module_config?.telemetry) {
+      const tel = create(Protobuf.ModuleConfig.ModuleConfig_TelemetryConfigSchema, {
+        deviceUpdateInterval: Number(doc.module_config.telemetry.deviceUpdateInterval) || 0
+      });
+      const mod = create(Protobuf.ModuleConfig.ModuleConfigSchema, {
+        payloadVariant: { case: "telemetry", value: tel }
+      });
+      await estado.dispositivo.setModuleConfig(mod);
+      logActividad("✓ Módulo de Telemetría enviado.");
+    }
+
+    if (doc.module_config?.mqtt) {
+      const mqtt = create(Protobuf.ModuleConfig.ModuleConfig_MQTTConfigSchema, {
+        enabled: Boolean(doc.module_config.mqtt.enabled),
+        address: doc.module_config.mqtt.address || "mqtt.desdechipiona.es",
+        username: doc.module_config.mqtt.username || "meshdev",
+        password: doc.module_config.mqtt.password || "large4cats",
+        root: doc.module_config.mqtt.root || "msh",
+        encryptionEnabled: true
+      });
+      const mod = create(Protobuf.ModuleConfig.ModuleConfigSchema, {
+        payloadVariant: { case: "mqtt", value: mqtt }
+      });
+      await estado.dispositivo.setModuleConfig(mod);
+      logActividad("✓ Módulo MQTT comunitario enviado.");
+    }
+
+    // 4. Canales
+    if (Array.isArray(doc.channels)) {
+      for (const ch of doc.channels) {
+        if (ch && ch.settings && ch.settings.name) {
+          const chObj = create(Protobuf.Channel.ChannelSchema, {
+            index: ch.index,
+            role: ch.role === "PRIMARY" ? 1 : 2,
+            settings: {
+              name: ch.settings.name,
+              psk: new Uint8Array([1]),
+              uplinkEnabled: ch.settings.uplinkEnabled ?? true,
+              downlinkEnabled: ch.settings.downlinkEnabled ?? true
+            }
+          });
+          await estado.dispositivo.setChannel(chObj);
+          logActividad(`✓ Canal ${ch.index} (${ch.settings.name}) actualizado.`);
+        }
+      }
+    }
+
+    logActividad("¡Configuración escrita con éxito en el nodo!");
+    alert("¡Configuración volcada con éxito al dispositivo! El nodo se reiniciará con los nuevos ajustes.");
+  } catch (err) {
+    logActividad(`Error al escribir configuración: ${err.message}`);
+    alert(`Error al escribir en el nodo: ${err.message}`);
+  } finally {
+    if (btnUpload) btnUpload.disabled = false;
+  }
 }
 
 export function alEditarYamlDeseado() {
@@ -529,6 +896,7 @@ export function alEditarYamlDeseado() {
   if (desired) {
     estado.desiredConfig = null;
   }
+  actualizarDiff();
 }
 
 // --- Conmutación de Modo (Asistente vs Workbench) ---
@@ -547,6 +915,7 @@ export function setModo(modo) {
 
   if (!esAsistente) {
     construirYamlDeseado();
+    actualizarDiff();
   }
 }
 
@@ -579,6 +948,7 @@ window.descargarConfiguracionNodo = descargarConfiguracionNodo;
 window.copiarLiveADeseado = copiarLiveADeseado;
 window.aplicarDeseadoANodo = aplicarDeseadoANodo;
 window.alEditarYamlDeseado = alEditarYamlDeseado;
+window.actualizarDiff = actualizarDiff;
 window.setModo = setModo;
 window.toggleTema = toggleTema;
 window.limpiarLog = () => {
@@ -629,6 +999,12 @@ function iniciarConfigurador() {
   document.getElementById("transportSelect")?.addEventListener("change", (e) => {
     const isHttp = e.target.value === "http";
     const httpGroup = document.getElementById("httpIpGroup");
+    if (httpGroup) httpGroup.style.display = isHttp ? "flex" : "none";
+  });
+
+  document.getElementById("transportSelectWorkbench")?.addEventListener("change", (e) => {
+    const isHttp = e.target.value === "http";
+    const httpGroup = document.getElementById("httpIpGroupWorkbench");
     if (httpGroup) httpGroup.style.display = isHttp ? "flex" : "none";
   });
 

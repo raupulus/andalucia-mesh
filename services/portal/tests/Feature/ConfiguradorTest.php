@@ -158,4 +158,36 @@ class ConfiguradorTest extends TestCase
         $pt->assertStatus(200);
         $pt->assertSee('Queres colaborar enviando para este MQTT?');
     }
+
+    public function test_configurador_contiene_opciones_ampliadas_telemetria_y_posicion(): void
+    {
+        $response = $this->get('/configurador');
+
+        $response->assertStatus(200);
+        $response->assertSee('id="telemetriaSelect"', false);
+        $response->assertSee('id="posicionSelect"', false);
+        // Opciones ampliadas de tiempo (12h, 24h, 48h, 72h)
+        $response->assertSee('value="43200"', false);
+        $response->assertSee('value="86400"', false);
+        $response->assertSee('value="172800"', false);
+        $response->assertSee('value="259200"', false);
+        $response->assertSee('Cada 12 horas');
+        $response->assertSee('Cada 24 horas (1 día)');
+        $response->assertSee('Cada 48 horas (2 días)');
+        $response->assertSee('Cada 72 horas (3 días');
+    }
+
+    public function test_configurador_modo_avanzado_contiene_panel_conexion_directa(): void
+    {
+        $response = $this->get('/configurador');
+
+        $response->assertStatus(200);
+        $response->assertSee('id="transportSelectWorkbench"', false);
+        $response->assertSee('id="btnConnectWorkbench"', false);
+        $response->assertSee('id="btnDisconnectWorkbench"', false);
+        $response->assertSee('id="btnDownloadLiveHeader"', false);
+        $response->assertSee('id="workbenchStatusPill"', false);
+        $response->assertSee('Conexión Directa con el Nodo');
+    }
 }
+

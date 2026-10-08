@@ -215,13 +215,31 @@
                 <label for="telemetriaSelect" class="field-label">Telemetría del dispositivo</label>
                 <select id="telemetriaSelect" class="form-select" onchange="actualizarConfiguracion()">
                   <option value="0" selected>Desactivada — (Enchufado en casa o móvil sin sensores)</option>
-                  <option value="14400">Nodo Solar — Cada 4 horas (Batería y paneles)</option>
-                  <option value="21600">Troncal / Infraestructura — Cada 6 horas (ChUtil / Saturación)</option>
+                  <option value="14400">Cada 4 horas — (Nodo Solar: Batería y paneles)</option>
+                  <option value="21600">Cada 6 horas — (Troncal / Infraestructura)</option>
+                  <option value="43200">Cada 12 horas</option>
+                  <option value="86400">Cada 24 horas (1 día)</option>
+                  <option value="172800">Cada 48 horas (2 días)</option>
+                  <option value="259200">Cada 72 horas (3 días)</option>
                 </select>
                 <span style="font-size: 0.8rem; color: var(--color-texto-2);">Evita emitir telemetría innecesaria para reservar el espectro de radio a la mensajería.</span>
               </div>
 
               <div class="field-group">
+                <label for="posicionSelect" class="field-label">Envío de posición (GPS / Ubicación)</label>
+                <select id="posicionSelect" class="form-select" onchange="actualizarConfiguracion()">
+                  <option value="0">Desactivada — (Sin emisión periódica de posición)</option>
+                  <option value="14400">Cada 4 horas</option>
+                  <option value="21600" selected>Cada 6 horas — (Recomendado móvil / CLIENT_MUTE)</option>
+                  <option value="43200">Cada 12 horas</option>
+                  <option value="86400">Cada 24 horas (1 día)</option>
+                  <option value="172800">Cada 48 horas (2 días)</option>
+                  <option value="259200">Cada 72 horas (3 días — Recomendado fijo / CLIENT)</option>
+                </select>
+                <span style="font-size: 0.8rem; color: var(--color-texto-2);">Intervalo para refrescar la posición del nodo en la malla. Emisiones frecuentes saturan el canal.</span>
+              </div>
+
+              <div class="field-group" style="grid-column: 1 / -1;">
                 <label class="field-label">Conexión MQTT Comunitaria</label>
                 <div style="background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-md); padding: 0.85rem; margin-top: 0.25rem;">
                   <label style="display: flex; align-items: flex-start; gap: 0.6rem; cursor: pointer; font-size: 0.9rem;">
@@ -364,6 +382,47 @@
            VISTA 2: MODO AVANZADO (WORKBENCH DE OPERADOR)
            =================================================================== -->
       <div id="viewWorkbench" style="display: none;">
+        <!-- Tarjeta de Conexión directa en Modo Avanzado -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <span style="font-size: 1.25rem;">🔌</span>
+              <h3 style="margin: 0;">Conexión Directa con el Nodo</h3>
+            </div>
+            <div id="workbenchStatusPill" class="badge-tag">🔌 Desconectado</div>
+          </div>
+          <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; align-items: end;">
+              <div class="field-group">
+                <label for="transportSelectWorkbench" class="field-label">Método de conexión directa</label>
+                <select id="transportSelectWorkbench" class="form-select">
+                  <option value="serial">USB Serial (Cable conectado al ordenador)</option>
+                  <option value="bluetooth">Bluetooth (Inalámbrico Web BLE)</option>
+                  <option value="http">HTTP(S) local (Nodo en la misma WiFi)</option>
+                </select>
+              </div>
+              <div id="httpIpGroupWorkbench" style="display: none;" class="field-group">
+                <label for="httpIpInputWorkbench" class="field-label">Dirección IP o Host del nodo</label>
+                <input id="httpIpInputWorkbench" type="text" class="form-control" placeholder="192.168.1.100 o meshtastic.local" />
+              </div>
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button id="btnConnectWorkbench" type="button" class="btn btn-primary" onclick="conectarDispositivo('workbench')">
+                  ⚡ Conectar al nodo
+                </button>
+                <button id="btnDisconnectWorkbench" type="button" class="btn btn-secondary" disabled onclick="desconectarDispositivo()">
+                  Desconectar
+                </button>
+                <button id="btnDownloadLiveHeader" type="button" class="btn btn-secondary" disabled onclick="descargarConfiguracionNodo()">
+                  📥 Leer del nodo
+                </button>
+              </div>
+            </div>
+            <div style="margin-top: 0.85rem; font-size: 0.85rem; color: var(--color-texto-2); line-height: 1.45;">
+              💡 <em>Para Web Serial (USB) se requiere un navegador Chromium (Google Chrome, Edge, Brave u Opera en escritorio). Al pulsar en conectar, selecciona el puerto serie/USB asignado a tu radio.</em>
+            </div>
+          </div>
+        </div>
+
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
           <!-- Tarjeta 1: Configuración Actual en el Nodo -->
           <div class="card">
