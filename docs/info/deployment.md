@@ -54,4 +54,4 @@ Para pasar de fase: la pieza aparece en verde en el panel (desde la fase 5) y su
 Cada pieza se puede volver a desplegar sola sin parar las demás.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

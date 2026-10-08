@@ -47,6 +47,8 @@ Route::get('/revisa-tu-nodo', [DiagnosticoController::class, 'index'])->name('re
 Route::get('/revisa-tu-nodo/{id}', [DiagnosticoController::class, 'show'])->name('revisa-nodo.show');
 Route::get('/configurador', [ConfiguradorController::class, 'index'])->name('configurador');
 Route::get('/configurador/{file}', [ConfiguradorController::class, 'asset'])->where('file', '.*')->name('configurador.asset');
+Route::get('/styles.css', fn () => redirect('/configurador/styles.css', 301));
+Route::get('/configurador.js', fn () => redirect('/configurador/configurador.js', 301));
 Route::get('/hardware', [HardwareController::class, 'index'])->name('hardware.index');
 Route::get('/faq', [FaqController::class, 'index'])->name('faq');
 Route::get('/paginas', [CustomPageController::class, 'index'])->name('paginas.index');

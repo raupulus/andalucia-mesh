@@ -64,6 +64,7 @@
 ## Trampas conocidas
 - **Web Serial y Web Bluetooth en Safari / Firefox:** Estas APIs solo están disponibles en navegadores basados en Chromium (Chrome, Edge, Opera, Brave). Para usuarios de otros navegadores, el configurador ofrece de forma nativa la descarga de archivo YAML, comandos CLI y el código QR escaneable con el móvil.
 - **Amplificadores de potencia (PA):** En módulos con amplificador externo o integrado como el Ebyte E22P-868M30S, configurar 27 dBm de potencia en el firmware satura el amplificador y supera con creces el límite legal europeo (ERP 27 dBm). Debe seleccionarse siempre 8 dBm para estos módulos.
+- **Resolución de assets relativos en `/configurador` (`TR-16`):** Al embeber la herramienta bajo `/configurador` sin barra final, los enlaces `./styles.css` resuelven contra `/` en el cliente. El portal inyecta `<base href="/configurador/">` y reescribe las rutas a absolutas (`/configurador/...`), con redirecciones defensivas en rutas de raíz.
 
 ## Tests que lo cubren
 - `services/portal/tests/Feature/ConfiguradorTest.php`:
@@ -74,6 +75,8 @@
   - `test_configurador_entrega_preset_client_mute`
   - `test_configurador_entrega_preset_client`
   - `test_configurador_recurso_inexistente_devuelve_404`
+  - `test_configurador_html_incluye_base_href_y_rutas_absolutas`
+  - `test_redireccion_defensiva_para_recursos_en_raiz`
 
 ## Pendiente real
 - [x] Contenedor Docker compilado y corriendo en local (puerto 8420).
@@ -82,4 +85,4 @@
 - [x] Integración en el portal y rutas públicas de Laravel probadas (puerto 9000).
 
 ---
-> Creado: 2026-10-08 · Última revisión: 2026-10-08
+> Creado: 2026-10-08 · Última revisión: 2026-10-09

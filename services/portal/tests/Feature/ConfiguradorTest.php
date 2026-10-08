@@ -78,4 +78,25 @@ class ConfiguradorTest extends TestCase
 
         $response->assertStatus(404);
     }
+
+    public function test_configurador_html_incluye_base_href_y_rutas_absolutas(): void
+    {
+        $response = $this->get('/configurador');
+
+        $response->assertStatus(200);
+        $response->assertSee('<base href="/configurador/">', false);
+        $response->assertSee('href="/configurador/styles.css"', false);
+        $response->assertSee('src="/configurador/configurador.js"', false);
+    }
+
+    public function test_redireccion_defensiva_para_recursos_en_raiz(): void
+    {
+        $css = $this->get('/styles.css');
+        $css->assertStatus(301);
+        $css->assertRedirect('/configurador/styles.css');
+
+        $js = $this->get('/configurador.js');
+        $js->assertStatus(301);
+        $js->assertRedirect('/configurador/configurador.js');
+    }
 }

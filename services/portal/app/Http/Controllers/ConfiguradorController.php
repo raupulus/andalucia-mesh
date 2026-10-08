@@ -45,7 +45,7 @@ class ConfiguradorController extends Controller
             try {
                 $response = Http::timeout(2)->get($backendUrl.'/');
                 if ($response->successful()) {
-                    return response($response->body(), 200, [
+                    return response($this->prepareHtml($response->body()), 200, [
                         'Content-Type' => 'text/html; charset=utf-8',
                         'Cache-Control' => 'no-cache, private',
                     ]);
@@ -62,7 +62,7 @@ class ConfiguradorController extends Controller
 
         foreach ($candidatePaths as $path) {
             if (file_exists($path)) {
-                return response((string) file_get_contents($path), 200, [
+                return response($this->prepareHtml((string) file_get_contents($path)), 200, [
                     'Content-Type' => 'text/html; charset=utf-8',
                     'Cache-Control' => 'no-cache, private',
                 ]);
@@ -70,6 +70,25 @@ class ConfiguradorController extends Controller
         }
 
         return response('El servicio de configuración no se encuentra disponible temporalmente.', 503);
+    }
+
+    /**
+     * Prepara el contenido HTML para servirse bajo el prefijo /configurador.
+     * Asegura la etiqueta <base href="/configurador/"> y adapta rutas relativas para estilos y scripts.
+     */
+    private function prepareHtml(string $html): string
+    {
+        // 1. Inyectar <base href="/configurador/"> tras <head> si no existe
+        if (! str_contains($html, '<base ')) {
+            $html = (string) preg_replace('/<head(\s[^>]*)?>/i', "$0\n    <base href=\"/configurador/\">", $html, 1);
+        }
+
+        // 2. Normalizar enlaces a recursos estáticos locales
+        return str_replace(
+            ['href="./styles.css"', 'src="./configurador.js"'],
+            ['href="/configurador/styles.css"', 'src="/configurador/configurador.js"'],
+            $html
+        );
     }
 
     /**
