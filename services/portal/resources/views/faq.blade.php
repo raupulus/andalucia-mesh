@@ -3,7 +3,7 @@
     $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
 @endphp
 
-<x-layout :title="__('portal.faq.meta_title')" :description="__('portal.faq.meta_description')">
+<x-layout :title="__('portal.faq.meta_title')" :description="__('portal.faq.meta_description')" :image="asset('img/og/og-faq.webp')">
     @if(count($faqs) > 0)
         @php
             $faqSchema = [

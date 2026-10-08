@@ -3,7 +3,7 @@
     $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
 @endphp
 
-<x-layout :title="__('portal.node_check.meta_title')" :description="__('portal.node_check.meta_description')">
+<x-layout :title="__('portal.node_check.meta_title')" :description="__('portal.node_check.meta_description')" :image="asset('img/og/og-revisa-nodo.webp')">
     <div class="contenedor seccion">
         <div style="max-width: 760px; margin: 0 auto;">
             <header style="text-align: center; margin-bottom: 2.5rem;">

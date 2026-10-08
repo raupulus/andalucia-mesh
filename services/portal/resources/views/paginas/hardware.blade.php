@@ -9,7 +9,7 @@
     }
 @endphp
 
-<x-layout :title="__('portal.hardware.meta_title')" :description="__('portal.hardware.meta_description')">
+<x-layout :title="__('portal.hardware.meta_title')" :description="__('portal.hardware.meta_description')" :image="asset('img/og/og-hardware.webp')">
     <x-slot:styles>
         <style>
             /* ==============================================================================

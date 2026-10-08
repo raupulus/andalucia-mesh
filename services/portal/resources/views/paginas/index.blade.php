@@ -3,7 +3,7 @@
     $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
 @endphp
 
-<x-layout :title="__('portal.pages.index_title')" :description="__('portal.pages.index_subtitle')">
+<x-layout :title="__('portal.pages.index_title')" :description="__('portal.pages.index_subtitle')" :image="asset('img/og/og-paginas.webp')">
     <div class="contenedor seccion">
         <!-- Encabezado de la sección -->
         <header style="margin-bottom: 2.5rem; border-bottom: 1px solid var(--color-borde); padding-bottom: 1.5rem;">

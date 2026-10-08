@@ -3,7 +3,7 @@
     $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
 @endphp
 
-<x-layout :title="__('portal.suggestions.meta_title')" :description="__('portal.suggestions.meta_description')">
+<x-layout :title="__('portal.suggestions.meta_title')" :description="__('portal.suggestions.meta_description')" :image="asset('img/og/og-sugerencias.webp')">
     @if(!empty($siteKey))
         <x-slot:styles>
             <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>

@@ -3,7 +3,7 @@
     $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
 @endphp
 
-<x-layout :title="$pagina->title" :description="$pagina->description" :image="$pagina->cover_image_url" :keywords="$pagina->keywords">
+<x-layout :title="$pagina->title" :description="$pagina->description" :image="$pagina->cover_image_url ?: asset('img/og/og-paginas.webp')" :keywords="$pagina->keywords">
     <div class="contenedor seccion">
         <article class="pagina-detalle" style="max-width: 860px; margin: 0 auto;">
             <!-- Migas de pan / Volver -->

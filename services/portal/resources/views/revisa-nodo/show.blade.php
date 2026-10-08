@@ -3,7 +3,7 @@
     $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
 @endphp
 
-<x-layout :title="__('portal.node_check.report_title', ['id' => $idBuscado, 'name' => config('proyecto.nombre')])" :description="__('portal.node_check.report_description')">
+<x-layout :title="__('portal.node_check.report_title', ['id' => $idBuscado, 'name' => config('proyecto.nombre')])" :description="__('portal.node_check.report_description')" :image="asset('img/og/og-revisa-nodo.webp')">
     <div class="contenedor seccion">
         <div style="max-width: 820px; margin: 0 auto;">
             <a href="/revisa-tu-nodo{{ $langQuery }}" style="font-size: 0.9rem; color: var(--color-texto-2); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 1.5rem;">
