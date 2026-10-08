@@ -6,7 +6,9 @@ namespace Tests\Feature;
 
 use App\Models\Suggestion;
 use App\Models\User;
+use App\Servicios\TurnstileService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -227,7 +229,7 @@ class SugerenciasTest extends TestCase
             'services.turnstile.secret_key' => '0x4AAAAAAAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
         ]);
 
-        $service = app(\App\Servicios\TurnstileService::class);
+        $service = app(TurnstileService::class);
         $this->assertFalse($service->isEnabled());
         $this->assertNull($service->getSiteKey());
         $this->assertTrue($service->verify(null));
@@ -244,7 +246,7 @@ class SugerenciasTest extends TestCase
         ]);
 
         Http::fake([
-            'https://challenges.cloudflare.com/turnstile/v0/siteverify' => function (\Illuminate\Http\Client\Request $request) {
+            'https://challenges.cloudflare.com/turnstile/v0/siteverify' => function (Request $request) {
                 // Comprobar que en el cuerpo del form no se incluye remoteip para 127.0.0.1
                 $body = $request->data();
                 if (isset($body['remoteip'])) {
@@ -255,7 +257,7 @@ class SugerenciasTest extends TestCase
             },
         ]);
 
-        $service = app(\App\Servicios\TurnstileService::class);
+        $service = app(TurnstileService::class);
         $this->assertTrue($service->verify('token-valido', '127.0.0.1'));
         $this->assertTrue($service->verify('token-valido', '172.18.0.2'));
     }

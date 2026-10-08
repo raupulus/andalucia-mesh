@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
-use Filament\Auth\MultiFactor\App\AppAuthentication;
+use App\Filament\Widgets\EstadoServiciosWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -13,9 +13,8 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
 use Filament\View\PanelsRenderHook;
-use App\Filament\Pages\Auth\Login;
+use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -31,15 +30,12 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->brandName(config('proyecto.nombre') . ' · Operador')
+            ->brandName(config('proyecto.nombre').' · Operador')
             ->brandLogo(fn () => view('filament.brand-logo'))
             ->brandLogoHeight('2.5rem')
             ->favicon(asset('favicon.ico'))
-            ->login(Login::class)
+            ->login()
             ->profile()
-            ->multiFactorAuthentication([
-                AppAuthentication::make(),
-            ])
             ->colors([
                 'primary' => Color::Emerald,
                 'gray' => Color::Slate,
@@ -64,7 +60,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 AccountWidget::class,
-                \App\Filament\Widgets\EstadoServiciosWidget::class,
+                EstadoServiciosWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

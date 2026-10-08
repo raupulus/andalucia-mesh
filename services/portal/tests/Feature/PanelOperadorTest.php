@@ -6,9 +6,11 @@ namespace Tests\Feature;
 
 use App\Jobs\ComprobarServicios;
 use App\Models\User;
+use Filament\Auth\Pages\Login;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class PanelOperadorTest extends TestCase
@@ -28,17 +30,23 @@ class PanelOperadorTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_login_admin_muestra_captcha_cuando_turnstile_esta_activo(): void
+    public function test_operador_puede_iniciar_sesion_con_credenciales_correctas(): void
     {
-        config([
-            'services.turnstile.site_key' => '0x4AAAAAAAsitekey',
-            'services.turnstile.secret_key' => '0x4AAAAAAAsecretkey',
+        $user = User::factory()->create([
+            'password' => bcrypt('password123'),
+            'activo' => true,
         ]);
 
-        $response = $this->get('/admin/login');
-        $response->assertStatus(200);
-        $response->assertSee('cf-turnstile', false);
-        $response->assertSee('challenges.cloudflare.com/turnstile/v0/api.js', false);
+        Livewire::test(Login::class)
+            ->fillForm([
+                'email' => $user->email,
+                'password' => 'password123',
+            ])
+            ->call('authenticate')
+            ->assertHasNoFormErrors()
+            ->assertRedirect(filament()->getUrl());
+
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_comando_operador_crear_valida_longitud_password(): void

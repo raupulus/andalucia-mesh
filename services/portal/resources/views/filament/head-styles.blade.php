@@ -1,9 +1,3 @@
-@php
-    $turnstile = app(\App\Servicios\TurnstileService::class);
-@endphp
-@if($turnstile->isEnabled())
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-@endif
 
 <style>
     /* Estilos de refuerzo e identidad para el panel de operador */

@@ -11,11 +11,9 @@ Que los operadores vean de un vistazo si cada pieza funciona y qué pasa en la m
 ### Acceso
 
 - Panel Filament único `admin` en `/admin` (`App\Providers\Filament\AdminPanelProvider`), con sesión y CSRF (grupo `web`; las rutas públicas van en otro grupo sin sesión).
-- **Identidad y diseño de acceso:** Página de login personalizada (`App\Filament\Pages\Auth\Login`), logotipo integrado con tipografía corporativa (`filament.brand-logo`), paleta de acento verde esmeralda (`Color::Emerald` acorde a `DESIGN.md`), franja tricolor andaluza decorativa, advertencia de sesión protegida con 2FA y enlace de retorno al portal público (`filament.auth.login-after`).
-- **Protección antibot (Turnstile):** Validación de Cloudflare Turnstile integrada directamente en el formulario de login cuando las claves de entorno están configuradas, con enlace a Livewire y filtrado de IP.
+- **Identidad y diseño de acceso:** Logotipo integrado con tipografía corporativa (`filament.brand-logo`), paleta de acento verde esmeralda (`Color::Emerald` acorde a `DESIGN.md`), franja tricolor andaluza decorativa en cabecera de autenticación (`filament.auth.login-before`) y enlace de retorno al portal público (`filament.auth.login-after`).
 - **Assets de interfaz:** Publicación garantizada en el build de producción mediante `RUN php artisan filament:assets` en el `Dockerfile` y versión persistente en `public/css/filament/`, `public/js/` y `public/fonts/`.
 - Sin registro ni recuperación pública: los operadores se crean con `php artisan operador:crear {email} {nombre}` (pide la contraseña por consola, mínimo 8 caracteres) y se desactivan con `operador:desactivar {email}`. Cambio de contraseña disponible desde el perfil del operador (`->profile()`).
-- Segundo factor TOTP obligatorio (autenticación multifactor de Filament 5): en el primer acceso el operador lo configura; sin él no entra. Códigos de recuperación de un solo uso.
 - `throttle` de inicio de sesión: 5 intentos fallidos por IP y email → bloqueo 15 min. IP real por `trustProxies` (ver [11](11-public-api.md)).
 - `User::canAccessPanel()` = `activo = true`. Sesión de 8 h; cookie `Secure`, `HttpOnly`, `SameSite=Lax`.
 - Cabeceras: `X-Robots-Tag: noindex, nofollow` en todo `/admin`.
