@@ -1,34 +1,58 @@
-<div class="flex items-center gap-2 px-2 py-1" x-data="{ open: false }">
-    <div class="relative">
-        <button
-            type="button"
-            @click="open = !open"
-            @click.outside="open = false"
-            class="flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-            aria-label="{{ __('admin.language_selector') }}"
-            title="{{ __('admin.language_selector') }}"
-        >
-            <x-icono-bandera :idioma="app()->getLocale()" :tamano="20" />
-        </button>
+<div
+    class="fi-language-switch-wrapper"
+    x-data="{ open: false }"
+    @keydown.escape.window="open = false"
+>
+    <!-- Botón activador: solo icono redondo con la bandera actual -->
+    <button
+        type="button"
+        @click="open = !open"
+        @click.outside="open = false"
+        :aria-expanded="open"
+        aria-haspopup="true"
+        aria-label="{{ __('admin.language_selector') }}"
+        title="{{ __('admin.language_selector') }}"
+        class="fi-btn-idioma-trigger"
+    >
+        <x-icono-bandera :idioma="app()->getLocale()" :tamano="22" />
+    </button>
 
-        <div
-            x-show="open"
-            x-transition
-            class="absolute right-0 mt-2 w-36 rounded-lg bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50 text-xs"
-            style="display: none;"
+    <!-- Menú desplegable flotante idéntico al frontend -->
+    <div
+        x-show="open"
+        x-cloak
+        x-transition:enter="transition ease-out duration-100"
+        x-transition:enter-start="opacity-0 transform scale-95"
+        x-transition:enter-end="opacity-100 transform scale-100"
+        x-transition:leave="transition ease-in duration-75"
+        x-transition:leave-start="opacity-100 transform scale-100"
+        x-transition:leave-end="opacity-0 transform scale-95"
+        class="fi-language-dropdown-menu"
+        style="display: none; position: absolute; right: 0; top: calc(100% + 8px);"
+    >
+        <a
+            href="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}"
+            class="fi-lang-item {{ app()->getLocale() === 'es' ? 'activo' : '' }}"
+            data-lang="es"
         >
-            <a href="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 {{ app()->getLocale() === 'es' ? 'font-bold text-[#15612F] dark:text-[#9CF1BA]' : 'text-gray-700 dark:text-gray-200' }}">
-                <x-icono-bandera idioma="es" :tamano="18" />
-                <span>Español</span>
-            </a>
-            <a href="{{ request()->fullUrlWithQuery(['lang' => 'pt']) }}" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 {{ app()->getLocale() === 'pt' ? 'font-bold text-[#15612F] dark:text-[#9CF1BA]' : 'text-gray-700 dark:text-gray-200' }}">
-                <x-icono-bandera idioma="pt" :tamano="18" />
-                <span>Português</span>
-            </a>
-            <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 {{ app()->getLocale() === 'en' ? 'font-bold text-[#15612F] dark:text-[#9CF1BA]' : 'text-gray-700 dark:text-gray-200' }}">
-                <x-icono-bandera idioma="en" :tamano="18" />
-                <span>English</span>
-            </a>
-        </div>
+            <x-icono-bandera idioma="es" :tamano="20" />
+            <span>Español</span>
+        </a>
+        <a
+            href="{{ request()->fullUrlWithQuery(['lang' => 'pt']) }}"
+            class="fi-lang-item {{ app()->getLocale() === 'pt' ? 'activo' : '' }}"
+            data-lang="pt"
+        >
+            <x-icono-bandera idioma="pt" :tamano="20" />
+            <span>Português</span>
+        </a>
+        <a
+            href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}"
+            class="fi-lang-item {{ app()->getLocale() === 'en' ? 'activo' : '' }}"
+            data-lang="en"
+        >
+            <x-icono-bandera idioma="en" :tamano="20" />
+            <span>English</span>
+        </a>
     </div>
 </div>

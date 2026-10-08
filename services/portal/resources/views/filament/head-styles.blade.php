@@ -519,4 +519,91 @@
     .fi-transition-fail {
         border-left: 3px solid #f43f5e;
     }
+
+    /* ==============================================================================
+     * Selector de idioma en topbar de Filament (idéntico al frontend)
+     * ============================================================================== */
+    .fi-language-switch-wrapper {
+        position: relative !important;
+        display: inline-flex !important;
+        align-items: center !important;
+    }
+
+    .fi-btn-idioma-trigger {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        border-radius: 9999px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        background: transparent !important;
+        border: 1px solid rgba(156, 163, 175, 0.35) !important;
+        padding: 0 !important;
+        outline: none !important;
+        transition: all 0.15s ease !important;
+    }
+
+    .fi-btn-idioma-trigger:hover {
+        border-color: #007A33 !important;
+        background-color: rgba(0, 122, 51, 0.08) !important;
+    }
+
+    .fi-language-dropdown-menu {
+        position: absolute !important;
+        right: 0 !important;
+        top: calc(100% + 8px) !important;
+        min-width: 155px !important;
+        border-radius: 0.5rem !important;
+        padding: 0.35rem 0 !important;
+        z-index: 999 !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2) !important;
+        background-color: #FFFFFF !important;
+        border: 1px solid #E2E8F0 !important;
+    }
+
+    .dark .fi-language-dropdown-menu {
+        background-color: #1A1C24 !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+
+    .fi-lang-item {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.65rem !important;
+        padding: 0.55rem 0.9rem !important;
+        text-decoration: none !important;
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        color: #334155 !important;
+        transition: background-color 0.12s ease, color 0.12s ease !important;
+    }
+
+    .fi-lang-item:hover {
+        background-color: #F1F5F9 !important;
+        color: #0F172A !important;
+    }
+
+    .fi-lang-item.activo {
+        font-weight: 700 !important;
+        background-color: #F1F5F9 !important;
+        color: #007A33 !important;
+    }
+
+    .dark .fi-lang-item {
+        color: #E2E8F0 !important;
+    }
+
+    .dark .fi-lang-item:hover {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        color: #FFFFFF !important;
+    }
+
+    .dark .fi-lang-item.activo {
+        font-weight: 700 !important;
+        background-color: rgba(255, 255, 255, 0.12) !important;
+        color: #9CF1BA !important;
+    }
 </style>

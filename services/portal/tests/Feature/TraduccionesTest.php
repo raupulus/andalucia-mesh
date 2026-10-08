@@ -180,6 +180,26 @@ class TraduccionesTest extends TestCase
             $posLoginEs < $posLoginPt && $posLoginPt < $posLoginEn,
             "El orden en el selector de login debe ser estrictamente Español -> Portugués -> Inglés (es: {$posLoginEs}, pt: {$posLoginPt}, en: {$posLoginEn})"
         );
+
+        // 4. Verificación en el componente de idiomas del panel (/admin): desplegable flotante idéntico al frontend, sin ensanchar navbar
+        $htmlAdmin = (string) view('filament.language-switch')->render();
+
+        $this->assertStringContainsString('fi-language-switch-wrapper', $htmlAdmin, 'El selector debe tener su wrapper dedicado');
+        $this->assertStringContainsString('fi-language-dropdown-menu', $htmlAdmin, 'El menú desplegable debe tener la clase fi-language-dropdown-menu');
+        $this->assertStringContainsString('position: absolute', $htmlAdmin, 'El desplegable debe flotar de forma absoluta sin ensanchar el navbar');
+
+        $posAdminEs = strpos($htmlAdmin, 'data-lang="es"');
+        $posAdminPt = strpos($htmlAdmin, 'data-lang="pt"');
+        $posAdminEn = strpos($htmlAdmin, 'data-lang="en"');
+
+        $this->assertNotFalse($posAdminEs, 'El componente del panel debe incluir la opción en español');
+        $this->assertNotFalse($posAdminPt, 'El componente del panel debe incluir la opción en portugués');
+        $this->assertNotFalse($posAdminEn, 'El componente del panel debe incluir la opción en inglés');
+
+        $this->assertTrue(
+            $posAdminEs < $posAdminPt && $posAdminPt < $posAdminEn,
+            'El orden en el panel de administración debe ser estrictamente Español -> Portugués -> Inglés'
+        );
     }
 
     /**
