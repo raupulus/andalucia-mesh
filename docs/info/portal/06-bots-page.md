@@ -23,7 +23,7 @@ Que una persona sin experiencia añada el bot a un grupo de Telegram o a un cana
 
 - Tarjetas visuales destacadas y oxigenadas para ambos bots (Telegram activo con botón directo; Discord con chip de "Próximamente" y botón deshabilitado).
 - Dos botones secundarios (mismo peso para ambos bots; un solo primario por pantalla, `DESIGN.md`). Sin logos de Telegram ni Discord: solo su nombre en texto (excepción decidida).
-- Ejemplos de respuesta en el componente "Bloque de código" (`.bloque-codigo` / `tarjeta-codigo` con cabecera y tipografía mono).
+- Ejemplos de respuesta en el componente "Bloque de código" (`.bloque-codigo` / `.tarjeta-codigo` con cabecera y tipografía mono en layout flex de altura completa para igualar las filas del grid sin cortes).
 - Aviso de alerta resaltado en tarjeta visual con borde crítico y desglose contextual de iconos.
 - Catálogo con TTL 1 h; si la API no responde, se muestran los nombres de riesgo y tipo sin descripción.
 - Enlazada desde la navegación, desde "Sube los datos de tu nodo" (portada y `/conecta-tu-gateway`) y desde `/alertas`.

@@ -320,7 +320,7 @@
                             <span style="font-family: var(--font-mono); color: var(--color-texto);">/status</span>
                             <span>{{ __('portal.bots.ex_status_header') }}</span>
                         </div>
-                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code>Estado de la malla · 14:35:12
+                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0; flex: 1;"><code>Estado de la malla · 14:35:12
 Nodos activos (24 h): 142
 Routers activos (24 h): 18
 Gateways publicando: 9
@@ -336,7 +336,7 @@ Infraestructura: 1 · Clientes: 3</code></pre>
                             <span style="font-family: var(--font-mono); color: var(--color-texto);">/battery</span>
                             <span>{{ __('portal.bots.ex_battery_header') }}</span>
                         </div>
-                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code>🔋 Batería de routers · Andalucía (5 activos)
+                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0; flex: 1;"><code>🔋 Batería de routers · Andalucía (5 activos)
 🔴 1 crítico · 🟠 1 bajo · 🟢 2 normales · 🔌 1 alimentado
 
 📍 Cádiz (2)
@@ -357,7 +357,7 @@ Infraestructura: 1 · Clientes: 3</code></pre>
                             <span style="font-family: var(--font-mono); color: var(--color-texto);">/routers</span>
                             <span>{{ __('portal.bots.ex_routers_header') }}</span>
                         </div>
-                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code>📶 Routers de la red · Andalucía (4 activos en 7d)
+                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0; flex: 1;"><code>📶 Routers de la red · Andalucía (4 activos en 7d)
 
 📍 Cádiz (2)
 • CAD1 · 🟠 34 % · 📡 ch 22,5 % · ⬆️ tx 3,1 % · hace 2 min
@@ -376,7 +376,7 @@ Infraestructura: 1 · Clientes: 3</code></pre>
                             <span style="font-family: var(--font-mono); color: var(--color-texto);">/levels · /types</span>
                             <span>{{ __('portal.bots.ex_filters_header') }}</span>
                         </div>
-                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code># Modificación de niveles de severidad:
+                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0; flex: 1;"><code># Modificación de niveles de severidad:
 > /levels medio alto
 Riesgos activos en este canal: medio, alto
 
@@ -391,7 +391,7 @@ Tipos activos en este canal: infraestructura</code></pre>
                             <span style="font-family: var(--font-mono); color: var(--color-texto);">/settings</span>
                             <span>{{ __('portal.bots.ex_settings_header') }}</span>
                         </div>
-                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code>Configuración de este canal:
+                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0; flex: 1;"><code>Configuración de este canal:
 Este canal recibe alertas de riesgo medio y alto, de tipo infraestructura.
 Activo desde: 2026-09-15 10:20 UTC</code></pre>
                     </div>
@@ -402,7 +402,7 @@ Activo desde: 2026-09-15 10:20 UTC</code></pre>
                             <span style="font-family: var(--font-mono); color: var(--color-texto);">/help</span>
                             <span>{{ __('portal.bots.ex_help_header') }}</span>
                         </div>
-                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code>/status · /battery · /routers · /levels · /types · /settings
+                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0; flex: 1;"><code>/status · /battery · /routers · /levels · /types · /settings
 Cómo usar el bot: https://{{ config('proyecto.dominio') }}/bots</code></pre>
                     </div>
 
@@ -544,7 +544,7 @@ https://{{ config('proyecto.dominio') }}/alertas/alt-90412</code></div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1.5rem;">
                     
                     <!-- Para no llenar tu canal -->
-                    <div class="tarjeta" style="padding: 1.75rem; background: var(--color-superficie);">
+                    <div class="tarjeta" style="padding: 1.75rem; background: var(--color-superficie); display: flex; flex-direction: column;">
                         <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔇</div>
                         <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-texto);">
                             {{ __('portal.bots.card_rate_limit_title') }}
@@ -555,7 +555,7 @@ https://{{ config('proyecto.dominio') }}/alertas/alt-90412</code></div>
                     </div>
 
                     <!-- Webhooks -->
-                    <div class="tarjeta" style="padding: 1.75rem; background: var(--color-superficie);">
+                    <div class="tarjeta" style="padding: 1.75rem; background: var(--color-superficie); display: flex; flex-direction: column;">
                         <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⚡</div>
                         <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-texto);">
                             {{ __('portal.bots.card_webhooks_title') }}
@@ -563,11 +563,11 @@ https://{{ config('proyecto.dominio') }}/alertas/alt-90412</code></div>
                         <p style="font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.55; margin-bottom: 0.75rem;">
                             {!! __('portal.bots.card_webhooks_desc') !!}
                         </p>
-                        <a href="/api{{ $langQuery }}" style="font-size: 0.88rem; font-weight: 600;">{{ __('portal.bots.card_webhooks_link') }}</a>
+                        <a href="/api{{ $langQuery }}" style="margin-top: auto; font-size: 0.88rem; font-weight: 600;">{{ __('portal.bots.card_webhooks_link') }}</a>
                     </div>
 
                     <!-- Privacidad -->
-                    <div class="tarjeta" style="padding: 1.75rem; background: var(--color-superficie);">
+                    <div class="tarjeta" style="padding: 1.75rem; background: var(--color-superficie); display: flex; flex-direction: column;">
                         <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔒</div>
                         <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-texto);">
                             {{ __('portal.bots.card_privacy_title') }}
@@ -575,7 +575,7 @@ https://{{ config('proyecto.dominio') }}/alertas/alt-90412</code></div>
                         <p style="font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.55; margin-bottom: 0.75rem;">
                             {{ __('portal.bots.card_privacy_desc') }}
                         </p>
-                        <a href="/legal/privacidad{{ $langQuery }}" style="font-size: 0.88rem; font-weight: 600;">{{ __('portal.bots.card_privacy_link') }}</a>
+                        <a href="/legal/privacidad{{ $langQuery }}" style="margin-top: auto; font-size: 0.88rem; font-weight: 600;">{{ __('portal.bots.card_privacy_link') }}</a>
                     </div>
 
                 </div>
