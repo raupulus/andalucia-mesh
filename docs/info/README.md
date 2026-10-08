@@ -14,6 +14,7 @@ Documentación técnica canónica del proyecto. Todavía no hay código: cada do
 
 - [commands.md](commands.md): catálogo de comandos y scripts.
 - [decisiones-tecnicas.md](decisiones-tecnicas.md): decisiones deliberadas que no se deben «arreglar».
+- [incidentes.md](incidentes.md): registro de errores graves, incidentes y análisis post-mortem.
 - [customizations.md](customizations.md): histórico y catálogo de personalizaciones sobre software/imágenes de terceros.
 - [DESIGN.md](DESIGN.md): sistema visual del portal (obligatorio).
 - [COMPONENTS.md](COMPONENTS.md): componentes de interfaz.

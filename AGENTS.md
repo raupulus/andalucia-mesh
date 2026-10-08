@@ -42,6 +42,7 @@ Este documento define las normas operativas, la estructura del proyecto y el pro
         ├── integration.md       contrato común entre piezas
         ├── deployment.md        requisitos, fases y orden de despliegue
         ├── decisiones-tecnicas.md
+        ├── incidentes.md        registro de errores graves y post-mortem
         ├── DESIGN.md
         ├── COMPONENTS.md
         ├── commands.md
@@ -115,6 +116,7 @@ El repositorio contiene muchas aplicaciones independientes. **No se carga toda l
 | [`integration.md`](docs/info/integration.md) | Contrato común entre piezas: hosts, redes, MQTT, flujo `decoded`, socket, bases, vistas, API, salud, `.env` común, estructura del repositorio. Manda sobre los documentos de pieza |
 | [`deployment.md`](docs/info/deployment.md) | Requisitos, fases, orden y dependencias de despliegue |
 | [`decisiones-tecnicas.md`](docs/info/decisiones-tecnicas.md) | Decisiones deliberadas que no se deben «arreglar» |
+| [`incidentes.md`](docs/info/incidentes.md) | Registro de errores graves, incidentes y análisis post-mortem |
 | [`DESIGN.md`](docs/info/DESIGN.md) | Sistema visual del portal (solo para interfaz) |
 | [`COMPONENTS.md`](docs/info/COMPONENTS.md) | Componentes de interfaz implementados (solo para interfaz) |
 | [`commands.md`](docs/info/commands.md) | Comandos y scripts disponibles |
