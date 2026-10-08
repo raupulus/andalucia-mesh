@@ -9,7 +9,7 @@ class Saturacion
     /**
      * Calcula la saturación ponderada provincial y global a partir de las filas de api_province_load.
      *
-     * @param array<int, array{province: string, grupo: string, channel_utilization: float|int}> $filas
+     * @param  array<int, array{province: string, grupo: string, channel_utilization: float|int}>  $filas
      * @return array{
      *     andalucia_avg: float|null,
      *     andalucia_max: float|null,
@@ -38,8 +38,8 @@ class Saturacion
             'ES-CA' => 'Cádiz',
             'ES-CO' => 'Córdoba',
             'ES-GR' => 'Granada',
-            'ES-H'  => 'Huelva',
-            'ES-J'  => 'Jaén',
+            'ES-H' => 'Huelva',
+            'ES-J' => 'Jaén',
             'ES-MA' => 'Málaga',
             'ES-SE' => 'Sevilla',
         ]);
@@ -62,7 +62,7 @@ class Saturacion
             $grupo = (string) $fila['grupo'];
             $util = (float) $fila['channel_utilization'];
 
-            if (!isset($porProvincia[$code])) {
+            if (! isset($porProvincia[$code])) {
                 continue;
             }
 
@@ -93,7 +93,7 @@ class Saturacion
 
             $maxProv = null;
             $todosValores = array_merge($routers, $clientes);
-            if (!empty($todosValores)) {
+            if (! empty($todosValores)) {
                 $maxProv = max($todosValores);
             }
 

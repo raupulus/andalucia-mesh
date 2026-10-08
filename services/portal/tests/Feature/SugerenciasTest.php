@@ -209,6 +209,8 @@ class SugerenciasTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Potato Mesh');
         $response->assertSee('waypoints offline');
+        $response->assertSee('¿Nota?');
+        $response->assertSee('No');
 
         // Modificar estado y notas internas
         $sugerencia->update([
@@ -218,6 +220,19 @@ class SugerenciasTest extends TestCase
 
         $this->assertEquals(Suggestion::STATUS_APPROVED, $sugerencia->fresh()->status);
         $this->assertEquals('Aprobado para la próxima versión de PotatoMesh.', $sugerencia->fresh()->operator_notes);
+
+        // Al recargar con nota, debe mostrar el badge de Sí
+        $responseConNota = $this->actingAs($operador)
+            ->get('/admin/suggestions');
+        $responseConNota->assertStatus(200);
+        $responseConNota->assertSee('Sí');
+
+        // Acceso a la página de edición con las dos secciones a ancho completo
+        $responseEdit = $this->actingAs($operador)
+            ->get("/admin/suggestions/{$sugerencia->id}/edit");
+        $responseEdit->assertStatus(200);
+        $responseEdit->assertSee('Detalle de la Sugerencia');
+        $responseEdit->assertSee('Gestión Interna (Operador)');
     }
 
     /**

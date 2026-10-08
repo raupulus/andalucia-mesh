@@ -13,8 +13,6 @@ class CargaProvincias
 {
     /**
      * Obtiene el cálculo de saturación ponderada para las provincias y Andalucía.
-     *
-     * @return Resultado
      */
     public function obtener(): Resultado
     {

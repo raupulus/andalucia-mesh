@@ -9,14 +9,14 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Ejecuta las migraciones creando la tabla de preguntas frecuentes (FAQ).
+     * Ejecuta las migraciones creando la tabla de preguntas frecuentes (FAQ) con soporte multidioma.
      */
     public function up(): void
     {
         Schema::create('faqs', function (Blueprint $table) {
             $table->id();
-            $table->string('question', 255);
-            $table->text('answer');
+            $table->jsonb('question');
+            $table->jsonb('answer');
             $table->boolean('is_active')->default(true)->index();
             $table->integer('sort_order')->default(0)->index();
             $table->timestamps();

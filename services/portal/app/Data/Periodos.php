@@ -12,8 +12,8 @@ class Periodos
     /**
      * Calcula los límites temporales en UTC para las consultas de estadísticas y rankings.
      *
-     * @param string $period Granularidad ('hour', 'day', 'week', 'month')
-     * @param string $which Momento ('current', 'previous')
+     * @param  string  $period  Granularidad ('hour', 'day', 'week', 'month')
+     * @param  string  $which  Momento ('current', 'previous')
      * @return array{
      *     granularity: string,
      *     bucket_start: string,
@@ -29,11 +29,11 @@ class Periodos
         $ahora = CarbonImmutable::now($tz);
 
         $validPeriods = ['hour', 'day', 'week', 'month'];
-        if (!in_array($period, $validPeriods, true)) {
+        if (! in_array($period, $validPeriods, true)) {
             throw new InvalidArgumentException("Periodo inválido '{$period}'. Usa hour, day, week o month.");
         }
 
-        if (!in_array($which, ['current', 'previous'], true)) {
+        if (! in_array($which, ['current', 'previous'], true)) {
             throw new InvalidArgumentException("Momento inválido '{$which}'. Usa current o previous.");
         }
 
@@ -65,7 +65,7 @@ class Periodos
                 break;
 
             default:
-                throw new InvalidArgumentException("Periodo no soportado");
+                throw new InvalidArgumentException('Periodo no soportado');
         }
 
         $fromUtc = $start->setTimezone('UTC');

@@ -34,8 +34,9 @@ class NodesApiController extends Controller
         }
 
         $res = $this->diagnostico->buscar($search, $limit);
+
         return response()->json($res->aRespuesta(), 200, [
-            'Cache-Control' => 'public, max-age=' . ($res->stale ? 15 : $res->ttl),
+            'Cache-Control' => 'public, max-age='.($res->stale ? 15 : $res->ttl),
             'X-Cache' => $res->xCache,
         ]);
     }
@@ -59,7 +60,7 @@ class NodesApiController extends Controller
         }
 
         return response()->json($res->aRespuesta(), 200, [
-            'Cache-Control' => 'public, max-age=' . ($res->stale ? 15 : $res->ttl),
+            'Cache-Control' => 'public, max-age='.($res->stale ? 15 : $res->ttl),
             'X-Cache' => $res->xCache,
         ]);
     }

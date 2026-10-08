@@ -19,19 +19,22 @@ use Filament\Schemas\Schema;
 class SuggestionForm
 {
     /**
-     * Configura los campos del formulario organizados en secciones legibles.
+     * Configura los campos del formulario organizados en secciones legibles a ancho completo.
      */
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
+                // 1. Bloque de detalles de la sugerencia a ancho completo
                 Section::make(__('admin.suggestions.section_detail'))
                     ->description(__('admin.suggestions.section_detail_desc'))
+                    ->columnSpanFull()
                     ->schema([
-                        Grid::make(2)->schema([
+                        Grid::make(['default' => 1, 'md' => 2])->schema([
                             Select::make('category')
                                 ->label(__('admin.suggestions.col_category'))
-                                ->options(fn () => collect(Suggestion::CATEGORIES)->mapWithKeys(fn ($v, $k) => [$k => __('admin.suggestions.categories.' . $k)])->toArray())
+                                ->options(fn () => collect(Suggestion::CATEGORIES)->mapWithKeys(fn ($v, $k) => [$k => __('admin.suggestions.categories.'.$k)])->toArray())
                                 ->required(),
 
                             Select::make('status')
@@ -48,18 +51,22 @@ class SuggestionForm
                         Textarea::make('content')
                             ->label(__('admin.suggestions.field_proposal'))
                             ->rows(6)
+                            ->columnSpanFull()
                             ->required(),
                     ]),
 
+                // 2. Bloque de gestión interna de operador debajo a ancho completo
                 Section::make(__('admin.suggestions.section_admin'))
                     ->description(__('admin.suggestions.section_admin_desc'))
+                    ->columnSpanFull()
                     ->schema([
                         Textarea::make('operator_notes')
                             ->label(__('admin.suggestions.field_operator_notes'))
                             ->placeholder(__('admin.suggestions.placeholder_operator_notes'))
-                            ->rows(4),
+                            ->rows(4)
+                            ->columnSpanFull(),
 
-                        Grid::make(2)->schema([
+                        Grid::make(['default' => 1, 'md' => 2])->schema([
                             TextInput::make('ip_hash')
                                 ->label(__('admin.suggestions.field_ip_hash'))
                                 ->disabled()

@@ -29,8 +29,8 @@
 
 | Listener | Puerto | Alcance | Quién | Autenticación |
 |---|---|---|---|---|
-| Público | 1883 | Escucha local / interno (destino de stream TLS) | Gateways | Usuario = `meshdev` (o individual) + contraseña; `passwd-gateways` + `acl-gateways` |
-| Público TLS | 8883 | Nginx termina TLS → `127.0.0.1:1883` | Gateways con TLS (recomendado) | Igual que el 1883 con cifrado TLS |
+| Interno / Local | 1883 | Escucha local / interno (destino de stream TLS; no expuesto al exterior) | Gateways | Usuario = `meshdev` (o individual) + contraseña; `passwd-gateways` + `acl-gateways` |
+| Público TLS | 8883 | Nginx termina TLS → `127.0.0.1:1883` (único acceso exterior) | Gateways con TLS | Igual que el 1883 con cifrado TLS |
 | Interno | 1884 | Solo red `mesh` (`172.30.0.1:1884`) | Servicios | Usuario por servicio; `passwd-servicios` + `acl-servicios` |
 | Local | 1885 | `127.0.0.1` del host | Host | Healthcheck, vigilancia, diagnóstico; anónimo, solo lectura (`acl-local`) |
 
@@ -235,7 +235,7 @@ Servicio nativo en el host: `mosquitto.service` (paquetes Debian `mosquitto` y `
 
 | Servicio | Tipo | Puertos | TLS 8883 | Healthcheck |
 |---|---|---|---|---|
-| `mosquitto` | Servicio systemd nativo | 1883 (`0.0.0.0`), 1884 (`172.30.0.1`), 1885 (`127.0.0.1`) | Nginx `stream` `8883 → 127.0.0.1:1883` (`infrastructure/nginx/streams/snm-mqtts.conf`) | `mosquitto_sub -h 127.0.0.1 -p 1885 -t '$SYS/broker/uptime' -C 1 -W 15` cada 30 s |
+| `mosquitto` | Servicio systemd nativo | 1883 (`127.0.0.1` / interno, cerrado al exterior), 1884 (`172.30.0.1`), 1885 (`127.0.0.1`) | Nginx `stream` `8883 → 127.0.0.1:1883` (`infrastructure/nginx/streams/snm-mqtts.conf`) | `mosquitto_sub -h 127.0.0.1 -p 1885 -t '$SYS/broker/uptime' -C 1 -W 15` cada 30 s |
 
 1. Requisitos: `../infrastructure/` completo (red `mesh`, Nginx con `snm-mqtts.conf` apuntando a `127.0.0.1:1883`, DNS de `mqtt.`).
 2. `apt-get install -y mosquitto mosquitto-clients`.
@@ -249,7 +249,7 @@ Servicio nativo en el host: `mosquitto.service` (paquetes Debian `mosquitto` y `
 
 ## 9. Definición de hecho
 
-- [x] Servicio `mosquitto.service` activo en el host; solo 1883 abierto directamente al exterior; 8883 por Nginx `stream`.
+- [x] Servicio `mosquitto.service` activo en el host; 1883 cerrado al exterior; pasarela pública exclusiva 8883 por Nginx `stream` con TLS.
 - [x] Sin acceso anónimo en 1883, 8883 y 1884; el 1885 solo es accesible en `127.0.0.1` del host.
 - [x] ACL generadas desde `ALLOWED_CHANNELS` coinciden con §4; `test-acl.sh` en verde.
 - [x] Ningún gateway recibe nada al suscribirse; ningún servicio puede publicar en `msh/#`.

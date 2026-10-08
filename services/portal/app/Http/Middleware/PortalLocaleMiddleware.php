@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,14 +31,14 @@ class PortalLocaleMiddleware
     /**
      * Procesa la petición entrante y configura el locale activo en el contenedor de Laravel.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         $locale = $this->determineLocale($request);
 
         app()->setLocale($locale);
-        \Carbon\Carbon::setLocale($locale);
+        Carbon::setLocale($locale);
 
         return $next($request);
     }
@@ -57,7 +58,7 @@ class PortalLocaleMiddleware
         }
 
         // 2. Detección automática por la cabecera HTTP Accept-Language del navegador si está presente
-        if ($request->headers->has('Accept-Language') && !empty($request->header('Accept-Language'))) {
+        if ($request->headers->has('Accept-Language') && ! empty($request->header('Accept-Language'))) {
             $navegadorLangs = $request->getLanguages();
             foreach ($navegadorLangs as $lang) {
                 $codigo = strtolower(substr(trim($lang), 0, 2));

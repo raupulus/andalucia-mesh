@@ -70,17 +70,20 @@ El panel recibe a los operadores con un centro de control operativo estructurado
 ### Sugerencias (`SuggestionResource`)
 
 Gestión interna de propuestas ciudadanas (base `portal`, tabla `suggestions`):
-- Listado formateado con filtros por estado (`pending`, `approved`, `rejected`) y categoría (`bot_telegram`, `web`, `meshview`, `potatomesh`, `nueva_funcionalidad`, `otros`).
-- Acciones directas por fila: Aprobar, Rechazar y Editar para redactar notas privadas de operador (`operator_notes`).
+- Listado formateado con columnas optimizadas: Fecha (`created_at`), Estado (`status` con badge y color por estado), Categoría (`category` con badge), Propuesta (`content` con tooltip completo) e indicador compacto de notas de operador (`¿Nota?` con badge Sí/No y tooltip del texto de la nota).
+- Filtros interactivos por estado (`pending`, `approved`, `rejected`) y categoría (`bot_telegram`, `web`, `meshview`, `potatomesh`, `nueva_funcionalidad`, `otros`).
+- Acciones directas por fila: Aprobar, Rechazar, Editar (para ver detalles y redactar notas de operador) y Eliminar.
+- Formulario de creación y edición estructurado en dos bloques a ancho completo (`columnSpanFull`): bloque superior con «Detalle de la Sugerencia» (categoría, estado y texto de propuesta a ancho completo) y bloque inferior con «Gestión Interna (Operador)» (notas privadas de operador a ancho completo, hash de IP y fecha de recepción).
 - Badge en el menú de navegación con el recuento de propuestas pendientes en color ámbar.
 - Privacidad estricta: los usuarios únicamente envían su propuesta de forma anónima; las notas y el estado son visibles exclusivamente para los operadores en Filament.
 
 ### Preguntas Frecuentes (`FaqResource`)
 
 Gestión editorial de preguntas y respuestas frecuentes (base `portal`, tabla `faqs`):
-- Formulario directo con dos bloques principales: **Pregunta** (`question`) y **Respuesta** (`answer`), con soporte para formato enriquecido Markdown (listas, negritas, enlaces, código).
-- Ajustes de visibilidad pública (`is_active`) y prioridad de ordenación (`sort_order`).
-- Listado interactivo con búsqueda en preguntas y respuestas, ordenación por prioridad, filtro por visibilidad y acciones de edición y eliminación.
+- Selector superior de idiomas por pestañas (`Tabs`: Español ES, English EN, Português PT) para traducir pregunta y respuesta.
+- En pestaña principal: bloque superior con pregunta a la izquierda (9 columnas) y visibilidad pública (`is_active`) a la derecha (3 columnas). Bloque inferior a ancho completo con editor enriquecido de Markdown (`answer`) validado hasta 1024 caracteres (soporte de listas, negritas, cursiva, enlaces, títulos y bloques de código).
+- Reordenación interactiva arrastrando filas en la tabla mediante `$table->reorderable('sort_order')` (sin campo manual en el formulario).
+- Listado interactivo con visualización traducida (pregunta y respuesta limitadas a 2 líneas visibles con `lineClamp(2)` y tooltip completo), filtro por visibilidad y acciones de edición y eliminación.
 
 ### Usuarios
 

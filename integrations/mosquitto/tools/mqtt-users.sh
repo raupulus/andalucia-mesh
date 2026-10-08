@@ -155,7 +155,7 @@ case "${COMMAND}" in
         echo "================================================================================"
         echo " Usuario:     ${NODE_ID}"
         echo " Contraseña:  ${PASSWORD}"
-        echo " Servidor:    mqtt.<PROJECT_DOMAIN> (puerto 1883 sin TLS, 8883 con TLS)"
+        echo " Servidor:    mqtt.<PROJECT_DOMAIN> (puerto 8883 con TLS obligatorio)"
         echo " Canales:     Solo canales autorizados de Andalucía Mesh"
         echo "================================================================================"
         echo " NOTA: La contraseña no se almacena en texto plano y no se volverá a mostrar."

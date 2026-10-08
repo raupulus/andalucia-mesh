@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Models\HardwareCategory;
 use App\Models\HardwareItem;
 use App\Models\User;
+use Database\Seeders\HardwareSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -296,5 +297,165 @@ class HardwareCatalogoTest extends TestCase
         $responseEn->assertSee('Solar Autonomous Node');
         $responseEn->assertSee('Includes 10W panel and LiFePO4 battery');
         $responseEn->assertSee('Where to buy');
+    }
+
+    /**
+     * Comprueba que HardwareSeeder genere las 4 categorías fijas requeridas por slug y los 10 artículos.
+     */
+    public function test_seeder_crea_las_cuatro_categorias_fijas_y_los_diez_articulos(): void
+    {
+        $this->seed(HardwareSeeder::class);
+
+        // Comprueba las 4 categorías por su slug exacto
+        $slugsEsperados = ['antenas', 'nodos-diy', 'nodos-prefabricados', 'placas-solares'];
+        foreach ($slugsEsperados as $slug) {
+            $cat = HardwareCategory::where('slug', $slug)->first();
+            $this->assertNotNull($cat, "La categoría con slug '{$slug}' debe existir.");
+            $this->assertTrue($cat->is_active);
+            $this->assertGreaterThan(0, $cat->items()->count(), "La categoría '{$slug}' debe tener al menos un artículo.");
+        }
+
+        $this->assertEquals(4, HardwareCategory::count());
+        $this->assertEquals(10, HardwareItem::count());
+
+        // Comprueba idempotencia: ejecutar el seeder dos veces no duplica registros
+        $this->seed(HardwareSeeder::class);
+        $this->assertEquals(4, HardwareCategory::count());
+        $this->assertEquals(10, HardwareItem::count());
+    }
+
+    /**
+     * Comprueba que el menú lateral muestre todas las categorías con sus recuentos y el estado aria-current.
+     */
+    public function test_menu_lateral_muestra_categorias_con_conteo_de_articulos(): void
+    {
+        $this->seed(HardwareSeeder::class);
+
+        $response = $this->get('/hardware');
+        $response->assertStatus(200);
+
+        // Menú lateral presente y con etiqueta accesible
+        $response->assertSee('hardware-sidebar', false);
+        $response->assertSee('Categorías de hardware');
+
+        // Todas las categorías está activo inicialmente
+        $response->assertSee('Todas las categorías');
+        $response->assertSee('aria-current="page"', false);
+
+        // Comprobar recuento total (10)
+        $response->assertSee('10');
+
+        // Cada una de las 4 categorías aparece en la navegación
+        $response->assertSee('Antenas');
+        $response->assertSee('Nodos DIY');
+        $response->assertSee('Nodos Prefabricados');
+        $response->assertSee('Placas Solares');
+
+        // Al filtrar por una categoría específica (ej. antenas)
+        $responseCat = $this->get('/hardware?categoria=antenas');
+        $responseCat->assertStatus(200);
+        $responseCat->assertSee('?categoria=antenas', false);
+        $responseCat->assertSee('aria-current="page"', false);
+    }
+
+    /**
+     * Comprueba que los formularios de Filament contengan el selector de idiomas superior y la distribución por bloques requerida.
+     */
+    public function test_formularios_filament_contienen_pestanas_multidioma_y_distribucion_ancho_completo(): void
+    {
+        $operador = User::factory()->create([
+            'email' => 'operador.i18n@andalucia.mesh',
+            'activo' => true,
+        ]);
+
+        $cat = HardwareCategory::create([
+            'slug' => 'test-cat',
+            'name' => [
+                'es' => 'Categoria Test ES',
+                'en' => 'Category Test EN',
+                'pt' => 'Categoria Test PT',
+            ],
+            'description' => [
+                'es' => 'Descripción ES',
+                'en' => 'Description EN',
+                'pt' => 'Descrição PT',
+            ],
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+
+        $item = HardwareItem::create([
+            'category_id' => $cat->id,
+            'slug' => 'test-item',
+            'name' => [
+                'es' => 'Dispositivo Test ES',
+                'en' => 'Device Test EN',
+                'pt' => 'Dispositivo Test PT',
+            ],
+            'description' => [
+                'es' => 'Descripción artículo ES',
+                'en' => 'Item description EN',
+                'pt' => 'Descrição artigo PT',
+            ],
+            'image_path' => 'hardware/test.webp',
+            'buy_url' => 'https://example.com/buy',
+            'is_active' => true,
+        ]);
+
+        // 1. Acceso a edición de categoría: contiene los campos ES, EN y PT
+        $responseEditCat = $this->actingAs($operador)->get("/admin/hardware-categories/{$cat->id}/edit");
+        $responseEditCat->assertStatus(200);
+        $responseEditCat->assertSee('name.es', false);
+        $responseEditCat->assertSee('name.en', false);
+        $responseEditCat->assertSee('name.pt', false);
+        $responseEditCat->assertSee('Categoria Test ES');
+
+        // 2. Acceso a edición de artículo: contiene los campos ES, EN y PT y los 4 bloques
+        $responseEditItem = $this->actingAs($operador)->get("/admin/hardware-items/{$item->id}/edit");
+        $responseEditItem->assertStatus(200);
+        $responseEditItem->assertSee('name.es', false);
+        $responseEditItem->assertSee('name.en', false);
+        $responseEditItem->assertSee('name.pt', false);
+        $responseEditItem->assertSee('image_path', false);
+        $responseEditItem->assertSee('buy_url', false);
+        $responseEditItem->assertSee('is_featured', false);
+        $responseEditItem->assertSee('Dispositivo Test ES');
+        // El campo sort_order se ha retirado del formulario de artículos para ordenarse solo desde la tabla
+        $responseEditItem->assertDontSee('data.sort_order', false);
+    }
+
+    /**
+     * Comprueba que los artículos de hardware autoasignen orden incremental al crearse si no se define.
+     */
+    public function test_articulo_hardware_autoasigna_orden_incremental_al_crear(): void
+    {
+        $cat = HardwareCategory::create([
+            'slug' => 'cat-orden',
+            'name' => ['es' => 'Cat Orden', 'en' => 'Order Cat'],
+            'is_active' => true,
+        ]);
+
+        $item1 = HardwareItem::create([
+            'category_id' => $cat->id,
+            'slug' => 'item-orden-1',
+            'name' => 'Item 1',
+            'description' => ['es' => 'Desc 1', 'en' => 'Desc 1'],
+            'image_path' => 'hardware/1.webp',
+            'buy_url' => 'https://example.com/1',
+            'is_active' => true,
+        ]);
+
+        $item2 = HardwareItem::create([
+            'category_id' => $cat->id,
+            'slug' => 'item-orden-2',
+            'name' => 'Item 2',
+            'description' => ['es' => 'Desc 2', 'en' => 'Desc 2'],
+            'image_path' => 'hardware/2.webp',
+            'buy_url' => 'https://example.com/2',
+            'is_active' => true,
+        ]);
+
+        $this->assertGreaterThan(0, $item1->sort_order);
+        $this->assertGreaterThan($item1->sort_order, $item2->sort_order);
     }
 }

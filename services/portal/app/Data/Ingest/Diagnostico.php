@@ -24,7 +24,7 @@ class Diagnostico
         ];
 
         return Fuente::recordar('buscar_nodos', $params, 60, function () use ($termino, $limit) {
-            $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $termino) . '%';
+            $like = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $termino).'%';
 
             $items = DB::connection('ingesta')
                 ->table('api_nodes')
@@ -42,8 +42,8 @@ class Diagnostico
                 ])
                 ->where(function ($q) use ($like) {
                     $q->where('id', 'ilike', $like)
-                      ->orWhere('short_name', 'ilike', $like)
-                      ->orWhere('long_name', 'ilike', $like);
+                        ->orWhere('short_name', 'ilike', $like)
+                        ->orWhere('long_name', 'ilike', $like);
                 })
                 ->orderByDesc('last_seen')
                 ->limit($limit)
@@ -71,7 +71,7 @@ class Diagnostico
                 ->where('id', $nodeId)
                 ->first();
 
-            if (!$node) {
+            if (! $node) {
                 return null;
             }
 
@@ -110,15 +110,15 @@ class Diagnostico
                 $hallazgos[] = [
                     'clave' => 'saltos_excesivos',
                     'severidad' => 'critico',
-                    'titulo' => 'Límite de saltos excesivo (' . $hopLimit . ')',
+                    'titulo' => 'Límite de saltos excesivo ('.$hopLimit.')',
                     'descripcion' => 'Tu nodo tiene configurado un límite de saltos superior a 5, lo que propaga paquetes innecesariamente por toda Andalucía saturando el canal de radio. Se recomienda configurarlo en 3 saltos.',
                 ];
             } elseif ($hopLimit !== null && $hopLimit > 3) {
                 $hallazgos[] = [
                     'clave' => 'saltos_altos',
                     'severidad' => 'aviso',
-                    'titulo' => 'Límite de saltos mayor al estándar (' . $hopLimit . ')',
-                    'descripcion' => 'Tu nodo emite con ' . $hopLimit . ' saltos. El estándar de la red es 3 saltos, salvo en zonas remotas o aisladas.',
+                    'titulo' => 'Límite de saltos mayor al estándar ('.$hopLimit.')',
+                    'descripcion' => 'Tu nodo emite con '.$hopLimit.' saltos. El estándar de la red es 3 saltos, salvo en zonas remotas o aisladas.',
                 ];
             }
 
@@ -132,7 +132,7 @@ class Diagnostico
                         'clave' => 'nodeinfo_frecuente',
                         'severidad' => 'aviso',
                         'titulo' => 'NodeInfo emitido con demasiada frecuencia',
-                        'descripcion' => 'El nodo emite su información cada ' . round($mediana / 3600, 1) . ' horas. En nodos fijos se recomienda un intervalo de 72 horas para no ocupar espectro.',
+                        'descripcion' => 'El nodo emite su información cada '.round($mediana / 3600, 1).' horas. En nodos fijos se recomienda un intervalo de 72 horas para no ocupar espectro.',
                     ];
                 }
 
@@ -141,7 +141,7 @@ class Diagnostico
                         'clave' => 'telemetria_rapida',
                         'severidad' => 'aviso',
                         'titulo' => 'Telemetría enviada con frecuencia elevada',
-                        'descripcion' => 'Las métricas del dispositivo se transmiten cada ' . round($mediana / 60) . ' minutos. Se aconseja al menos 2 a 4 horas en nodos solares o desactivarla si está enchufado.',
+                        'descripcion' => 'Las métricas del dispositivo se transmiten cada '.round($mediana / 60).' minutos. Se aconseja al menos 2 a 4 horas en nodos solares o desactivarla si está enchufado.',
                     ];
                 }
             }
@@ -206,6 +206,7 @@ class Diagnostico
     public static function normalizarId(string $id): string
     {
         $limpio = ltrim(trim($id), '!');
-        return '!' . strtolower($limpio);
+
+        return '!'.strtolower($limpio);
     }
 }

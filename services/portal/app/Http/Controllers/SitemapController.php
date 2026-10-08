@@ -49,9 +49,9 @@ class SitemapController extends Controller
         $domain = (string) config('proyecto.dominio', 'mesh.desdechipiona.es');
 
         $contenido = "User-agent: *\n"
-            . "Disallow: /admin\n"
-            . "Disallow: /api/v1\n"
-            . "Sitemap: https://{$domain}/sitemap.xml\n";
+            ."Disallow: /admin\n"
+            ."Disallow: /api/v1\n"
+            ."Sitemap: https://{$domain}/sitemap.xml\n";
 
         return response($contenido, 200, [
             'Content-Type' => 'text/plain; charset=utf-8',
@@ -66,14 +66,14 @@ class SitemapController extends Controller
         $domain = (string) config('proyecto.dominio', 'mesh.desdechipiona.es');
 
         $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            . "<robots>\n"
-            . "    <sitemap>https://{$domain}/sitemap.xml</sitemap>\n"
-            . "    <rules>\n"
-            . "        <user-agent>*</user-agent>\n"
-            . "        <disallow>/admin</disallow>\n"
-            . "        <disallow>/api/v1</disallow>\n"
-            . "    </rules>\n"
-            . "</robots>\n";
+            ."<robots>\n"
+            ."    <sitemap>https://{$domain}/sitemap.xml</sitemap>\n"
+            ."    <rules>\n"
+            ."        <user-agent>*</user-agent>\n"
+            ."        <disallow>/admin</disallow>\n"
+            ."        <disallow>/api/v1</disallow>\n"
+            ."    </rules>\n"
+            ."</robots>\n";
 
         return response($xml, 200, [
             'Content-Type' => 'application/xml; charset=utf-8',
@@ -86,7 +86,7 @@ class SitemapController extends Controller
     public function buildSitemap(): Sitemap
     {
         $domain = (string) config('proyecto.dominio', 'mesh.desdechipiona.es');
-        $baseUrl = 'https://' . $domain;
+        $baseUrl = 'https://'.$domain;
         $sitemap = Sitemap::create();
 
         $routes = Route::getRoutes()->getRoutes();
@@ -98,8 +98,8 @@ class SitemapController extends Controller
             }
 
             $uri = $route->uri();
-            $path = ($uri === '/' || $uri === '') ? '' : '/' . ltrim($uri, '/');
-            $fullUrl = $baseUrl . $path;
+            $path = ($uri === '/' || $uri === '') ? '' : '/'.ltrim($uri, '/');
+            $fullUrl = $baseUrl.$path;
 
             if (isset($urlsAgregadas[$fullUrl])) {
                 continue;

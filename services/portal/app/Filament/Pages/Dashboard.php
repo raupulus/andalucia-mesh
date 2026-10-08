@@ -9,6 +9,7 @@ use App\Filament\Widgets\MallaStatsOverviewWidget;
 use App\Filament\Widgets\RoutersInfraestructuraWidget;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Widgets\Widget;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * Página principal del Escritorio del Operador en Filament.
@@ -21,7 +22,7 @@ class Dashboard extends BaseDashboard
         return __('admin.dashboard_title');
     }
 
-    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('admin.dashboard_title');
     }

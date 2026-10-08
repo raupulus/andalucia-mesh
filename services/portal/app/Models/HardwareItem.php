@@ -67,6 +67,7 @@ class HardwareItem extends Model
     protected function casts(): array
     {
         return [
+            'name' => 'array',
             'description' => 'array',
             'last_price' => 'decimal:2',
             'is_active' => 'boolean',
@@ -132,7 +133,7 @@ class HardwareItem extends Model
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                 $this->attributes['name'] = $value;
             } else {
-                $this->attributes['name'] = json_encode(['es' => $value, 'en' => $value], JSON_UNESCAPED_UNICODE);
+                $this->attributes['name'] = json_encode(['es' => $value, 'en' => $value, 'pt' => $value], JSON_UNESCAPED_UNICODE);
             }
         } else {
             $this->attributes['name'] = json_encode([], JSON_UNESCAPED_UNICODE);
@@ -140,42 +141,41 @@ class HardwareItem extends Model
     }
 
     /**
+     * Accesor para obtener el array de traducciones de nombre.
+     *
+     * @return array<string, string>
+     */
+    public function getNameAttribute(mixed $value): array
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+
+            return ['es' => $value, 'en' => $value, 'pt' => $value];
+        }
+
+        return [];
+    }
+
+    /**
      * Accesor para obtener el nombre localizado según el idioma activo con fallback a español.
      */
     public function getTranslatedNameAttribute(): string
     {
-        $raw = $this->attributes['name'] ?? null;
-        if (empty($raw)) {
-            return '';
-        }
-
-        $decoded = is_string($raw) ? json_decode($raw, true) : $raw;
-        if (is_array($decoded)) {
+        $names = $this->name;
+        if (is_array($names)) {
             $locale = app()->getLocale();
 
-            return (string) ($decoded[$locale] ?? $decoded['es'] ?? (reset($decoded) ?: ''));
+            return (string) ($names[$locale] ?? $names['es'] ?? (reset($names) ?: ''));
         }
 
-        return (string) $raw;
-    }
-
-    /**
-     * Accesor para obtener el nombre (coherente con translated_name).
-     */
-    public function getNameAttribute(mixed $value): string
-    {
-        if (empty($value)) {
-            return '';
-        }
-
-        $decoded = is_string($value) ? json_decode($value, true) : $value;
-        if (is_array($decoded)) {
-            $locale = app()->getLocale();
-
-            return (string) ($decoded[$locale] ?? $decoded['es'] ?? (reset($decoded) ?: ''));
-        }
-
-        return (string) $value;
+        return is_string($names) ? $names : '';
     }
 
     /**
@@ -206,6 +206,10 @@ class HardwareItem extends Model
             return $this->image_path;
         }
 
+        if (str_starts_with($this->image_path, 'img/') || str_starts_with($this->image_path, '/img/')) {
+            return asset(ltrim($this->image_path, '/'));
+        }
+
         return Storage::disk('public')->url($this->image_path);
     }
 
@@ -219,5 +223,18 @@ class HardwareItem extends Model
         }
 
         return number_format((float) $this->last_price, 2, ',', '.').' '.($this->currency === 'EUR' ? '€' : $this->currency);
+    }
+
+    /**
+     * Asigna automáticamente el siguiente orden disponible al crear un nuevo artículo si no se define.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (HardwareItem $item): void {
+            if ($item->sort_order === null || $item->sort_order === 0) {
+                $maxOrder = static::query()->max('sort_order');
+                $item->sort_order = $maxOrder !== null ? $maxOrder + 1 : 1;
+            }
+        });
     }
 }

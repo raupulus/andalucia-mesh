@@ -35,7 +35,7 @@ class HardwareItemsTable
                     ->square()
                     ->size(48),
 
-                TextColumn::make('name')
+                TextColumn::make('name.es')
                     ->label(__('admin.hardware.col_name'))
                     ->searchable()
                     ->sortable()

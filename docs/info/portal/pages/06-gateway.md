@@ -50,11 +50,11 @@ Un gateway es un nodo con internet que sube a nuestro servidor lo que oye por ra
 |---|---|
 | MQTT activado | Sí |
 | Servidor | `mqtt.{PROJECT_DOMAIN}` [Copiar] |
-| Puerto | `1883`, o `8883` con TLS |
+| Puerto | `8883` (TLS obligatorio) |
 | Usuario / contraseña | Los tuyos: `!<id>` y la que te enviamos |
 | Cifrado | Activado |
 | JSON | Desactivado |
-| TLS | Opcional |
+| TLS | Activado (obligatorio) |
 | Root topic | `{MQTT_TOPIC_ROOT}` [Copiar] |
 | Map reporting | Activado |
 | Uplink | Activado en `{PRIMARY_CHANNEL}` y en los canales de la lista que uses |
@@ -75,7 +75,7 @@ Todos son canales públicos: sus mensajes se ven en PotatoMesh y MeshView y los 
 - **Cifrado activado:** los paquetes suben tal y como viajan por la radio. Solo desciframos los canales que usan la clave pública por defecto.
 - **JSON desactivado:** el firmware actual ya no lo usa y el servidor no lo acepta.
 - **Root topic `{MQTT_TOPIC_ROOT}`:** escríbelo a mano. Con un servidor que no es el de fábrica, el firmware no añade la región por su cuenta.
-- **TLS opcional:** usa el puerto `8883` si tu nodo lo admite; algunos dan problemas con TLS y por eso el `1883` sigue abierto.
+- **TLS obligatorio (puerto 8883):** por seguridad y confidencialidad de credenciales en tránsito, el servidor solo admite conexiones cifradas TLS en el puerto `8883`. El puerto `1883` sin cifrar está cerrado.
 - **Map reporting:** tu nodo publica de vez en cuando su información y su posición para los mapas.
 - **OK to MQTT:** marca tus paquetes como "se pueden subir". Los gateways solo suben los paquetes de los nodos que lo tienen activado.
 - **Ignore MQTT:** tu nodo descarta los paquetes que otros han hecho pasar por internet, así no los repite por radio.
@@ -110,10 +110,10 @@ Los paquetes que subes se muestran en PotatoMesh y MeshView, alimentan las estad
 | `{ALLOWED_CHANNELS}` | Variable global de la que se genera la ACL del broker. Se pinta tal cual, sin escribir los nombres a mano |
 | `{PRIMARY_CHANNEL}` | `PRIMARY_CHANNEL` |
 | Contacto y `mailto:` | `PROJECT_CONTACT` |
-| Puertos | Fijos (`1883`, `8883`), según `../../mosquitto/README.md` |
+| Puertos | `8883` (con TLS obligatorio; 1883 cerrado al exterior), según `../../mosquitto/README.md` |
 | Texto | `resources/contenido/conecta-tu-gateway.md`. Sin datos de la API |
 
 Ningún texto incluye credenciales: ni contraseñas de gateway ni de servicios (`../04-gateway-connection.md`).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

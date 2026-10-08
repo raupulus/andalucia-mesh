@@ -137,11 +137,11 @@ Si tu nodo tiene internet, puede hacer de gateway: sube lo que oye por radio a n
 |---|---|
 | MQTT activado | Sí |
 | Servidor | `mqtt.{PROJECT_DOMAIN}` [Copiar] |
-| Puerto | `1883` (`8883` con TLS) |
+| Puerto | `8883` (TLS obligatorio) |
 | Usuario / contraseña | Los tuyos: `!<id>` y la que te enviamos |
 | Cifrado | Activado |
 | JSON | Desactivado |
-| TLS | Opcional |
+| TLS | Activado (obligatorio) |
 | Root topic | `{MQTT_TOPIC_ROOT}` [Copiar] |
 | Map reporting | Activado |
 | Uplink | Activado en `{PRIMARY_CHANNEL}` y en los canales de la lista que uses |
@@ -199,4 +199,4 @@ Desarrollador web full stack especializado en backend · @raupulus
 | Textos fijos | `resources/contenido/inicio.md` |
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
 
@@ -44,7 +43,7 @@ class ConfiguradorController extends Controller
     {
         foreach ($this->getBackendUrls() as $backendUrl) {
             try {
-                $response = Http::timeout(2)->get($backendUrl . '/');
+                $response = Http::timeout(2)->get($backendUrl.'/');
                 if ($response->successful()) {
                     return response($response->body(), 200, [
                         'Content-Type' => 'text/html; charset=utf-8',
@@ -82,7 +81,7 @@ class ConfiguradorController extends Controller
 
         foreach ($this->getBackendUrls() as $backendUrl) {
             try {
-                $response = Http::timeout(2)->get($backendUrl . '/' . $cleanFile);
+                $response = Http::timeout(2)->get($backendUrl.'/'.$cleanFile);
                 if ($response->successful()) {
                     $ext = strtolower(pathinfo($cleanFile, PATHINFO_EXTENSION));
                     $contentType = match ($ext) {
@@ -103,10 +102,10 @@ class ConfiguradorController extends Controller
         }
 
         $candidatePaths = [
-            resource_path('configurador/custom/' . $cleanFile),
-            resource_path('configurador/' . $cleanFile),
-            base_path('../../integrations/meshconfig/custom/' . $cleanFile),
-            base_path('../../integrations/meshconfig/' . $cleanFile),
+            resource_path('configurador/custom/'.$cleanFile),
+            resource_path('configurador/'.$cleanFile),
+            base_path('../../integrations/meshconfig/custom/'.$cleanFile),
+            base_path('../../integrations/meshconfig/'.$cleanFile),
         ];
 
         foreach ($candidatePaths as $realFile) {

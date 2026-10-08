@@ -2,9 +2,22 @@
 
 declare(strict_types=1);
 
+use App\Excepciones\FuenteNoDisponible;
+use App\Http\Middleware\PortalLocaleMiddleware;
+use App\Http\Middleware\RespuestaApi;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,26 +33,26 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Eliminar cookies y sesiones del grupo público web para cumplir la política de cero rastreo
         $middleware->removeFromGroup('web', [
-            \Illuminate\Cookie\Middleware\EncryptCookies::class,
-            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-            \Illuminate\Session\Middleware\StartSession::class,
-            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            ShareErrorsFromSession::class,
+            ValidateCsrfToken::class,
         ]);
 
         // Registrar middleware de detección de idioma sin cookies (RN-48)
         $middleware->appendToGroup('web', [
-            \App\Http\Middleware\PortalLocaleMiddleware::class,
+            PortalLocaleMiddleware::class,
         ]);
 
         // Configurar middleware del grupo api
         $middleware->appendToGroup('api', [
             'throttle:api-publica',
-            \App\Http\Middleware\RespuestaApi::class,
+            RespuestaApi::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (\Throwable $e, \Illuminate\Http\Request $request) {
+        $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->is('api/v1') || $request->is('api/v1/*')) {
                 $status = 500;
                 $code = 'internal_error';
@@ -50,29 +63,29 @@ return Application::configure(basePath: dirname(__DIR__))
                 ];
                 $extra = [];
 
-                if ($e instanceof \Illuminate\Validation\ValidationException) {
+                if ($e instanceof ValidationException) {
                     $status = 400;
                     $code = 'invalid_parameter';
                     $message = 'Parámetros inválidos en la petición.';
                     $extra['parameters'] = $e->errors();
-                } elseif ($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+                } elseif ($e instanceof NotFoundHttpException) {
                     $status = 404;
                     $code = 'not_found';
                     $message = 'El recurso solicitado no fue encontrado.';
                     $headers['Cache-Control'] = 'public, max-age=60';
-                } elseif ($e instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException) {
+                } elseif ($e instanceof MethodNotAllowedHttpException) {
                     $status = 405;
                     $code = 'method_not_allowed';
                     $message = 'Método HTTP no permitido. Solo se admite GET.';
                     $headers['Allow'] = 'GET, HEAD';
-                } elseif ($e instanceof \Illuminate\Http\Exceptions\ThrottleRequestsException) {
+                } elseif ($e instanceof ThrottleRequestsException) {
                     $status = 429;
                     $code = 'rate_limited';
                     $message = 'Demasiadas peticiones: espera un minuto antes de reintentar.';
                     if ($e->getHeaders()) {
                         $headers = array_merge($headers, $e->getHeaders());
                     }
-                } elseif ($e instanceof \App\Excepciones\FuenteNoDisponible) {
+                } elseif ($e instanceof FuenteNoDisponible) {
                     $status = 503;
                     $code = 'source_unavailable';
                     $message = $e->getMessage();

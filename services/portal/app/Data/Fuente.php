@@ -14,10 +14,11 @@ class Fuente
     /**
      * Ejecuta una consulta con caché de dos niveles (fresco y último respaldo).
      *
-     * @param string $consulta Identificador semántico de la consulta
-     * @param array<string, mixed> $params Parámetros normalizados
-     * @param int $ttl Segundos de vigencia para el resultado fresco
-     * @param Closure(): mixed $leer Función que ejecuta la consulta en la base de datos
+     * @param  string  $consulta  Identificador semántico de la consulta
+     * @param  array<string, mixed>  $params  Parámetros normalizados
+     * @param  int  $ttl  Segundos de vigencia para el resultado fresco
+     * @param  Closure(): mixed  $leer  Función que ejecuta la consulta en la base de datos
+     *
      * @throws FuenteNoDisponible Si la base de datos falla y no existe respaldo
      */
     public static function recordar(string $consulta, array $params, int $ttl, Closure $leer): Resultado
@@ -27,7 +28,7 @@ class Fuente
 
         $keyFresco = "api1:{$consulta}:{$hash}:fresco";
         $keyUltimo = "api1:{$consulta}:{$hash}:ultimo";
-        $keyFallo  = "api1:{$consulta}:{$hash}:fallo";
+        $keyFallo = "api1:{$consulta}:{$hash}:fallo";
 
         // 1. Acierto en caché fresca
         $fresco = Cache::get($keyFresco);

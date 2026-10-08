@@ -20,6 +20,6 @@ Artisan::command('inspire', function () {
 | con prevención de solapamiento. Conforme a docs/info/portal/14-operator-panel.md.
 |
 */
-Schedule::job(new ComprobarServicios())
+Schedule::job(new ComprobarServicios)
     ->everyMinute()
     ->withoutOverlapping();

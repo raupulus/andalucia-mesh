@@ -69,7 +69,7 @@ class AlertasController extends Controller
             $alerta = null;
         }
 
-        if (!$alerta) {
+        if (! $alerta) {
             throw new NotFoundHttpException("La alerta '{$id}' no existe o ha expirado.");
         }
 

@@ -607,5 +607,8 @@ return [
         'empty_title' => 'No devices found',
         'empty_text' => 'No results match the selected criteria. Try selecting another category or clearing the search query.',
         'reset_filters' => 'Reset filters',
+        'sidebar_heading' => 'Categories',
+        'showing_count' => 'Showing :count of :total items',
+        'opens_new_tab' => 'opens in a new tab',
     ],
 ];

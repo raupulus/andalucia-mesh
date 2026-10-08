@@ -8,7 +8,6 @@ use App\Data\Ingest\Diagnostico;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class DiagnosticoController extends Controller
@@ -29,9 +28,9 @@ class DiagnosticoController extends Controller
             // Si el usuario introduce directamente un ID !xxxxxxxx o xxxxxxxx, redirigir directo
             if (preg_match('/^!?([0-9A-Fa-f]{8})$/', $busqueda, $m)) {
                 $lang = (string) $request->query('lang', '');
-                $langQuery = in_array($lang, ['es', 'en', 'pt'], true) && $lang !== 'es' ? '?lang=' . $lang : '';
+                $langQuery = in_array($lang, ['es', 'en', 'pt'], true) && $lang !== 'es' ? '?lang='.$lang : '';
 
-                return redirect('/revisa-tu-nodo/!' . strtolower($m[1]) . $langQuery);
+                return redirect('/revisa-tu-nodo/!'.strtolower($m[1]).$langQuery);
             }
 
             try {
@@ -63,7 +62,7 @@ class DiagnosticoController extends Controller
             $informe = null;
         }
 
-        if (!$informe) {
+        if (! $informe) {
             return view('revisa-nodo.show', [
                 'idBuscado' => $idNormalizado,
                 'noEncontrado' => true,

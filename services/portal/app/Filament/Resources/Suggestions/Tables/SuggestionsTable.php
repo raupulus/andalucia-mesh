@@ -33,10 +33,21 @@ class SuggestionsTable
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
 
+                TextColumn::make('status')
+                    ->label(__('admin.suggestions.col_status'))
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        Suggestion::STATUS_APPROVED => 'success',
+                        Suggestion::STATUS_REJECTED => 'danger',
+                        default => 'warning',
+                    })
+                    ->formatStateUsing(fn (?string $state): string => ($state && __('admin.suggestions.statuses.'.$state) !== 'admin.suggestions.statuses.'.$state) ? __('admin.suggestions.statuses.'.$state) : (Suggestion::STATUSES[$state] ?? (string) $state))
+                    ->sortable(),
+
                 TextColumn::make('category')
                     ->label(__('admin.suggestions.col_category'))
                     ->badge()
-                    ->formatStateUsing(fn (?string $state): string => ($state && __('admin.suggestions.categories.' . $state) !== 'admin.suggestions.categories.' . $state) ? __('admin.suggestions.categories.' . $state) : (Suggestion::CATEGORIES[$state] ?? (string) $state))
+                    ->formatStateUsing(fn (?string $state): string => ($state && __('admin.suggestions.categories.'.$state) !== 'admin.suggestions.categories.'.$state) ? __('admin.suggestions.categories.'.$state) : (Suggestion::CATEGORIES[$state] ?? (string) $state))
                     ->sortable(),
 
                 TextColumn::make('content')
@@ -46,22 +57,13 @@ class SuggestionsTable
                     ->searchable()
                     ->wrap(),
 
-                TextColumn::make('status')
-                    ->label(__('admin.suggestions.col_status'))
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        Suggestion::STATUS_APPROVED => 'success',
-                        Suggestion::STATUS_REJECTED => 'danger',
-                        default => 'warning',
-                    })
-                    ->formatStateUsing(fn (?string $state): string => ($state && __('admin.suggestions.statuses.' . $state) !== 'admin.suggestions.statuses.' . $state) ? __('admin.suggestions.statuses.' . $state) : (Suggestion::STATUSES[$state] ?? (string) $state))
-                    ->sortable(),
-
                 TextColumn::make('operator_notes')
-                    ->label(__('admin.suggestions.col_operator_notes'))
-                    ->limit(40)
-                    ->placeholder('—')
+                    ->label(__('admin.suggestions.col_has_notes'))
+                    ->badge()
+                    ->color(fn (?string $state): string => filled($state) ? 'info' : 'gray')
+                    ->formatStateUsing(fn (?string $state): string => filled($state) ? __('admin.suggestions.has_notes_yes') : __('admin.suggestions.has_notes_no'))
                     ->tooltip(fn (Suggestion $record): ?string => $record->operator_notes)
+                    ->alignCenter()
                     ->searchable(),
             ])
             ->defaultSort('created_at', 'desc')
@@ -76,7 +78,7 @@ class SuggestionsTable
 
                 SelectFilter::make('category')
                     ->label(__('admin.suggestions.filter_category'))
-                    ->options(fn () => collect(Suggestion::CATEGORIES)->mapWithKeys(fn ($v, $k) => [$k => __('admin.suggestions.categories.' . $k)])->toArray()),
+                    ->options(fn () => collect(Suggestion::CATEGORIES)->mapWithKeys(fn ($v, $k) => [$k => __('admin.suggestions.categories.'.$k)])->toArray()),
             ])
             ->recordActions([
                 Action::make('approve')

@@ -34,7 +34,7 @@ class RespuestaApi
             $response->headers->set('Content-Type', 'application/json; charset=utf-8');
 
             $content = (string) $response->getContent();
-            $etag = 'W/"' . sha1($content) . '"';
+            $etag = 'W/"'.sha1($content).'"';
             $response->headers->set('ETag', $etag);
 
             $ifNoneMatch = $request->header('If-None-Match');

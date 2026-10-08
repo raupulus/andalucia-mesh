@@ -9,8 +9,8 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
@@ -20,35 +20,45 @@ use Filament\Tables\Table;
 class FaqsTable
 {
     /**
-     * Define las columnas, filtros, ordenación y acciones para los operadores.
+     * Define las columnas, reordenación interactiva arrastrando filas, filtros y acciones.
      */
     public static function configure(Table $table): Table
     {
         return $table
+            ->reorderable('sort_order')
+            ->defaultSort('sort_order', 'asc')
             ->columns([
-                TextColumn::make('sort_order')
-                    ->label(__('admin.faqs.col_sort_order'))
-                    ->sortable()
-                    ->alignCenter(),
-
-                TextColumn::make('question')
+                TextColumn::make('translated_question')
                     ->label(__('admin.faqs.col_question'))
-                    ->limit(65)
-                    ->tooltip(fn (Faq $record): string => $record->question)
-                    ->searchable()
+                    ->lineClamp(2)
+                    ->tooltip(fn (Faq $record): string => $record->getTranslatedQuestion())
+                    ->searchable(query: function ($query, string $search): void {
+                        $driver = $query->getConnection()->getDriverName();
+                        if ($driver === 'pgsql') {
+                            $query->whereRaw('question::text ILIKE ?', ["%{$search}%"]);
+                        } else {
+                            $query->where('question', 'like', "%{$search}%");
+                        }
+                    })
                     ->wrap(),
 
-                TextColumn::make('answer')
+                TextColumn::make('translated_answer')
                     ->label(__('admin.faqs.col_answer'))
-                    ->limit(75)
-                    ->tooltip(fn (Faq $record): string => $record->answer)
-                    ->searchable()
+                    ->formatStateUsing(fn (string $state): string => preg_replace('/[*_#`]/', '', strip_tags($state)))
+                    ->lineClamp(2)
+                    ->tooltip(fn (Faq $record): string => strip_tags($record->getTranslatedAnswer()))
+                    ->searchable(query: function ($query, string $search): void {
+                        $driver = $query->getConnection()->getDriverName();
+                        if ($driver === 'pgsql') {
+                            $query->whereRaw('answer::text ILIKE ?', ["%{$search}%"]);
+                        } else {
+                            $query->where('answer', 'like', "%{$search}%");
+                        }
+                    })
                     ->wrap(),
 
-                IconColumn::make('is_active')
+                ToggleColumn::make('is_active')
                     ->label(__('admin.faqs.col_is_active'))
-                    ->boolean()
-                    ->sortable()
                     ->alignCenter(),
 
                 TextColumn::make('created_at')
@@ -57,7 +67,6 @@ class FaqsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('sort_order', 'asc')
             ->filters([
                 TernaryFilter::make('is_active')
                     ->label(__('admin.faqs.filter_active')),

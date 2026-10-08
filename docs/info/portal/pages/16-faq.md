@@ -23,8 +23,9 @@
 ## Datos dinámicos y configuración
 
 - Consulta directa a base de datos de preguntas activas: `Faq::where('is_active', true)->orderBy('sort_order', 'asc')->orderBy('id', 'asc')`.
-- Renderizado de respuestas con `ContenidoMarkdown::convertText()` para conversión segura a HTML y reemplazo de variables globales (`{PROJECT_NAME}`, `{PROJECT_DOMAIN}`, etc.).
-- Gestión interna desde Filament en `/admin/faqs` (`FaqResource`) con dos bloques: pregunta y respuesta, más visibilidad y orden de prioridad.
+- Traducción dinámica según el locale activo de la aplicación (`es`, `en`, `pt`) con fallback transparente a español (`getTranslatedQuestion()`, `getTranslatedAnswer()`).
+- Renderizado de respuestas con `ContenidoMarkdown::convertText()` para conversión segura a HTML y reemplazo de variables globales (`{PROJECT_NAME}`, `{PROJECT_DOMAIN}`, `{TELEGRAM_BOT_USERNAME}`, etc.).
+- Gestión interna desde Filament en `/admin/faqs` (`FaqResource`) con selector superior de idiomas por pestañas (`Tabs`), visibilidad a la derecha de la pregunta, editor Markdown a ancho completo y reordenación interactiva arrastrando filas en la tabla.
 
 ---
 > Creado: 2026-10-08 · Última revisión: 2026-10-08

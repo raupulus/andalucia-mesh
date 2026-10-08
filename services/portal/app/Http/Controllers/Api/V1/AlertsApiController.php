@@ -139,7 +139,7 @@ class AlertsApiController extends Controller
             $alerta = null;
         }
 
-        if (!$alerta) {
+        if (! $alerta) {
             return response()->json([
                 'error' => [
                     'status' => 404,

@@ -30,8 +30,9 @@ class StatsApiController extends Controller
     public function summary(): JsonResponse
     {
         $res = $this->resumen->obtenerResultado();
+
         return response()->json($res->aRespuesta(), 200, [
-            'Cache-Control' => 'public, max-age=' . ($res->stale ? 15 : $res->ttl),
+            'Cache-Control' => 'public, max-age='.($res->stale ? 15 : $res->ttl),
             'X-Cache' => $res->xCache,
         ]);
     }
@@ -42,7 +43,7 @@ class StatsApiController extends Controller
     public function provinces(Request $request): JsonResponse
     {
         $ventana = $request->query('window', '7d');
-        if (!in_array($ventana, ['24h', '7d', '30d'], true)) {
+        if (! in_array($ventana, ['24h', '7d', '30d'], true)) {
             return response()->json([
                 'error' => [
                     'status' => 400,
@@ -56,8 +57,9 @@ class StatsApiController extends Controller
         }
 
         $res = $this->provincias->obtenerResultado((string) $ventana);
+
         return response()->json($res->aRespuesta(), 200, [
-            'Cache-Control' => 'public, max-age=' . ($res->stale ? 15 : $res->ttl),
+            'Cache-Control' => 'public, max-age='.($res->stale ? 15 : $res->ttl),
             'X-Cache' => $res->xCache,
         ]);
     }
@@ -68,6 +70,7 @@ class StatsApiController extends Controller
     public function rankingsList(): JsonResponse
     {
         $catalogo = Rankings::catalogo();
+
         return response()->json([
             'generated_at' => gmdate('Y-m-d\TH:i:s\Z'),
             'stale' => false,
@@ -101,7 +104,7 @@ class StatsApiController extends Controller
         }
 
         return response()->json($res->aRespuesta(), 200, [
-            'Cache-Control' => 'public, max-age=' . ($res->stale ? 15 : $res->ttl),
+            'Cache-Control' => 'public, max-age='.($res->stale ? 15 : $res->ttl),
             'X-Cache' => $res->xCache,
         ]);
     }
@@ -127,7 +130,7 @@ class StatsApiController extends Controller
         }
 
         return response()->json($res->aRespuesta(), 200, [
-            'Cache-Control' => 'public, max-age=' . ($res->stale ? 15 : $res->ttl),
+            'Cache-Control' => 'public, max-age='.($res->stale ? 15 : $res->ttl),
             'X-Cache' => $res->xCache,
         ]);
     }
@@ -141,8 +144,9 @@ class StatsApiController extends Controller
         $sort = (string) $request->query('sort', 'battery_asc');
 
         $res = $this->routers->obtenerResultado($province ? (string) $province : null, $sort);
+
         return response()->json($res->aRespuesta(), 200, [
-            'Cache-Control' => 'public, max-age=' . ($res->stale ? 15 : $res->ttl),
+            'Cache-Control' => 'public, max-age='.($res->stale ? 15 : $res->ttl),
             'X-Cache' => $res->xCache,
         ]);
     }

@@ -32,18 +32,19 @@ class GenerarMapaSvg extends Command
 
         // 1. Localizar el archivo GeoJSON
         $geojsonPath = base_path('../../services/ingesta/polygons/provincias-andalucia.geojson');
-        if (!file_exists($geojsonPath)) {
+        if (! file_exists($geojsonPath)) {
             $geojsonPath = resource_path('geo/provincias-andalucia.geojson');
         }
 
-        if (!file_exists($geojsonPath)) {
+        if (! file_exists($geojsonPath)) {
             $this->error("No se encontró el archivo GeoJSON en {$geojsonPath}");
+
             return Command::FAILURE;
         }
 
         $jsonRaw = (string) file_get_contents($geojsonPath);
         $geoData = json_decode($jsonRaw, true);
-        if (!is_array($geoData) || empty($geoData['features'])) {
+        if (! is_array($geoData) || empty($geoData['features'])) {
             throw new RuntimeException('GeoJSON corrupto o sin features.');
         }
 
@@ -65,6 +66,7 @@ class GenerarMapaSvg extends Command
         $project = function (float $lon, float $lat) use ($minLon, $maxLat, $cosPhi0, $scale, $padding): array {
             $x = ($lon - $minLon) * $cosPhi0 * $scale + $padding;
             $y = ($maxLat - $lat) * $scale + $padding;
+
             return [round($x, 1), round($y, 1)];
         };
 
@@ -91,8 +93,8 @@ class GenerarMapaSvg extends Command
                         $p = $project((float) $pt[0], (float) $pt[1]);
                         $ringPoints[] = "{$p[0]},{$p[1]}";
                     }
-                    if (!empty($ringPoints)) {
-                        $dParts[] = 'M ' . implode(' ', $ringPoints) . ' Z';
+                    if (! empty($ringPoints)) {
+                        $dParts[] = 'M '.implode(' ', $ringPoints).' Z';
                     }
                 }
             }
@@ -106,7 +108,7 @@ class GenerarMapaSvg extends Command
         $targetBlade = resource_path('views/components/mapa-provincias.blade.php');
         file_put_contents($targetBlade, $blade);
 
-        $this->info("Componente generado con éxito en: {$targetBlade} (" . strlen($blade) . ' bytes)');
+        $this->info("Componente generado con éxito en: {$targetBlade} (".strlen($blade).' bytes)');
 
         return Command::SUCCESS;
     }
@@ -114,8 +116,8 @@ class GenerarMapaSvg extends Command
     /**
      * Construye el código Blade del componente SVG y su tabla accesible.
      *
-     * @param array<string, string> $paths
-     * @param array<string, string> $names
+     * @param  array<string, string>  $paths
+     * @param  array<string, string>  $names
      */
     protected function generarPlantillaBlade(array $paths, array $names, float $w, float $h): string
     {
@@ -221,7 +223,7 @@ BLADE;
             $out .= "                          aria-haspopup=\"dialog\"\n";
             $out .= "                          aria-label=\"{{ \$mapaDatos['{$code}']['name'] ?? '{$name}' }}: {{ \$mapaDatos['{$code}']['nodes'] ?? 0 }} nodos\"\n";
             $out .= "                          data-code=\"{$code}\" />\n";
-            $out .= "                    <g class=\"burbuja-grupo " . ($code === 'ES-CA' ? 'burbuja-cadiz' : '') . "\" transform=\"translate({$bX}, {$bY})\" pointer-events=\"none\">\n";
+            $out .= '                    <g class="burbuja-grupo '.($code === 'ES-CA' ? 'burbuja-cadiz' : '')."\" transform=\"translate({$bX}, {$bY})\" pointer-events=\"none\">\n";
             $out .= "                        <circle r=\"22\" class=\"burbuja-fondo\" />\n";
             $out .= "                        <text y=\"6\" text-anchor=\"middle\" class=\"burbuja-texto\">{{ \$mapaDatos['{$code}']['nodes'] ?? '0' }}</text>\n";
             $out .= "                    </g>\n";

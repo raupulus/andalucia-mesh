@@ -117,7 +117,7 @@ class Rankings
     public function obtenerRanking(string $id, string $period = 'day', string $which = 'current', int $limit = 10): Resultado
     {
         $catalogo = self::catalogo();
-        if (!isset($catalogo[$id])) {
+        if (! isset($catalogo[$id])) {
             throw new InvalidArgumentException("Ranking desconocido '{$id}'.");
         }
 
@@ -151,7 +151,7 @@ class Rankings
             }
 
             $infoNodos = [];
-            if (!empty($nodeIds)) {
+            if (! empty($nodeIds)) {
                 $infoNodos = DB::connection('ingesta')
                     ->table('api_nodes')
                     ->whereIn('id', $nodeIds)

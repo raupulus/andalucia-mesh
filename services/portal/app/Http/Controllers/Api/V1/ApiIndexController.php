@@ -22,7 +22,7 @@ class ApiIndexController extends Controller
             'project' => config('proyecto.nombre'),
             'domain' => config('proyecto.dominio'),
             'contact' => config('proyecto.contacto'),
-            'documentation' => 'https://' . config('proyecto.dominio') . '/api',
+            'documentation' => 'https://'.config('proyecto.dominio').'/api',
             'generated_at' => gmdate('Y-m-d\TH:i:s\Z'),
             'stale' => false,
             'endpoints_count' => count($endpoints),

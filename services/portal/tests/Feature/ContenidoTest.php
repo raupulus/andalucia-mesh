@@ -17,7 +17,7 @@ class ContenidoTest extends TestCase
     {
         $servicio = app(ContenidoMarkdown::class);
         $directorio = resource_path('contenido');
-        $archivos = glob($directorio . '/*.md');
+        $archivos = glob($directorio.'/*.md');
 
         $this->assertNotEmpty($archivos, 'El directorio resources/contenido debe contener archivos Markdown.');
 

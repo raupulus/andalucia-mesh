@@ -20,12 +20,12 @@ class RankingsController extends Controller
     public function index(Request $request): View
     {
         $period = (string) $request->query('period', 'day');
-        if (!in_array($period, ['hour', 'day', 'week', 'month'], true)) {
+        if (! in_array($period, ['hour', 'day', 'week', 'month'], true)) {
             $period = 'day';
         }
 
         $which = (string) $request->query('which', 'current');
-        if (!in_array($which, ['current', 'previous'], true)) {
+        if (! in_array($which, ['current', 'previous'], true)) {
             $which = 'current';
         }
 

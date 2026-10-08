@@ -15,12 +15,13 @@ use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
 /**
- * Esquema del formulario de gestión de categorías de hardware en Filament.
+ * Esquema del formulario de gestión de categorías de hardware en Filament con soporte multi-idioma (ES/EN/PT).
  */
 class HardwareCategoryForm
 {
     /**
-     * Configura los campos del formulario con soporte multi-idioma (ES/EN) y metadatos.
+     * Configura los campos del formulario con pestañas de idioma en la cabecera del bloque de textos
+     * a ancho completo y bloque de configuración y visibilidad debajo a ancho completo.
      */
     public static function configure(Schema $schema): Schema
     {
@@ -28,10 +29,12 @@ class HardwareCategoryForm
             ->components([
                 Section::make(__('admin.hardware.section_translations'))
                     ->description(__('admin.hardware.section_translations_desc'))
+                    ->columnSpanFull()
                     ->schema([
-                        Tabs::make('I18n')
+                        Tabs::make('Idiomas')
                             ->tabs([
                                 Tab::make(__('admin.hardware.tab_es'))
+                                    ->badge('ES')
                                     ->schema([
                                         TextInput::make('name.es')
                                             ->label(__('admin.hardware.field_name_es'))
@@ -46,7 +49,9 @@ class HardwareCategoryForm
                                             ->label(__('admin.hardware.field_description_es'))
                                             ->rows(3),
                                     ]),
+
                                 Tab::make(__('admin.hardware.tab_en'))
+                                    ->badge('EN')
                                     ->schema([
                                         TextInput::make('name.en')
                                             ->label(__('admin.hardware.field_name_en')),
@@ -54,26 +59,40 @@ class HardwareCategoryForm
                                             ->label(__('admin.hardware.field_description_en'))
                                             ->rows(3),
                                     ]),
-                            ]),
+
+                                Tab::make(__('admin.hardware.tab_pt'))
+                                    ->badge('PT')
+                                    ->schema([
+                                        TextInput::make('name.pt')
+                                            ->label(__('admin.hardware.field_name_pt')),
+                                        Textarea::make('description.pt')
+                                            ->label(__('admin.hardware.field_description_pt'))
+                                            ->rows(3),
+                                    ]),
+                            ])
+                            ->columnSpanFull(),
                     ]),
 
                 Section::make(__('admin.hardware.section_settings'))
+                    ->description(__('admin.hardware.section_settings_desc'))
+                    ->columnSpanFull()
                     ->schema([
                         TextInput::make('slug')
                             ->label(__('admin.hardware.field_slug'))
                             ->required()
                             ->unique(ignoreRecord: true),
 
-                        Grid::make(2)->schema([
-                            TextInput::make('sort_order')
-                                ->label(__('admin.hardware.field_sort_order'))
-                                ->numeric()
-                                ->default(0),
+                        Grid::make(['default' => 1, 'md' => 2])
+                            ->schema([
+                                TextInput::make('sort_order')
+                                    ->label(__('admin.hardware.field_sort_order'))
+                                    ->numeric()
+                                    ->default(0),
 
-                            Toggle::make('is_active')
-                                ->label(__('admin.hardware.field_is_active'))
-                                ->default(true),
-                        ]),
+                                Toggle::make('is_active')
+                                    ->label(__('admin.hardware.field_is_active'))
+                                    ->default(true),
+                            ]),
                     ]),
             ]);
     }

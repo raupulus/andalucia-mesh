@@ -45,6 +45,7 @@ Registro de decisiones deliberadas de arquitectura, diseño y convenciones técn
 | DT-37 | Aislamiento estricto de instancias de terceros frente a federaciones externas | Las aplicaciones upstream como PotatoMesh traen por defecto activada la federación peer-to-peer (`FEDERATION=1`). En el proyecto se fuerza `FEDERATION=0` tanto en compose como en `.env` para garantizar que la instancia no realice anuncios salientes ni crawling a nodos externos no auditados. |
 | DT-38 | Registro de personalizaciones sobre software de terceros (`docs/info/customizations.md`) | Cualquier parche de plantilla o código sobre imágenes docker de terceros se versiona en el repositorio (ej. `integrations/<pieza>/templates/`) y se cataloga con ID en `customizations.md` para garantizar que sea comprobado y reaplicado en cada actualización de versión. |
 | DT-39 | Agrupación provincial y exclusión estricta de nodos exteriores en comandos de routers (`/battery` y `/routers`) | Facilita la lectura rápida de telemetría de infraestructura por zona y evita contaminación visual con nodos foráneos, alineado con el alcance regional andaluz del proyecto. |
+| DT-40 | Puerto MQTT 1883 plano cerrado hacia el exterior; pasarela pública exclusiva por puerto 8883 con TLS terminado en Nginx stream | Garantiza el cifrado en tránsito de credenciales y telemetría de gateways comunitarios hacia el broker; el listener 1883 de Mosquitto solo atiende tráfico interno y el stream local de Nginx (`127.0.0.1`). |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

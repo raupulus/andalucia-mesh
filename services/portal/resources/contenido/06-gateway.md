@@ -107,10 +107,10 @@ Los paquetes que subes se muestran en PotatoMesh y MeshView, alimentan las estad
 | `{ALLOWED_CHANNELS}` | Variable global de la que se genera la ACL del broker. Se pinta tal cual, sin escribir los nombres a mano |
 | `{PRIMARY_CHANNEL}` | `PRIMARY_CHANNEL` |
 | Contacto y `mailto:` | `PROJECT_CONTACT` |
-| Puertos | Fijos (`1883`, `8883`), según `../../mosquitto/README.md` |
+| Puertos | `8883` (con TLS obligatorio; 1883 cerrado al exterior), según `../../mosquitto/README.md` |
 | Texto | `resources/contenido/conecta-tu-gateway.md`. Sin datos de la API |
 
 Ningún texto incluye credenciales: ni contraseñas de gateway ni de servicios (`../04-gateway-connection.md`).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

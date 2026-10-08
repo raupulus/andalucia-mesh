@@ -247,6 +247,17 @@
                 border-color: var(--color-enlace);
                 box-shadow: 0 0 0 3px var(--color-acento-suave);
             }
+            .faq-respuesta h1, .faq-respuesta h2, .faq-respuesta h3, .faq-respuesta h4, .faq-respuesta h5, .faq-respuesta h6 {
+                color: var(--color-texto-1);
+                font-weight: 700;
+                margin-top: 1.25rem;
+                margin-bottom: 0.5rem;
+                line-height: 1.35;
+            }
+            .faq-respuesta h1 { font-size: 1.25rem; }
+            .faq-respuesta h2 { font-size: 1.15rem; }
+            .faq-respuesta h3 { font-size: 1.05rem; }
+            .faq-respuesta h4, .faq-respuesta h5, .faq-respuesta h6 { font-size: 0.95rem; }
             .faq-respuesta p {
                 margin-top: 0;
                 margin-bottom: 0.85rem;
@@ -254,13 +265,44 @@
             .faq-respuesta p:last-child {
                 margin-bottom: 0;
             }
+            .faq-respuesta strong {
+                font-weight: 700;
+                color: var(--color-texto-1);
+            }
+            .faq-respuesta em {
+                font-style: italic;
+            }
+            .faq-respuesta del {
+                text-decoration: line-through;
+                opacity: 0.8;
+            }
             .faq-respuesta ul, .faq-respuesta ol {
-                margin-top: 0.25rem;
+                margin-top: 0.35rem;
                 margin-bottom: 0.85rem;
                 padding-left: 1.5rem;
             }
             .faq-respuesta li {
                 margin-bottom: 0.35rem;
+            }
+            .faq-respuesta blockquote {
+                margin: 0.85rem 0;
+                padding: 0.6rem 1rem;
+                border-left: 3px solid var(--color-enlace);
+                background: var(--color-superficie-sutil);
+                border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
+                color: var(--color-texto-2);
+                font-style: italic;
+            }
+            .faq-respuesta pre {
+                background: var(--color-superficie-sutil);
+                border: 1px solid var(--color-borde);
+                border-radius: var(--radio-sm);
+                padding: 0.75rem 1rem;
+                overflow-x: auto;
+                font-family: var(--fuente-mono);
+                font-size: 0.9em;
+                margin: 0.85rem 0;
+                line-height: 1.5;
             }
             .faq-respuesta code {
                 font-family: var(--fuente-mono);
@@ -270,10 +312,40 @@
                 border-radius: var(--radio-sm);
                 border: 1px solid var(--color-borde);
             }
+            .faq-respuesta pre code {
+                background: transparent;
+                padding: 0;
+                border: none;
+            }
             .faq-respuesta a {
                 color: var(--color-enlace);
                 text-decoration: underline;
                 text-underline-offset: 3px;
+                font-weight: 500;
+            }
+            .faq-respuesta a:hover {
+                opacity: 0.85;
+            }
+            .faq-respuesta table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 1rem 0;
+                font-size: 0.95rem;
+            }
+            .faq-respuesta th, .faq-respuesta td {
+                padding: 0.5rem 0.75rem;
+                border: 1px solid var(--color-borde);
+                text-align: left;
+            }
+            .faq-respuesta th {
+                background: var(--color-superficie-sutil);
+                font-weight: 600;
+                color: var(--color-texto-1);
+            }
+            .faq-respuesta hr {
+                border: none;
+                border-top: 1px solid var(--color-borde);
+                margin: 1.25rem 0;
             }
         </style>
     </x-slot:styles>

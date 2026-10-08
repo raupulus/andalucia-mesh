@@ -32,7 +32,7 @@ class GenerarCodigoQr extends Command
     {
         $domain = (string) config('proyecto.dominio');
         $nombre = (string) config('proyecto.nombre');
-        $url = 'https://' . $domain;
+        $url = 'https://'.$domain;
 
         $this->info("Generando códigos QR para: {$url}");
 
@@ -50,14 +50,14 @@ class GenerarCodigoQr extends Command
         $svgContent = $qrcode->render($url);
         $svgPath = public_path('qr.svg');
         file_put_contents($svgPath, $svgContent);
-        $this->info("Archivo SVG generado en: {$svgPath} (" . strlen($svgContent) . " bytes)");
+        $this->info("Archivo SVG generado en: {$svgPath} (".strlen($svgContent).' bytes)');
 
         // 3. Generar qr.pdf (Formato A6: 105 mm x 148 mm -> 297.64 pt x 419.53 pt)
         $matrix = $qrcode->getQRMatrix($url);
         $pdfContent = $this->generarPdfA6($matrix, $nombre, $url);
         $pdfPath = public_path('qr.pdf');
         file_put_contents($pdfPath, $pdfContent);
-        $this->info("Archivo PDF generado en: {$pdfPath} (" . strlen($pdfContent) . " bytes)");
+        $this->info("Archivo PDF generado en: {$pdfPath} (".strlen($pdfContent).' bytes)');
 
         return Command::SUCCESS;
     }
@@ -75,13 +75,13 @@ class GenerarCodigoQr extends Command
         // Título del proyecto
         $stream .= "BT\n/F1 18 Tf\n";
         $titleX = max(20.0, ($pageW - (strlen($nombre) * 9.5)) / 2);
-        $stream .= sprintf("1 0 0 1 %.2f 365 Tm\n(%s) Tj\nET\n", $titleX, addcslashes($nombre, "()\\"));
+        $stream .= sprintf("1 0 0 1 %.2f 365 Tm\n(%s) Tj\nET\n", $titleX, addcslashes($nombre, '()\\'));
 
         // Subtítulo
         $sub = 'Red regional comunitaria LoRa Meshtastic';
         $stream .= "BT\n/F2 9 Tf\n";
         $subX = max(15.0, ($pageW - (strlen($sub) * 4.8)) / 2);
-        $stream .= sprintf("1 0 0 1 %.2f 345 Tm\n(%s) Tj\nET\n", $subX, addcslashes($sub, "()\\"));
+        $stream .= sprintf("1 0 0 1 %.2f 345 Tm\n(%s) Tj\nET\n", $subX, addcslashes($sub, '()\\'));
 
         // Matriz del QR centrada
         $matrixSize = $matrix->getSize();
@@ -103,13 +103,13 @@ class GenerarCodigoQr extends Command
         // URL legible debajo del QR
         $stream .= "BT\n/F1 11 Tf\n";
         $urlX = max(15.0, ($pageW - (strlen($url) * 6.2)) / 2);
-        $stream .= sprintf("1 0 0 1 %.2f 90 Tm\n(%s) Tj\nET\n", $urlX, addcslashes($url, "()\\"));
+        $stream .= sprintf("1 0 0 1 %.2f 90 Tm\n(%s) Tj\nET\n", $urlX, addcslashes($url, '()\\'));
 
         // Pie
         $pie = 'Accede para ver el mapa en vivo y configurar tu nodo';
         $stream .= "BT\n/F2 8 Tf\n";
         $pieX = max(10.0, ($pageW - (strlen($pie) * 4.2)) / 2);
-        $stream .= sprintf("1 0 0 1 %.2f 70 Tm\n(%s) Tj\nET\n", $pieX, addcslashes($pie, "()\\"));
+        $stream .= sprintf("1 0 0 1 %.2f 70 Tm\n(%s) Tj\nET\n", $pieX, addcslashes($pie, '()\\'));
 
         $len = strlen($stream);
         $objs = [];
@@ -122,13 +122,13 @@ class GenerarCodigoQr extends Command
         );
         $objs[4] = '<</Type/Font/Subtype/Type1/BaseFont/Helvetica-Bold>>';
         $objs[5] = '<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>';
-        $objs[6] = "<</Length {$len}>>\nstream\n" . $stream . "endstream";
+        $objs[6] = "<</Length {$len}>>\nstream\n".$stream.'endstream';
 
         $out = "%PDF-1.4\n";
         $offsets = [0];
         for ($i = 1; $i <= 6; $i++) {
             $offsets[$i] = strlen($out);
-            $out .= "{$i} 0 obj\n" . $objs[$i] . "\nendobj\n";
+            $out .= "{$i} 0 obj\n".$objs[$i]."\nendobj\n";
         }
         $xrefOffset = strlen($out);
         $out .= "xref\n0 7\n0000000000 65535 f \n";

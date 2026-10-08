@@ -35,12 +35,11 @@ class ContenidoMarkdown
                 'noreferrer' => 'external',
             ],
         ]);
-        $environment->addExtension(new CommonMarkCoreExtension());
-        $environment->addExtension(new GithubFlavoredMarkdownExtension());
-        $environment->addExtension(new ExternalLinkExtension());
+        $environment->addExtension(new CommonMarkCoreExtension);
+        $environment->addExtension(new GithubFlavoredMarkdownExtension);
+        $environment->addExtension(new ExternalLinkExtension);
 
         $this->converter = new MarkdownConverter($environment);
-
 
         $this->variables = [
             '{PROJECT_NAME}' => (string) config('proyecto.nombre'),
@@ -59,13 +58,13 @@ class ContenidoMarkdown
             '{LORA_HOP_LIMIT}' => (string) config('proyecto.lora.hop_limit'),
             '{INGESTA_LORA_PREAMBULO}' => (string) config('proyecto.lora.preambulo'),
             '{MQTT_HOST}' => (string) config('proyecto.mqtt.host_publico'),
-            '{MQTT_PORT}' => (string) config('proyecto.mqtt.puerto_plano'),
+            '{MQTT_PORT}' => (string) config('proyecto.mqtt.puerto_tls'),
             '{MQTT_TLS_PORT}' => (string) config('proyecto.mqtt.puerto_tls'),
             '{MQTT_TOPIC_ROOT}' => (string) config('proyecto.mqtt.topic_root'),
             '{MQTT_GATEWAY_USER}' => (string) config('proyecto.mqtt.gateway_user'),
             '{MQTT_GATEWAY_PASSWORD}' => (string) config('proyecto.mqtt.gateway_password'),
-            '{MESHVIEW_URL}' => 'https://' . env('MESHVIEW_DOMAIN', 'meshview.' . $projectDomain),
-            '{POTATOMESH_URL}' => 'https://potato.' . $projectDomain,
+            '{MESHVIEW_URL}' => 'https://'.env('MESHVIEW_DOMAIN', 'meshview.'.$projectDomain),
+            '{POTATOMESH_URL}' => 'https://potato.'.$projectDomain,
             '{TELEGRAM_BOT_USERNAME}' => (string) config('proyecto.bots.telegram_username'),
             '{DISCORD_INVITE_URL}' => (string) config('proyecto.bots.discord_invite_url'),
             '{BOT_RIESGOS_DEFECTO}' => (string) config('proyecto.bots.riesgos_defecto'),
@@ -87,7 +86,7 @@ class ContenidoMarkdown
     /**
      * Carga y procesa un documento Markdown devolviendo título, descripción y HTML.
      *
-     * @param string $nombreFichero Nombre relativo en resources/contenido/ (ej. '02-project.md')
+     * @param  string  $nombreFichero  Nombre relativo en resources/contenido/ (ej. '02-project.md')
      * @return array{titulo: string, descripcion: string, html: string, h1: string}
      */
     public function render(string $nombreFichero): array
@@ -97,18 +96,18 @@ class ContenidoMarkdown
 
         if ($locale !== 'es') {
             $ficheroLocalizado = str_replace('.md', ".{$locale}.md", $nombreFichero);
-            if (file_exists(resource_path('contenido/' . $ficheroLocalizado))) {
+            if (file_exists(resource_path('contenido/'.$ficheroLocalizado))) {
                 $ficheroEfectivo = $ficheroLocalizado;
             }
         }
 
-        $path = resource_path('contenido/' . $ficheroEfectivo);
-        if (!file_exists($path)) {
-            $path = resource_path('contenido/' . $nombreFichero);
+        $path = resource_path('contenido/'.$ficheroEfectivo);
+        if (! file_exists($path)) {
+            $path = resource_path('contenido/'.$nombreFichero);
             $ficheroEfectivo = $nombreFichero;
         }
 
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             throw new RuntimeException("El archivo de contenido {$nombreFichero} no existe.");
         }
 
@@ -116,7 +115,7 @@ class ContenidoMarkdown
         $cacheKey = "markdown_render_v4:{$locale}:{$ficheroEfectivo}:{$mtime}";
 
         /** @var array{titulo: string, descripcion: string, html: string, h1: string} */
-        return Cache::rememberForever($cacheKey, function () use ($path, $ficheroEfectivo): array {
+        return Cache::rememberForever($cacheKey, function () use ($path): array {
             $rawContent = (string) file_get_contents($path);
 
             // 1. Extraer metadatos de SEO si existen
@@ -140,7 +139,6 @@ class ContenidoMarkdown
             $partes = preg_split('/\n##\s+(?:Datos dinámicos|Supuestos aplicados|Criterios de aceptación)/u', $body);
             $body = $partes[0] ?? $body;
             $body = preg_replace('/\n---\s*\n>\s*Creado:.*$/us', '', $body) ?? $body;
-
 
             // 3. Extraer H1 si está anotado como "**H1:** Título" y descartar meta-instrucciones previas
             $h1 = $titulo;
@@ -186,7 +184,7 @@ class ContenidoMarkdown
     /**
      * Convierte una cadena de texto en formato Markdown a HTML seguro sustituyendo variables globales.
      *
-     * @param string $markdown Texto con sintaxis Markdown
+     * @param  string  $markdown  Texto con sintaxis Markdown
      * @return string HTML sanitizado resultante
      */
     public function convertText(string $markdown): string
@@ -196,4 +194,3 @@ class ContenidoMarkdown
         return (string) $this->converter->convert($texto);
     }
 }
-

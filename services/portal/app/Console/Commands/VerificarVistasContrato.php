@@ -63,6 +63,7 @@ class VerificarVistasContrato extends Command
             DB::connection('ingesta')->getPdo();
         } catch (Throwable $e) {
             $this->error("No se pudo conectar a la base de datos de ingesta: {$e->getMessage()}");
+
             return Command::FAILURE;
         }
 
@@ -77,9 +78,10 @@ class VerificarVistasContrato extends Command
                 ->where('table_name', $nombreVista)
                 ->exists();
 
-            if (!$existe) {
+            if (! $existe) {
                 $filasTabla[] = [$nombreVista, 'NO EXISTE', 'Faltan todas'];
                 $todasCorrectas = false;
+
                 continue;
             }
 
@@ -94,7 +96,7 @@ class VerificarVistasContrato extends Command
             $faltantes = array_diff($columnasRequeridas, $columnasDb);
 
             if (empty($faltantes)) {
-                $filasTabla[] = [$nombreVista, 'OK (' . count($columnasDb) . ' cols)', 'Ninguna'];
+                $filasTabla[] = [$nombreVista, 'OK ('.count($columnasDb).' cols)', 'Ninguna'];
             } else {
                 $filasTabla[] = [$nombreVista, 'INCOMPLETA', implode(', ', $faltantes)];
                 $todasCorrectas = false;
@@ -105,10 +107,12 @@ class VerificarVistasContrato extends Command
 
         if ($todasCorrectas) {
             $this->info('Todas las 20 vistas de contrato api_* están presentes y completas.');
+
             return Command::SUCCESS;
         }
 
         $this->error('Se detectaron vistas ausentes o con columnas faltantes.');
+
         return Command::FAILURE;
     }
 }

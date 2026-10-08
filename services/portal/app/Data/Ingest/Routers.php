@@ -13,8 +13,8 @@ class Routers
     /**
      * Obtiene el listado de routers de infraestructura y su telemetría.
      *
-     * @param string|null $province Filtro opcional por código ISO provincial
-     * @param string $sort battery_asc, last_seen_desc, chutil_desc
+     * @param  string|null  $province  Filtro opcional por código ISO provincial
+     * @param  string  $sort  battery_asc, last_seen_desc, chutil_desc
      */
     public function obtenerResultado(?string $province = null, string $sort = 'battery_asc'): Resultado
     {

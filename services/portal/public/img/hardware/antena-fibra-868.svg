@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <rect width="400" height="400" fill="#1F2029"/>
+  <rect x="20" y="20" width="360" height="360" rx="20" fill="#2C2D3C" stroke="#3D3E4D" stroke-width="3"/>
+  <!-- Base N-connector -->
+                   <rect x="185" y="260" width="30" height="50" rx="4" fill="#8D8EA6" stroke="#F0F0F5" stroke-width="2"/>
+                   <!-- Fiberglass tube -->
+                   <rect x="190" y="70" width="20" height="190" rx="6" fill="#F0F0F5" stroke="#E0E1EB" stroke-width="2"/>
+                   <!-- RF Radiation waves -->
+                   <circle cx="200" cy="140" r="50" fill="none" stroke="#67EA94" stroke-width="3" stroke-dasharray="8 6"/>
+                   <circle cx="200" cy="140" r="85" fill="none" stroke="#67EA94" stroke-width="2" stroke-dasharray="10 8" opacity="0.7"/>
+                   <circle cx="200" cy="140" r="120" fill="none" stroke="#67EA94" stroke-width="1.5" stroke-dasharray="12 10" opacity="0.4"/>
+  <text x="200" y="340" fill="#F0F0F5" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="700" text-anchor="middle">Antena Fibra 5.8 dBi</text>
+  <text x="200" y="360" fill="#9FA0B4" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="500" text-anchor="middle">Omni Colineal 868 MHz</text>
+</svg>

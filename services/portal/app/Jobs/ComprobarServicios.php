@@ -54,7 +54,7 @@ class ComprobarServicios
     /**
      * Audita un servicio específico según su tipo de sonda.
      *
-     * @param array<string, mixed> $cfg
+     * @param  array<string, mixed>  $cfg
      */
     private function auditarServicio(string $clave, array $cfg, int $timeout): void
     {
@@ -87,22 +87,22 @@ class ComprobarServicios
                             $motivo = $ok ? null : (string) ($json['motivo'] ?? $json['error'] ?? 'Estado ok: false');
                         } else {
                             $ok = $res->successful();
-                            $motivo = $ok ? null : 'Código HTTP ' . $codigo;
+                            $motivo = $ok ? null : 'Código HTTP '.$codigo;
                         }
                     } else {
                         $ok = $res->successful();
-                        $motivo = $ok ? null : 'Código HTTP ' . $codigo;
+                        $motivo = $ok ? null : 'Código HTTP '.$codigo;
                     }
                     break;
 
                 case 'mqtt':
                     $host = (string) ($cfg['host'] ?? '172.30.0.1');
                     $port = (int) ($cfg['port'] ?? 1884);
-                    $user = !empty($cfg['user']) ? (string) $cfg['user'] : null;
-                    $pass = !empty($cfg['password']) ? (string) $cfg['password'] : null;
+                    $user = ! empty($cfg['user']) ? (string) $cfg['user'] : null;
+                    $pass = ! empty($cfg['password']) ? (string) $cfg['password'] : null;
 
-                    $client = new MqttClient($host, $port, 'portal-health-' . bin2hex(random_bytes(4)));
-                    $settings = (new ConnectionSettings())
+                    $client = new MqttClient($host, $port, 'portal-health-'.bin2hex(random_bytes(4)));
+                    $settings = (new ConnectionSettings)
                         ->setUsername($user)
                         ->setPassword($pass)
                         ->setConnectTimeout($timeout)
@@ -133,7 +133,7 @@ class ComprobarServicios
                         $ok = true;
                     } else {
                         $ok = false;
-                        $motivo = 'Fallo en conexiones: ' . implode(', ', $falladas);
+                        $motivo = 'Fallo en conexiones: '.implode(', ', $falladas);
                     }
                     break;
 
@@ -148,13 +148,13 @@ class ComprobarServicios
                         $ok = true;
                     } else {
                         $ok = false;
-                        $motivo = $latido === null ? 'Sin registros de ejecución previos' : 'Sin latido en los últimos ' . $maxRetraso . 's';
+                        $motivo = $latido === null ? 'Sin registros de ejecución previos' : 'Sin latido en los últimos '.$maxRetraso.'s';
                     }
                     break;
 
                 default:
                     $latenciaMs = 0;
-                    $motivo = 'Tipo de sonda no soportado: ' . $tipo;
+                    $motivo = 'Tipo de sonda no soportado: '.$tipo;
                     break;
             }
         } catch (Throwable $e) {

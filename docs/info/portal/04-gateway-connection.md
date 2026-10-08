@@ -47,7 +47,7 @@ Una línea sobre qué se hace con los datos y enlace a `/legal/privacidad`; "si 
 
 ## Contratos propios
 
-- `config/proyecto.php` → `mqtt.host_publico` (`'mqtt.'.PROJECT_DOMAIN`), `mqtt.puertos` (`1883`, `8883`), `mqtt.topic_raiz` (`MQTT_TOPIC_ROOT`), `canales` (`ALLOWED_CHANNELS`), `canal_primario`.
+- `config/proyecto.php` → `mqtt.host_publico` (`'mqtt.'.PROJECT_DOMAIN`), `mqtt.puerto_tls` (`8883`), `mqtt.topic_raiz` (`MQTT_TOPIC_ROOT`), `canales` (`ALLOWED_CHANNELS`), `canal_primario`.
 - La tabla de ajustes es la misma que la de alta de gateways del broker: si cambia allí, cambia aquí.
 
 ## Unidades de trabajo

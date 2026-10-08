@@ -7,11 +7,11 @@ namespace App\Data;
 class Resultado
 {
     /**
-     * @param mixed $datos Contenido devuelto por la consulta o respaldo
-     * @param string $generadoEn Fecha ISO 8601 UTC en que se originó el dato
-     * @param bool $stale True si el dato proviene de una copia de respaldo ante fallo
-     * @param string $xCache Estado de la caché ('HIT', 'MISS', 'STALE')
-     * @param int $ttl Segundos recomendados de caché
+     * @param  mixed  $datos  Contenido devuelto por la consulta o respaldo
+     * @param  string  $generadoEn  Fecha ISO 8601 UTC en que se originó el dato
+     * @param  bool  $stale  True si el dato proviene de una copia de respaldo ante fallo
+     * @param  string  $xCache  Estado de la caché ('HIT', 'MISS', 'STALE')
+     * @param  int  $ttl  Segundos recomendados de caché
      */
     public function __construct(
         public mixed $datos,

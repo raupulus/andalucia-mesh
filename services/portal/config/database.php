@@ -113,7 +113,7 @@ return [
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
             'options' => extension_loaded('pdo_pgsql') ? [
-                \PDO::ATTR_TIMEOUT => 2,
+                PDO::ATTR_TIMEOUT => 2,
             ] : [],
         ],
 
@@ -130,7 +130,7 @@ return [
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
             'options' => extension_loaded('pdo_pgsql') ? [
-                \PDO::ATTR_TIMEOUT => 2,
+                PDO::ATTR_TIMEOUT => 2,
             ] : [],
         ],
 

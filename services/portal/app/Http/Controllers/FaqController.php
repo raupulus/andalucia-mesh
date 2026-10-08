@@ -24,11 +24,14 @@ class FaqController extends Controller
             ->get();
 
         $faqItems = $faqs->map(function (Faq $faq) use ($markdown): array {
+            $question = $faq->getTranslatedQuestion();
+            $answer = $faq->getTranslatedAnswer();
+
             return [
                 'id' => $faq->id,
-                'question' => $faq->question,
-                'answer' => $faq->answer,
-                'answer_html' => $markdown->convertText($faq->answer),
+                'question' => $question,
+                'answer' => $answer,
+                'answer_html' => $markdown->convertText($answer),
             ];
         });
 

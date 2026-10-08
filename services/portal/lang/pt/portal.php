@@ -607,5 +607,8 @@ return [
         'empty_title' => 'Nenhum dispositivo encontrado',
         'empty_text' => 'Nenhum resultado corresponde aos critérios selecionados. Tente selecionar outra categoria ou limpar a pesquisa.',
         'reset_filters' => 'Redefinir filtros',
+        'sidebar_heading' => 'Categorias',
+        'showing_count' => 'A mostrar :count de :total artigos',
+        'opens_new_tab' => 'abre num novo separador',
     ],
 ];

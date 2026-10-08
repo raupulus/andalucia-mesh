@@ -17,12 +17,13 @@ class Provincias
     /**
      * Obtiene los nodos y saturación provincial según la ventana de tiempo.
      *
-     * @param string $ventana '24h', '7d' o '30d'
+     * @param  string  $ventana  '24h', '7d' o '30d'
      * @return array<string, mixed>
      */
     public function obtener(string $ventana = '7d'): array
     {
         $res = $this->obtenerResultado($ventana);
+
         return $res->aRespuesta();
     }
 
@@ -63,8 +64,8 @@ class Provincias
                 'ES-CA' => 'Cádiz',
                 'ES-CO' => 'Córdoba',
                 'ES-GR' => 'Granada',
-                'ES-H'  => 'Huelva',
-                'ES-J'  => 'Jaén',
+                'ES-H' => 'Huelva',
+                'ES-J' => 'Jaén',
                 'ES-MA' => 'Málaga',
                 'ES-SE' => 'Sevilla',
             ]);

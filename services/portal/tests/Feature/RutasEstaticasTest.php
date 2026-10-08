@@ -98,10 +98,10 @@ class RutasEstaticasTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'text/plain; charset=utf-8');
-        $response->assertSee("User-agent: *", false);
-        $response->assertSee("Disallow: /admin", false);
-        $response->assertSee("Disallow: /api/v1", false);
-        $response->assertSee("Sitemap: https://" . config('proyecto.dominio') . "/sitemap.xml", false);
+        $response->assertSee('User-agent: *', false);
+        $response->assertSee('Disallow: /admin', false);
+        $response->assertSee('Disallow: /api/v1', false);
+        $response->assertSee('Sitemap: https://'.config('proyecto.dominio').'/sitemap.xml', false);
         $response->assertHeaderMissing('Set-Cookie');
     }
 
@@ -112,7 +112,7 @@ class RutasEstaticasTest extends TestCase
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/xml; charset=utf-8');
         $response->assertSee('<robots>', false);
-        $response->assertSee('<sitemap>https://' . config('proyecto.dominio') . '/sitemap.xml</sitemap>', false);
+        $response->assertSee('<sitemap>https://'.config('proyecto.dominio').'/sitemap.xml</sitemap>', false);
         $response->assertSee('<disallow>/admin</disallow>', false);
         $response->assertHeaderMissing('Set-Cookie');
     }
@@ -148,4 +148,3 @@ class RutasEstaticasTest extends TestCase
         $this->assertStringContainsString('OK to MQTT', $privacidad);
     }
 }
-
