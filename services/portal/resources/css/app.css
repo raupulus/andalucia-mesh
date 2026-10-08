@@ -370,31 +370,150 @@ p.lead {
   background-color: var(--color-superficie-sutil);
 }
 
-/* Tablas y elementos en páginas de contenido (.prose) */
+/* ==============================================================================
+ * Tablas en páginas de contenido Markdown (.prose) con estilo Andalucía y Cromo
+ * ============================================================================== */
 .prose table {
   width: 100%;
-  border-collapse: collapse;
-  margin: 1.5rem 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 2.25rem 0;
+  border-radius: var(--radio-lg);
+  border: 2px solid #007A33;
+  box-shadow: 0 0 0 1.5px #FFFFFF, 0 0 0 3px rgba(0, 122, 51, 0.25), var(--sombra-1);
+  background:
+    linear-gradient(
+      135deg,
+      #F9FDFB 0%,
+      #F0FAF4 24%,
+      #E7F7ED 44%,
+      rgba(255, 255, 255, 0.98) 49%,
+      #FFFFFF 50%,
+      rgba(255, 255, 255, 0.98) 51%,
+      #E7F7ED 56%,
+      #F0FAF4 76%,
+      #F9FDFB 100%
+    );
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.prose table:hover {
+  transform: translateY(-2px);
+  border-color: #009940;
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4.5px #007A33, 0 10px 24px rgba(0, 122, 51, 0.28);
+}
+
+[data-theme="dark"] .prose table {
+  background:
+    linear-gradient(
+      135deg,
+      #171824 0%,
+      #17221E 24%,
+      #1D2E26 44%,
+      rgba(255, 255, 255, 0.14) 49%,
+      rgba(255, 255, 255, 0.22) 50%,
+      rgba(255, 255, 255, 0.14) 51%,
+      #1D2E26 56%,
+      #17221E 76%,
+      #171824 100%
+    );
+  border: 2px solid #007A33;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.45), 0 0 0 3.5px rgba(0, 122, 51, 0.5), var(--sombra-2);
+}
+
+[data-theme="dark"] .prose table:hover {
+  transform: translateY(-2px);
+  border-color: #2ED573;
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4.5px #007A33, 0 12px 28px rgba(0, 122, 51, 0.45);
+}
+
+.prose thead th {
+  padding: 1.1rem 1.6rem;
+  background: linear-gradient(135deg, rgba(0, 122, 51, 0.08) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(0, 122, 51, 0.05) 100%);
+  border-bottom: 2px solid rgba(0, 122, 51, 0.18);
+  color: var(--color-texto);
+  font-weight: 700;
   font-size: 0.95rem;
-}
-
-.prose th {
   text-align: left;
-  padding: 0.75rem 1rem;
-  background-color: var(--color-superficie-sutil);
+  letter-spacing: 0.02em;
+}
+
+[data-theme="dark"] .prose thead th {
+  background: linear-gradient(135deg, rgba(0, 122, 51, 0.22) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(0, 122, 51, 0.12) 100%);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.12);
+}
+
+.prose tbody td {
+  padding: 1rem 1.6rem;
+  border-bottom: 1px solid rgba(0, 122, 51, 0.12);
   color: var(--color-texto);
-  border-bottom: 2px solid var(--color-borde);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+[data-theme="dark"] .prose tbody td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.prose tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.prose tbody tr:hover td {
+  background-color: rgba(0, 122, 51, 0.05);
+}
+
+[data-theme="dark"] .prose tbody tr:hover td {
+  background-color: rgba(103, 234, 148, 0.06);
+}
+
+.prose tbody td:first-child {
   font-weight: 600;
+  color: var(--color-texto-1);
+  width: 34%;
 }
 
-.prose td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--color-borde);
+.prose table code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  padding: 0.18em 0.45em;
+  border-radius: var(--radio-sm);
+  background-color: rgba(0, 122, 51, 0.08);
   color: var(--color-texto);
+  border: 1px solid rgba(0, 122, 51, 0.18);
 }
 
-.prose tr:hover td {
-  background-color: var(--color-superficie-sutil);
+[data-theme="dark"] .prose table code {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+}
+
+@media (max-width: 768px) {
+  .prose table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .prose thead th,
+  .prose tbody td {
+    padding: 0.75rem 1rem;
+    font-size: 0.88rem;
+  }
+  .prose tbody td:first-child {
+    width: auto;
+  }
+}
+
+.prose > p,
+.prose > ul,
+.prose > ol,
+.prose > blockquote {
+  max-width: 900px;
 }
 
 .prose code {
@@ -531,29 +650,7 @@ pre code {
   margin-bottom: 1.25rem;
 }
 
-/* Tablas adaptables dentro de artículos y páginas Markdown */
-.prose table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1.5rem 0;
-  display: block;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
 
-.prose th,
-.prose td {
-  padding: 0.65rem 0.85rem;
-  border-bottom: 1px solid var(--color-borde);
-  text-align: left;
-  font-size: 0.92rem;
-}
-
-.prose th {
-  font-weight: 600;
-  color: var(--color-texto);
-  background-color: var(--color-superficie-sutil);
-}
 
 
 /* Trama diagonal para "sin datos" */

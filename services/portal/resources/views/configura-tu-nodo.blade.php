@@ -14,7 +14,7 @@
             <x-tarjeta-configurador-automatico />
 
             <!-- Contenido detallado procesado desde Markdown -->
-            <div class="prose" style="line-height: 1.7; font-size: 1.05rem; margin-top: 2.5rem; max-width: 860px;">
+            <div class="prose" style="line-height: 1.7; font-size: 1.05rem; margin-top: 2.5rem; width: 100%;">
                 {!! $html !!}
             </div>
 

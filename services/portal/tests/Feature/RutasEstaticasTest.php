@@ -177,7 +177,11 @@ class RutasEstaticasTest extends TestCase
         $response->assertSee('tarjeta-tabla-andalucia', false);
         $response->assertSee('tarjeta-tabla-andalucia-cabecera', false);
         $response->assertSee('param-box-andalucia', false);
-        $response->assertSee('width: 100%', false);
+        $response->assertSee('class="prose" style="line-height: 1.7; font-size: 1.05rem; margin-top: 2.5rem; width: 100%;"', false);
+        // Comprueba que las tablas de markdown (Radio y Rol) se renderizan dentro de prose
+        $response->assertSee('Región (Region)', false);
+        $response->assertSee('CLIENT_MUTE', false);
+        $response->assertSee('<table>', false);
     }
 
     /**
@@ -192,6 +196,9 @@ class RutasEstaticasTest extends TestCase
         $response->assertSee('tarjeta-tabla-andalucia', false);
         $response->assertSee('tarjeta-tabla-andalucia-cabecera', false);
         $response->assertSee('param-box-andalucia', false);
-        $response->assertSee('width: 100%', false);
+        $response->assertSee('class="prose" style="line-height: 1.7; font-size: 1.05rem; margin-top: 2.5rem; width: 100%;"', false);
+        // Comprueba que la tabla de ajustes de pasarela se renderiza dentro de prose
+        $response->assertSee('MQTT activado', false);
+        $response->assertSee('<table>', false);
     }
 }
