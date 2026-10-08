@@ -85,9 +85,25 @@ Gestión editorial de preguntas y respuestas frecuentes (base `portal`, tabla `f
 - Reordenación interactiva arrastrando filas en la tabla mediante `$table->reorderable('sort_order')` (sin campo manual en el formulario).
 - Listado interactivo con visualización traducida (pregunta y respuesta limitadas a 2 líneas visibles con `lineClamp(2)` y tooltip completo), filtro por visibilidad y acciones de edición y eliminación.
 
-### Usuarios
+### Destinos de Webhooks (`WebhookDestinationResource`)
+
+Gestión dinámica de integradores de webhooks (base `portal`, tabla local replicada `webhook_destinations` sincronizada con el microservicio `webhooks` vía API interna HTTP en red Docker `mesh`):
+- **Aislamiento estricto de base de datos:** El portal nunca escribe en la base de datos de `webhooks`. Toda mutación se efectúa mediante `App\Servicios\WebhooksClient` consumiendo `http://webhooks:8080/internal/destinos` protegido con la cabecera `X-Internal-Secret: ${INTERNAL_API_SECRET}`.
+- **Tabla interactiva:**
+  - Columnas: Nombre, Host, Filtros activos (chips/badges semánticos de riesgos, tipos, provincias y nodos), Estado (`Activo` en verde, `Suspendido` en rojo con motivo de baja), Fallos consecutivos, Entregas pendientes y Último OK.
+  - Acción por fila «Probar (Ping)» (icono `paper-airplane`): Invoca `POST /internal/destinos/{nombre}/probar` ejecutando un ping fuera de cola firmado con HMAC-SHA256 y notifica en interfaz el código HTTP y la latencia obtenida (o el error en caso de fallo).
+  - Acción por fila «Reactivar» (icono `arrow-path`): Visible únicamente si el destino está inactivo (`activo = false`); invoca `POST /internal/destinos/{nombre}/reactivar` para reponer el destino (`activo = true`, `fallos_seguidos = 0`, `motivo_baja = NULL`) y despertar el despachador sin reiniciar contenedores.
+  - Acciones de «Editar» y «Eliminar» (baja lógica a `retirado` y purga de entregas pendientes en el microservicio).
+- **Formulario (Crear / Editar) con guía operativa y filtros explicados:**
+  - «Guía de Criterios y Clasificación» (bloque inicial con vista Blade `filament.webhooks.guide-alertas`): Explica con detalle los niveles de riesgo (**Alto**: bucles de reinicio en repetidores, baterías críticas < 20%, routers en silencio > 24 h, gateways caídos > 2 h, saturación ChUtil $\ge 40\%$, floods o saltos $\ge 7$; **Medio**: degradación de servicio, baterías < 40%, silencio > 6 h, gateways desconectados > 15 min, saturación > 20% o interferencias; **Bajo**: avisos leves en nodos cliente particulares sin daño troncal) y los tipos de red (**Infraestructura**: repetidores troncales `ROUTER`/`REPEATER` y pasarelas MQTT; **Clientes**: nodos individuales `CLIENT`), además de recordar la regla de comodín (si no se marca ningún filtro se reciben todas las alertas de ese criterio).
+  - «Configuración del Destino»: Nombre (`^[a-z0-9-]{1,40}$`, obligatorio y de solo lectura en edición), URL HTTPS completa y Secreto HMAC-SHA256 (mínimo 32 caracteres) con máscara de contraseña revelable y acción de generación automática de clave segura aleatoria de 64 caracteres hexadecimales.
+  - «Filtros de Entrega»: Selección múltiple con descripciones detalladas bajo cada opción y texto de ayuda para riesgos (`bajo`, `medio`, `alto`), tipos (`infraestructura`, `clientes`), provincias (`ES-AL`, `ES-CA`, etc.) y etiquetas de nodos Meshtastic (`^![0-9a-f]{8}$`).
+
+### Usuarios y Perfil de Operador
 
 Recurso `Operadores` (base `portal`): listar, desactivar/activar, forzar nuevo TOTP. Crear solo por comando (evita que un panel comprometido cree cuentas).
+
+La página de edición de perfil (`/admin/profile`, `EditProfile`) utiliza un modal amplio para escritorio (`Width::FourExtraLarge`, 56rem / 896px) en lugar del ancho compacto de login, con avatar circular centrado horizontalmente y distribución en dos columnas (`sm: 2`) para optimizar la ergonomía en pantallas grandes.
 
 ## Contratos propios
 
@@ -101,6 +117,7 @@ Recurso `Operadores` (base `portal`): listar, desactivar/activar, forzar nuevo T
 | `tareas_latido` | `tarea` PK, `ultima_ejecucion` |
 | `suggestions` | `id`, `category`, `content`, `status`, `operator_notes`, `ip_hash`, `created_at`, `updated_at` |
 | `faqs` | `id`, `question`, `answer`, `is_active`, `sort_order`, `created_at`, `updated_at` |
+| `webhook_destinations` | `id`, `name` único, `url`, `host`, `active` bool, `disabled_reason` null, `consecutive_failures`, `pending_deliveries`, `last_ok_at`, `risks` json, `types` json, `provinces` json, `nodes` json, `created_at`, `updated_at` |
 
 ### Configuración
 
@@ -110,6 +127,8 @@ Recurso `Operadores` (base `portal`): listar, desactivar/activar, forzar nuevo T
 | `MQTT_PANEL_USER` / `MQTT_PANEL_PASSWORD` | `svc-panel` / — | Propia | Contraseña sí |
 | `ADMIN_PATH` | `admin` | Propia | No |
 | `SESSION_LIFETIME` | `480` | Propia | No |
+| `WEBHOOKS_INTERNAL_URL` | `http://webhooks:8080` | Común / Propia | No |
+| `INTERNAL_API_SECRET` | Token compartido para endpoints internos en red `mesh` | Común / Propia | **Sí** |
 
 ## Unidades de trabajo
 
@@ -119,6 +138,7 @@ Recurso `Operadores` (base `portal`): listar, desactivar/activar, forzar nuevo T
 - **UT-06.14.4 — Recursos de solo lectura.** Gateways, nodos, routers, alertas, catálogo. *Aceptación:* ningún botón de crear/editar/borrar; una petición forzada de edición devuelve `403`.
 - **UT-06.14.5 — Operadores.** *Aceptación:* desactivar un operador cierra sus sesiones.
 - **UT-06.14.6 — Tareas programadas y purga.** `portal-tareas` ejecuta `php artisan schedule:work` de forma continua: `ComprobarServicios` cada minuto (con auditoría de salud y purga de `estado_servicio_cambio` > 90 días) y `portal:sitemap` cada noche a las 04:00 (regeneración de `sitemap.xml`).
+- **UT-06.14.7 — Gestión de webhooks.** Integración con `WebhooksClient`, réplica local `webhook_destinations`, acciones de ping HMAC y reactivación dinámica.
 
 ## Escenarios de prueba
 
@@ -128,10 +148,11 @@ Recurso `Operadores` (base `portal`): listar, desactivar/activar, forzar nuevo T
 4. **Dado** `sync-peers` con un peer caído desde hace 2 h, **cuando** se abre su detalle, **entonces** el peer aparece destacado; el servicio sigue en verde.
 5. **Dado** la base `alertas` caída, **cuando** se abre la sección Alertas, **entonces** aviso "fuente no disponible" sin error 500 y el resto del panel funciona.
 6. **Dado** un intento de `POST` a la edición de un gateway, **cuando** se envía, **entonces** `403`.
+7. **Dado** un destino de webhook suspendido por fallos, **cuando** el operador pulsa "Reactivar", **entonces** el cliente llama a la API interna y su estado pasa a Activo en verde sin reiniciar servicios.
 
 ## Ampliaciones posibles (fuera de la base)
 
-Alta y baja de gateways en Mosquitto, gestión de destinos de webhooks y edición de textos del portal. Cada una exige definir cómo el portal entrega la configuración al otro servicio sin escribir en su base.
+Alta y baja de gateways en Mosquitto y edición de textos del portal. Cada una exige definir cómo el portal entrega la configuración al otro servicio sin escribir en su base.
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

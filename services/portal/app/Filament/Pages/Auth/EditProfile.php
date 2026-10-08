@@ -16,6 +16,7 @@ use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -29,6 +30,16 @@ use SensitiveParameter;
 class EditProfile extends BaseEditProfile
 {
     protected static bool $isDiscovered = false;
+
+    /**
+     * Ancho del modal/página ampliado a 4xl (56rem / 896px) para una visualización espaciosa en escritorio.
+     */
+    protected Width | string | null $maxWidth = Width::FourExtraLarge;
+
+    public function getMaxWidth(): Width | string | null
+    {
+        return $this->maxWidth ?? Width::FourExtraLarge;
+    }
 
     public static function getLabel(): string
     {
@@ -49,6 +60,7 @@ class EditProfile extends BaseEditProfile
             ->components([
                 Section::make(__('admin.profile.identity_section'))
                     ->description(__('admin.profile.identity_desc'))
+                    ->columns(['default' => 1, 'sm' => 2])
                     ->schema([
                         $this->getAvatarFormComponent(),
                         $this->getNameFormComponent(),
@@ -57,6 +69,7 @@ class EditProfile extends BaseEditProfile
 
                 Section::make(__('admin.profile.security_section'))
                     ->description(__('admin.profile.security_desc'))
+                    ->columns(['default' => 1, 'sm' => 2])
                     ->schema([
                         $this->getPasswordFormComponent(),
                         $this->getPasswordConfirmationFormComponent(),
@@ -66,13 +79,14 @@ class EditProfile extends BaseEditProfile
     }
 
     /**
-     * Componente para subir el avatar o icono de operador con editor y cropper estricto 1:1.
+     * Componente para subir el avatar o icono de operador con editor y cropper estricto 1:1 centrado.
      */
     protected function getAvatarFormComponent(): Component
     {
         return FileUpload::make('avatar_url')
             ->label(__('admin.profile.avatar_label'))
             ->avatar()
+            ->alignCenter()
             ->image()
             ->imageEditor()
             ->circleCropper()
@@ -81,7 +95,12 @@ class EditProfile extends BaseEditProfile
             ->directory('avatars')
             ->disk('public')
             ->maxSize(2048)
-            ->helperText(__('admin.profile.avatar_helper'));
+            ->helperText(__('admin.profile.avatar_helper'))
+            ->columnSpanFull()
+            ->extraFieldWrapperAttributes([
+                'class' => 'flex flex-col items-center justify-center text-center',
+                'style' => 'text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;',
+            ]);
     }
 
     /**
@@ -155,6 +174,7 @@ class EditProfile extends BaseEditProfile
             ->revealable(filament()->arePasswordsRevealable())
             ->required()
             ->visible(fn (Get $get): bool => filled($get('password')) || ($get('email') !== $this->getUser()->getAttributeValue('email')))
+            ->columnSpanFull()
             ->dehydrated(false);
     }
 

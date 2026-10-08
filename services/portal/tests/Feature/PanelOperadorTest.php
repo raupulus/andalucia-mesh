@@ -194,6 +194,8 @@ class PanelOperadorTest extends TestCase
         $response->assertSee('Identidad del Operador');
         $response->assertSee('Seguridad y Contraseña');
         $response->assertSee('Eliminar cuenta');
+        $response->assertSee('fi-width-4xl', false);
+        $response->assertSee('fi-align-center', false);
     }
 
     public function test_operador_puede_modificar_su_nombre_desde_perfil(): void

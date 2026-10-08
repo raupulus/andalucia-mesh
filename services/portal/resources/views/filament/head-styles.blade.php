@@ -20,12 +20,52 @@
     }
 
     .fi-simple-main {
-        max-width: 28rem !important;
         width: 100%;
         margin-left: auto;
         margin-right: auto;
         border-radius: 1rem;
         box-shadow: 0 10px 25px -5px rgba(44, 45, 60, 0.08), 0 8px 10px -6px rgba(44, 45, 60, 0.04);
+    }
+
+    /* Pantallas simples compactas (ej. Login) */
+    .fi-simple-main:not([class*="fi-width-"]),
+    .fi-simple-main.fi-width-lg {
+        max-width: 28rem;
+    }
+
+    /* En la página de perfil de operador, conceder ancho generoso de modal (4xl / 56rem) en pantallas de escritorio */
+    .fi-simple-main.fi-width-4xl {
+        max-width: 56rem !important;
+    }
+
+    .fi-simple-main.fi-width-3xl {
+        max-width: 48rem !important;
+    }
+
+    /* Centrado visual del avatar de perfil de operador */
+    .fi-simple-page .fi-fo-file-upload-avatar,
+    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) {
+        margin-left: auto !important;
+        margin-right: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+
+    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) .fi-fo-field-label-col,
+    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) .fi-fo-field-content-col,
+    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) .fi-fo-field-helper-text {
+        text-align: center !important;
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+
+    .fi-simple-page .fi-fo-file-upload-avatar .fi-fo-file-upload-input-ctn {
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
 
     /* Cabecera superior con acento institucional verde de Andalucía */
