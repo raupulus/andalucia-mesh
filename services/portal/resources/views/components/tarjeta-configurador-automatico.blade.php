@@ -34,7 +34,7 @@
             left: 0;
             right: 0;
             height: 6px;
-            background: linear-gradient(90deg, var(--color-primario) 0%, var(--color-acento) 100%);
+            background: linear-gradient(90deg, #007A33 0%, var(--color-acento) 100%);
         "
         aria-hidden="true"
     ></div>
@@ -110,21 +110,8 @@
     <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.25rem; padding-top: 0.5rem;">
         <a
             href="{{ $configuradorUrl }}"
-            class="btn btn-primario"
-            style="
-                background: var(--color-primario);
-                color: #FFFFFF;
-                font-size: 1.05rem;
-                font-weight: 700;
-                padding: 0.85rem 1.75rem;
-                border-radius: var(--radio-md);
-                display: inline-flex;
-                align-items: center;
-                gap: 0.65rem;
-                text-decoration: none;
-                box-shadow: 0 4px 14px rgba(0, 122, 51, 0.3);
-                transition: transform 0.15s ease, box-shadow 0.15s ease;
-            "
+            class="btn-configurador-destacado"
+            style="font-size: 1.05rem; padding: 0.85rem 1.85rem;"
         >
             <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>

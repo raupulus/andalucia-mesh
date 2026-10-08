@@ -58,6 +58,9 @@ Catálogo de componentes reutilizables de interfaz de usuario de Andalucía Mesh
 ### `.btn-verde`
 - **Propósito:** Botón de acción principal verde Andalucía (`#007A33`) con texto blanco y realce interactivo para llamadas a la acción directas como el botón de catálogo en la portada.
 
+### `.btn-configurador-destacado`
+- **Propósito:** Botón de llamada a la acción de alta visibilidad para el configurador automático de nodos. Emplea un degradado Verde Andalucía (`#008F3E` a `#007A33`), borde verde nítido (`#00B348`), texto blanco nítido con sombra y elevación reactiva en hover, garantizando máximo protagonismo visual frente a botones secundarios en portada y guías.
+
 ### `x-aviso-pruebas` (`aviso-pruebas.blade.php`)
 - **Propósito:** Aviso flotante global y persistente ubicado en la esquina inferior derecha de la pantalla (o barra inferior adaptable en móviles), indicando a los visitantes que la plataforma se encuentra en fase activa de desarrollo y pruebas, y que determinados datos o nodos pueden no estar 100% verificados.
 - **Comportamiento interactivo:**

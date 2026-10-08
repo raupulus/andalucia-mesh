@@ -74,7 +74,8 @@
   --color-enlace: #15612F;
   --color-foco: #15612F;
 
-  /* Acento */
+  /* Acento y Color Primario */
+  --color-primario: #007A33;
   --color-acento: #67EA94;
   --color-sobre-acento: #2C2D3C;
   --color-acento-suave: #E9FCEF;
@@ -144,7 +145,8 @@
   --color-enlace: #67EA94;
   --color-foco: #67EA94;
 
-  /* Acento */
+  /* Acento y Color Primario */
+  --color-primario: #008A3B;
   --color-acento: #67EA94;
   --color-sobre-acento: #2C2D3C;
   --color-acento-suave: #1C3A28;
@@ -1295,6 +1297,83 @@ pre code {
   color: #FFFFFF !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0, 122, 51, 0.45);
+}
+
+/* Botón Verde Andalucía Destacado para el Configurador Automático */
+.btn-configurador-destacado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  background: linear-gradient(135deg, #008F3E 0%, #007A33 100%);
+  color: #FFFFFF !important;
+  padding: 0.8rem 1.65rem;
+  font-weight: 700;
+  font-size: 1.02rem;
+  line-height: 1.3;
+  border-radius: var(--radio-md);
+  text-decoration: none;
+  border: 1.5px solid #00B348;
+  box-shadow: 0 4px 16px rgba(0, 122, 51, 0.42), 0 0 0 1px rgba(0, 179, 72, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+}
+
+.btn-configurador-destacado svg {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
+
+.btn-configurador-destacado span {
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.btn-configurador-destacado:hover {
+  background: linear-gradient(135deg, #00A347 0%, #008538 100%);
+  color: #FFFFFF !important;
+  transform: translateY(-2px);
+  border-color: #00D659;
+  box-shadow: 0 6px 22px rgba(0, 122, 51, 0.65), 0 0 0 1px rgba(0, 214, 89, 0.4);
+}
+
+.btn-configurador-destacado:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 122, 51, 0.4);
+}
+
+[data-theme="dark"] .btn-configurador-destacado {
+  background: linear-gradient(135deg, #009943 0%, #007A33 100%);
+  border-color: #00B84D;
+  box-shadow: 0 4px 18px rgba(0, 122, 51, 0.55), 0 0 0 1px rgba(0, 184, 77, 0.35);
+}
+
+[data-theme="dark"] .btn-configurador-destacado:hover {
+  background: linear-gradient(135deg, #00B04C 0%, #008F3C 100%);
+  border-color: #00FF66;
+  box-shadow: 0 6px 24px rgba(0, 122, 51, 0.8), 0 0 0 1px rgba(0, 255, 102, 0.45);
+}
+
+.acciones-configura-nodo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .acciones-configura-nodo {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .acciones-configura-nodo .btn,
+  .acciones-configura-nodo .btn-configurador-destacado {
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+  }
 }
 
 /* Tarjetas compactas para la Portada (2 por fila) */

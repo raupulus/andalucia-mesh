@@ -5,7 +5,7 @@
 
 @php
     $lang = strtolower((string) $idioma);
-    if (!in_array($lang, ['es', 'en', 'pt'], true)) {
+    if (!in_array($lang, ['es', 'en', 'pt', 'espana', 'es-es'], true)) {
         $lang = 'es';
     }
     $uid = uniqid('flag_');
@@ -21,6 +21,18 @@
             <rect x="0" y="0" width="32" height="10.67" fill="#007A33" />
             <rect x="0" y="10.67" width="32" height="10.66" fill="#FFFFFF" />
             <rect x="0" y="21.33" width="32" height="10.67" fill="#007A33" />
+        </g>
+    </svg>
+@elseif($lang === 'espana' || $lang === 'es-es')
+    {{-- Bandera de España (rojo, amarillo, rojo) para ámbito nacional --}}
+    <svg viewBox="0 0 32 32" width="{{ $tamano }}" height="{{ $tamano }}" {{ $attributes->merge(['class' => 'bandera-redonda']) }} aria-hidden="true" style="border-radius: 50%; box-shadow: 0 0 0 1px rgba(0,0,0,0.12); flex-shrink: 0;">
+        <clipPath id="clip-esp-{{ $uid }}">
+            <circle cx="16" cy="16" r="16" />
+        </clipPath>
+        <g clip-path="url(#clip-esp-{{ $uid }})">
+            <rect x="0" y="0" width="32" height="8" fill="#AA151B" />
+            <rect x="0" y="8" width="32" height="16" fill="#F1BF00" />
+            <rect x="0" y="24" width="32" height="8" fill="#AA151B" />
         </g>
     </svg>
 @elseif($lang === 'en')

@@ -7,6 +7,7 @@ namespace App\Filament\Widgets;
 use App\Data\Ingest\Routers;
 use Carbon\Carbon;
 use Filament\Widgets\Widget;
+use Livewire\Attributes\On;
 use Throwable;
 
 /**
@@ -15,6 +16,8 @@ use Throwable;
  */
 class RoutersInfraestructuraWidget extends Widget
 {
+    public string $ambito = 'andalucia';
+
     protected static bool $isLazy = false;
 
     protected string $view = 'filament.widgets.routers-infraestructura-widget';
@@ -22,6 +25,17 @@ class RoutersInfraestructuraWidget extends Widget
     protected int|string|array $columnSpan = 'full';
 
     protected static ?int $sort = 2;
+
+    public function mount(): void
+    {
+        $this->ambito = session('dashboard_ambito', 'andalucia');
+    }
+
+    #[On('ambito-cambiado')]
+    public function actualizarAmbito(string $ambito): void
+    {
+        $this->ambito = $ambito;
+    }
 
     /**
      * Prepara los datos de telemetría de los routers de la malla.
@@ -38,7 +52,7 @@ class RoutersInfraestructuraWidget extends Widget
         try {
             /** @var Routers $routersService */
             $routersService = app(Routers::class);
-            $datos = (array) $routersService->obtenerResultado(sort: 'battery_asc')->datos;
+            $datos = (array) $routersService->obtenerResultado(sort: 'battery_asc', ambito: $this->ambito)->datos;
             $items = $datos['items'] ?? [];
             $total = count($items);
 
@@ -119,6 +133,7 @@ class RoutersInfraestructuraWidget extends Widget
             'total' => $total,
             'en_alerta' => $enAlerta,
             'error_fuente' => $errorFuente,
+            'ambito' => $this->ambito,
         ];
     }
 }

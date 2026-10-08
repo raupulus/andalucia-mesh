@@ -11,19 +11,30 @@ use Illuminate\Support\Facades\DB;
 class Routers
 {
     /**
+     * Provincias oficiales de la comunidad de Andalucía (ISO 3166-2:ES).
+     *
+     * @var list<string>
+     */
+    public const PROVINCIAS_ANDALUCIA = [
+        'ES-AL', 'ES-CA', 'ES-CO', 'ES-GR', 'ES-H', 'ES-HU', 'ES-J', 'ES-JA', 'ES-MA', 'ES-SE',
+    ];
+
+    /**
      * Obtiene el listado de routers de infraestructura y su telemetría.
      *
      * @param  string|null  $province  Filtro opcional por código ISO provincial
      * @param  string  $sort  battery_asc, last_seen_desc, chutil_desc
+     * @param  string  $ambito  'andalucia', 'espana', 'global'
      */
-    public function obtenerResultado(?string $province = null, string $sort = 'battery_asc'): Resultado
+    public function obtenerResultado(?string $province = null, string $sort = 'battery_asc', string $ambito = 'andalucia'): Resultado
     {
         $params = [
             'province' => $province,
             'sort' => $sort,
+            'ambito' => $ambito,
         ];
 
-        return Fuente::recordar('routers', $params, 60, function () use ($province, $sort) {
+        return Fuente::recordar('routers', $params, 60, function () use ($province, $sort, $ambito) {
             $query = DB::connection('ingesta')
                 ->table('api_routers')
                 ->select([
@@ -47,7 +58,13 @@ class Routers
 
             if ($province !== null) {
                 $query->where('province', $province);
+            } elseif ($ambito === 'andalucia') {
+                $query->whereIn('province', self::PROVINCIAS_ANDALUCIA);
+            } elseif ($ambito === 'espana') {
+                $query->where('province', 'like', 'ES-%')
+                    ->where('province', '!=', 'FUERA');
             }
+            // En ámbito 'global' se cargan todos los routers sin filtro de provincia
 
             switch ($sort) {
                 case 'last_seen_desc':

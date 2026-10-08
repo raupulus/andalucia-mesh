@@ -31,6 +31,19 @@ return [
         'webhooks' => 'Webhooks Service',
     ],
 
+    'ambitos' => [
+        'heading' => 'Territorial Supervision Scope',
+        'active_context' => 'Active context:',
+        'andalucia_title' => 'Andalusia',
+        'andalucia_desc' => '8 Andalusian provinces (ES-AL .. ES-SE) · Priority management',
+        'espana_title' => 'Spain',
+        'espana_desc' => 'Nodes in national territory (ES-*)',
+        'global_title' => 'Whole Mesh',
+        'global_desc' => 'Full network without territorial filtering or exclusions',
+        'active_badge' => 'Active',
+        'routers_count' => '{0} 0 routers|{1} :count router|[2,*] :count routers',
+    ],
+
     'widgets' => [
         'stats' => [
             'channel_pressure' => 'Air Pressure (ChUtil)',

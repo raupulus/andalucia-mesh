@@ -25,19 +25,28 @@ Que los operadores vean de un vistazo si cada pieza funciona y qué pasa en la m
 
 ### Página de inicio del panel (Dashboard operativo y widgets)
 
-El panel recibe a los operadores con un centro de control operativo estructurado en 3 niveles de supervisión en tiempo real con refresco automático (`wire:poll.30s`):
+El panel recibe a los operadores con un centro de control operativo estructurado en 4 niveles de supervisión en tiempo real con refresco automático (`wire:poll.30s`):
 
-1. **MallaStatsOverviewWidget (KPIs ejecutivos de la red y presión en el aire):**
-   - **Presión del Aire (`channel_utilization`):** % de utilización promedio del canal LoRa en Andalucía, chip semántico de severidad (🟢 Holgado $\le 20\%$, 🟡 Cargado $20\%-40\%$, 🔴 Saturado $\ge 40\%$) y provincia con el pico máximo detectado.
-   - **Saturación TX Repetidores (`air_util_tx`):** Tiempo medio de ocupación del aire en emisión de la infraestructura para verificar el cumplimiento del *duty cycle* legal ($< 10\%$).
-   - **Infraestructura y Energía:** Total de routers activos, desglose de nodos alimentados permanentemente a red/solar (`⚡`) frente a nodos a batería, con alerta prioritaria si hay nodos en nivel crítico ($< 20\%$).
+1. **AmbitoSelectorWidget (Selector interactivo de ámbito territorial):**
+   - Tarjetas interactivas de gran formato situadas en la parte superior del cuadro de mando (`$sort = -200`, ancho completo) que permiten conmutar la supervisión entre tres contextos:
+     - **Andalucía (activo por defecto):** Centrado estrictamente en las 8 provincias andaluzas (`ES-AL` .. `ES-SE`) mediante bandera andaluza. Asegura que los operadores supervisen únicamente los repetidores e infraestructura gestionada por la comunidad andaluza, evitando sobrecargas de contexto con nodos foráneos.
+     - **España:** Ámbito nacional que engloba todos los nodos del territorio nacional (`ES-*`) mediante bandera de España.
+     - **Toda la Malla:** Ámbito global sin filtros ni exclusiones territoriales (incluyendo nodos exteriores `FUERA`, Portugal u otros países) mediante icono de red/globo.
+   - **Reactividad Livewire y persistencia:** Cada tarjeta presenta el recuento en tiempo real de routers del ámbito. Al conmutar el ámbito, se persiste en la sesión del operador (`dashboard_ambito`) y se despacha el evento reactivo `ambito-cambiado`, actualizando al instante los widgets de métricas y repetidores sin recargar la página.
+
+2. **MallaStatsOverviewWidget (KPIs ejecutivos de la red y presión en el aire):**
+   - Reactivo a `ambito-cambiado` y sincronizado con el ámbito activo.
+   - **Presión del Aire (`channel_utilization`):** % de utilización promedio del canal LoRa (restringido a las provincias andaluzas cuando el ámbito es Andalucía), chip semántico de severidad (🟢 Holgado $\le 20\%$, 🟡 Cargado $20\%-40\%$, 🔴 Saturado $\ge 40\%$) y provincia con el pico máximo detectado.
+   - **Saturación TX Repetidores (`air_util_tx`):** Tiempo medio de ocupación del aire en emisión de la infraestructura filtrada para verificar el cumplimiento del *duty cycle* legal ($< 10\%$).
+   - **Infraestructura y Energía:** Total de routers del ámbito activo, desglose de nodos alimentados permanentemente a red/solar (`⚡`) frente a nodos a batería, con alerta prioritaria si hay nodos en nivel crítico ($< 20\%$).
    - **Tráfico y Pasarelas:** Nodos activos 24h, total de paquetes por hora procesados y número de gateways publicando en el broker MQTT.
 
-2. **RoutersInfraestructuraWidget (Monitor de repetidores y nodos clave):**
-   - Tabla interactiva conectada a la vista de contrato `api_routers` de Ingesta (con degradación segura en caché y manejo de caídas vía `Fuente::recordar`).
+3. **RoutersInfraestructuraWidget (Monitor de repetidores y nodos clave):**
+   - Tabla interactiva conectada a la vista de contrato `api_routers` de Ingesta (con degradación segura en caché y manejo de caídas vía `Fuente::recordar`), filtrada según el ámbito activo mediante `Routers::obtenerResultado(..., ambito: $this->ambito)`.
+   - Cabecera con badge dinámico indicando el número de routers y el contexto territorial activo (`· Andalucía` / `· España` / `· Toda la Malla`).
    - Muestra para cada router: identificador (`!hex`), modelo de hardware (`hw_model`), provincia, estado de alimentación (`⚡ Red/Solar` con voltaje o barra de batería porcentual con código de color dinámico), nivel de presión local ChUtil, saturación TX, tiempo desde el último contacto y botón de inspección directa a `/revisa-tu-nodo/{id}`.
 
-3. **EstadoServiciosWidget (Salud de la plataforma y microservicios):**
+4. **EstadoServiciosWidget (Salud de la plataforma y microservicios):**
    - Supervisión periódica (cada minuto por `portal-tareas`, con botón de forzado manual `comprobarAhora`).
    - Destinos en `config/servicios.php` (contrato `integration.md` §11):
 

@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Data\Ingest\Routers;
 use App\Filament\Pages\Auth\EditProfile;
+use App\Filament\Resources\CoordinatedRouters\Pages\ListCoordinatedRouters;
+use App\Filament\Widgets\AmbitoSelectorWidget;
+use App\Filament\Widgets\RoutersInfraestructuraWidget;
 use App\Jobs\ComprobarServicios;
 use App\Models\User;
 use Filament\Auth\Pages\Login;
@@ -287,5 +291,85 @@ class PanelOperadorTest extends TestCase
         $user->refresh();
         $this->assertNotNull($user->avatar_url);
         Storage::disk('public')->assertExists($user->avatar_url);
+    }
+
+    public function test_operador_activo_ve_selector_de_ambito_en_dashboard(): void
+    {
+        $user = User::factory()->create([
+            'activo' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get('/admin');
+        $response->assertStatus(200);
+        $response->assertSee('Ámbito Territorial de Supervisión');
+        $response->assertSee('Andalucía');
+        $response->assertSee('España');
+        $response->assertSee('Toda la Malla');
+    }
+
+    public function test_cambio_de_ambito_persiste_en_sesion_y_emite_evento(): void
+    {
+        $user = User::factory()->create(['activo' => true]);
+        $this->actingAs($user);
+
+        Livewire::test(AmbitoSelectorWidget::class)
+            ->assertSet('ambito', 'andalucia')
+            ->call('setAmbito', 'espana')
+            ->assertSet('ambito', 'espana')
+            ->assertDispatched('ambito-cambiado', ambito: 'espana');
+
+        $this->assertEquals('espana', session('dashboard_ambito'));
+    }
+
+    public function test_routers_widget_y_data_filtra_por_ambito_territorial(): void
+    {
+        ListCoordinatedRouters::ensureApiRoutersTableExists();
+
+        /** @var Routers $routersService */
+        $routersService = app(Routers::class);
+
+        // 1. Ámbito Andalucía: solo debe retornar los 8 routers andaluces
+        $resAndalucia = (array) $routersService->obtenerResultado(ambito: 'andalucia')->datos;
+        $itemsAndalucia = $resAndalucia['items'] ?? [];
+        $this->assertCount(8, $itemsAndalucia);
+        $idsAndalucia = array_column($itemsAndalucia, 'id');
+        $this->assertContains('!2a3b4c5d', $idsAndalucia); // SE01
+        $this->assertNotContains('!b3c4d5e6', $idsAndalucia); // AB01 (Albacete)
+        $this->assertNotContains('!a2b3c4d5', $idsAndalucia); // EXT1 (FUERA)
+
+        // 2. Ámbito España: debe retornar 9 routers (8 andaluces + Albacete), excluyendo FUERA
+        $resEspana = (array) $routersService->obtenerResultado(ambito: 'espana')->datos;
+        $itemsEspana = $resEspana['items'] ?? [];
+        $this->assertCount(9, $itemsEspana);
+        $idsEspana = array_column($itemsEspana, 'id');
+        $this->assertContains('!2a3b4c5d', $idsEspana); // SE01
+        $this->assertContains('!b3c4d5e6', $idsEspana); // AB01 (Albacete)
+        $this->assertNotContains('!a2b3c4d5', $idsEspana); // EXT1 (FUERA)
+
+        // 3. Ámbito Global: debe retornar los 10 routers sin exclusión
+        $resGlobal = (array) $routersService->obtenerResultado(ambito: 'global')->datos;
+        $itemsGlobal = $resGlobal['items'] ?? [];
+        $this->assertCount(10, $itemsGlobal);
+        $idsGlobal = array_column($itemsGlobal, 'id');
+        $this->assertContains('!2a3b4c5d', $idsGlobal);
+        $this->assertContains('!b3c4d5e6', $idsGlobal);
+        $this->assertContains('!a2b3c4d5', $idsGlobal);
+
+        // 4. Widget Routers reacciona al evento ámbito-cambiado
+        Livewire::test(RoutersInfraestructuraWidget::class)
+            ->assertSet('ambito', 'andalucia')
+            ->assertSee('SE01')
+            ->assertDontSee('AB01')
+            ->assertDontSee('EXT1')
+            ->dispatch('ambito-cambiado', ambito: 'espana')
+            ->assertSet('ambito', 'espana')
+            ->assertSee('SE01')
+            ->assertSee('AB01')
+            ->assertDontSee('EXT1')
+            ->dispatch('ambito-cambiado', ambito: 'global')
+            ->assertSet('ambito', 'global')
+            ->assertSee('SE01')
+            ->assertSee('AB01')
+            ->assertSee('EXT1');
     }
 }

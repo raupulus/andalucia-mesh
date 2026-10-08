@@ -288,6 +288,21 @@ class ListCoordinatedRouters extends ListRecords
                     'is_gateway' => 0,
                     'last_seen' => $now->toDateTimeString(),
                 ],
+                [
+                    'id' => '!b3c4d5e6',
+                    'short_name' => 'AB01',
+                    'long_name' => 'Router Albacete Los Llanos',
+                    'role' => 'ROUTER',
+                    'province' => 'ES-AB',
+                    'battery_level' => 88,
+                    'voltage' => 4.02,
+                    'channel_utilization' => 9.5,
+                    'air_util_tx' => 1.1,
+                    'hw_model' => 'HELTEC_V3',
+                    'powered' => 0,
+                    'is_gateway' => 0,
+                    'last_seen' => $now->toDateTimeString(),
+                ],
             ]);
         }
     }

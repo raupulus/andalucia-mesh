@@ -7,6 +7,7 @@
                     <span class="fi-widget-title">{{ __('admin.widgets.routers.heading') }}</span>
                     <span class="fi-widget-pill fi-widget-pill-neutral">
                         {{ trans_choice('admin.widgets.routers.routers_badge', $total, ['count' => $total]) }}
+                        <span class="opacity-75">· {{ __('admin.ambitos.' . (($ambito ?? 'andalucia') === 'espana' ? 'espana_title' : (($ambito ?? 'andalucia') === 'global' ? 'global_title' : 'andalucia_title'))) }}</span>
                     </span>
                     @if($en_alerta > 0)
                         <span class="fi-widget-pill fi-widget-pill-danger">

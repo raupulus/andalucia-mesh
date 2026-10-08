@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\AmbitoSelectorWidget;
 use App\Filament\Widgets\EstadoServiciosWidget;
 use App\Filament\Widgets\MallaStatsOverviewWidget;
 use App\Filament\Widgets\RoutersInfraestructuraWidget;
@@ -35,6 +36,7 @@ class Dashboard extends BaseDashboard
     public function getWidgets(): array
     {
         return [
+            AmbitoSelectorWidget::class,
             MallaStatsOverviewWidget::class,
             RoutersInfraestructuraWidget::class,
             EstadoServiciosWidget::class,

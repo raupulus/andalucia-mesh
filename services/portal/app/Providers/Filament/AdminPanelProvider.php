@@ -6,6 +6,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Dashboard;
+use App\Filament\Widgets\AmbitoSelectorWidget;
 use App\Filament\Widgets\EstadoServiciosWidget;
 use App\Filament\Widgets\MallaStatsOverviewWidget;
 use App\Filament\Widgets\RoutersInfraestructuraWidget;
@@ -71,6 +72,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
+                AmbitoSelectorWidget::class,
                 MallaStatsOverviewWidget::class,
                 RoutersInfraestructuraWidget::class,
                 EstadoServiciosWidget::class,

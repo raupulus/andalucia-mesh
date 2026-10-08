@@ -207,4 +207,18 @@ class PortadaYMapaTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('data-theme="dark"', false);
     }
+
+    /**
+     * Comprueba que el botón para el configurador automático en portada se presenta destacado y verde.
+     */
+    public function test_boton_configurador_automatico_destacado_en_portada(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('acciones-configura-nodo', false);
+        $response->assertSee('btn-configurador-destacado', false);
+        $response->assertSee('/configurador', false);
+        $response->assertSee(__('portal.home.btn_auto_configurator'), false);
+    }
 }

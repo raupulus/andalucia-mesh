@@ -31,6 +31,19 @@ return [
         'webhooks' => 'Servicio de Webhooks',
     ],
 
+    'ambitos' => [
+        'heading' => 'Ámbito Territorial de Supervisión',
+        'active_context' => 'Contexto activo:',
+        'andalucia_title' => 'Andalucía',
+        'andalucia_desc' => '8 provincias andaluzas (ES-AL .. ES-SE) · Gestión prioritaria',
+        'espana_title' => 'España',
+        'espana_desc' => 'Nodos en territorio nacional (ES-*)',
+        'global_title' => 'Toda la Malla',
+        'global_desc' => 'Malla completa sin filtro territorial ni exclusiones',
+        'active_badge' => 'Activo',
+        'routers_count' => '{0} 0 routers|{1} :count router|[2,*] :count routers',
+    ],
+
     'widgets' => [
         'stats' => [
             'channel_pressure' => 'Presión del Aire (ChUtil)',

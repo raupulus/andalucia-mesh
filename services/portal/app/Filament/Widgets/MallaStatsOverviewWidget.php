@@ -8,6 +8,7 @@ use App\Data\Ingest\Resumen;
 use App\Data\Ingest\Routers;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Livewire\Attributes\On;
 use Throwable;
 
 /**
@@ -16,11 +17,24 @@ use Throwable;
  */
 class MallaStatsOverviewWidget extends BaseWidget
 {
+    public string $ambito = 'andalucia';
+
     protected static bool $isLazy = false;
 
     protected static ?int $sort = -100;
 
     protected ?string $pollingInterval = '30s';
+
+    public function mount(): void
+    {
+        $this->ambito = session('dashboard_ambito', 'andalucia');
+    }
+
+    #[On('ambito-cambiado')]
+    public function actualizarAmbito(string $ambito): void
+    {
+        $this->ambito = $ambito;
+    }
 
     /**
      * Construye las tarjetas de resumen y presión del aire.
@@ -39,12 +53,12 @@ class MallaStatsOverviewWidget extends BaseWidget
             $resumenData = null;
         }
 
-        // 2. Obtener datos de routers de infraestructura
+        // 2. Obtener datos de routers de infraestructura filtrados por el ámbito activo
         $routersData = null;
         try {
             /** @var Routers $routersService */
             $routersService = app(Routers::class);
-            $routersData = (array) $routersService->obtenerResultado()->datos;
+            $routersData = (array) $routersService->obtenerResultado(sort: 'battery_asc', ambito: $this->ambito)->datos;
         } catch (Throwable) {
             $routersData = null;
         }
@@ -52,6 +66,9 @@ class MallaStatsOverviewWidget extends BaseWidget
         // --- TARJETA 1: Presión del Aire (Channel Utilization) ---
         $chUtilAvg = $resumenData['channel_utilization']['andalucia_avg'] ?? null;
         $provincias = $resumenData['channel_utilization']['provinces'] ?? [];
+        if ($this->ambito === 'andalucia') {
+            $provincias = array_values(array_filter($provincias, fn ($p) => in_array($p['code'] ?? '', Routers::PROVINCIAS_ANDALUCIA, true)));
+        }
 
         $picoProvincia = null;
         $picoMax = 0.0;
@@ -159,20 +176,26 @@ class MallaStatsOverviewWidget extends BaseWidget
         $traficoDesc = __('admin.widgets.stats.traffic_desc', ['gateways' => $gateways, 'nodes' => $nodos24h]);
         $traficoColor = $gateways > 0 ? 'info' : 'gray';
 
+        $ambitoLabel = match ($this->ambito) {
+            'espana' => ' (España)',
+            'global' => ' (Toda la Malla)',
+            default => ' (Andalucía)',
+        };
+
         return [
-            Stat::make(__('admin.widgets.stats.channel_pressure'), $chUtilVal)
+            Stat::make(__('admin.widgets.stats.channel_pressure').$ambitoLabel, $chUtilVal)
                 ->description($chDesc)
                 ->descriptionIcon('heroicon-m-signal')
                 ->color($chColor)
                 ->chart($chartChUtil),
 
-            Stat::make(__('admin.widgets.stats.tx_saturation'), $txVal)
+            Stat::make(__('admin.widgets.stats.tx_saturation').$ambitoLabel, $txVal)
                 ->description($txDesc)
                 ->descriptionIcon('heroicon-m-arrow-up-circle')
                 ->color($txColor)
                 ->chart($chartTx),
 
-            Stat::make(__('admin.widgets.stats.infrastructure_energy'), $routersVal)
+            Stat::make(__('admin.widgets.stats.infrastructure_energy').$ambitoLabel, $routersVal)
                 ->description($batDesc)
                 ->descriptionIcon('heroicon-m-bolt')
                 ->color($batColor),
