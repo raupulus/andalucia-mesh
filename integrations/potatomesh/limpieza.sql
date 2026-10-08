@@ -5,12 +5,26 @@
 -- Ejecutado a diario por snm-potato-limpieza.timer a las 03:30 h en el host.
 -- ==============================================================================
 
-DELETE FROM messages WHERE created_at < datetime('now', '-30 days');
-DELETE FROM positions WHERE created_at < datetime('now', '-30 days');
-DELETE FROM telemetry WHERE created_at < datetime('now', '-30 days');
-DELETE FROM traces WHERE created_at < datetime('now', '-30 days');
-DELETE FROM neighbors WHERE updated_at < datetime('now', '-30 days');
-DELETE FROM nodes WHERE last_heard < datetime('now', '-30 days');
+PRAGMA foreign_keys = ON;
+
+-- 1. Mensajes con más de 30 días
+DELETE FROM messages WHERE rx_time < unixepoch('now', '-30 days');
+
+-- 2. Posiciones con más de 30 días
+DELETE FROM positions WHERE rx_time < unixepoch('now', '-30 days');
+
+-- 3. Telemetría con más de 30 días
+DELETE FROM telemetry WHERE rx_time < unixepoch('now', '-30 days');
+
+-- 4. Trazas y sus saltos con más de 30 días
+DELETE FROM traces WHERE rx_time < unixepoch('now', '-30 days');
+DELETE FROM trace_hops WHERE trace_id NOT IN (SELECT id FROM traces);
+
+-- 5. Vecinos con más de 30 días
+DELETE FROM neighbors WHERE rx_time < unixepoch('now', '-30 days');
+
+-- 6. Nodos no oídos en los últimos 30 días
+DELETE FROM nodes WHERE last_heard IS NOT NULL AND last_heard < unixepoch('now', '-30 days');
 
 -- Truncar el archivo WAL para liberar espacio sin bloquear lectura continua
 PRAGMA wal_checkpoint(TRUNCATE);

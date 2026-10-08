@@ -287,7 +287,20 @@ class PeerSyncer:
         if not isinstance(data, (dict, list)) or not data:
             return
 
-        await self._post_local_potatomesh(session, "nodes", data)
+        # PotatoMesh POST /api/nodes requiere un objeto JSON / Hash {node_id: node_data}
+        if isinstance(data, list):
+            payload = {
+                str(node.get("node_id")): node
+                for node in data
+                if isinstance(node, dict) and node.get("node_id")
+            }
+        else:
+            payload = data
+
+        if not payload:
+            return
+
+        await self._post_local_potatomesh(session, "nodes", payload)
         await self.mqtt_publisher.publish_event(peer.id, "nodes", data)
         await update_cursor_nodes(self.pool, peer.id, now)
 

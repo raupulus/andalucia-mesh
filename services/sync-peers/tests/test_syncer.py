@@ -83,3 +83,45 @@ async def test_health_server_deactivated_peer(monkeypatch: pytest.MonkeyPatch) -
     assert peer_map["malla-2"]["estado"] == "desactivado"
     assert peer_map["malla-2"]["activo"] is False
     assert peer_map["malla-2"]["ok"] is False
+
+
+@pytest.mark.asyncio
+async def test_sync_nodes_formats_dict() -> None:
+    """Verifica que _sync_nodes transforme una lista de nodos en un diccionario para PotatoMesh."""
+    from unittest.mock import AsyncMock, MagicMock
+    from src.syncer import PeerSyncer
+    from src.peers import PeerConfig
+
+    cfg = Config()
+    mock_pool = MagicMock()
+    mock_peer_manager = MagicMock()
+    mock_publisher = MagicMock()
+    syncer = PeerSyncer(cfg, mock_pool, mock_peer_manager, mock_publisher)
+
+    # Simular _fetch_json devolviendo una lista de nodos
+    node_list = [
+        {"node_id": "!11111111", "short_name": "N1"},
+        {"node_id": "!22222222", "short_name": "N2"},
+    ]
+    syncer._fetch_json = AsyncMock(return_value=node_list)
+    syncer._post_local_potatomesh = AsyncMock()
+    syncer.mqtt_publisher = MagicMock()
+    syncer.mqtt_publisher.publish_event = AsyncMock()
+
+    peer = PeerConfig("malla-remota", "Malla Remota", "https://potato.example.org", activo=True)
+    mock_session = MagicMock()
+
+    # Parchear update_cursor_nodes
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr("src.syncer.update_cursor_nodes", AsyncMock())
+        await syncer._sync_nodes(peer, mock_session, {}, {})
+
+    # Verificar que _post_local_potatomesh recibió un diccionario
+    assert syncer._post_local_potatomesh.call_count == 1
+    call_args = syncer._post_local_potatomesh.call_args
+    assert call_args[0][1] == "nodes"
+    posted_payload = call_args[0][2]
+    assert isinstance(posted_payload, dict)
+    assert "!11111111" in posted_payload
+    assert "!22222222" in posted_payload
+    assert posted_payload["!11111111"]["short_name"] == "N1"
