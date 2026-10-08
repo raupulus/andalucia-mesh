@@ -86,18 +86,32 @@ class CustomPage extends Model
     public function getCoverImageUrlAttribute(): string
     {
         if (empty($this->featured_image)) {
-            return asset('img/revisa-nodo-banner.webp');
+            return asset('img/paginas/default-banner.svg');
         }
 
         if (str_starts_with($this->featured_image, 'http://') || str_starts_with($this->featured_image, 'https://')) {
             return $this->featured_image;
         }
 
-        if (str_starts_with($this->featured_image, '/')) {
-            return asset(ltrim($this->featured_image, '/'));
+        $trimmed = ltrim($this->featured_image, '/');
+
+        // 1. Si existe directamente como archivo en public/
+        if (file_exists(public_path($trimmed))) {
+            return asset($trimmed);
         }
 
-        return Storage::disk('public')->url($this->featured_image);
+        // 2. Si existe en el disco público de Storage
+        if (Storage::disk('public')->exists($trimmed)) {
+            return Storage::disk('public')->url($trimmed);
+        }
+
+        // 3. Si la ruta apunta explícitamente a img/ o storage/
+        if (str_starts_with($trimmed, 'img/') || str_starts_with($trimmed, 'storage/')) {
+            return asset($trimmed);
+        }
+
+        // 4. Fallback garantizado: banner animado vectorial oficial
+        return asset('img/paginas/default-banner.svg');
     }
 
     /**

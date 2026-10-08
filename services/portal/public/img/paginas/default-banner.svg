@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14151F"/>
+      <stop offset="50%" stop-color="#1E202E"/>
+      <stop offset="100%" stop-color="#161722"/>
+    </linearGradient>
+    <linearGradient id="flagGradV" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#007A33"/>
+      <stop offset="50%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#007A33"/>
+    </linearGradient>
+    <radialGradient id="glowG" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#007A33" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#007A33" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#67EA94" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#67EA94" stop-opacity="0"/>
+    </radialGradient>
+
+    <style>
+      /* Animaciones de nodos y ondas de radio */
+      @keyframes pulsoOnda {
+        0% { r: 18px; opacity: 0.8; stroke-width: 2.5px; }
+        50% { opacity: 0.35; }
+        100% { r: 75px; opacity: 0; stroke-width: 0.5px; }
+      }
+      @keyframes pulsoOnda2 {
+        0% { r: 24px; opacity: 0.7; stroke-width: 2px; }
+        100% { r: 90px; opacity: 0; stroke-width: 0.5px; }
+      }
+      @keyframes flotarNodo1 {
+        0%, 100% { transform: translateY(0px) translateX(0px); }
+        50% { transform: translateY(-8px) translateX(5px); }
+      }
+      @keyframes flotarNodo2 {
+        0%, 100% { transform: translateY(0px) translateX(0px); }
+        50% { transform: translateY(10px) translateX(-6px); }
+      }
+      @keyframes flotarNodo3 {
+        0%, 100% { transform: translateY(0px) translateX(0px); }
+        50% { transform: translateY(-12px) translateX(-4px); }
+      }
+      @keyframes paqueteViajero {
+        0% { stroke-dashoffset: 240; }
+        100% { stroke-dashoffset: 0; }
+      }
+      @keyframes rotarAura {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      .onda-1 { animation: pulsoOnda 3.2s cubic-bezier(0.2, 0.8, 0.4, 1) infinite; }
+      .onda-2 { animation: pulsoOnda 3.2s cubic-bezier(0.2, 0.8, 0.4, 1) infinite 1.6s; }
+      .onda-nodo { animation: pulsoOnda2 2.8s ease-out infinite; }
+      .nodo-flotante-1 { animation: flotarNodo1 5s ease-in-out infinite; transform-origin: 220px 170px; }
+      .nodo-flotante-2 { animation: flotarNodo2 6.2s ease-in-out infinite; transform-origin: 580px 180px; }
+      .nodo-flotante-3 { animation: flotarNodo3 4.8s ease-in-out infinite; transform-origin: 320px 320px; }
+      .linea-paquetes {
+        stroke-dasharray: 8 16;
+        animation: paqueteViajero 4s linear infinite;
+      }
+    </style>
+  </defs>
+
+  <!-- Fondo estilizado oscuro -->
+  <rect width="800" height="450" fill="url(#bgGrad)"/>
+
+  <!-- Cuadrícula sutil de referencia topológica -->
+  <g opacity="0.06" stroke="#FFFFFF" stroke-width="1">
+    <line x1="0" y1="90" x2="800" y2="90"/>
+    <line x1="0" y1="180" x2="800" y2="180"/>
+    <line x1="0" y1="270" x2="800" y2="270"/>
+    <line x1="0" y1="360" x2="800" y2="360"/>
+    <line x1="160" y1="0" x2="160" y2="450"/>
+    <line x1="320" y1="0" x2="320" y2="450"/>
+    <line x1="480" y1="0" x2="480" y2="450"/>
+    <line x1="640" y1="0" x2="640" y2="450"/>
+  </g>
+
+  <!-- Resplandor central -->
+  <circle cx="400" cy="225" r="240" fill="url(#glowG)"/>
+
+  <!-- Enlaces de la red mallada (Mesh links estáticos y dinámicos) -->
+  <g stroke="#3D4058" stroke-width="1.5" opacity="0.6">
+    <line x1="220" y1="170" x2="400" y2="200"/>
+    <line x1="580" y1="180" x2="400" y2="200"/>
+    <line x1="320" y1="320" x2="400" y2="200"/>
+    <line x1="500" y1="310" x2="400" y2="200"/>
+    <line x1="220" y1="170" x2="320" y2="320"/>
+    <line x1="580" y1="180" x2="500" y2="310"/>
+    <line x1="320" y1="320" x2="500" y2="310"/>
+    <line x1="140" y1="260" x2="220" y2="170"/>
+    <line x1="660" y1="270" x2="580" y2="180"/>
+  </g>
+
+  <!-- Enlaces activos con tráfico de paquetes animados -->
+  <g stroke="#67EA94" stroke-width="2" class="linea-paquetes" opacity="0.85">
+    <line x1="220" y1="170" x2="400" y2="200"/>
+    <line x1="400" y1="200" x2="580" y2="180"/>
+    <line x1="400" y1="200" x2="320" y2="320"/>
+    <line x1="400" y1="200" x2="500" y2="310"/>
+  </g>
+
+  <!-- Nodos periféricos móviles -->
+  <!-- Nodo Izquierda Superior -->
+  <g class="nodo-flotante-1">
+    <circle cx="220" cy="170" class="onda-nodo" stroke="#67EA94" fill="none"/>
+    <circle cx="220" cy="170" r="14" fill="#1E202E" stroke="#007A33" stroke-width="2.5"/>
+    <circle cx="220" cy="170" r="6" fill="#67EA94"/>
+  </g>
+
+  <!-- Nodo Derecha Superior -->
+  <g class="nodo-flotante-2">
+    <circle cx="580" cy="180" class="onda-nodo" stroke="#FFFFFF" fill="none" style="animation-delay: 1.2s;"/>
+    <circle cx="580" cy="180" r="15" fill="#1E202E" stroke="#007A33" stroke-width="2.5"/>
+    <circle cx="580" cy="180" r="7" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Nodo Izquierda Inferior -->
+  <g class="nodo-flotante-3">
+    <circle cx="320" cy="320" r="12" fill="#1E202E" stroke="#007A33" stroke-width="2"/>
+    <circle cx="320" cy="320" r="5" fill="#67EA94"/>
+  </g>
+
+  <!-- Nodo Derecha Inferior -->
+  <g>
+    <circle cx="500" cy="310" r="13" fill="#1E202E" stroke="#007A33" stroke-width="2"/>
+    <circle cx="500" cy="310" r="5" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Nodos de borde decorativos -->
+  <circle cx="140" cy="260" r="7" fill="#2C2D3C" stroke="#67EA94" stroke-width="1.5"/>
+  <circle cx="660" cy="270" r="7" fill="#2C2D3C" stroke="#67EA94" stroke-width="1.5"/>
+
+  <!-- NODO CENTRAL (REPETIDOR PRINCIPAL) CON ONDAS EXPANSIVAS -->
+  <g transform="translate(0, 0)">
+    <!-- Ondas concéntricas animadas -->
+    <circle cx="400" cy="200" class="onda-1" stroke="#007A33" fill="none"/>
+    <circle cx="400" cy="200" class="onda-2" stroke="#67EA94" fill="none"/>
+
+    <!-- Núcleo central del nodo -->
+    <circle cx="400" cy="200" r="32" fill="#181924" stroke="#007A33" stroke-width="3"/>
+    <circle cx="400" cy="200" r="24" fill="#007A33"/>
+    <circle cx="400" cy="200" r="14" fill="#FFFFFF"/>
+    <circle cx="400" cy="200" r="6" fill="#007A33"/>
+
+    <!-- Franja vertical representativa de la bandera de Andalucía en el nodo -->
+    <rect x="397" y="180" width="2" height="40" fill="#007A33" opacity="0.9"/>
+    <rect x="399" y="180" width="2" height="40" fill="#FFFFFF" opacity="0.9"/>
+    <rect x="401" y="180" width="2" height="40" fill="#007A33" opacity="0.9"/>
+  </g>
+
+  <!-- Tipografía institucional inferior -->
+  <g text-anchor="middle">
+    <text x="400" y="380" font-family="'Ubuntu', -apple-system, sans-serif" font-size="18" font-weight="700" fill="#F0F0F5" letter-spacing="3">
+      ANDALUCÍA MESH
+    </text>
+    <text x="400" y="405" font-family="'Inter', -apple-system, sans-serif" font-size="12" font-weight="600" fill="#67EA94" letter-spacing="4">
+      RED LIBRE COMUNITARIA · 868 MHz
+    </text>
+  </g>
+
+  <!-- Franja decorativa inferior de la bandera de Andalucía (verde/blanca/verde) -->
+  <rect x="0" y="442" width="800" height="2.5" fill="#007A33"/>
+  <rect x="0" y="444.5" width="800" height="2.5" fill="#FFFFFF"/>
+  <rect x="0" y="447" width="800" height="3" fill="#007A33"/>
+</svg>
