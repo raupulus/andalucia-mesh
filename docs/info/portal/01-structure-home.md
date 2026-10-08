@@ -19,19 +19,21 @@ Que quien llega por el enlace o el QR entienda en 10 segundos qué es esto, vea 
 | Sugerencias | `/sugerencias` | `SuggestionController` | Buzón ciudadano con Turnstile y categorías |
 | Resto | Ver `README.md` §4.1 | Su módulo | Su documento en `pages/` |
 
-Navegación principal: Inicio · Configura tu nodo · Conecta tu gateway · Rankings · Alertas · Bots · Revisa tu nodo. Pie: El proyecto · Quién lo impulsa · Cómo se gestiona · Sugerencias · Firmware y apps · API · Aviso legal · Privacidad · Cookies · línea de autoría (`05-authorship.md`). Accesos discretos y no invasivos al buzón de sugerencias en pie, menú móvil, pie de portada y sección final de bots.
+Navegación principal: Inicio · Configura tu nodo · Configurador · MQTT (`/conecta-tu-gateway`) · Rankings · Alertas · Bots · Desplegable **Extras** (`/revisa-tu-nodo` y `/sugerencias`). Pie: El proyecto · Quién lo impulsa · Cómo se gestiona · Sugerencias · Firmware y apps · API · Aviso legal · Privacidad · Cookies · línea de autoría (`05-authorship.md`). Por defecto la interfaz se presenta en modo oscuro (`data-theme="dark"`), respetando el modo claro solo cuando el sistema operativo tiene explícitamente activada la preferencia `prefers-color-scheme: light` o el usuario seleccionó un tema en `localStorage`.
 
 ### Portada (orden fijo)
 
-1. Cabecera común.
+1. Cabecera común con logotipo, selector de idioma, navegación y desplegable de Extras.
 2. Presentación: `PROJECT_NAME` (H1) y una frase.
 3. **Tres tarjetas** en este orden: MeshView (`https://meshview.${PROJECT_DOMAIN}`), PotatoMesh (`https://potato.${PROJECT_DOMAIN}`), Consumo y nodos en peligro (`/rankings`). Cada una: imagen 16:9, nombre, descripción de 2 líneas como máximo, toda la tarjeta es el enlace, misma pestaña. Fila de tres en escritorio, columna en móvil.
-4. Mapa de Andalucía (`02-province-map.md`).
-5. Configura tu nodo, resumen (`03-node-setup-guide.md`).
-6. Sube los datos de tu nodo, resumen (`04-gateway-connection.md`).
-7. Quién está detrás (`05-authorship.md`).
-8. Aviso "no es un servicio de emergencias".
-9. Pie común.
+4. Mapa de Andalucía (`02-province-map.md`) con selector temporal (24h / 7d) y tabla accesible de nodos y saturación.
+5. **Tarjeta horizontal comunitaria: ¡Envía tu Sugerencia!**, con ilustración corporativa en formato 1:1 a la izquierda, descripción de ideas y botón verde del diseño centrado enlazando a `/sugerencias`.
+6. Configura tu nodo, resumen (`03-node-setup-guide.md`).
+7. Sube los datos de tu nodo, resumen (`04-gateway-connection.md`).
+8. **Tarjeta horizontal de diagnóstico: Revisa tu nodo**, con ilustración de lupa sobre PCB en formato 1:1 a la izquierda, texto descriptivo y botón verde centrado enlazando a `/revisa-tu-nodo`.
+9. Quién está detrás (`05-authorship.md`): tarjeta vertical centrada y oxigenada con el logotipo de `raupulus.dev` enlazado a la web personal y botón a `/quien-lo-impulsa`.
+10. Aviso "no es un servicio de emergencias".
+11. Pie común.
 
 Bots, alertas y API no llevan tarjeta: van en navegación y pie.
 

@@ -143,6 +143,42 @@ class PanelOperadorTest extends TestCase
         $response->assertSee('Saturación TX Repetidores');
         $response->assertSee('Repetidores y Nodos de Infraestructura');
         $response->assertSee('Estado de la Red y Microservicios');
+        $response->assertSee('Panel de Operador');
+        $response->assertSee('Ingesta de paquetes');
+    }
+
+    public function test_operador_activo_ve_dashboard_y_widgets_traducidos_a_ingles(): void
+    {
+        $user = User::factory()->create([
+            'activo' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get('/admin?lang=en');
+        $response->assertStatus(200);
+        $response->assertSee('Operations Control Center');
+        $response->assertSee('Air Pressure (ChUtil)');
+        $response->assertSee('Repeater TX Saturation');
+        $response->assertSee('Repeaters &amp; Infrastructure Nodes', false);
+        $response->assertSee('Network and Microservices Status');
+        $response->assertSee('Operator Panel');
+        $response->assertSee('Packet Ingestion');
+    }
+
+    public function test_operador_activo_ve_dashboard_y_widgets_traducidos_a_portugues(): void
+    {
+        $user = User::factory()->create([
+            'activo' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get('/admin?lang=pt');
+        $response->assertStatus(200);
+        $response->assertSee('Centro de Controlo Operativo');
+        $response->assertSee('Pressão do Ar (ChUtil)');
+        $response->assertSee('Saturação TX Repetidores');
+        $response->assertSee('Repetidores e Nós de Infraestrutura');
+        $response->assertSee('Estado da Rede e Microsserviços');
+        $response->assertSee('Painel de Operador');
+        $response->assertSee('Ingestão de pacotes');
     }
 
     public function test_operador_activo_puede_ver_su_perfil(): void

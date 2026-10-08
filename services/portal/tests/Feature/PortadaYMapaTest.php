@@ -116,5 +116,58 @@ class PortadaYMapaTest extends TestCase
         $contenido = (string) $response->getContent();
         $this->assertMatchesRegularExpression('/<script type="application\/json" id="mapa-datos-iniciales">\s*\{.*"provinces".*\}\s*<\/script>/s', $contenido);
     }
-}
 
+    /**
+     * Comprueba que las tarjetas destacadas de sugerencias, revisa tu nodo y quién está detrás aparecen correctamente.
+     */
+    public function test_tarjetas_destacadas_y_bloque_autoria_en_portada(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+
+        // Tarjeta horizontal de sugerencias
+        $response->assertSee('/img/sugerencias-banner.webp', false);
+        $response->assertSee('¡Envía tu Sugerencia!', false);
+        $response->assertSee('/sugerencias', false);
+
+        // Tarjeta horizontal de revisa tu nodo
+        $response->assertSee('/img/revisa-nodo-banner.webp', false);
+        $response->assertSee('Revisa la configuración de tu nodo', false);
+        $response->assertSee('/revisa-tu-nodo', false);
+
+        // Bloque Quién está detrás con logotipo oficial de raupulus.dev
+        $response->assertSee('/img/raupulus-logo.webp', false);
+        $response->assertSee('https://raupulus.dev', false);
+    }
+
+    /**
+     * Comprueba que la cabecera muestra el texto MQTT y el desplegable Extras.
+     */
+    public function test_cabecera_muestra_mqtt_y_menu_extras(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+
+        // MQTT en lugar de Conecta tu gateway en la navegación
+        $response->assertSee('MQTT', false);
+        $response->assertSee('/conecta-tu-gateway', false);
+
+        // Menú Extras con Revisa tu nodo y Sugerencias
+        $response->assertSee('Extras', false);
+        $response->assertSee('btn-extras-nav', false);
+        $response->assertSee('dropdown-extras-nav', false);
+    }
+
+    /**
+     * Comprueba que el modo oscuro está configurado por defecto en la etiqueta HTML.
+     */
+    public function test_modo_oscuro_por_defecto_en_html(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('data-theme="dark"', false);
+    }
+}
