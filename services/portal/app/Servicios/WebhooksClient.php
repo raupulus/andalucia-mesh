@@ -51,20 +51,34 @@ class WebhooksClient
      */
     public function getDestinations(): array
     {
-        $response = $this->request()->get("{$this->baseUrl}/internal/destinos");
+        try {
+            $response = $this->request()->get("{$this->baseUrl}/internal/destinos");
 
-        if (! $response->successful()) {
-            Log::error('Fallo al obtener destinos de webhooks desde microservicio', [
-                'status' => $response->status(),
-                'body' => $response->body(),
+            if (! $response->successful()) {
+                Log::error('Fallo al obtener destinos de webhooks desde microservicio', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                throw new RuntimeException("Error al consultar destinos ({$response->status()}): ".($response->json('error') ?? $response->body()));
+            }
+
+            /** @var array<int, array<string, mixed>> $destinos */
+            $destinos = $response->json('destinos', []);
+
+            return $destinos;
+        } catch (\Throwable $e) {
+            if ($e instanceof RuntimeException) {
+                throw $e;
+            }
+
+            $msg = $e->getMessage();
+            Log::warning('No se pudo conectar con el microservicio webhooks al listar', [
+                'baseUrl' => $this->baseUrl,
+                'error' => $msg,
             ]);
-            throw new RuntimeException("Error al consultar destinos ({$response->status()}): ".($response->json('error') ?? $response->body()));
+
+            throw new RuntimeException("No se pudo conectar con el microservicio webhooks ({$this->baseUrl}): {$msg}", 0, $e);
         }
-
-        /** @var array<int, array<string, mixed>> $destinos */
-        $destinos = $response->json('destinos', []);
-
-        return $destinos;
     }
 
     /**
@@ -75,21 +89,35 @@ class WebhooksClient
      */
     public function createDestination(array $data): array
     {
-        $response = $this->request()->post("{$this->baseUrl}/internal/destinos", $data);
+        try {
+            $response = $this->request()->post("{$this->baseUrl}/internal/destinos", $data);
 
-        if (! $response->successful()) {
-            $error = (string) ($response->json('error') ?? $response->body());
-            Log::warning('Fallo al crear destino de webhook en microservicio', [
-                'status' => $response->status(),
-                'error' => $error,
+            if (! $response->successful()) {
+                $error = (string) ($response->json('error') ?? $response->body());
+                Log::warning('Fallo al crear destino de webhook en microservicio', [
+                    'status' => $response->status(),
+                    'error' => $error,
+                ]);
+                throw new RuntimeException($error, $response->status());
+            }
+
+            /** @var array<string, mixed> $resultado */
+            $resultado = $response->json();
+
+            return $resultado;
+        } catch (\Throwable $e) {
+            if ($e instanceof RuntimeException) {
+                throw $e;
+            }
+
+            $msg = $e->getMessage();
+            Log::warning('Fallo de conexión al crear destino de webhook', [
+                'baseUrl' => $this->baseUrl,
+                'error' => $msg,
             ]);
-            throw new RuntimeException($error, $response->status());
+
+            throw new RuntimeException("No se pudo conectar con el microservicio webhooks ({$this->baseUrl}): {$msg}", 0, $e);
         }
-
-        /** @var array<string, mixed> $resultado */
-        $resultado = $response->json();
-
-        return $resultado;
     }
 
     /**
@@ -100,21 +128,35 @@ class WebhooksClient
      */
     public function updateDestination(string $name, array $data): array
     {
-        $response = $this->request()->put("{$this->baseUrl}/internal/destinos/{$name}", $data);
+        try {
+            $response = $this->request()->put("{$this->baseUrl}/internal/destinos/{$name}", $data);
 
-        if (! $response->successful()) {
-            $error = (string) ($response->json('error') ?? $response->body());
-            Log::warning("Fallo al actualizar destino de webhook {$name}", [
-                'status' => $response->status(),
-                'error' => $error,
+            if (! $response->successful()) {
+                $error = (string) ($response->json('error') ?? $response->body());
+                Log::warning("Fallo al actualizar destino de webhook {$name}", [
+                    'status' => $response->status(),
+                    'error' => $error,
+                ]);
+                throw new RuntimeException($error, $response->status());
+            }
+
+            /** @var array<string, mixed> $resultado */
+            $resultado = $response->json();
+
+            return $resultado;
+        } catch (\Throwable $e) {
+            if ($e instanceof RuntimeException) {
+                throw $e;
+            }
+
+            $msg = $e->getMessage();
+            Log::warning("Fallo de conexión al actualizar destino de webhook {$name}", [
+                'baseUrl' => $this->baseUrl,
+                'error' => $msg,
             ]);
-            throw new RuntimeException($error, $response->status());
+
+            throw new RuntimeException("No se pudo conectar con el microservicio webhooks ({$this->baseUrl}): {$msg}", 0, $e);
         }
-
-        /** @var array<string, mixed> $resultado */
-        $resultado = $response->json();
-
-        return $resultado;
     }
 
     /**
@@ -124,49 +166,86 @@ class WebhooksClient
      */
     public function deleteDestination(string $name): array
     {
-        $response = $this->request()->delete("{$this->baseUrl}/internal/destinos/{$name}");
+        try {
+            $response = $this->request()->delete("{$this->baseUrl}/internal/destinos/{$name}");
 
-        if (! $response->successful()) {
-            $error = (string) ($response->json('error') ?? $response->body());
-            Log::warning("Fallo al eliminar destino de webhook {$name}", [
-                'status' => $response->status(),
-                'error' => $error,
+            if (! $response->successful()) {
+                $error = (string) ($response->json('error') ?? $response->body());
+                Log::warning("Fallo al eliminar destino de webhook {$name}", [
+                    'status' => $response->status(),
+                    'error' => $error,
+                ]);
+                throw new RuntimeException($error, $response->status());
+            }
+
+            /** @var array<string, mixed> $resultado */
+            $resultado = $response->json();
+
+            return $resultado;
+        } catch (\Throwable $e) {
+            if ($e instanceof RuntimeException) {
+                throw $e;
+            }
+
+            $msg = $e->getMessage();
+            Log::warning("Fallo de conexión al eliminar destino de webhook {$name}", [
+                'baseUrl' => $this->baseUrl,
+                'error' => $msg,
             ]);
-            throw new RuntimeException($error, $response->status());
+
+            throw new RuntimeException("No se pudo conectar con el microservicio webhooks ({$this->baseUrl}): {$msg}", 0, $e);
         }
-
-        /** @var array<string, mixed> $resultado */
-        $resultado = $response->json();
-
-        return $resultado;
     }
 
     /**
      * Envía un ping de prueba firmado fuera de cola y retorna el resultado.
+     * Captura cualquier excepción de red o conexión para devolver un estado estructurado amigable.
      *
      * @return array{ok: bool, status_code: int, duration_ms: int, error: ?string}
      */
     public function testDestination(string $name): array
     {
-        $response = $this->request()->post("{$this->baseUrl}/internal/destinos/{$name}/probar");
+        try {
+            $response = $this->request()->post("{$this->baseUrl}/internal/destinos/{$name}/probar");
 
-        if (! $response->successful() && $response->status() !== 200) {
-            $error = (string) ($response->json('error') ?? $response->body());
+            if (! $response->successful() && $response->status() !== 200) {
+                $error = (string) ($response->json('error') ?? $response->body());
+
+                return [
+                    'ok' => false,
+                    'status_code' => $response->status(),
+                    'duration_ms' => 0,
+                    'error' => $error ?: "Error HTTP {$response->status()}",
+                ];
+            }
+
+            return [
+                'ok' => (bool) $response->json('ok', false),
+                'status_code' => (int) $response->json('status_code', 0),
+                'duration_ms' => (int) $response->json('duration_ms', 0),
+                'error' => $response->json('error'),
+            ];
+        } catch (\Throwable $e) {
+            $msg = $e->getMessage();
+            $detalle = $msg;
+
+            if (str_contains($msg, 'Could not resolve host') || str_contains($msg, 'Connection refused')) {
+                $detalle = "No se pudo conectar con el microservicio webhooks en {$this->baseUrl}. Verifique que el servicio esté activo y accesible en la red Docker: {$msg}";
+            }
+
+            Log::warning("Fallo de conexión al probar destino de webhook {$name}", [
+                'destino' => $name,
+                'baseUrl' => $this->baseUrl,
+                'error' => $msg,
+            ]);
 
             return [
                 'ok' => false,
-                'status_code' => $response->status(),
+                'status_code' => 0,
                 'duration_ms' => 0,
-                'error' => $error,
+                'error' => $detalle,
             ];
         }
-
-        return [
-            'ok' => (bool) $response->json('ok', false),
-            'status_code' => (int) $response->json('status_code', 0),
-            'duration_ms' => (int) $response->json('duration_ms', 0),
-            'error' => $response->json('error'),
-        ];
     }
 
     /**
@@ -176,21 +255,35 @@ class WebhooksClient
      */
     public function reactivateDestination(string $name): array
     {
-        $response = $this->request()->post("{$this->baseUrl}/internal/destinos/{$name}/reactivar");
+        try {
+            $response = $this->request()->post("{$this->baseUrl}/internal/destinos/{$name}/reactivar");
 
-        if (! $response->successful()) {
-            $error = (string) ($response->json('error') ?? $response->body());
-            Log::warning("Fallo al reactivar destino de webhook {$name}", [
-                'status' => $response->status(),
-                'error' => $error,
+            if (! $response->successful()) {
+                $error = (string) ($response->json('error') ?? $response->body());
+                Log::warning("Fallo al reactivar destino de webhook {$name}", [
+                    'status' => $response->status(),
+                    'error' => $error,
+                ]);
+                throw new RuntimeException($error, $response->status());
+            }
+
+            /** @var array<string, mixed> $resultado */
+            $resultado = $response->json();
+
+            return $resultado;
+        } catch (\Throwable $e) {
+            if ($e instanceof RuntimeException) {
+                throw $e;
+            }
+
+            $msg = $e->getMessage();
+            Log::warning("Fallo de conexión al reactivar destino de webhook {$name}", [
+                'baseUrl' => $this->baseUrl,
+                'error' => $msg,
             ]);
-            throw new RuntimeException($error, $response->status());
+
+            throw new RuntimeException("No se pudo conectar con el microservicio webhooks ({$this->baseUrl}): {$msg}", 0, $e);
         }
-
-        /** @var array<string, mixed> $resultado */
-        $resultado = $response->json();
-
-        return $resultado;
     }
 
     /**

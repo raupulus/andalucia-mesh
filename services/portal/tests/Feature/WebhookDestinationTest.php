@@ -270,6 +270,40 @@ class WebhookDestinationTest extends TestCase
     }
 
     /**
+     * Comprueba que si el ping falla por error de conexión o host no resuelto,
+     * se captura la excepción y se emite notificación de peligro sin error 500.
+     */
+    public function test_accion_probar_ping_captura_excepcion_conexion(): void
+    {
+        $operador = User::factory()->create([
+            'email' => 'operador@andalucia.mesh',
+            'activo' => true,
+        ]);
+
+        $destino = WebhookDestination::create([
+            'nombre' => 'malaga-hook',
+            'url' => 'https://malaga.example.org/in',
+            'host' => 'malaga.example.org',
+            'activo' => true,
+            'secreto' => 'secreto_64_caracteres_ejemplo_123456789012345678901234567890123456',
+        ]);
+
+        Http::fake([
+            'http://webhooks:8080/internal/destinos' => Http::response(['ok' => true, 'destinos' => []], 200),
+            'http://webhooks:8080/internal/destinos/malaga-hook/probar' => function () {
+                throw new \Illuminate\Http\Client\ConnectionException('cURL error 6: Could not resolve host: webhooks');
+            },
+        ]);
+
+        $this->actingAs($operador);
+
+        Livewire::test(ListWebhookDestinations::class)
+            ->callTableAction('probar', $destino)
+            ->assertHasNoTableActionErrors()
+            ->assertNotified('Fallo al probar destino (Ping)');
+    }
+
+    /**
      * Comprueba la acción de reactivación de un destino suspendido.
      */
     public function test_accion_reactivar_en_tabla_filament(): void

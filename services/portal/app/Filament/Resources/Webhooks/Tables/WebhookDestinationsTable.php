@@ -104,21 +104,33 @@ class WebhookDestinationsTable
                     ->icon(Heroicon::OutlinedBolt)
                     ->color('warning')
                     ->action(function (WebhookDestination $record, WebhooksClient $client): void {
-                        $res = $client->testDestination($record->nombre);
-                        $code = $res['status_code'];
-                        $ms = $res['duration_ms'];
+                        try {
+                            $res = $client->testDestination($record->nombre);
+                            $code = $res['status_code'];
+                            $ms = $res['duration_ms'];
 
-                        if ($res['ok']) {
-                            Notification::make()
-                                ->success()
-                                ->title("Ping exitoso (HTTP {$code}) en {$ms} ms")
-                                ->send();
-                        } else {
-                            $error = $res['error'] ?? 'Fallo en la comunicación';
+                            if ($res['ok']) {
+                                Notification::make()
+                                    ->success()
+                                    ->title("Ping exitoso (HTTP {$code}) en {$ms} ms")
+                                    ->body('El receptor respondió correctamente y validó la firma HMAC-SHA256.')
+                                    ->send();
+                            } else {
+                                $error = $res['error'] ?? 'Fallo en la comunicación con el destino';
+                                $codeInfo = $code > 0 ? "Código: HTTP {$code}" : 'Sin respuesta del servicio';
+                                $timing = $ms > 0 ? " ({$ms} ms)" : '';
+
+                                Notification::make()
+                                    ->danger()
+                                    ->title('Fallo al probar destino (Ping)')
+                                    ->body("{$codeInfo}{$timing}. {$error}")
+                                    ->send();
+                            }
+                        } catch (\Throwable $e) {
                             Notification::make()
                                 ->danger()
-                                ->title('Fallo al probar destino')
-                                ->body("Código: HTTP {$code} ({$ms} ms). Error: {$error}")
+                                ->title('Error al conectar con el servicio webhooks')
+                                ->body($e->getMessage())
                                 ->send();
                         }
                     }),
@@ -156,7 +168,15 @@ class WebhookDestinationsTable
                 DeleteAction::make()
                     ->label(__('admin.webhooks.action_delete'))
                     ->before(function (WebhookDestination $record, WebhooksClient $client): void {
-                        $client->deleteDestination($record->nombre);
+                        try {
+                            $client->deleteDestination($record->nombre);
+                        } catch (\Throwable $e) {
+                            Notification::make()
+                                ->warning()
+                                ->title('Aviso de baja en microservicio')
+                                ->body('El destino se retiró localmente, pero el microservicio no respondió: ' . $e->getMessage())
+                                ->send();
+                        }
                     }),
             ]);
     }
