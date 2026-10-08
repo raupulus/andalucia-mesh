@@ -154,6 +154,7 @@ Copia: diaria con `.backup`, etiqueta `potato`, 7 diarias (`../infrastructure/04
 2. `POTATOMESH_SQLITE=/srv/potatomesh/datos/mesh.db` (bind mount en lugar de volumen con nombre, para que el host lo copie).
 3. Sin parches de frontend; si hiciera falta filtrar pestañas, se propone como opción a PotatoMesh.
 4. `/metrics` no se publica en Nginx (`location /metrics { return 404; }`).
+5. Federación desactivada de forma obligatoria en `compose.yaml` (`environment: - FEDERATION=0`) y en `.env` para garantizar aislamiento total frente a anuncios y crawling de peers no controlados (DT-37, CUST-02).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

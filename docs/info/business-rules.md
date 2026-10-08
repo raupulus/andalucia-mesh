@@ -23,8 +23,8 @@
 | RN-04 | Nunca se publican mensajes directos (PKI ni texto con destinatario); solo difusión en canales de la lista | [ingesta](ingesta/06-decoded-stream.md), [chat-ws](chat-ws/README.md) |
 | RN-05 | El portal y la API nunca exponen coordenadas: solo provincia y recuentos | [portal](portal/README.md) |
 | RN-06 | Las páginas públicas no usan cookies ni hacen peticiones a terceros | [portal](portal/README.md) |
-| RN-07 | Retención: bruto 30 días; posiciones y telemetría 90; agregados con nodo 1 año; sin nodo indefinidos; alertas y avisos enviados 1 año; PotatoMesh 30 días; MeshView 14 días | [04-storage-retention](ingesta/04-storage-retention.md) |
-| RN-08 | Independencia y centralización: sin bridges MQTT bidireccionales; sync-peers solo lee APIs públicas de otras instancias y las canaliza a ingesta (filtro anti-duplicados) y PotatoMesh | [sync-peers](potatomesh/sync-peers.md) |
+| RN-08 | Independencia, centralización y aislamiento: sin bridges MQTT bidireccionales ni federaciones salientes hacia redes de terceros (PotatoMesh `FEDERATION=0` forzado y MeshviewWorld sin enlaces activos); sync-peers solo lee APIs públicas de otras instancias y las canaliza a ingesta (filtro anti-duplicados) y PotatoMesh | [sync-peers](potatomesh/sync-peers.md), [customizations](customizations.md) |
+| RN-09 | Toda fecha y marca temporal debe persistirse en UTC siempre que sea viable (epoch UTC o `TIMESTAMPTZ`); en interfaces de usuario y vistas se muestra en hora local peninsular (`Europe/Madrid`, CET/CEST) en formato 24 horas (`HH:mm:ss`) y fecha estándar europea (`DD/MM/YYYY`) o ISO (`YYYY-MM-DD`) | [integration](integration.md), [customizations](customizations.md) |
 
 ## 3. Definiciones y cálculos
 
@@ -83,6 +83,7 @@
 | 2026-10-08 | RN-34 | Filtros por defecto de bots: solo avisos de infraestructura altos (riesgo 'alto') al integrarlo a grupos para evitar spam | Responsable del proyecto |
 | 2026-10-08 | RN-22 | Umbrales de saltos (hops-high): 6 saltos genera riesgo bajo y >= 7 genera riesgo alto; clasificación de tipo según nodo (infraestructura para routers/gateways y clientes para nodos de usuario) | Responsable del proyecto |
 | 2026-10-08 | RN-34 | Filtro geográfico en bots: nodos exteriores (fuera de Andalucía) desactivados por defecto al añadir el bot a grupos; configurables con /disableExterior y /enableExterior | Responsable del proyecto |
+| 2026-10-08 | RN-08, RN-09 | Persistencia estricta en UTC y visualización obligatoria en 24h peninsular (Europe/Madrid) con formato europeo; aislamiento frente a federaciones externas (PotatoMesh FEDERATION=0 forzado en compose) y registro de personalizaciones | Responsable del proyecto |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

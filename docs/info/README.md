@@ -14,6 +14,7 @@ Documentación técnica canónica del proyecto. Todavía no hay código: cada do
 
 - [commands.md](commands.md): catálogo de comandos y scripts.
 - [decisiones-tecnicas.md](decisiones-tecnicas.md): decisiones deliberadas que no se deben «arreglar».
+- [customizations.md](customizations.md): histórico y catálogo de personalizaciones sobre software/imágenes de terceros.
 - [DESIGN.md](DESIGN.md): sistema visual del portal (obligatorio).
 - [COMPONENTS.md](COMPONENTS.md): componentes de interfaz.
 - [_MODULE_TEMPLATE.md](_MODULE_TEMPLATE.md): plantilla de módulo.
@@ -43,4 +44,4 @@ Ficha de desarrollo: 1 Contexto · 2 Alcance · 3 Stack y versiones · 4 Contrat
 Consulte [apis/README.md](apis/README.md).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

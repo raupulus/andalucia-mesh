@@ -18,6 +18,8 @@ services:
       - /srv/potatomesh/datos:/app/.local/share/potato-mesh
       - /srv/potatomesh/config:/app/.config/potato-mesh
       - ./pages:/app/pages:ro
+    environment:
+      - FEDERATION=0
     env_file:
       - path: /srv/comun/.env
         required: false

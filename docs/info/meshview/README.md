@@ -164,10 +164,10 @@ db_cleanup_logfile = /var/log/meshview/dbcleanup.log
 - **Aceptación:** `curl -sI https://meshview.${PROJECT_DOMAIN}` → 200 con las cabeceras de seguridad comunes; `docker ps` muestra `healthy`; `ss -tlnp` del host muestra el 8081 solo en `127.0.0.1`.
 
 ### UT-03.4 — Personalización
-- **Comportamiento:** interfaz en español, mapa encuadrado, textos con el nombre y el portal, secciones activas salvo `net`, refresco a 10 s.
-- **Detalle:** todo por `config.ini`; ningún archivo de la imagen se sustituye (las actualizaciones solo cambian la etiqueta).
-- **Casos borde:** textos internos de la interfaz que nombren a terceros no se parchean (excepción MeshView; ver §11).
-- **Aceptación:** la web abre en `/map` en español con Andalucía, Ceuta y Melilla a la vista y el título `${PROJECT_NAME}`.
+- **Comportamiento:** interfaz en español, mapa encuadrado, textos con el nombre y el portal, secciones activas salvo `net`, refresco a 10 s, formato de hora en 24 horas (`HH:mm:ss`) y fecha en formato peninsular español (`DD/MM/YYYY`) en `/chat` y `/net`.
+- **Detalle:** configuración principal por `config.ini`; plantillas `chat.html` y `net.html` montadas en `:ro` sobre `/app/meshview/templates/` para forzar `timeZone: "Europe/Madrid"`, `hour12: false` y formato europeo (catalogado en [`../customizations.md`](../customizations.md), `CUST-01`).
+- **Casos borde:** actualización de versión de MeshView → verificar y reaplicar plantillas según `customizations.md`.
+- **Aceptación:** la web abre en `/map` en español con Andalucía, Ceuta y Melilla a la vista y el título `${PROJECT_NAME}`; `/chat` muestra mensajes con formato 24 horas (ej. `00:07:08 - 08/10/2026`).
 
 ### UT-03.5 — Retención
 - **Comportamiento:** limpieza diaria a 14 días.
@@ -192,11 +192,11 @@ db_cleanup_logfile = /var/log/meshview/dbcleanup.log
 | Contenedor | Imagen | Redes | Volúmenes | Puertos | Publicación | Healthcheck |
 |---|---|---|---|---|---|---|
 | `meshview-config` (un solo uso) | La misma de `meshview` | `none` | `./plantilla:/plantilla:ro`, `/srv/meshview/datos/config:/etc/meshview` | — | — | — (termina con 0) |
-| `meshview` | `ghcr.io/pablorevilla-meshtastic/meshview:<3.0.8>@sha256:…` | `mesh` | `/srv/meshview/datos/config:/etc/meshview:ro`, `/srv/meshview/datos/logs:/var/log/meshview` | `127.0.0.1:8081:8081` | Nginx (`snm-meshview.conf`) | `python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/health', timeout=5)"` cada 30 s, `start_period` 60 s |
+| `meshview` | `ghcr.io/pablorevilla-meshtastic/meshview:<3.0.8>@sha256:…` | `mesh` | `/srv/meshview/datos/config:/etc/meshview:ro`, `/srv/meshview/datos/logs:/var/log/meshview`, `./templates/chat.html:/app/meshview/templates/chat.html:ro`, `./templates/net.html:/app/meshview/templates/net.html:ro` | `127.0.0.1:8081:8081` | Nginx (`snm-meshview.conf`) | `python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/health', timeout=5)"` cada 30 s, `start_period` 60 s |
 
 Ambos con `env_file: [/srv/comun/.env, .env]`; `meshview` con `restart: unless-stopped`, `mem_limit: 768m`, `security_opt: ["no-new-privileges:true"]`.
 
-Contenido de `integrations/meshview/`: `README.md` (referencia, versión, licencia, actualización), `compose.yaml`, `.env.example` (`MQTT_USER`, `MQTT_PASSWORD`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`), `plantilla/config.ini.plantilla`, `plantilla/generar-config.py`.
+Contenido de `integrations/meshview/`: `README.md` (referencia, versión, licencia, actualización), `compose.yaml`, `.env.example` (`MQTT_USER`, `MQTT_PASSWORD`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`), `plantilla/config.ini.plantilla`, `plantilla/generar-config.py`, `templates/` (`chat.html`, `net.html`).
 
 **Pasos en orden**
 
@@ -207,7 +207,7 @@ Contenido de `integrations/meshview/`: `README.md` (referencia, versión, licenc
 5. `deploy.sh meshview`: genera `config.ini`, levanta `meshview` y espera a `healthy`. `meshview-config` queda parado con código 0 (`deploy.sh` solo espera a los contenedores en marcha).
 6. Comprobar: `https://meshview.${PROJECT_DOMAIN}` muestra paquetes de varios gateways; panel en verde.
 
-**Actualización:** leer el registro de cambios → cambiar etiqueta y digest (commit) → copia con el sistema del operador → `deploy.sh meshview` → panel en verde. Si falla: revertir el commit, restaurar `meshview.dump` si hubo migración y desplegar.
+**Actualización:** leer el registro de cambios → cambiar etiqueta y digest (commit) → copia con el sistema del operador → verificar y reaplicar plantillas personalizadas según [`../customizations.md`](../customizations.md) → `deploy.sh meshview` → panel en verde. Si falla: revertir el commit, restaurar `meshview.dump` si hubo migración y desplegar.
 
 **Copias de seguridad:** fuera del proyecto (sistema del operador). Qué copiar: la base `meshview` y `.env`; `datos/` se regenera. Restauración: `pg_restore -d meshview` y `deploy.sh meshview`.
 
@@ -223,6 +223,7 @@ Contenido de `integrations/meshview/`: `README.md` (referencia, versión, licenc
 - [x] Limpieza a 14 días activa en la configuración de MeshView (`prune_hours = 336`).
 - [x] `/health` en verde en el panel; contenedor `healthy`; sin puertos publicados.
 - [x] Prueba de 100 usuarios superada; `/api/config` sin secretos.
+- [x] Plantillas de chat montadas con soporte para hora 24h y fechas `Europe/Madrid` (`customizations.md`).
 
 ## 10. Escenarios de prueba
 
@@ -246,7 +247,7 @@ Contenido de `integrations/meshview/`: `README.md` (referencia, versión, licenc
 
 ## 12. Referencias
 
-- Contratos comunes: [`../integration.md`](../integration.md) §4, §5, §8, §11, §12. Broker y usuarios: [`../mosquitto/README.md`](../mosquitto/README.md). Nginx: [`../infrastructure/03-nginx-dns.md`](../infrastructure/03-nginx-dns.md).
+- Contratos comunes: [`../integration.md`](../integration.md) §4, §5, §8, §11, §12. Broker y usuarios: [`../mosquitto/README.md`](../mosquitto/README.md). Nginx: [`../infrastructure/03-nginx-dns.md`](../infrastructure/03-nginx-dns.md). Personalizaciones: [`../customizations.md`](../customizations.md).
 
 ## Decisiones de detalle
 
@@ -256,6 +257,7 @@ Contenido de `integrations/meshview/`: `README.md` (referencia, versión, licenc
 4. Encuadre ampliado al sur (35,2) para incluir Ceuta y Melilla.
 5. `vacuum` y copias internas desactivados: autovacuum de PostgreSQL y copias del operador.
 6. Todas las secciones activas salvo `net`; refresco a 10 s.
+7. Plantillas `chat.html` y `net.html` montadas para forzar formato 24h y zona `Europe/Madrid` (DT-36, CUST-01).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

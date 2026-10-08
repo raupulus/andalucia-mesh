@@ -45,6 +45,7 @@ Este documento define las normas operativas, la estructura del proyecto y el pro
         ├── DESIGN.md
         ├── COMPONENTS.md
         ├── commands.md
+        ├── customizations.md    catálogo y registro de personalizaciones sobre imágenes de terceros
         ├── _MODULE_TEMPLATE.md
         ├── apis/
         ├── infrastructure/      README + 01-server, 02-postgresql, 03-nginx-dns, 04-operations
@@ -117,6 +118,7 @@ El repositorio contiene muchas aplicaciones independientes. **No se carga toda l
 | [`DESIGN.md`](docs/info/DESIGN.md) | Sistema visual del portal (solo para interfaz) |
 | [`COMPONENTS.md`](docs/info/COMPONENTS.md) | Componentes de interfaz implementados (solo para interfaz) |
 | [`commands.md`](docs/info/commands.md) | Comandos y scripts disponibles |
+| [`customizations.md`](docs/info/customizations.md) | Catálogo y registro histórico de personalizaciones sobre software/imágenes de terceros |
 | [`_MODULE_TEMPLATE.md`](docs/info/_MODULE_TEMPLATE.md) | Plantilla para documentar un módulo implementado |
 | [`apis/README.md`](docs/info/apis/README.md) | Cómo se integran APIs de terceros |
 | `infrastructure/` | Servidor (`01-server`), PostgreSQL (`02-postgresql`), Nginx y DNS (`03-nginx-dns`), operación y despliegue (`04-operations`) |

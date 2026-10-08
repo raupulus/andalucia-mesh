@@ -41,7 +41,10 @@ Registro de decisiones deliberadas de arquitectura, diseño y convenciones técn
 | DT-33 | Carga estática explícita de módulos de reglas (`detector.reglas`) en el gestor de recarga | Al desacoplar el catálogo de reglas en módulos individuales usando decoradores `@registrar`, se requiere la importación explícita de `detector.reglas` en tiempo de inicialización para que la metaclase / decorador registre las clases antes de instanciarlas dinámicamente desde `reglas.yaml`. |
 | DT-34 | Supervisión de salud del worker `portal-tareas` mediante inspección de proceso `schedule:work` | Al ser un proceso CLI continuo sin servidor HTTP que hereda la imagen FrankenPHP, el healthcheck de Docker debe comprobar `pgrep -f 'schedule:work' || exit 1` en lugar de una sonda HTTP a localhost. |
 | DT-35 | Compatibilidad dual de marcas temporales en vistas contrato (`inicio_at` y `abierta_en`) | Para mantener compatibilidad estricta con controladores del portal y APIs REST externas, la vista `api_alertas` expone `a.abierta_en` y el alias `a.abierta_en AS inicio_at`. |
+| DT-36 | Persistencia obligatoria en UTC y presentación en 24h peninsular (`Europe/Madrid`) | Toda marca temporal se guarda en bases de datos como época Unix (segundos o microsegundos UTC) o `TIMESTAMPTZ` (UTC). En todas las interfaces públicas y visores se formatea en hora local peninsular española (`Europe/Madrid`, CET/CEST) en formato 24 horas (`HH:mm:ss`) y fecha europea (`DD/MM/YYYY`) o ISO (`YYYY-MM-DD`). |
+| DT-37 | Aislamiento estricto de instancias de terceros frente a federaciones externas | Las aplicaciones upstream como PotatoMesh traen por defecto activada la federación peer-to-peer (`FEDERATION=1`). En el proyecto se fuerza `FEDERATION=0` tanto en compose como en `.env` para garantizar que la instancia no realice anuncios salientes ni crawling a nodos externos no auditados. |
+| DT-38 | Registro de personalizaciones sobre software de terceros (`docs/info/customizations.md`) | Cualquier parche de plantilla o código sobre imágenes docker de terceros se versiona en el repositorio (ej. `integrations/<pieza>/templates/`) y se cataloga con ID en `customizations.md` para garantizar que sea comprobado y reaplicado en cada actualización de versión. |
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08
 

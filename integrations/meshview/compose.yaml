@@ -38,6 +38,8 @@ services:
     volumes:
       - /srv/meshview/datos/config:/etc/meshview:ro
       - /srv/meshview/datos/logs:/var/log/meshview
+      - ./templates/chat.html:/app/meshview/templates/chat.html:ro
+      - ./templates/net.html:/app/meshview/templates/net.html:ro
     env_file:
       - path: /srv/comun/.env
         required: false
