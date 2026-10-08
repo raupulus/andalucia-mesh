@@ -66,6 +66,92 @@
 
     /* --- ESTILOS DECORATIVOS DEL DASHBOARD DE OPERADOR --- */
 
+    /* 4 Tarjetas de Métricas de Malla: fondo verde corporativo, borde blanco y reflejo animado sutil */
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat {
+        position: relative !important;
+        overflow: hidden !important;
+        background: linear-gradient(140deg, #04210e 0%, #004d20 35%, #007A33 75%, #09401d 100%) !important;
+        border: 1.5px solid #FFFFFF !important;
+        border-radius: 1rem !important;
+        box-shadow: 0 10px 25px -4px rgba(0, 122, 51, 0.45), 0 0 10px rgba(255, 255, 255, 0.18) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px -4px rgba(0, 122, 51, 0.55), 0 0 14px rgba(255, 255, 255, 0.28) !important;
+    }
+
+    /* Reflejo animado degradado a blanco moviéndose */
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat::after {
+        content: '';
+        position: absolute;
+        top: -60%;
+        left: -90%;
+        width: 65%;
+        height: 220%;
+        background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.08) 25%,
+            rgba(255, 255, 255, 0.38) 50%,
+            rgba(255, 255, 255, 0.08) 75%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        transform: rotate(25deg);
+        pointer-events: none;
+        z-index: 10;
+        animation: fi-stat-sweep-reflection 5.5s ease-in-out infinite;
+    }
+
+    @keyframes fi-stat-sweep-reflection {
+        0% {
+            left: -90%;
+        }
+        35%, 100% {
+            left: 160%;
+        }
+    }
+
+    /* Textos y cifras dentro de las 4 tarjetas */
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-content {
+        position: relative;
+        z-index: 5;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-label {
+        color: #FFFFFF !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        letter-spacing: -0.01em !important;
+        opacity: 0.95 !important;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-value {
+        color: #FFFFFF !important;
+        font-weight: 800 !important;
+        font-size: 1.85rem !important;
+        line-height: 1.2 !important;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-description {
+        color: #d1fae5 !important;
+        font-weight: 500 !important;
+        font-size: 0.8rem !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-description svg,
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-label-ctn svg {
+        color: #a7f3d0 !important;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-chart {
+        opacity: 0.85;
+    }
+
     /* Encabezados de widgets */
     .fi-widget-header-flex {
         display: flex;

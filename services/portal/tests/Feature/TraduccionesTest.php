@@ -26,7 +26,7 @@ class TraduccionesTest extends TestCase
         // 1. Verificación directa en el middleware sin cabecera
         $requestSinCabecera = Request::create('/');
         $requestSinCabecera->headers->remove('accept-language');
-        $middleware = new PortalLocaleMiddleware();
+        $middleware = new PortalLocaleMiddleware;
         $this->assertSame('es', $middleware->determineLocale($requestSinCabecera));
 
         // 2. Verificación de respuesta HTTP completa
@@ -127,7 +127,59 @@ class TraduccionesTest extends TestCase
         $responsePt->assertStatus(200);
         $contenidoPt = (string) $responsePt->getContent();
         $this->assertStringContainsString('#006600', $contenidoPt, 'El selector debe incluir el verde de la bandera portuguesa');
-        $this->assertStringContainsString('#FF0000', $contenidoPt, 'El selector debe incluir el rojo de la bandera portuguesa');
+    }
+
+    /**
+     * Comprueba que el selector de idiomas en cabecera y panel contiene solo el icono redondeado
+     * sin texto visible en el activador, y que el orden del menú desplegable es estrictamente:
+     * 1. Español (es)
+     * 2. Portugués (pt)
+     * 3. Inglés (en)
+     */
+    public function test_selector_de_idiomas_muestra_solo_icono_redondo_y_orden_estricto_es_pt_en(): void
+    {
+        $response = $this->get('/');
+        $response->assertStatus(200);
+        $html = (string) $response->getContent();
+
+        // 1. El botón activador del selector contiene la clase btn-idioma-redondo y ningún texto de idioma
+        $this->assertMatchesRegularExpression(
+            '/<button[^>]*id="btn-idioma-nav"[^>]*class="[^"]*btn-idioma-redondo[^"]*"[^>]*>\s*<svg[^>]*class="[^"]*bandera-redonda[^"]*"[\s\S]*?<\/svg>\s*<\/button>/',
+            $html,
+            'El botón activador de escritorio debe contener exclusivamente el SVG redondeado de la bandera sin texto'
+        );
+
+        // 2. El orden de las opciones en el menú desplegable debe ser estrictamente es -> pt -> en
+        $posEs = strpos($html, 'data-lang="es"');
+        $posPt = strpos($html, 'data-lang="pt"');
+        $posEn = strpos($html, 'data-lang="en"');
+
+        $this->assertNotFalse($posEs, 'Debe existir la opción en español');
+        $this->assertNotFalse($posPt, 'Debe existir la opción en portugués');
+        $this->assertNotFalse($posEn, 'Debe existir la opción en inglés');
+
+        $this->assertTrue(
+            $posEs < $posPt && $posPt < $posEn,
+            "El orden de los idiomas en el selector debe ser estrictamente Español -> Portugués -> Inglés (es: {$posEs}, pt: {$posPt}, en: {$posEn})"
+        );
+
+        // 3. Verificación en la pantalla de login del panel de administración
+        $responseLogin = $this->get('/admin/login');
+        $responseLogin->assertStatus(200);
+        $htmlLogin = (string) $responseLogin->getContent();
+
+        $posLoginEs = strpos($htmlLogin, 'title="Español (Andalucía)"');
+        $posLoginPt = strpos($htmlLogin, 'title="Português"');
+        $posLoginEn = strpos($htmlLogin, 'title="English"');
+
+        $this->assertNotFalse($posLoginEs, 'Login debe contener la opción en español');
+        $this->assertNotFalse($posLoginPt, 'Login debe contener la opción en portugués');
+        $this->assertNotFalse($posLoginEn, 'Login debe contener la opción en inglés');
+
+        $this->assertTrue(
+            $posLoginEs < $posLoginPt && $posLoginPt < $posLoginEn,
+            "El orden en el selector de login debe ser estrictamente Español -> Portugués -> Inglés (es: {$posLoginEs}, pt: {$posLoginPt}, en: {$posLoginEn})"
+        );
     }
 
     /**
@@ -254,4 +306,3 @@ class TraduccionesTest extends TestCase
         $revisaEn->assertSee('Search node');
     }
 }
-

@@ -40,17 +40,38 @@
                 @endif
             @endforeach
 
-            <!-- Selector de Idioma con Bandera Redonda (Andalucía para ES) (RN-48) -->
-            <div class="selector-idioma-wrapper" style="display: flex; align-items: center; gap: 0.4rem; background: var(--color-superficie-sutil); border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); padding: 0.2rem 0.5rem; min-height: 44px;">
-                <div class="icono-bandera-redonda" id="bandera-idioma-actual" style="display: flex; align-items: center; justify-content: center;" title="{{ __('portal.nav.languages.' . $currentLang) }}">
-                    <x-icono-bandera :idioma="$currentLang" :tamano="22" />
+            <!-- Selector de Idioma: solo icono redondo con bandera (Andalucía para ES) (RN-48) -->
+            <div class="selector-idioma-wrapper">
+                <button
+                    type="button"
+                    id="btn-idioma-nav"
+                    class="btn-idioma-redondo"
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                    aria-label="{{ __('portal.nav.select_language') }}"
+                    title="{{ __('portal.nav.select_language') }}"
+                >
+                    <x-icono-bandera :idioma="$currentLang" :tamano="24" />
+                </button>
+                <div
+                    id="dropdown-idioma-nav"
+                    class="dropdown-idiomas"
+                    role="menu"
+                    aria-label="{{ __('portal.nav.select_language') }}"
+                >
+                    <a href="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}" class="dropdown-idioma-item {{ $currentLang === 'es' ? 'activo' : '' }}" role="menuitem" data-lang="es">
+                        <x-icono-bandera idioma="es" :tamano="20" />
+                        <span>Español</span>
+                    </a>
+                    <a href="{{ request()->fullUrlWithQuery(['lang' => 'pt']) }}" class="dropdown-idioma-item {{ $currentLang === 'pt' ? 'activo' : '' }}" role="menuitem" data-lang="pt">
+                        <x-icono-bandera idioma="pt" :tamano="20" />
+                        <span>Português</span>
+                    </a>
+                    <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" class="dropdown-idioma-item {{ $currentLang === 'en' ? 'activo' : '' }}" role="menuitem" data-lang="en">
+                        <x-icono-bandera idioma="en" :tamano="20" />
+                        <span>English</span>
+                    </a>
                 </div>
-                <label for="selector-idioma-nav" class="sr-only">{{ __('portal.nav.select_language') }}</label>
-                <select id="selector-idioma-nav" class="selector-idioma-select" aria-label="{{ __('portal.nav.select_language') }}" style="background: transparent; border: none; color: var(--color-texto); font-size: 0.9rem; font-weight: 600; cursor: pointer; padding: 0.25rem 0.25rem 0.25rem 0; outline: none;">
-                    <option value="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}" data-lang="es" {{ $currentLang === 'es' ? 'selected' : '' }}>ES · {{ __('portal.nav.languages.es') }}</option>
-                    <option value="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" data-lang="en" {{ $currentLang === 'en' ? 'selected' : '' }}>EN · {{ __('portal.nav.languages.en') }}</option>
-                    <option value="{{ request()->fullUrlWithQuery(['lang' => 'pt']) }}" data-lang="pt" {{ $currentLang === 'pt' ? 'selected' : '' }}>PT · {{ __('portal.nav.languages.pt') }}</option>
-                </select>
             </div>
 
             <!-- Selector de Tema (Claro / Oscuro) -->
@@ -61,6 +82,40 @@
 
         <!-- Botón Menú Móvil -->
         <div class="nav-movil-toggle">
+            <!-- Selector de Idioma en Cabecera Móvil: solo icono redondo -->
+            <div class="selector-idioma-wrapper">
+                <button
+                    type="button"
+                    id="btn-idioma-movil"
+                    class="btn-idioma-redondo"
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                    aria-label="{{ __('portal.nav.select_language') }}"
+                    title="{{ __('portal.nav.select_language') }}"
+                >
+                    <x-icono-bandera :idioma="$currentLang" :tamano="24" />
+                </button>
+                <div
+                    id="dropdown-idioma-movil"
+                    class="dropdown-idiomas"
+                    role="menu"
+                    aria-label="{{ __('portal.nav.select_language') }}"
+                >
+                    <a href="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}" class="dropdown-idioma-item {{ $currentLang === 'es' ? 'activo' : '' }}" role="menuitem" data-lang="es">
+                        <x-icono-bandera idioma="es" :tamano="20" />
+                        <span>Español</span>
+                    </a>
+                    <a href="{{ request()->fullUrlWithQuery(['lang' => 'pt']) }}" class="dropdown-idioma-item {{ $currentLang === 'pt' ? 'activo' : '' }}" role="menuitem" data-lang="pt">
+                        <x-icono-bandera idioma="pt" :tamano="20" />
+                        <span>Português</span>
+                    </a>
+                    <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" class="dropdown-idioma-item {{ $currentLang === 'en' ? 'activo' : '' }}" role="menuitem" data-lang="en">
+                        <x-icono-bandera idioma="en" :tamano="20" />
+                        <span>English</span>
+                    </a>
+                </div>
+            </div>
+
             <button id="btn-menu-movil" type="button" aria-expanded="false" aria-controls="menu-movil" aria-label="{{ __('portal.nav.mobile_menu') }}" style="background: none; border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); min-width: 44px; min-height: 44px; cursor: pointer; color: var(--color-texto); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
                 <span aria-hidden="true">☰</span>
             </button>
@@ -80,16 +135,19 @@
                 </a>
             @endforeach
 
-            <!-- Cambio de idioma en móvil -->
+            <!-- Cambio de idioma en menú móvil: orden español, portugués, inglés -->
             <div style="border-top: 1px solid var(--color-borde); padding-top: 1rem; margin-top: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
                 <span style="font-size: 0.95rem; color: var(--color-texto-2); font-weight: 500;">{{ __('portal.nav.select_language') }}:</span>
-                <div style="display: flex; align-items: center; gap: 0.5rem; background: var(--color-superficie-sutil); border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); padding: 0.25rem 0.6rem; min-height: 44px;">
-                    <x-icono-bandera :idioma="$currentLang" :tamano="22" />
-                    <select id="selector-idioma-movil" class="selector-idioma-select" aria-label="{{ __('portal.nav.select_language') }}" style="background: transparent; border: none; color: var(--color-texto); font-size: 0.95rem; font-weight: 600; cursor: pointer;">
-                        <option value="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}" data-lang="es" {{ $currentLang === 'es' ? 'selected' : '' }}>ES · {{ __('portal.nav.languages.es') }}</option>
-                        <option value="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" data-lang="en" {{ $currentLang === 'en' ? 'selected' : '' }}>EN · {{ __('portal.nav.languages.en') }}</option>
-                        <option value="{{ request()->fullUrlWithQuery(['lang' => 'pt']) }}" data-lang="pt" {{ $currentLang === 'pt' ? 'selected' : '' }}>PT · {{ __('portal.nav.languages.pt') }}</option>
-                    </select>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <a href="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}" class="dropdown-idioma-item btn-idioma-redondo {{ $currentLang === 'es' ? 'activo' : '' }}" data-lang="es" title="Español" aria-label="Español" style="text-decoration: none;">
+                        <x-icono-bandera idioma="es" :tamano="22" />
+                    </a>
+                    <a href="{{ request()->fullUrlWithQuery(['lang' => 'pt']) }}" class="dropdown-idioma-item btn-idioma-redondo {{ $currentLang === 'pt' ? 'activo' : '' }}" data-lang="pt" title="Português" aria-label="Português" style="text-decoration: none;">
+                        <x-icono-bandera idioma="pt" :tamano="22" />
+                    </a>
+                    <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" class="dropdown-idioma-item btn-idioma-redondo {{ $currentLang === 'en' ? 'activo' : '' }}" data-lang="en" title="English" aria-label="English" style="text-decoration: none;">
+                        <x-icono-bandera idioma="en" :tamano="22" />
+                    </a>
                 </div>
             </div>
 

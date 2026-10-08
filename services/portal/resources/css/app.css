@@ -631,7 +631,81 @@ pre code {
   .nav-movil-toggle {
     display: flex !important;
     align-items: center;
+    gap: 0.5rem;
   }
+}
+
+/* ==============================================================================
+ * Selector de Idioma con Icono Redondeado (RN-48)
+ * ============================================================================== */
+.selector-idioma-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-idioma-redondo {
+  background: var(--color-superficie-sutil);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-full);
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  color: var(--color-texto);
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-idioma-redondo:hover {
+  background-color: var(--color-superficie);
+  border-color: var(--color-acento);
+}
+
+.btn-idioma-redondo.activo {
+  border-color: var(--color-acento);
+  box-shadow: 0 0 0 2px var(--color-acento-fondo);
+}
+
+.dropdown-idiomas {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  box-shadow: var(--sombra-2);
+  z-index: 150;
+  min-width: 165px;
+  padding: 0.35rem 0;
+  overflow: hidden;
+}
+
+.dropdown-idioma-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 1rem;
+  text-decoration: none;
+  color: var(--color-texto);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.dropdown-idioma-item:hover {
+  background-color: var(--color-superficie-sutil);
+  color: var(--color-enlace);
+}
+
+.dropdown-idioma-item.activo {
+  font-weight: 700;
+  background-color: var(--color-superficie-sutil);
 }
 
 /* Utilidad para elementos accesibles solo para lectores de pantalla */

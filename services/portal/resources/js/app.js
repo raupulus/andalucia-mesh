@@ -37,19 +37,66 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Selector de Idioma (Frontend, RN-48)
-    const selectoresIdioma = document.querySelectorAll('.selector-idioma-select');
-    selectoresIdioma.forEach(select => {
-        select.addEventListener('change', (e) => {
-            const url = e.target.value;
-            try {
-                const urlObj = new URL(url, window.location.origin);
-                const lang = urlObj.searchParams.get('lang');
-                if (lang) {
+    // 3. Selector de Idioma con bandera redonda y menú desplegable (RN-48)
+    const setupSelectorIdioma = (btnId, dropdownId) => {
+        const btn = document.getElementById(btnId);
+        const dropdown = document.getElementById(dropdownId);
+        if (!btn || !dropdown) return;
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = dropdown.style.display === 'block';
+
+            // Cerrar cualquier otro dropdown abierto
+            document.querySelectorAll('.dropdown-idiomas').forEach(d => {
+                if (d !== dropdown) d.style.display = 'none';
+            });
+            document.querySelectorAll('.btn-idioma-redondo').forEach(b => {
+                if (b !== btn) b.setAttribute('aria-expanded', 'false');
+            });
+
+            dropdown.style.display = isOpen ? 'none' : 'block';
+            btn.setAttribute('aria-expanded', !isOpen);
+        });
+    };
+
+    setupSelectorIdioma('btn-idioma-nav', 'dropdown-idioma-nav');
+    setupSelectorIdioma('btn-idioma-movil', 'dropdown-idioma-movil');
+
+    // Cerrar desplegable al hacer clic fuera del selector
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.selector-idioma-wrapper')) {
+            document.querySelectorAll('.dropdown-idiomas').forEach(d => {
+                d.style.display = 'none';
+            });
+            document.querySelectorAll('.btn-idioma-redondo').forEach(b => {
+                b.setAttribute('aria-expanded', 'false');
+            });
+        }
+    });
+
+    // Cerrar desplegable al pulsar la tecla Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.dropdown-idiomas').forEach(d => {
+                d.style.display = 'none';
+            });
+            document.querySelectorAll('.btn-idioma-redondo').forEach(b => {
+                b.setAttribute('aria-expanded', 'false');
+            });
+        }
+    });
+
+    // Guardar preferencia de idioma en localStorage sin cookies (RN-06 / RN-48)
+    const itemsIdioma = document.querySelectorAll('.dropdown-idioma-item');
+    itemsIdioma.forEach(item => {
+        item.addEventListener('click', () => {
+            const lang = item.getAttribute('data-lang');
+            if (lang) {
+                try {
                     localStorage.setItem('portal_locale', lang);
-                }
-            } catch (err) {}
-            window.location.href = url;
+                } catch (err) {}
+            }
         });
     });
 

@@ -19,7 +19,7 @@ Que los operadores vean de un vistazo si cada pieza funciona y qué pasa en la m
   - **Seguridad:** Modificación de contraseña verificada requiriendo la clave actual mediante `currentPassword(guard: Filament::getAuthGuard())`, validación de complejidad mínima y confirmación idéntica obligatoria.
   - **Baja de cuenta:** Acción destructiva de eliminación de cuenta personal tanto en cabecera como al pie del formulario, con modal de confirmación reforzado que exige la contraseña actual antes de cerrar la sesión, invalidar tokens y eliminar al usuario y su avatar.
 - `throttle` de inicio de sesión: 5 intentos fallidos por IP y email → bloqueo 15 min. IP real por `trustProxies` (ver [11](11-public-api.md)).
-- **Internacionalización y selector de idioma (RN-48):** Soporte de interfaz en español (por defecto), inglés y portugués. Selector interactivo con banderas en la barra superior (topbar antes del menú de usuario) y en la pantalla de inicio de sesión, persistiendo la selección en la sesión de administración (`filament_locale`) mediante `FilamentLocaleMiddleware`.
+- **Internacionalización y selector de idioma (RN-48):** Soporte de interfaz en español (por defecto), portugués e inglés. Selector interactivo con solo el icono redondo de la bandera activa en la barra superior (topbar antes del menú de usuario) y en la pantalla de inicio de sesión, desplegando las opciones en orden estricto (Español, Portugués, Inglés) y persistiendo la selección en la sesión de administración (`filament_locale`) mediante `FilamentLocaleMiddleware`.
 - `User::canAccessPanel()` = `activo = true`. Sesión de 8 h; cookie `Secure`, `HttpOnly`, `SameSite=Lax`.
 - Cabeceras: `X-Robots-Tag: noindex, nofollow` en todo `/admin`.
 

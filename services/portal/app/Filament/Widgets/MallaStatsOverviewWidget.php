@@ -18,7 +18,7 @@ class MallaStatsOverviewWidget extends BaseWidget
 {
     protected static bool $isLazy = false;
 
-    protected static ?int $sort = 1;
+    protected static ?int $sort = -100;
 
     protected ?string $pollingInterval = '30s';
 

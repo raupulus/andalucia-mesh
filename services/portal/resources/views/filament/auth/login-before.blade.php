@@ -1,21 +1,30 @@
 <div style="margin-bottom: 1.25rem;">
-    <!-- Selector de idioma en login -->
-    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
-        <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('admin.language') }}:</span>
-        <div class="flex items-center gap-1.5">
-            <a href="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}" class="flex items-center gap-1 px-2 py-1 rounded text-xs {{ app()->getLocale() === 'es' ? 'bg-[#E9FCEF] text-[#15612F] font-bold dark:bg-[#1C3A28] dark:text-[#9CF1BA]' : 'text-gray-600 dark:text-gray-300' }}" title="Español (Andalucía)">
-                <x-icono-bandera idioma="es" :tamano="14" />
-                <span>ES</span>
-            </a>
-            <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" class="flex items-center gap-1 px-2 py-1 rounded text-xs {{ app()->getLocale() === 'en' ? 'bg-[#E9FCEF] text-[#15612F] font-bold dark:bg-[#1C3A28] dark:text-[#9CF1BA]' : 'text-gray-600 dark:text-gray-300' }}" title="English">
-                <x-icono-bandera idioma="en" :tamano="14" />
-                <span>EN</span>
-            </a>
-            <a href="{{ request()->fullUrlWithQuery(['lang' => 'pt']) }}" class="flex items-center gap-1 px-2 py-1 rounded text-xs {{ app()->getLocale() === 'pt' ? 'bg-[#E9FCEF] text-[#15612F] font-bold dark:bg-[#1C3A28] dark:text-[#9CF1BA]' : 'text-gray-600 dark:text-gray-300' }}" title="Português">
-                <x-icono-bandera idioma="pt" :tamano="14" />
-                <span>PT</span>
-            </a>
-        </div>
+    <!-- Selector de idioma en login: solo iconos redondeados, más grandes, en línea y centrados (es, pt, en) -->
+    <div style="display: flex; justify-content: center; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+        <a
+            href="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}"
+            class="flex items-center justify-center w-10 h-10 rounded-full border transition {{ app()->getLocale() === 'es' ? 'border-[#15612F] bg-[#E9FCEF] dark:border-[#9CF1BA] dark:bg-[#1C3A28] ring-2 ring-[#15612F]/40 dark:ring-[#9CF1BA]/40 shadow-sm' : 'border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800' }}"
+            title="Español (Andalucía)"
+            aria-label="Español (Andalucía)"
+        >
+            <x-icono-bandera idioma="es" :tamano="26" />
+        </a>
+        <a
+            href="{{ request()->fullUrlWithQuery(['lang' => 'pt']) }}"
+            class="flex items-center justify-center w-10 h-10 rounded-full border transition {{ app()->getLocale() === 'pt' ? 'border-[#15612F] bg-[#E9FCEF] dark:border-[#9CF1BA] dark:bg-[#1C3A28] ring-2 ring-[#15612F]/40 dark:ring-[#9CF1BA]/40 shadow-sm' : 'border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800' }}"
+            title="Português"
+            aria-label="Português"
+        >
+            <x-icono-bandera idioma="pt" :tamano="26" />
+        </a>
+        <a
+            href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}"
+            class="flex items-center justify-center w-10 h-10 rounded-full border transition {{ app()->getLocale() === 'en' ? 'border-[#15612F] bg-[#E9FCEF] dark:border-[#9CF1BA] dark:bg-[#1C3A28] ring-2 ring-[#15612F]/40 dark:ring-[#9CF1BA]/40 shadow-sm' : 'border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800' }}"
+            title="English"
+            aria-label="English"
+        >
+            <x-icono-bandera idioma="en" :tamano="26" />
+        </a>
     </div>
 
     <!-- Franja tricolor de Andalucía -->
