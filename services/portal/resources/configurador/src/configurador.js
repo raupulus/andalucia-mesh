@@ -154,6 +154,26 @@ export function construirYamlDeseado() {
     });
   }
 
+  const moduleConfig = {
+    telemetry: {
+      deviceUpdateInterval: telemetriaSecs
+    }
+  };
+
+  // Solo incluir bloque MQTT con nuestra URL si el usuario marca explícitamente el check de colaborar
+  if (mqttActivo) {
+    moduleConfig.mqtt = {
+      enabled: true,
+      address: "mqtt.desdechipiona.es",
+      username: "meshdev",
+      password: "large4cats",
+      root: "msh",
+      encryptionEnabled: true,
+      proxyToClientEnabled: true,
+      mapReportingEnabled: false
+    };
+  }
+
   const configDoc = {
     owner: longName,
     owner_short: shortName,
@@ -185,21 +205,7 @@ export function construirYamlDeseado() {
         serialEnabled: true
       }
     },
-    module_config: {
-      telemetry: {
-        deviceUpdateInterval: telemetriaSecs
-      },
-      mqtt: {
-        enabled: mqttActivo,
-        address: "mqtt.desdechipiona.es",
-        username: "meshdev",
-        password: "large4cats",
-        root: "msh",
-        encryptionEnabled: true,
-        proxyToClientEnabled: true,
-        mapReportingEnabled: false
-      }
-    },
+    module_config: moduleConfig,
     channels: channels
   };
 
@@ -388,9 +394,27 @@ export function copiarComandosCli() {
     `meshtastic --set device.role ${dev.role} --set device.node_info_broadcast_secs ${dev.nodeInfoBroadcastSecs}`,
     `meshtastic --set position.position_broadcast_smart_enabled false --set position.position_flags 0 --set position.position_broadcast_secs ${pos.positionBroadcastSecs}`,
     `meshtastic --ch-set name "SFNarrow" --ch-set psk "AQ==" --ch-index 0`
-  ].join("\n");
+  ];
 
-  navigator.clipboard.writeText(comandos).then(() => {
+  // Canales secundarios añadidos
+  if (configDoc.channels && configDoc.channels.length > 1) {
+    for (let i = 1; i < configDoc.channels.length; i++) {
+      const ch = configDoc.channels[i];
+      if (ch && ch.settings && ch.settings.name) {
+        comandos.push(`meshtastic --ch-set name "${ch.settings.name}" --ch-set psk "${ch.settings.psk || 'AQ=='}" --ch-index ${i}`);
+      }
+    }
+  }
+
+  // Configuración MQTT comunitaria solo si el usuario ha marcado el check de colaborar
+  if (configDoc.module_config?.mqtt?.enabled) {
+    const mqtt = configDoc.module_config.mqtt;
+    comandos.push(`meshtastic --set mqtt.enabled true --set mqtt.address "${mqtt.address}" --set mqtt.username "${mqtt.username}" --set mqtt.password "${mqtt.password}" --set mqtt.encryption_enabled true`);
+  }
+
+  const textoComandos = comandos.join("\n");
+
+  navigator.clipboard.writeText(textoComandos).then(() => {
     alert("Comandos CLI de Meshtastic copiados al portapapeles.");
     logActividad("Comandos CLI copiados al portapapeles.");
   });

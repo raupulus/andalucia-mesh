@@ -7896,7 +7896,18 @@ function rf() {
 		role: "SECONDARY",
 		settings: {}
 	});
-	let d = {
+	let d = { telemetry: { deviceUpdateInterval: o } };
+	s && (d.mqtt = {
+		enabled: !0,
+		address: "mqtt.desdechipiona.es",
+		username: "meshdev",
+		password: "large4cats",
+		root: "msh",
+		encryptionEnabled: !0,
+		proxyToClientEnabled: !0,
+		mapReportingEnabled: !1
+	});
+	let f = {
 		owner: e,
 		owner_short: t,
 		is_unmessagable: !1,
@@ -7925,30 +7936,18 @@ function rf() {
 			},
 			security: { serialEnabled: !0 }
 		},
-		module_config: {
-			telemetry: { deviceUpdateInterval: o },
-			mqtt: {
-				enabled: s,
-				address: "mqtt.desdechipiona.es",
-				username: "meshdev",
-				password: "large4cats",
-				root: "msh",
-				encryptionEnabled: !0,
-				proxyToClientEnabled: !0,
-				mapReportingEnabled: !1
-			}
-		},
+		module_config: d,
 		channels: l
 	};
-	Z.desiredConfig = d;
-	let f = nf(d, {
+	Z.desiredConfig = f;
+	let ee = nf(f, {
 		lineWidth: 120,
 		noRefs: !0,
 		sortKeys: !1
-	}), ee = document.getElementById("desiredYamlTextarea");
-	return ee && (ee.value = f), {
-		configDoc: d,
-		yamlText: f
+	}), p = document.getElementById("desiredYamlTextarea");
+	return p && (p.value = ee), {
+		configDoc: f,
+		yamlText: ee
 	};
 }
 function $(e) {
@@ -8067,8 +8066,17 @@ function pf() {
 		`meshtastic --set device.role ${n.role} --set device.node_info_broadcast_secs ${n.nodeInfoBroadcastSecs}`,
 		`meshtastic --set position.position_broadcast_smart_enabled false --set position.position_flags 0 --set position.position_broadcast_secs ${r.positionBroadcastSecs}`,
 		"meshtastic --ch-set name \"SFNarrow\" --ch-set psk \"AQ==\" --ch-index 0"
-	].join("\n");
-	navigator.clipboard.writeText(i).then(() => {
+	];
+	if (e.channels && e.channels.length > 1) for (let t = 1; t < e.channels.length; t++) {
+		let n = e.channels[t];
+		n && n.settings && n.settings.name && i.push(`meshtastic --ch-set name "${n.settings.name}" --ch-set psk "${n.settings.psk || "AQ=="}" --ch-index ${t}`);
+	}
+	if (e.module_config?.mqtt?.enabled) {
+		let t = e.module_config.mqtt;
+		i.push(`meshtastic --set mqtt.enabled true --set mqtt.address "${t.address}" --set mqtt.username "${t.username}" --set mqtt.password "${t.password}" --set mqtt.encryption_enabled true`);
+	}
+	let a = i.join("\n");
+	navigator.clipboard.writeText(a).then(() => {
 		alert("Comandos CLI de Meshtastic copiados al portapapeles."), Q("Comandos CLI copiados al portapapeles.");
 	});
 }

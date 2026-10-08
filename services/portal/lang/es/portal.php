@@ -678,5 +678,7 @@ return [
         'warning_experimental_lead' => 'Esta herramienta es experimental y debe utilizarse bajo su propio riesgo.',
         'warning_experimental_report' => 'Si detecta algo extraño o inesperado, por favor repórtelo en :link.',
         'warning_experimental_link' => 'sugerencias',
+        'mqtt_colaborar_label' => '¿Quieres colaborar subiendo a este MQTT?',
+        'mqtt_colaborar_desc' => 'Si lo habilitas, se configurará la pasarela MQTT comunitaria (mqtt.desdechipiona.es) para compartir telemetría y mensajes con la red. Si no lo activas, no se incluirá configuración MQTT.',
     ],
 ];

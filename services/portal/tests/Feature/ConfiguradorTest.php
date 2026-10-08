@@ -140,4 +140,22 @@ class ConfiguradorTest extends TestCase
         $pt->assertSee('conta e risco');
         $pt->assertSee('/sugerencias?lang=pt');
     }
+
+    public function test_configurador_contiene_checkbox_colaboracion_mqtt(): void
+    {
+        $response = $this->get('/configurador');
+
+        $response->assertStatus(200);
+        $response->assertSee('chkMqtt');
+        $response->assertSee('¿Quieres colaborar subiendo a este MQTT?');
+        $response->assertSee('mqtt.desdechipiona.es');
+
+        $en = $this->get('/configurador?lang=en');
+        $en->assertStatus(200);
+        $en->assertSee('Do you want to collaborate by uploading to this MQTT?');
+
+        $pt = $this->get('/configurador?lang=pt');
+        $pt->assertStatus(200);
+        $pt->assertSee('Queres colaborar enviando para este MQTT?');
+    }
 }

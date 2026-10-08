@@ -677,5 +677,7 @@ return [
         'warning_experimental_lead' => 'Esta ferramenta é experimental e deve ser utilizada por sua conta e risco.',
         'warning_experimental_report' => 'Se detetar algo estranho ou inesperado, por favor reporte em :link.',
         'warning_experimental_link' => 'sugestões',
+        'mqtt_colaborar_label' => 'Queres colaborar enviando para este MQTT?',
+        'mqtt_colaborar_desc' => 'Se ativado, será configurado o gateway MQTT comunitário (mqtt.desdechipiona.es) para partilhar telemetria e mensagens com a rede. Se desativado, nenhuma configuração MQTT será incluída.',
     ],
 ];
