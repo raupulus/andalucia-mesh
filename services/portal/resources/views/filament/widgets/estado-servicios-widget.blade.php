@@ -4,24 +4,24 @@
             <div class="fi-widget-header-flex">
                 <div class="fi-widget-title-group">
                     <span class="fi-widget-icon" aria-hidden="true">🖥️</span>
-                    <span class="fi-widget-title">Estado de la Red y Microservicios</span>
+                    <span class="fi-widget-title">{{ __('admin.widget_network_status.heading') }}</span>
                     <span class="fi-widget-pill {{ $latido_ok ? 'fi-widget-pill-success' : 'fi-widget-pill-danger' }}">
-                        Daemon: {{ $latido_ok ? 'Activo (' . $latido_hace . ')' : 'Sin latido reciente' }}
+                        {{ $latido_ok ? __('admin.widget_network_status.daemon_active', ['time' => $latido_hace]) : __('admin.widget_network_status.daemon_inactive') }}
                     </span>
                 </div>
 
                 <div class="fi-widget-actions-group">
                     <div class="fi-status-counter-group">
                         <span class="fi-status-counter fi-status-counter-ok">
-                            <span class="fi-status-dot-sm bg-emerald-500"></span> {{ $operativos }} OK
+                            <span class="fi-status-dot-sm bg-emerald-500"></span> {{ $operativos }} {{ __('admin.widget_network_status.status_ok') }}
                         </span>
                         @if($caidos > 0)
                             <span class="fi-status-counter fi-status-counter-danger">
-                                <span class="fi-status-dot-sm bg-rose-500"></span> {{ $caidos }} Caídos
+                                <span class="fi-status-dot-sm bg-rose-500"></span> {{ $caidos }} {{ __('admin.widget_network_status.down_count') }}
                             </span>
                         @endif
                         <span class="fi-status-counter fi-status-counter-pending">
-                            <span class="fi-status-dot-sm bg-gray-400"></span> {{ $pendientes }} Pendientes
+                            <span class="fi-status-dot-sm bg-gray-400"></span> {{ $pendientes }} {{ __('admin.widget_network_status.pending_count') }}
                         </span>
                     </div>
 
@@ -31,8 +31,8 @@
                         wire:loading.attr="disabled"
                         class="fi-btn-refresh"
                     >
-                        <span wire:loading.remove wire:target="comprobarAhora">↻ Comprobar ahora</span>
-                        <span wire:loading wire:target="comprobarAhora">Comprobando...</span>
+                        <span wire:loading.remove wire:target="comprobarAhora">{{ __('admin.widget_network_status.btn_check_now') }}</span>
+                        <span wire:loading wire:target="comprobarAhora">{{ __('admin.widget_network_status.checking') }}</span>
                     </button>
                 </div>
             </div>
@@ -43,12 +43,12 @@
             <table class="fi-dashboard-table">
                 <thead>
                     <tr>
-                        <th class="fi-th">Servicio</th>
-                        <th class="fi-th">Tipo / Fase</th>
-                        <th class="fi-th">Estado</th>
-                        <th class="fi-th">Latencia</th>
-                        <th class="fi-th">Último chequeo</th>
-                        <th class="fi-th">Detalle / Diagnóstico</th>
+                        <th class="fi-th">{{ __('admin.widget_network_status.th_service') }}</th>
+                        <th class="fi-th">{{ __('admin.widget_network_status.th_type') }}</th>
+                        <th class="fi-th">{{ __('admin.widget_network_status.th_status') }}</th>
+                        <th class="fi-th">{{ __('admin.widget_network_status.th_latency') }}</th>
+                        <th class="fi-th">{{ __('admin.widget_network_status.th_last_check') }}</th>
+                        <th class="fi-th">{{ __('admin.widget_network_status.th_detail') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -96,9 +96,9 @@
                                     <span class="{{ $s['color'] === 'rojo' ? 'text-rose-500 font-semibold' : 'opacity-80' }}">{{ $s['motivo'] }}</span>
                                 @elseif($s['clave'] === 'sync-peers' && is_array($s['detalle']) && isset($s['detalle']['peers']))
                                     @php $peers = (array) $s['detalle']['peers']; @endphp
-                                    <span class="opacity-80">{{ count($peers) }} peers ({{ collect($peers)->where('ok', true)->count() }} activos)</span>
+                                    <span class="opacity-80">{{ count($peers) }} {{ __('admin.widget_network_status.peers') }} ({{ collect($peers)->where('ok', true)->count() }} {{ __('admin.widget_network_status.active') }})</span>
                                 @elseif($s['ok'])
-                                    <span class="opacity-60">Operativo</span>
+                                    <span class="opacity-60">{{ __('admin.widget_network_status.status_ok') }}</span>
                                 @else
                                     <span class="opacity-40">—</span>
                                 @endif
@@ -113,15 +113,15 @@
         @if($transiciones->isNotEmpty())
             <div class="fi-transitions-wrapper">
                 <div class="fi-transitions-header">
-                    <span class="fi-transitions-title">Historial de Eventos Recientes</span>
-                    <span class="text-xs opacity-60">Últimos cambios de estado registrados en la plataforma</span>
+                    <span class="fi-transitions-title">{{ __('admin.widget_network_status.recent_transitions') }}</span>
+                    <span class="text-xs opacity-60">{{ __('admin.widget_network_status.recent_transitions_desc') }}</span>
                 </div>
                 <div class="fi-transitions-grid">
                     @foreach($transiciones as $t)
                         <div class="fi-transition-card {{ $t['ok'] ? 'fi-transition-ok' : 'fi-transition-fail' }}">
                             <div class="flex items-center justify-between font-mono text-xs">
                                 <span class="font-bold {{ $t['ok'] ? 'text-emerald-500' : 'text-rose-500' }}">
-                                    {{ $t['ok'] ? '● RECUPERADO' : '▲ CAÍDA' }}
+                                    {{ $t['ok'] ? '● ' . __('admin.widget_network_status.trans_recovered') : '▲ ' . __('admin.widget_network_status.trans_down') }}
                                 </span>
                                 <span class="opacity-60 text-[11px]">{{ $t['hace'] }}</span>
                             </div>
