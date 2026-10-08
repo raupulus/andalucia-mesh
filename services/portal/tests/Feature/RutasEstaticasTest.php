@@ -86,7 +86,7 @@ class RutasEstaticasTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/xml; charset=utf-8');
-        $response->assertSee('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', false);
+        $response->assertSee('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"', false);
         $response->assertSee('/configura-tu-nodo', false);
         $response->assertSee('/legal/privacidad', false);
         $response->assertHeaderMissing('Set-Cookie');
@@ -102,6 +102,18 @@ class RutasEstaticasTest extends TestCase
         $response->assertSee("Disallow: /admin", false);
         $response->assertSee("Disallow: /api/v1", false);
         $response->assertSee("Sitemap: https://" . config('proyecto.dominio') . "/sitemap.xml", false);
+        $response->assertHeaderMissing('Set-Cookie');
+    }
+
+    public function test_robots_xml_responde_correctamente(): void
+    {
+        $response = $this->get('/robots.xml');
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/xml; charset=utf-8');
+        $response->assertSee('<robots>', false);
+        $response->assertSee('<sitemap>https://' . config('proyecto.dominio') . '/sitemap.xml</sitemap>', false);
+        $response->assertSee('<disallow>/admin</disallow>', false);
         $response->assertHeaderMissing('Set-Cookie');
     }
 

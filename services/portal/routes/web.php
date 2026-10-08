@@ -54,6 +54,7 @@ Route::prefix('legal')->group(function () {
 // Indexación y robots de rastreo
 Route::get('/sitemap.xml', [SitemapController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
+Route::get('/robots.xml', [SitemapController::class, 'robotsXml'])->name('robots.xml');
 
 // Endpoints de salud para Docker healthcheck y red mesh
 Route::get('/health', fn () => response()->json(['ok' => true, 'service' => 'portal', 'timestamp' => now()->toIso8601String()]))->name('health');

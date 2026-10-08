@@ -28,6 +28,19 @@ class PanelOperadorTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_login_admin_muestra_captcha_cuando_turnstile_esta_activo(): void
+    {
+        config([
+            'services.turnstile.site_key' => '0x4AAAAAAAsitekey',
+            'services.turnstile.secret_key' => '0x4AAAAAAAsecretkey',
+        ]);
+
+        $response = $this->get('/admin/login');
+        $response->assertStatus(200);
+        $response->assertSee('cf-turnstile', false);
+        $response->assertSee('challenges.cloudflare.com/turnstile/v0/api.js', false);
+    }
+
     public function test_comando_operador_crear_valida_longitud_password(): void
     {
         $this->artisan('operador:crear', [

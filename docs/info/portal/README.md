@@ -60,7 +60,7 @@
 | `/sugerencias` | Público | 01, 14 |
 | `/legal/aviso-legal`, `/legal/privacidad`, `/legal/cookies` | Público | 10 |
 | `/api` (documentación) | Público | 11 |
-| `/sitemap.xml`, `/robots.txt`, `/qr.svg`, `/qr.pdf` | Público | 01 |
+| `/sitemap.xml`, `/robots.txt`, `/robots.xml`, `/qr.svg`, `/qr.pdf` | Público | 01 |
 | `/api/v1/*` | API (sin estado, `throttle:api-publica`) | 11–13 |
 | `/ws/*` | No es del portal: Nginx lo envía a `chat-ws` (`location /ws/` en `snm-portal.conf`) (`../chat-ws/`) | — |
 | `/admin/*` | Filament (sesión, CSRF, MFA) | 14 |
