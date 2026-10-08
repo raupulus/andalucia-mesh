@@ -16,7 +16,15 @@ use Filament\Widgets\Widget;
  */
 class Dashboard extends BaseDashboard
 {
-    protected static ?string $title = 'Centro de Control Operativo';
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.dashboard_title');
+    }
+
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __('admin.dashboard_title');
+    }
 
     /**
      * Define los widgets del dashboard en orden prioritario estricto.

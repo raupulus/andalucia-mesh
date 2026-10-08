@@ -16,10 +16,11 @@ return [
     'nav' => [
         'home' => 'Início',
         'node_setup' => 'Configura o teu nó',
-        'gateway' => 'Liga o teu gateway',
+        'gateway' => 'MQTT',
         'rankings' => 'Rankings',
         'alerts' => 'Alertas',
         'bots' => 'Bots',
+        'extras' => 'Extras',
         'node_check' => 'Verifica o teu nó',
         'suggestions' => 'Sugestões',
         'theme_toggle' => 'Alternar tema claro ou escuro',
