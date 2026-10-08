@@ -221,4 +221,17 @@ class PortadaYMapaTest extends TestCase
         $response->assertSee('/configurador', false);
         $response->assertSee(__('portal.home.btn_auto_configurator'), false);
     }
+
+    /**
+     * Comprueba que las tablas de configuración y gateway en portada tienen la clase tarjeta-tabla-andalucia.
+     */
+    public function test_tablas_configuracion_tienen_clase_tarjeta_tabla_andalucia(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $content = (string) $response->getContent();
+        // Debe aparecer al menos dos veces (tabla radio y datos gateway)
+        $this->assertEquals(2, substr_count($content, 'tarjeta-tabla-andalucia'));
+    }
 }

@@ -1376,6 +1376,79 @@ pre code {
   }
 }
 
+/* ==============================================================================
+ * Tarjetas de Configuración y Parámetros con Borde Andalucía y Reflejo Cromado
+ * ============================================================================== */
+.tarjeta-tabla-andalucia {
+  position: relative;
+  border-radius: var(--radio-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 2px solid #007A33;
+  box-shadow: 0 0 0 1.5px #FFFFFF, 0 0 0 3px rgba(0, 122, 51, 0.25), var(--sombra-1);
+  background:
+    linear-gradient(
+      135deg,
+      #F9FDFB 0%,
+      #F0FAF4 24%,
+      #E7F7ED 44%,
+      rgba(255, 255, 255, 0.98) 49%,
+      #FFFFFF 50%,
+      rgba(255, 255, 255, 0.98) 51%,
+      #E7F7ED 56%,
+      #F0FAF4 76%,
+      #F9FDFB 100%
+    );
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  overflow: hidden;
+}
+
+.tarjeta-tabla-andalucia:hover {
+  transform: translateY(-2px);
+  border-color: #009940;
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4.5px #007A33, 0 10px 24px rgba(0, 122, 51, 0.28);
+}
+
+.tarjeta-tabla-andalucia code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  padding: 0.15em 0.4em;
+  border-radius: var(--radio-sm);
+  background-color: rgba(0, 122, 51, 0.08);
+  color: var(--color-texto);
+  border: 1px solid rgba(0, 122, 51, 0.18);
+}
+
+[data-theme="dark"] .tarjeta-tabla-andalucia {
+  background:
+    linear-gradient(
+      135deg,
+      #171824 0%,
+      #17221E 24%,
+      #1D2E26 44%,
+      rgba(255, 255, 255, 0.14) 49%,
+      rgba(255, 255, 255, 0.22) 50%,
+      rgba(255, 255, 255, 0.14) 51%,
+      #1D2E26 56%,
+      #17221E 76%,
+      #171824 100%
+    );
+  border: 2px solid #007A33;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.45), 0 0 0 3.5px rgba(0, 122, 51, 0.5), var(--sombra-2);
+}
+
+[data-theme="dark"] .tarjeta-tabla-andalucia:hover {
+  transform: translateY(-2px);
+  border-color: #2ED573;
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4.5px #007A33, 0 12px 28px rgba(0, 122, 51, 0.45);
+}
+
+[data-theme="dark"] .tarjeta-tabla-andalucia code {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+}
+
 /* Tarjetas compactas para la Portada (2 por fila) */
 .grid-paginas-portada {
   display: grid;

@@ -75,7 +75,7 @@
                     {{ __('portal.home.node_setup_lead') }}
                 </p>
 
-                <div class="tarjeta" style="padding: 1.5rem; margin-bottom: 1.5rem; background: var(--color-superficie-sutil);">
+                <div class="tarjeta tarjeta-tabla-andalucia">
                     <div style="overflow-x: auto;">
                         <table class="tabla" style="width: 100%; border-collapse: collapse; font-size: 0.92rem;">
                             <tbody>
@@ -139,7 +139,7 @@
                     {{ __('portal.home.gateway_lead') }}
                 </p>
 
-                <div class="tarjeta" style="padding: 1.5rem; margin-bottom: 1.5rem; background: var(--color-superficie-sutil);">
+                <div class="tarjeta tarjeta-tabla-andalucia">
                     <ul style="margin: 0; padding-left: 1.25rem; line-height: 1.7; font-size: 0.95rem;">
                         <li>{{ __('portal.gateway_card.mqtt_public') }} <code>{{ config('proyecto.mqtt.host_publico') }}</code> ({{ __('portal.gateway_card.port_tls') }} <strong>{{ config('proyecto.mqtt.puerto_tls') }}</strong>)</li>
                         <li>{{ __('portal.gateway_card.user') }} <code>{{ config('proyecto.mqtt.gateway_user') }}</code> · {{ __('portal.gateway_card.password') }} <code>{{ config('proyecto.mqtt.gateway_password') }}</code></li>
