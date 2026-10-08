@@ -62,8 +62,9 @@ Catálogo de componentes reutilizables de interfaz de usuario de Andalucía Mesh
 - **Propósito:** Botón de llamada a la acción de alta visibilidad para el configurador automático de nodos. Emplea un degradado Verde Andalucía (`#008F3E` a `#007A33`), borde verde nítido (`#00B348`), texto blanco nítido con sombra y elevación reactiva en hover, garantizando máximo protagonismo visual frente a botones secundarios en portada y guías.
 
 ### `.tarjeta-tabla-andalucia`
-- **Propósito:** Contenedor estilizado para las tablas y bloques de configuración clave en la portada (parámetros de radio LoRa y credenciales MQTT de subida para gateways).
+- **Propósito:** Contenedor estilizado a ancho completo para las tablas y bloques de configuración clave en la portada (parámetros de radio LoRa y credenciales MQTT de subida para gateways).
 - **Diseño visual:**
+  - Ocupa el 100% del ancho disponible en el contenedor de la página con padding generoso y adaptativo para móviles, ofreciendo una visualización amplia, abierta y desahogada sin sensación de encajonamiento.
   - Borde tricolor Verde/Blanco/Verde de inspiración andaluza (`border: 2px solid #007A33; box-shadow: 0 0 0 1.5px #FFFFFF, 0 0 0 3px rgba(0, 122, 51, 0.25)` en modo claro y halo exterior verde en modo oscuro), replicando el acabado de las tarjetas del listado de páginas.
   - Fondo con efecto de reflejo cromado sutil verde/blanco mediante gradiente diagonal en ángulo de 135º, aportando un acabado brillante y distinguido sin perjudicar en ningún momento la legibilidad ni el contraste WCAG 2.1 AAA de los textos, cifras y bloques `<code>`.
   - Elevación reactiva suave en hover con realce del anillo tricolor.

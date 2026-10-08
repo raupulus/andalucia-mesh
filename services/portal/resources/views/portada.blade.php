@@ -67,7 +67,7 @@
 
         <!-- 4. Resumen: Configura tu nodo -->
         <section class="seccion" style="border-top: 1px solid var(--color-borde); padding-top: 3.5rem; padding-bottom: 3.5rem;">
-            <div style="max-width: 820px;">
+            <div style="width: 100%;">
                 <h2 style="font-size: 1.85rem; font-weight: 700; margin-bottom: 1rem; color: var(--color-texto-1);">
                     {{ __('portal.home.node_setup_title') }}
                 </h2>
@@ -131,7 +131,7 @@
 
         <!-- 5. Resumen: Sube los datos de tu nodo (Gateways) -->
         <section class="seccion" style="border-top: 1px solid var(--color-borde); padding-top: 3.5rem; padding-bottom: 3.5rem;">
-            <div style="max-width: 820px;">
+            <div style="width: 100%;">
                 <h2 style="font-size: 1.85rem; font-weight: 700; margin-bottom: 1rem; color: var(--color-texto-1);">
                     {{ __('portal.home.gateway_title') }}
                 </h2>
