@@ -102,14 +102,21 @@ Gestión dinámica de integradores de webhooks (base `portal`, tabla local repli
 ### Routers Coordinados (`CoordinatedRouterResource`)
 
 Gestión y gobernanza comunitaria de la infraestructura de repetidores en Andalucía (base `portal`, tabla `coordinated_routers`):
-- **Objetivo:** Registrar formalmente qué repetidores y routers (`ROUTER`, `ROUTER_LATE`, `REPEATER`) están coordinados y aprobados por la comunidad andaluza, sirviendo de lista blanca para la regla `router-role` del detector de anomalías.
+- **Objetivo:** Registrar formalmente qué repetidores y routers (`ROUTER`, `ROUTER_LATE`, `REPEATER`) están coordinados y aprobados por la comunidad andaluza, clasificar los conocidos y detectar routers nuevos no controlados para evitar bucles o saturación de la malla.
+- **Estados de gobernanza y coordinación:**
+  - **Gestionado (`managed`, badge verde):** Routers aprobados, conocidos y coordinados oficialmente por los administradores de Andalucía Mesh. Representan la infraestructura formal de la red.
+  - **Conocido (`known`, badge ámbar/aviso):** Routers cuya existencia es asumida y tolerada por la comunidad, pero no están bajo control directo de los administradores (por ejemplo, instalados por usuarios particulares sin consulta previa y que no desean retirar).
+  - **Nuevo (`new`, badge rojo/peligro):** Routers recién detectados en la malla que aún no han sido evaluados. Son el foco prioritario de atención porque la activación de roles router de forma descontrolada o en cotas inadecuadas causa saturación de tráfico y bucles destructivos en la red LoRa.
 - **Agrupación y filtros por provincia:**
   - La tabla está agrupada por defecto por provincia andaluza (`Group::make('province')->defaultGroup('province')`), presentando el nombre oficial de cada provincia (`Cádiz`, `Sevilla`, `Málaga`, etc.) como encabezado de sección.
-  - Filtro por provincia y filtro por estado de aprobación (`approved`: Aprobado / Pendiente).
-- **Columnas operativas:** Identificador hex (`node_id`), nombre corto (`short_name`), nombre largo (`long_name`), provincia con badge, rol configurado, interruptor directo o badge de aprobación (`approved`), indicador de pasarela (`is_gateway`), modelo de hardware (`hw_model`), notas del operador (`notes`) y fecha del último contacto (`last_seen_at`).
+  - Filtro por provincia y filtro por estado de gestión (`status`: Gestionado / Conocido / Nuevo).
+- **Columnas operativas:** Estado con badge de severidad e icono semántico (`status`), identificador hex (`node_id`), nombre corto (`short_name`), nombre largo (`long_name`), provincia con badge, rol configurado, indicador de pasarela (`is_gateway`), modelo de hardware (`hw_model`), notas del operador (`notes`) y fecha del último contacto (`last_seen_at`).
+- **Acciones rápidas de fila y lote:** Acciones directas para transicionar estados en un solo clic («Marcar como Gestionado», «Marcar como Conocido», «Marcar como Nuevo») tanto a nivel de fila individual como en lote mediante acciones masivas de tabla.
 - **Acción «Sincronizar de la Malla»:**
   - Acción en cabecera que consulta la vista de contrato `api_routers` de la base de ingesta y vuelca/actualiza automáticamente los nodos detectados con rol de infraestructura.
+  - **Detección de nuevos y preservación de estado:** Los routers detectados que no figuren en la tabla se dan de alta automáticamente con estado `new` (Nuevo). Para los routers ya registrados previamente, la sincronización actualiza su telemetría y metadatos (`short_name`, `long_name`, `role`, `hw_model`, `is_gateway`, `last_seen_at`), preservando rigurosamente su estado (`managed` / `known`) y las notas privadas del operador.
   - **Filtro geográfico estricto:** Solo importa y actualiza routers situados dentro de las 8 provincias de Andalucía (`ES-AL` .. `ES-SE`), descartando de forma tajante cualquier nodo fuera de la comunidad (`FUERA`), cuya coordinación y supervisión corresponde a las comunidades autónomas vecinas o Portugal.
+  - **Resiliencia en entornos locales:** En entornos de desarrollo local y pruebas con SQLite, el sistema inicializa y asegura la estructura de `api_routers` poblándola con nodos de prueba si se encuentra vacía, evitando excepciones de base de datos ausente.
 - **Edición manual:** Permite registrar nuevos routers de forma anticipada antes de su despliegue físico o añadir anotaciones de operador sobre ubicación, responsable o cota de instalación.
 
 ### Usuarios y Perfil de Operador
@@ -155,7 +162,7 @@ Gestión y publicación de páginas y artículos divulgativos (base `portal`, ta
 | `suggestions` | `id`, `category`, `content`, `status`, `operator_notes`, `ip_hash`, `created_at`, `updated_at` |
 | `faqs` | `id`, `question`, `answer`, `is_active`, `sort_order`, `created_at`, `updated_at` |
 | `webhook_destinations` | `id`, `name` único, `url`, `host`, `active` bool, `disabled_reason` null, `consecutive_failures`, `pending_deliveries`, `last_ok_at`, `risks` json, `types` json, `provinces` json, `nodes` json, `created_at`, `updated_at` |
-| `coordinated_routers` | `id`, `node_id` único, `short_name`, `long_name`, `province`, `role`, `approved` bool, `is_gateway` bool, `hw_model`, `notes`, `last_seen_at`, `created_at`, `updated_at` |
+| `coordinated_routers` | `id`, `node_id` único, `short_name`, `long_name`, `province`, `role`, `status` varchar, `approved` bool, `is_gateway` bool, `hw_model`, `notes`, `last_seen_at`, `created_at`, `updated_at` |
 | `custom_pages` | `id`, `title`, `slug` único, `description`, `content` markdown, `keywords` json, `featured_image`, `is_active` bool, `created_at`, `updated_at` |
 
 ### Configuración

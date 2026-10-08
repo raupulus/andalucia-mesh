@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $long_name
  * @property string $province
  * @property string $role
+ * @property string $status
  * @property bool $approved
  * @property bool $is_gateway
  * @property string|null $hw_model
@@ -29,6 +30,26 @@ use Illuminate\Support\Carbon;
 class CoordinatedRouter extends Model
 {
     use HasFactory;
+
+    /**
+     * Estados de coordinación y gobernanza del router en la malla.
+     */
+    public const STATUS_MANAGED = 'managed';
+
+    public const STATUS_KNOWN = 'known';
+
+    public const STATUS_NEW = 'new';
+
+    /**
+     * Catálogo legible de estados.
+     *
+     * @var array<string, string>
+     */
+    public const STATUSES = [
+        self::STATUS_MANAGED => 'Gestionado',
+        self::STATUS_KNOWN => 'Conocido',
+        self::STATUS_NEW => 'Nuevo',
+    ];
 
     /**
      * Provincias oficiales de la comunidad de Andalucía conforme a ISO 3166-2:ES.
@@ -57,6 +78,7 @@ class CoordinatedRouter extends Model
         'long_name',
         'province',
         'role',
+        'status',
         'approved',
         'is_gateway',
         'hw_model',
@@ -72,10 +94,25 @@ class CoordinatedRouter extends Model
     protected function casts(): array
     {
         return [
+            'status' => 'string',
             'approved' => 'boolean',
             'is_gateway' => 'boolean',
             'last_seen_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Evento de arranque del modelo: asegura consistencia entre status y approved.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (self $router): void {
+            // Asegurar que el booleano approved se mantenga sincronizado con el estado 'managed'
+            if (empty($router->status)) {
+                $router->status = self::STATUS_NEW;
+            }
+            $router->approved = ($router->status === self::STATUS_MANAGED);
+        });
     }
 
     /**
@@ -102,25 +139,58 @@ class CoordinatedRouter extends Model
     }
 
     /**
-     * Scope para filtrar únicamente routers aprobados por la coordinación.
+     * Scope para filtrar routers gestionados (aprobados y coordinados oficialmente).
+     *
+     * @param  Builder<CoordinatedRouter>  $query
+     * @return Builder<CoordinatedRouter>
+     */
+    public function scopeManaged(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_MANAGED);
+    }
+
+    /**
+     * Scope para filtrar routers conocidos (asumidos pero sin gestión directa).
+     *
+     * @param  Builder<CoordinatedRouter>  $query
+     * @return Builder<CoordinatedRouter>
+     */
+    public function scopeKnown(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_KNOWN);
+    }
+
+    /**
+     * Scope para filtrar routers nuevos detectados pendientes de revisión.
+     *
+     * @param  Builder<CoordinatedRouter>  $query
+     * @return Builder<CoordinatedRouter>
+     */
+    public function scopeNew(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_NEW);
+    }
+
+    /**
+     * Scope para filtrar únicamente routers aprobados por la coordinación (compatibilidad).
      *
      * @param  Builder<CoordinatedRouter>  $query
      * @return Builder<CoordinatedRouter>
      */
     public function scopeApproved(Builder $query): Builder
     {
-        return $query->where('approved', true);
+        return $this->scopeManaged($query);
     }
 
     /**
-     * Scope para filtrar routers pendientes de aprobación.
+     * Scope para filtrar routers no gestionados / pendientes de aprobación.
      *
      * @param  Builder<CoordinatedRouter>  $query
      * @return Builder<CoordinatedRouter>
      */
     public function scopePending(Builder $query): Builder
     {
-        return $query->where('approved', false);
+        return $query->where('status', '!=', self::STATUS_MANAGED);
     }
 
     /**
@@ -135,11 +205,35 @@ class CoordinatedRouter extends Model
     }
 
     /**
-     * Determina si el router está formalmente aprobado.
+     * Determina si el router está formalmente gestionado/aprobado.
+     */
+    public function isManaged(): bool
+    {
+        return $this->status === self::STATUS_MANAGED;
+    }
+
+    /**
+     * Determina si el router es conocido (asumido pero sin control directo).
+     */
+    public function isKnown(): bool
+    {
+        return $this->status === self::STATUS_KNOWN;
+    }
+
+    /**
+     * Determina si el router es nuevo detectado.
+     */
+    public function isNew(): bool
+    {
+        return $this->status === self::STATUS_NEW;
+    }
+
+    /**
+     * Determina si el router está aprobado (alias de isManaged).
      */
     public function isApproved(): bool
     {
-        return (bool) $this->approved;
+        return $this->isManaged();
     }
 
     /**
@@ -156,5 +250,13 @@ class CoordinatedRouter extends Model
     public function getProvinceNameAttribute(): string
     {
         return self::provinceName($this->province);
+    }
+
+    /**
+     * Retorna la etiqueta legible del estado actual.
+     */
+    public function getStatusLabelAttribute(): string
+    {
+        return self::STATUSES[$this->status] ?? $this->status;
     }
 }

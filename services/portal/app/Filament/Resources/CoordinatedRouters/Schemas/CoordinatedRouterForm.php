@@ -64,10 +64,16 @@ class CoordinatedRouterForm
                 Section::make(__('admin.coordinated_routers.section_approval'))
                     ->columnSpanFull()
                     ->schema([
-                        Toggle::make('approved')
-                            ->label(__('admin.coordinated_routers.col_approved'))
-                            ->helperText('Marca este router como coordinado y aprobado para operar en la infraestructura de la malla.')
-                            ->default(false),
+                        Select::make('status')
+                            ->label(__('admin.coordinated_routers.col_status'))
+                            ->options([
+                                CoordinatedRouter::STATUS_MANAGED => __('admin.coordinated_routers.status_managed_desc'),
+                                CoordinatedRouter::STATUS_KNOWN => __('admin.coordinated_routers.status_known_desc'),
+                                CoordinatedRouter::STATUS_NEW => __('admin.coordinated_routers.status_new_desc'),
+                            ])
+                            ->default(CoordinatedRouter::STATUS_NEW)
+                            ->required()
+                            ->helperText(__('admin.coordinated_routers.helper_status')),
 
                         Textarea::make('notes')
                             ->label(__('admin.coordinated_routers.col_notes'))

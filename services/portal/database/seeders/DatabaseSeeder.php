@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             FaqSeeder::class,
             HardwareSeeder::class,
             SuggestionSeeder::class,
+            CustomPageSeeder::class,
         ]);
     }
 }
