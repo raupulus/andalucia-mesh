@@ -116,6 +116,7 @@ return [
         'status_pending_phase' => 'Pendente (Fase :phase)',
         'status_down_failures' => 'Em baixo (:count falhas)',
         'status_warning_transient' => 'Aviso transitório (1 falha)',
+        'status_disabled' => 'Desativado',
         'status_untested' => 'Não testado',
         'time_never' => 'Nunca',
         'no_data' => 'Sem dados',

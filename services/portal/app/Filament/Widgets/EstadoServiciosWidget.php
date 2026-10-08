@@ -71,8 +71,14 @@ class EstadoServiciosWidget extends Widget
                 $detalle = json_decode((string) $detalleRaw, true);
             }
 
+            $activo = (bool) ($cfg['activo'] ?? true);
+
             // Determinación de color y etiqueta según regla anti-parpadeo y fases
-            if ($ok) {
+            if (! $activo || (string) $motivo === 'Servicio desactivado') {
+                $color = 'gris';
+                $etiqueta = __('admin.widget_network_status.status_disabled');
+                $pendientes++;
+            } elseif ($ok) {
                 $color = 'verde';
                 $etiqueta = __('admin.widget_network_status.status_ok');
                 $operativos++;

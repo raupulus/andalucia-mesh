@@ -159,6 +159,13 @@ deploy_container() {
         return 0
     fi
 
+    # Comprobar si el servicio está marcado como desactivado
+    if [[ -f "/srv/${name}/disabled" ]] || [[ -f "/srv/${name}/.disabled" ]] || [[ -f "${dir_path}/.disabled" ]]; then
+        log "[INFO] El servicio ${name} está marcado como desactivado. Asegurando que esté detenido..."
+        docker compose -f "${compose_file}" down 2>/dev/null || true
+        return 0
+    fi
+
     log "[INFO] ----------------------------------------------------"
     log "[INFO] Desplegando componente Docker: ${name}"
     log "[INFO] ----------------------------------------------------"

@@ -32,6 +32,13 @@ class ComprobarServicios
         $timeout = (int) config('servicios.timeout_segundos', 3);
 
         foreach ($servicios as $clave => $cfg) {
+            $activo = (bool) ($cfg['activo'] ?? true);
+            if (! $activo) {
+                $this->marcarDesactivado((string) $clave, (array) $cfg);
+
+                continue;
+            }
+
             $this->auditarServicio((string) $clave, (array) $cfg, $timeout);
         }
 
@@ -211,6 +218,33 @@ class ComprobarServicios
             );
         } catch (Throwable) {
             // Silenciar fallos de persistencia transitorios para no abortar el ciclo
+        }
+    }
+
+    /**
+     * Registra un servicio marcado explícitamente como desactivado en la configuración.
+     *
+     * @param  array<string, mixed>  $cfg
+     */
+    private function marcarDesactivado(string $clave, array $cfg): void
+    {
+        $ahora = now();
+
+        try {
+            DB::table('estado_servicio')->updateOrInsert(
+                ['servicio' => $clave],
+                [
+                    'ok' => false,
+                    'codigo' => null,
+                    'latencia_ms' => null,
+                    'fallos_seguidos' => 0,
+                    'motivo' => 'Servicio desactivado',
+                    'detalle' => json_encode(['activo' => false], JSON_UNESCAPED_UNICODE),
+                    'comprobado_en' => $ahora,
+                ]
+            );
+        } catch (Throwable) {
+            // Silenciar fallos de persistencia transitorios
         }
     }
 }

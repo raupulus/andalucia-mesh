@@ -91,6 +91,7 @@ return [
             'tipo' => 'http',
             'url' => env('HEALTH_URL_BOT_DISCORD', 'http://bot-discord:8080/health'),
             'fase' => 8,
+            'activo' => (bool) env('BOT_DISCORD_ENABLED', false),
         ],
         'webhooks' => [
             'nombre' => 'Servicio de Webhooks',

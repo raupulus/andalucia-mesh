@@ -26,6 +26,10 @@ Pasos del script `deploy.sh`:
 5. Comprueba salud: verifica que los contenedores arranquen correctamente y no entren en estado de reinicio cíclico.
 6. Registra cada operación con marca de tiempo y usuario en `/var/www/storage/sur-nodos-en-mallas/logs/deploy.log`.
 
+### Servicios desactivados
+
+Si un servicio no debe operar en una instancia o entorno (por ejemplo `bot-discord` mientras no esté en uso), se marca como desactivado creando el archivo marcador `/srv/<servicio>/disabled` (o `/srv/<servicio>/.disabled` o `<directorio>/.disabled`). En ese caso, `deploy.sh` (tanto individual como en `all`) omite la compilación y el arranque, garantizando que el contenedor quede detenido con `docker compose down`. En el portal, el servicio se define con `'activo' => false` en `config/servicios.php` para evitar sondeos innecesarios de salud y mostrarlo en gris como «Desactivado».
+
 ### Versiones de los servicios propios
 
 - La versión es la del código en `/srv/repo` (rama o etiqueta git desplegada). La imagen se etiqueta `snm-<servicio>:<versión>` al construir (`VERSION` en el `.env`, por defecto el `git describe` del despliegue).
@@ -70,4 +74,4 @@ Claves de base de datos de 32 caracteres (`02-postgresql.md`), de MQTT de 24 alf
 - **Dado** una etiqueta nueva de MeshView que rompe la web, **cuando** se revierte el commit y se despliega, **entonces** vuelve la versión anterior.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

@@ -186,5 +186,9 @@ Hilo: `reference = MessageReference(message_id=<mensaje_id del hilo>, channel_id
 7. **Menciones neutralizadas.** Dado un nodo llamado `@everyone`, cuando se envía su alerta y alguien pide `/routers`, entonces nadie recibe una mención.
 8. **Canal borrado.** Dado un canal suscrito con 3 envíos pendientes, cuando se borra el canal, entonces el destino queda `canal_borrado` y no se hacen más peticiones a ese canal.
 
+### Estado operativo y desactivación
+
+En despliegues donde la integración con Discord no se utilice de forma inmediata, el servicio se mantiene inactivo mediante el marcador `/srv/bot-discord/disabled` (o `.disabled`). El script de despliegue `infrastructure/deploy.sh` omite su construcción y arranque garantizando su detención con `docker compose down`, y en el portal permanece con `BOT_DISCORD_ENABLED=false` en `config/servicios.php`.
+
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

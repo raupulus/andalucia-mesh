@@ -134,6 +134,13 @@ class PanelOperadorTest extends TestCase
         // 4. Debe haberse registrado la transición en estado_servicio_cambio
         $cambios = DB::table('estado_servicio_cambio')->where('servicio', 'adaptador-potato')->get();
         $this->assertNotEmpty($cambios);
+
+        // 5. Un servicio marcado como inactivo (ej. bot-discord) se registra desactivado y con 0 fallos
+        $discord = DB::table('estado_servicio')->where('servicio', 'bot-discord')->first();
+        $this->assertNotNull($discord);
+        $this->assertFalse((bool) $discord->ok);
+        $this->assertEquals(0, $discord->fallos_seguidos);
+        $this->assertEquals('Servicio desactivado', $discord->motivo);
     }
 
     public function test_operador_activo_puede_ver_dashboard_admin(): void

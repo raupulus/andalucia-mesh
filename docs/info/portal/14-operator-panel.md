@@ -67,6 +67,7 @@ El panel recibe a los operadores con un centro de control operativo estructurado
 | `portal-tareas` | Latido propio: la tarea escribe `ultima_ejecucion`; si tiene > 3 min, el panel lo marca en rojo al cargar | — |
 
 - Resultado en la tabla `estado_servicio` (base `portal`): última comprobación, `ok`, código, latencia, `motivo` del JSON de `/health` y el JSON completo (máx. 4 KB).
+- Servicios desactivados: si un servicio se marca con `'activo' => false` en `config/servicios.php` (ej. `bot-discord`), el job `ComprobarServicios` omite las consultas de red, actualiza `motivo = 'Servicio desactivado'` con 0 fallos consecutivos y el widget lo muestra en gris con la etiqueta `Desactivado`.
 - Historial reciente de transiciones en `estado_servicio_cambio` presentado en cuadrícula de tarjetas de evento con badges de recuperación/caída (`● RECUPERADO` / `▲ CAÍDA`).
 - Sin avisos externos: si cae el servidor entero, no hay aviso (limitación aceptada).
 
@@ -258,4 +259,4 @@ Gestión y publicación de páginas y artículos divulgativos (base `portal`, ta
 Alta y baja de gateways en Mosquitto y edición de textos del portal. Cada una exige definir cómo el portal entrega la configuración al otro servicio sin escribir en su base.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

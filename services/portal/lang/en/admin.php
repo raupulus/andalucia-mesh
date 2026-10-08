@@ -116,6 +116,7 @@ return [
         'status_pending_phase' => 'Pending (Phase :phase)',
         'status_down_failures' => 'Down (:count failures)',
         'status_warning_transient' => 'Transient warning (1 failure)',
+        'status_disabled' => 'Disabled',
         'status_untested' => 'Untested',
         'time_never' => 'Never',
         'no_data' => 'No data',
