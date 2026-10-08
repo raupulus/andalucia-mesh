@@ -14,6 +14,7 @@ use App\Models\User;
 use Filament\Auth\Pages\Login;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -304,7 +305,10 @@ class PanelOperadorTest extends TestCase
         $response->assertSee('Ámbito Territorial de Supervisión');
         $response->assertSee('Andalucía');
         $response->assertSee('España');
-        $response->assertSee('Toda la Malla');
+        $response->assertDontSee('Toda la Malla');
+        $response->assertSee('fi-ambito-card');
+        $response->assertSee('fi-ambito-card-andalucia-active');
+        $response->assertSee('fi-ambito-switch-pill');
     }
 
     public function test_cambio_de_ambito_persiste_en_sesion_y_emite_evento(): void
@@ -313,16 +317,24 @@ class PanelOperadorTest extends TestCase
         $this->actingAs($user);
 
         Livewire::test(AmbitoSelectorWidget::class)
-            ->assertSet('ambito', 'andalucia')
-            ->call('setAmbito', 'espana')
-            ->assertSet('ambito', 'espana')
+            ->assertSet('activoAndalucia', true)
+            ->assertSet('activoEspana', false)
+            ->call('toggleAmbito', 'espana')
+            ->assertSet('activoAndalucia', true)
+            ->assertSet('activoEspana', true)
+            ->assertDispatched('ambito-cambiado', ambito: 'ambos')
+            ->call('toggleAmbito', 'andalucia')
+            ->assertSet('activoAndalucia', false)
+            ->assertSet('activoEspana', true)
             ->assertDispatched('ambito-cambiado', ambito: 'espana');
 
-        $this->assertEquals('espana', session('dashboard_ambito'));
+        $this->assertFalse(session('dashboard_ambito_andalucia'));
+        $this->assertTrue(session('dashboard_ambito_espana'));
     }
 
     public function test_routers_widget_y_data_filtra_por_ambito_territorial(): void
     {
+        Cache::flush();
         ListCoordinatedRouters::ensureApiRoutersTableExists();
 
         /** @var Routers $routersService */
@@ -337,23 +349,20 @@ class PanelOperadorTest extends TestCase
         $this->assertNotContains('!b3c4d5e6', $idsAndalucia); // AB01 (Albacete)
         $this->assertNotContains('!a2b3c4d5', $idsAndalucia); // EXT1 (FUERA)
 
-        // 2. Ámbito España: debe retornar 9 routers (8 andaluces + Albacete), excluyendo FUERA
+        // 2. Ámbito España: retorna los routers del resto de España (Albacete), excluyendo Andalucía y FUERA
         $resEspana = (array) $routersService->obtenerResultado(ambito: 'espana')->datos;
         $itemsEspana = $resEspana['items'] ?? [];
-        $this->assertCount(9, $itemsEspana);
-        $idsEspana = array_column($itemsEspana, 'id');
-        $this->assertContains('!2a3b4c5d', $idsEspana); // SE01
-        $this->assertContains('!b3c4d5e6', $idsEspana); // AB01 (Albacete)
-        $this->assertNotContains('!a2b3c4d5', $idsEspana); // EXT1 (FUERA)
+        $this->assertCount(1, $itemsEspana);
+        $this->assertEquals('!b3c4d5e6', $itemsEspana[0]['id']); // AB01
 
-        // 3. Ámbito Global: debe retornar los 10 routers sin exclusión
-        $resGlobal = (array) $routersService->obtenerResultado(ambito: 'global')->datos;
-        $itemsGlobal = $resGlobal['items'] ?? [];
-        $this->assertCount(10, $itemsGlobal);
-        $idsGlobal = array_column($itemsGlobal, 'id');
-        $this->assertContains('!2a3b4c5d', $idsGlobal);
-        $this->assertContains('!b3c4d5e6', $idsGlobal);
-        $this->assertContains('!a2b3c4d5', $idsGlobal);
+        // 3. Ámbito Ambos (Andalucía + España acumulados): retorna 9 routers (8 andaluces + Albacete)
+        $resAmbos = (array) $routersService->obtenerResultado(ambito: 'ambos')->datos;
+        $itemsAmbos = $resAmbos['items'] ?? [];
+        $this->assertCount(9, $itemsAmbos);
+        $idsAmbos = array_column($itemsAmbos, 'id');
+        $this->assertContains('!2a3b4c5d', $idsAmbos); // SE01
+        $this->assertContains('!b3c4d5e6', $idsAmbos); // AB01
+        $this->assertNotContains('!a2b3c4d5', $idsAmbos); // EXT1 (FUERA)
 
         // 4. Widget Routers reacciona al evento ámbito-cambiado
         Livewire::test(RoutersInfraestructuraWidget::class)
@@ -363,13 +372,13 @@ class PanelOperadorTest extends TestCase
             ->assertDontSee('EXT1')
             ->dispatch('ambito-cambiado', ambito: 'espana')
             ->assertSet('ambito', 'espana')
-            ->assertSee('SE01')
+            ->assertDontSee('SE01')
             ->assertSee('AB01')
             ->assertDontSee('EXT1')
-            ->dispatch('ambito-cambiado', ambito: 'global')
-            ->assertSet('ambito', 'global')
+            ->dispatch('ambito-cambiado', ambito: 'ambos')
+            ->assertSet('ambito', 'ambos')
             ->assertSee('SE01')
             ->assertSee('AB01')
-            ->assertSee('EXT1');
+            ->assertDontSee('EXT1');
     }
 }

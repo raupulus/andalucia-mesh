@@ -62,9 +62,12 @@ class Routers
                 $query->whereIn('province', self::PROVINCIAS_ANDALUCIA);
             } elseif ($ambito === 'espana') {
                 $query->where('province', 'like', 'ES-%')
+                    ->whereNotIn('province', self::PROVINCIAS_ANDALUCIA)
+                    ->where('province', '!=', 'FUERA');
+            } elseif ($ambito === 'ambos' || $ambito === 'global') {
+                $query->where('province', 'like', 'ES-%')
                     ->where('province', '!=', 'FUERA');
             }
-            // En ámbito 'global' se cargan todos los routers sin filtro de provincia
 
             switch ($sort) {
                 case 'last_seen_desc':

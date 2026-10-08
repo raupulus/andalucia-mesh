@@ -28,22 +28,29 @@ Que los operadores vean de un vistazo si cada pieza funciona y qué pasa en la m
 El panel recibe a los operadores con un centro de control operativo estructurado en 4 niveles de supervisión en tiempo real con refresco automático (`wire:poll.30s`):
 
 1. **AmbitoSelectorWidget (Selector interactivo de ámbito territorial):**
-   - Tarjetas interactivas de gran formato situadas en la parte superior del cuadro de mando (`$sort = -200`, ancho completo) que permiten conmutar la supervisión entre tres contextos:
-     - **Andalucía (activo por defecto):** Centrado estrictamente en las 8 provincias andaluzas (`ES-AL` .. `ES-SE`) mediante bandera andaluza. Asegura que los operadores supervisen únicamente los repetidores e infraestructura gestionada por la comunidad andaluza, evitando sobrecargas de contexto con nodos foráneos.
-     - **España:** Ámbito nacional que engloba todos los nodos del territorio nacional (`ES-*`) mediante bandera de España.
-     - **Toda la Malla:** Ámbito global sin filtros ni exclusiones territoriales (incluyendo nodos exteriores `FUERA`, Portugal u otros países) mediante icono de red/globo.
-   - **Reactividad Livewire y persistencia:** Cada tarjeta presenta el recuento en tiempo real de routers del ámbito. Al conmutar el ámbito, se persiste en la sesión del operador (`dashboard_ambito`) y se despacha el evento reactivo `ambito-cambiado`, actualizando al instante los widgets de métricas y repetidores sin recargar la página.
+   - Dos tarjetas interactivas de gran formato situadas en la parte superior del cuadro de mando (`$sort = -200`, ancho completo) con diseño estructurado y estilos aislados `.fi-ambito-*` optimizados para modo oscuro y claro:
+     - **Andalucía (activo por defecto al entrar):** Centrado estrictamente en las 8 provincias andaluzas (`ES-AL` .. `ES-SE`) mediante bandera andaluza redonda. Asegura que los operadores supervisen de entrada únicamente los repetidores e infraestructura gestionada por la comunidad andaluza, evitando sobrecargas de contexto con nodos foráneos.
+     - **España:** Ámbito nacional centrado en el resto de comunidades del territorio (`ES-*` excluyendo Andalucía y excluyendo `FUERA`) mediante bandera de España redonda.
+   - **Comportamiento acumulativo y combinable:**
+     - Al entrar al panel, Andalucía se encuentra activa por defecto.
+     - Al pulsar España se suman ambos, permitiendo supervisar de forma acumulada toda la infraestructura española (`andalucia` + `espana` = `ambos`).
+     - Los operadores pueden alternar libremente las tres combinaciones operativas:
+       1. **Solo Andalucía** (por defecto).
+       2. **Solo España** (resto de comunidades nacionales).
+       3. **Andalucía y España** (ambas activas simultáneamente sumando coberturas).
+     - **Salvaguarda de contexto:** Al menos un ámbito debe permanecer activo en todo momento (no se permite desactivar el último activo para evitar dejar el cuadro de mando en blanco).
+   - **Reactividad Livewire y persistencia:** Cada tarjeta presenta el recuento en tiempo real de routers y una píldora conmutadora (`✓ Activo` en verde/rojo o `＋ Sumar` sutil). Al conmutar, se persisten las selecciones en sesión (`dashboard_ambito_andalucia`, `dashboard_ambito_espana` y `dashboard_ambito`) y se despacha el evento reactivo `ambito-cambiado`, actualizando al instante los KPIs y la tabla de repetidores sin recargar la página.
 
 2. **MallaStatsOverviewWidget (KPIs ejecutivos de la red y presión en el aire):**
-   - Reactivo a `ambito-cambiado` y sincronizado con el ámbito activo.
-   - **Presión del Aire (`channel_utilization`):** % de utilización promedio del canal LoRa (restringido a las provincias andaluzas cuando el ámbito es Andalucía), chip semántico de severidad (🟢 Holgado $\le 20\%$, 🟡 Cargado $20\%-40\%$, 🔴 Saturado $\ge 40\%$) y provincia con el pico máximo detectado.
+   - Reactivo a `ambito-cambiado` y sincronizado con el ámbito activo (`Andalucía`, `España` o `Andalucía + España`).
+   - **Presión del Aire (`channel_utilization`):** % de utilización promedio del canal LoRa (restringido a las provincias del ámbito seleccionado), chip semántico de severidad (🟢 Holgado $\le 20\%$, 🟡 Cargado $20\%-40\%$, 🔴 Saturado $\ge 40\%$) y provincia con el pico máximo detectado.
    - **Saturación TX Repetidores (`air_util_tx`):** Tiempo medio de ocupación del aire en emisión de la infraestructura filtrada para verificar el cumplimiento del *duty cycle* legal ($< 10\%$).
    - **Infraestructura y Energía:** Total de routers del ámbito activo, desglose de nodos alimentados permanentemente a red/solar (`⚡`) frente a nodos a batería, con alerta prioritaria si hay nodos en nivel crítico ($< 20\%$).
    - **Tráfico y Pasarelas:** Nodos activos 24h, total de paquetes por hora procesados y número de gateways publicando en el broker MQTT.
 
 3. **RoutersInfraestructuraWidget (Monitor de repetidores y nodos clave):**
    - Tabla interactiva conectada a la vista de contrato `api_routers` de Ingesta (con degradación segura en caché y manejo de caídas vía `Fuente::recordar`), filtrada según el ámbito activo mediante `Routers::obtenerResultado(..., ambito: $this->ambito)`.
-   - Cabecera con badge dinámico indicando el número de routers y el contexto territorial activo (`· Andalucía` / `· España` / `· Toda la Malla`).
+   - Cabecera con badge dinámico indicando el número de routers y el contexto territorial activo (`· Andalucía` / `· España` / `· Andalucía + España`).
    - Muestra para cada router: identificador (`!hex`), modelo de hardware (`hw_model`), provincia, estado de alimentación (`⚡ Red/Solar` con voltaje o barra de batería porcentual con código de color dinámico), nivel de presión local ChUtil, saturación TX, tiempo desde el último contacto y botón de inspección directa a `/revisa-tu-nodo/{id}`.
 
 4. **EstadoServiciosWidget (Salud de la plataforma y microservicios):**
@@ -140,21 +147,25 @@ Consola de operaciones y control administrativo de routers de la malla (`/admin/
   - El portal se ejecuta en el servidor/VPS. El operador físico conecta su nodo Meshtastic controlador directamente a su equipo local mediante Web Serial (USB @ 115200 baudios), Web Bluetooth (BLE) o red local (HTTP).
   - La interfaz web del operador en Filament se comunica directamente desde el navegador con su nodo local físico utilizando las APIs estándares del navegador (`navigator.serial`, `navigator.bluetooth`), sin que el VPS requiera pasarelas físicas ni puertos de radiofrecuencia acoplados.
   - El nodo local físico del operador actúa como puente de radiofrecuencia (transceiver) para inyectar paquetes administrativos `AdminMessage` de Meshtastic en la malla comunitaria LoRa hacia los routers remotos.
-- **Selector de router objetivo:**
-  - Filtrado estricto a los routers coordinados de las 8 provincias de Andalucía (`CoordinatedRouter::andalucia()`), presentando nombre, provincia, identificador hexadecimal, rol y estado de gobernanza (`managed`, `known`, `new`).
-  - Admite alternativamente la introducción manual de cualquier Node ID en formato hexadecimal (`!XXXXXXXX`) o decimal uint32 para pruebas o nodos en despliegue.
+  - **Aviso de compatibilidad de navegador:** Banner superior de advertencia en ámbar/amarillo destacando el requisito de utilizar **Google Chrome**, **Microsoft Edge**, **Brave** o navegadores Chromium en escritorio para habilitar Web Serial y Web Bluetooth, indicando que Firefox y Safari solo pueden operar mediante WiFi Local (HTTP) por políticas de seguridad del fabricante.
+  - **Guía operativa en 3 pasos:** Indicadores visuales numerados (Paso 1: Conectar nodo local; Paso 2: Elegir router objetivo; Paso 3: Transmitir acción por LoRa).
+- **Selector de router objetivo dual:**
+  - Disposición en dos columnas siempre visibles: **Opción A** (menú desplegable de routers coordinados de Andalucía con filtrado estricto a las 8 provincias vía `CoordinatedRouter::andalucia()`) y **Opción B** (campo manual para escribir o pegar cualquier Node ID en formato `!XXXXXXXX` o decimal uint32 para nodos nuevos o en despliegue).
+  - Sincronización reactiva automática: seleccionar en el desplegable rellena el campo manual y el destinatario unicast; escribir en el campo manual actualiza de inmediato el ID LoRa y la ficha de estado sin campos ocultos.
 - **Pestañas operativas de control:**
   - **1. Roles (`roles`):** Permite reconfigurar el rol de un router a través de la malla mediante `AdminMessage.setConfig` con `Config.DeviceConfig.role`. Posibilita la conmutación ágil a `CLIENT_MUTE` ante incidentes de saturación o emisores de spam cercanos para silenciar los reenvíos de un repetidor sin apagarlo, y restablecerlo posteriormente a `ROUTER` o `ROUTER_LATE`. Admite igualmente `CLIENT` y `REPEATER`.
   - **2. Favoritos (`favoritos`):** Gestión de la lista de nodos prioritarios del router mediante `setFavoriteNode` y `removeFavoriteNode` de `AdminMessage`. Permite que el router priorice los mensajes y telemetrías de los nodos clave de su zona.
   - **3. Sondeo de Malla (`sondeo`):** Emisión de paquetes broadcast (`^all`, constante `0xFFFFFFFF`) con `want_response = true` para sondeo masivo: identificación (`NodeInfo`), coordenadas (`Position`) y estado energético/canal (`Telemetry`).
   - **4. Petición a un Nodo (`unicast`):** Envío de solicitudes directas a un nodo concreto: `NodeInfo`, `Position`, `Telemetry` y trazado de saltos de ruta `Traceroute` (`TRACEROUTE_APP` con `RouteDiscoverySchema`).
   - **5. Mantenimiento (`mantenimiento`):** Envío de comandos de reinicio remoto diferido (`reboot_seconds`) con confirmación de seguridad y retardo configurable en segundos para permitir la propagación y confirmación ACK del paquete antes del reinicio del hardware.
+  - **Avisos de estado bajo cada acción:** Mensajes contextuales cuando el nodo local aún no está conectado o no se ha seleccionado ningún router, guiando al operador paso a paso.
 - **Consola de actividad en tiempo real:**
   - Terminal interactiva integrada con registro cronológico de eventos: eventos de conexión física, paquetes transmitidos (`TX ➡️`), paquetes recibidos (`RX ⬅️`), confirmaciones de entrega (`ACK ✅`) y fallos.
   - Descodificación en caliente de telemetría (batería, voltaje, ChUtil), posiciones GPS, respuestas `AdminMessage` y rutas de Traceroute.
   - Filtros por tipo de tráfico, limpieza de terminal y copiado directo al portapapeles.
 - **Empaquetado y eliminación de dependencias de CDN:**
-  - Bundle compilado con Vite (`resources/js/mesh-admin.js` -> `public/build/assets/`) e integración de `@meshtastic/core`, `@meshtastic/transport-web-serial`, `@meshtastic/transport-web-bluetooth` y `@bufbuild/protobuf` como dependencias locales versionadas.
+  - Bundle compilado con Vite en formato IIFE autónomo (`resources/js/mesh-admin.js` -> `public/js/mesh-admin.bundle.js` mediante `npm run build:mesh-admin` / `build-mesh-admin.js`) e integración de `@meshtastic/core`, `@meshtastic/transport-web-serial`, `@meshtastic/transport-web-bluetooth` y `@bufbuild/protobuf` como dependencias locales versionadas.
+  - La carga mediante `/js/mesh-admin.bundle.js` es completamente síncrona, port-agnóstica (inmune a puertos locales como 9000 o 80 en `APP_URL`) y expone `window.meshAdmin` de forma inmediata antes de la evaluación del árbol reactivo de Alpine.js.
   - Compilación autónoma de `configurador.js` (`npm run build:configurador`) eliminando las dependencias externas a `esm.sh` para garantizar funcionamiento autónomo e inmune a cortes de CDN externos.
 
 ### Usuarios y Perfil de Operador

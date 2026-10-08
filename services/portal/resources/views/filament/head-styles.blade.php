@@ -760,4 +760,281 @@
         border-color: #373a4d !important;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
     }
+
+    /* ==============================================================================
+     * Selector de Ámbito Territorial del Dashboard (AmbitoSelectorWidget)
+     * ============================================================================== */
+    .fi-ambito-wrapper {
+        margin-bottom: 1.25rem !important;
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.65rem !important;
+    }
+
+    .fi-ambito-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+        padding: 0 0.25rem !important;
+    }
+
+    .fi-ambito-title {
+        font-size: 0.8rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        color: #64748b !important;
+    }
+    .dark .fi-ambito-title {
+        color: #94a3b8 !important;
+    }
+
+    .fi-ambito-context-indicator {
+        font-size: 0.8rem !important;
+        color: #64748b !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        background: rgba(148, 163, 184, 0.12) !important;
+        padding: 0.25rem 0.75rem !important;
+        border-radius: 9999px !important;
+        border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    }
+    .dark .fi-ambito-context-indicator {
+        color: #cbd5e1 !important;
+        background: rgba(30, 41, 59, 0.7) !important;
+        border-color: rgba(148, 163, 184, 0.2) !important;
+    }
+
+    .fi-ambito-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1rem !important;
+        width: 100% !important;
+    }
+    @media (max-width: 768px) {
+        .fi-ambito-grid {
+            grid-template-columns: 1fr !important;
+            gap: 0.75rem !important;
+        }
+    }
+
+    .fi-ambito-card {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 1rem !important;
+        padding: 1.15rem 1.4rem !important;
+        border-radius: 0.85rem !important;
+        text-align: left !important;
+        cursor: pointer !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        outline: none !important;
+    }
+    .fi-ambito-card:focus-visible {
+        outline: 2px solid #67EA94 !important;
+        outline-offset: 2px !important;
+    }
+
+    .fi-ambito-card-inactive {
+        background: #ffffff !important;
+        border: 2px solid #e2e8f0 !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+        opacity: 0.78 !important;
+    }
+    .dark .fi-ambito-card-inactive {
+        background: #1e2029 !important;
+        border: 2px solid rgba(148, 163, 184, 0.16) !important;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) !important;
+        opacity: 0.72 !important;
+    }
+    .fi-ambito-card-inactive:hover {
+        opacity: 1 !important;
+        transform: translateY(-2px) !important;
+        border-color: rgba(148, 163, 184, 0.45) !important;
+    }
+    .dark .fi-ambito-card-inactive:hover {
+        border-color: rgba(148, 163, 184, 0.35) !important;
+        background: #242632 !important;
+    }
+
+    .fi-ambito-card-andalucia-active {
+        background: linear-gradient(135deg, rgba(0, 122, 51, 0.08) 0%, #ffffff 100%) !important;
+        border: 2px solid #007A33 !important;
+        box-shadow: 0 4px 16px rgba(0, 122, 51, 0.18) !important;
+        opacity: 1 !important;
+    }
+    .dark .fi-ambito-card-andalucia-active {
+        background: linear-gradient(135deg, rgba(0, 122, 51, 0.28) 0%, #1e2029 100%) !important;
+        border: 2px solid #67EA94 !important;
+        box-shadow: 0 4px 20px rgba(0, 122, 51, 0.45), inset 0 0 16px rgba(103, 234, 148, 0.08) !important;
+        opacity: 1 !important;
+    }
+    .fi-ambito-card-andalucia-active:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(0, 122, 51, 0.25) !important;
+    }
+    .dark .fi-ambito-card-andalucia-active:hover {
+        box-shadow: 0 6px 24px rgba(0, 122, 51, 0.55), inset 0 0 20px rgba(103, 234, 148, 0.12) !important;
+    }
+
+    .fi-ambito-card-espana-active {
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.08) 0%, #ffffff 100%) !important;
+        border: 2px solid #dc2626 !important;
+        box-shadow: 0 4px 16px rgba(220, 38, 38, 0.18) !important;
+        opacity: 1 !important;
+    }
+    .dark .fi-ambito-card-espana-active {
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.28) 0%, #1e2029 100%) !important;
+        border: 2px solid #f87171 !important;
+        box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4), inset 0 0 16px rgba(248, 113, 113, 0.08) !important;
+        opacity: 1 !important;
+    }
+    .fi-ambito-card-espana-active:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.25) !important;
+    }
+    .dark .fi-ambito-card-espana-active:hover {
+        box-shadow: 0 6px 24px rgba(220, 38, 38, 0.5), inset 0 0 20px rgba(248, 113, 113, 0.12) !important;
+    }
+
+    .fi-ambito-card-left {
+        display: flex !important;
+        align-items: center !important;
+        gap: 1rem !important;
+        min-width: 0 !important;
+    }
+
+    .fi-ambito-flag-wrapper {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25)) !important;
+    }
+
+    .fi-ambito-card-info {
+        display: flex !important;
+        flex-direction: column !important;
+        min-width: 0 !important;
+        text-align: left !important;
+    }
+
+    .fi-ambito-card-title-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+    }
+
+    .fi-ambito-card-name {
+        font-size: 1.05rem !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        line-height: 1.25 !important;
+    }
+    .dark .fi-ambito-card-name {
+        color: #f8fafc !important;
+    }
+
+    .fi-ambito-card-desc {
+        font-size: 0.78rem !important;
+        color: #64748b !important;
+        line-height: 1.35 !important;
+        margin-top: 0.2rem !important;
+    }
+    .dark .fi-ambito-card-desc {
+        color: #94a3b8 !important;
+    }
+
+    .fi-ambito-card-right {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-end !important;
+        gap: 0.45rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    .fi-ambito-count-badge {
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        font-variant-numeric: tabular-nums !important;
+        padding: 0.2rem 0.55rem !important;
+        border-radius: 0.375rem !important;
+        background: rgba(148, 163, 184, 0.15) !important;
+        color: #64748b !important;
+        white-space: nowrap !important;
+    }
+    .dark .fi-ambito-count-badge {
+        background: rgba(148, 163, 184, 0.12) !important;
+        color: #cbd5e1 !important;
+    }
+    .fi-ambito-count-badge-andalucia {
+        background: rgba(0, 122, 51, 0.18) !important;
+        color: #007A33 !important;
+        font-weight: 800 !important;
+    }
+    .dark .fi-ambito-count-badge-andalucia {
+        background: rgba(103, 234, 148, 0.18) !important;
+        color: #67EA94 !important;
+    }
+    .fi-ambito-count-badge-espana {
+        background: rgba(220, 38, 38, 0.15) !important;
+        color: #dc2626 !important;
+        font-weight: 800 !important;
+    }
+    .dark .fi-ambito-count-badge-espana {
+        background: rgba(248, 113, 113, 0.18) !important;
+        color: #fca5a5 !important;
+    }
+
+    .fi-ambito-switch-pill {
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.04em !important;
+        padding: 0.32rem 0.8rem !important;
+        border-radius: 9999px !important;
+        transition: all 0.15s ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.3rem !important;
+        white-space: nowrap !important;
+    }
+    .fi-ambito-switch-pill-off {
+        background: rgba(148, 163, 184, 0.15) !important;
+        color: #64748b !important;
+        border: 1px dashed rgba(148, 163, 184, 0.4) !important;
+    }
+    .dark .fi-ambito-switch-pill-off {
+        background: rgba(30, 41, 59, 0.5) !important;
+        color: #94a3b8 !important;
+        border-color: rgba(148, 163, 184, 0.25) !important;
+    }
+    .fi-ambito-switch-pill-on-andalucia {
+        background: #007A33 !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 6px rgba(0, 122, 51, 0.35) !important;
+    }
+    .dark .fi-ambito-switch-pill-on-andalucia {
+        background: #15612F !important;
+        color: #ffffff !important;
+        border: 1px solid #67EA94 !important;
+        box-shadow: 0 2px 8px rgba(0, 122, 51, 0.5) !important;
+    }
+    .fi-ambito-switch-pill-on-espana {
+        background: #dc2626 !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 6px rgba(220, 38, 38, 0.35) !important;
+    }
+    .dark .fi-ambito-switch-pill-on-espana {
+        background: #991b1b !important;
+        color: #ffffff !important;
+        border: 1px solid #f87171 !important;
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.5) !important;
+    }
 </style>

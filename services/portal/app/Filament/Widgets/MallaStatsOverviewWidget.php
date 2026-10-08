@@ -177,9 +177,9 @@ class MallaStatsOverviewWidget extends BaseWidget
         $traficoColor = $gateways > 0 ? 'info' : 'gray';
 
         $ambitoLabel = match ($this->ambito) {
-            'espana' => ' (España)',
-            'global' => ' (Toda la Malla)',
-            default => ' (Andalucía)',
+            'ambos', 'global' => ' ('.__('admin.ambitos.andalucia_title').' + '.__('admin.ambitos.espana_title').')',
+            'espana' => ' ('.__('admin.ambitos.espana_title').')',
+            default => ' ('.__('admin.ambitos.andalucia_title').')',
         };
 
         return [
