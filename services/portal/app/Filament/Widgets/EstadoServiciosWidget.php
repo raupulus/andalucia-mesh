@@ -56,7 +56,8 @@ class EstadoServiciosWidget extends Widget
         foreach ($configServicios as $clave => $cfg) {
             $reg = $registros->get($clave);
             $fase = (int) ($cfg['fase'] ?? 1);
-            $nombre = (string) ($cfg['nombre'] ?? $clave);
+            $nombreClave = 'admin.services.'.$clave;
+            $nombre = __($nombreClave) !== $nombreClave ? __($nombreClave) : (string) ($cfg['nombre'] ?? $clave);
 
             $ok = $reg ? (bool) $reg->ok : false;
             $fallos = $reg ? (int) $reg->fallos_seguidos : 0;
@@ -129,8 +130,11 @@ class EstadoServiciosWidget extends Widget
                 ->limit(8)
                 ->get()
                 ->map(function ($t) {
+                    $nombreClave = 'admin.services.'.$t->servicio;
+                    $nombreServicio = __($nombreClave) !== $nombreClave ? __($nombreClave) : $t->servicio;
+
                     return [
-                        'servicio' => $t->servicio,
+                        'servicio' => $nombreServicio,
                         'ok' => (bool) $t->ok,
                         'motivo' => $t->motivo,
                         'hace' => Carbon::parse($t->en)->diffForHumans(),

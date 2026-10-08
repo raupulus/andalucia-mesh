@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Conmutador de Tema Claro / Oscuro (escritorio y móvil)
     const toggleTema = () => {
         const html = document.documentElement;
-        const currentTheme = html.getAttribute('data-theme') || 'light';
+        const currentTheme = html.getAttribute('data-theme') || 'dark';
         const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
         html.setAttribute('data-theme', nextTheme);
         try {
@@ -37,7 +37,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Selector de Idioma con bandera redonda y menú desplegable (RN-48)
+    // 3. Menú Desplegable Extras (Revisa tu nodo, Sugerencias)
+    const btnExtras = document.getElementById('btn-extras-nav');
+    const dropdownExtras = document.getElementById('dropdown-extras-nav');
+    if (btnExtras && dropdownExtras) {
+        btnExtras.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = dropdownExtras.style.display === 'block';
+
+            // Cerrar cualquier dropdown de idioma abierto
+            document.querySelectorAll('.dropdown-idiomas').forEach(d => {
+                d.style.display = 'none';
+            });
+            document.querySelectorAll('.btn-idioma-redondo').forEach(b => {
+                b.setAttribute('aria-expanded', 'false');
+            });
+
+            dropdownExtras.style.display = isOpen ? 'none' : 'block';
+            btnExtras.setAttribute('aria-expanded', !isOpen);
+        });
+    }
+
+    // 4. Selector de Idioma con bandera redonda y menú desplegable (RN-48)
     const setupSelectorIdioma = (btnId, dropdownId) => {
         const btn = document.getElementById(btnId);
         const dropdown = document.getElementById(dropdownId);
@@ -46,6 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const isOpen = dropdown.style.display === 'block';
+
+            // Cerrar dropdown de extras si está abierto
+            if (dropdownExtras) dropdownExtras.style.display = 'none';
+            if (btnExtras) btnExtras.setAttribute('aria-expanded', 'false');
 
             // Cerrar cualquier otro dropdown abierto
             document.querySelectorAll('.dropdown-idiomas').forEach(d => {
@@ -63,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSelectorIdioma('btn-idioma-nav', 'dropdown-idioma-nav');
     setupSelectorIdioma('btn-idioma-movil', 'dropdown-idioma-movil');
 
-    // Cerrar desplegable al hacer clic fuera del selector
+    // Cerrar desplegables al hacer clic fuera del selector
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.selector-idioma-wrapper')) {
             document.querySelectorAll('.dropdown-idiomas').forEach(d => {
@@ -73,9 +98,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 b.setAttribute('aria-expanded', 'false');
             });
         }
+        if (!e.target.closest('.dropdown-extras-wrapper')) {
+            if (dropdownExtras) dropdownExtras.style.display = 'none';
+            if (btnExtras) btnExtras.setAttribute('aria-expanded', 'false');
+        }
     });
 
-    // Cerrar desplegable al pulsar la tecla Escape
+    // Cerrar desplegables al pulsar la tecla Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             document.querySelectorAll('.dropdown-idiomas').forEach(d => {
@@ -84,6 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.btn-idioma-redondo').forEach(b => {
                 b.setAttribute('aria-expanded', 'false');
             });
+            if (dropdownExtras) dropdownExtras.style.display = 'none';
+            if (btnExtras) btnExtras.setAttribute('aria-expanded', 'false');
         }
     });
 

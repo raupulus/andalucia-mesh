@@ -721,5 +721,85 @@ pre code {
   border-width: 0;
 }
 
+/* ==============================================================================
+ * Menú Desplegable Extras (Navegación)
+ * ============================================================================== */
+.dropdown-extras-wrapper {
+  position: relative;
+}
+
+.dropdown-extras-menu {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  box-shadow: var(--sombra-2);
+  z-index: 150;
+  min-width: 200px;
+  padding: 0.35rem 0;
+  overflow: hidden;
+}
+
+.dropdown-extras-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 1rem;
+  text-decoration: none;
+  color: var(--color-texto);
+  font-size: 0.92rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.dropdown-extras-item:hover,
+.dropdown-extras-item.activo {
+  background-color: var(--color-superficie-sutil);
+  color: var(--color-enlace);
+}
+
+.dropdown-extras-item.activo {
+  font-weight: 700;
+}
+
+/* ==============================================================================
+ * Tarjetas Horizontales Destacadas (Portada: Sugerencias, Revisa tu nodo)
+ * ============================================================================== */
+.tarjeta-horizontal-destacada {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tarjeta-horizontal-destacada:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-2);
+}
+
+.tarjeta-quien-detras {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tarjeta-quien-detras:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-2);
+}
+
+@media (max-width: 768px) {
+  .tarjeta-horizontal-destacada {
+    flex-direction: column !important;
+    text-align: center;
+    gap: 1.5rem !important;
+    padding: 1.5rem !important;
+  }
+  .tarjeta-horizontal-img-wrapper {
+    width: 140px !important;
+    height: 140px !important;
+    margin: 0 auto;
+  }
+}
+
+
 
 
