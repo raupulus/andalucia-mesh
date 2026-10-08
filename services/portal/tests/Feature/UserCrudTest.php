@@ -108,6 +108,7 @@ class UserCrudTest extends TestCase
                 'email' => 'nuevo@andalucia.mesh',
                 'role' => User::ROLE_ADMIN,
                 'password' => 'PasswordSegura2026!#',
+                'password_confirmation' => 'PasswordSegura2026!#',
                 'activo' => true,
             ])
             ->call('create')
@@ -123,6 +124,27 @@ class UserCrudTest extends TestCase
         $userCreado = User::where('email', 'nuevo@andalucia.mesh')->first();
         $this->assertNotNull($userCreado);
         $this->assertTrue(Hash::check('PasswordSegura2026!#', $userCreado->password));
+    }
+
+    /**
+     * Al crear usuario se requiere verificar la contraseña dos veces y falla si no coinciden.
+     */
+    public function test_superadmin_crear_usuario_falla_si_confirmacion_password_no_coincide(): void
+    {
+        $superadmin = User::factory()->superadmin()->create(['activo' => true]);
+
+        Livewire::actingAs($superadmin)
+            ->test(CreateUser::class)
+            ->fillForm([
+                'name' => 'Operador Error',
+                'email' => 'error@andalucia.mesh',
+                'role' => User::ROLE_ADMIN,
+                'password' => 'PasswordSegura2026!#',
+                'password_confirmation' => 'PasswordDiferente2026!#',
+                'activo' => true,
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['password']);
     }
 
     /**
@@ -173,6 +195,82 @@ class UserCrudTest extends TestCase
             'name' => 'Nombre Actualizado',
             'role' => User::ROLE_SUPERADMIN,
         ]);
+    }
+
+    /**
+     * Al editar un usuario, si la contraseña se deja vacía, se mantiene la actual.
+     */
+    public function test_superadmin_al_editar_si_password_esta_vacia_se_mantiene_la_misma(): void
+    {
+        $superadmin = User::factory()->superadmin()->create(['activo' => true]);
+
+        $usuario = User::factory()->admin()->create([
+            'email' => 'user-clave@andalucia.mesh',
+            'password' => bcrypt('ClaveOriginal2026!#'),
+            'activo' => true,
+        ]);
+
+        Livewire::actingAs($superadmin)
+            ->test(EditUser::class, ['record' => $usuario->getKey()])
+            ->fillForm([
+                'name' => 'Nombre Cambiado',
+                'password' => '',
+                'password_confirmation' => '',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $usuario->refresh();
+        $this->assertEquals('Nombre Cambiado', $usuario->name);
+        $this->assertTrue(Hash::check('ClaveOriginal2026!#', $usuario->password));
+    }
+
+    /**
+     * Al editar un usuario, se puede cambiar la contraseña verificándola dos veces.
+     */
+    public function test_superadmin_puede_cambiar_password_con_doble_verificacion(): void
+    {
+        $superadmin = User::factory()->superadmin()->create(['activo' => true]);
+
+        $usuario = User::factory()->admin()->create([
+            'email' => 'user-renovado@andalucia.mesh',
+            'password' => bcrypt('ClaveVieja2026!#'),
+            'activo' => true,
+        ]);
+
+        Livewire::actingAs($superadmin)
+            ->test(EditUser::class, ['record' => $usuario->getKey()])
+            ->fillForm([
+                'password' => 'NuevaClaveSegura2026!#',
+                'password_confirmation' => 'NuevaClaveSegura2026!#',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $usuario->refresh();
+        $this->assertTrue(Hash::check('NuevaClaveSegura2026!#', $usuario->password));
+    }
+
+    /**
+     * Al editar un usuario, si la confirmación no coincide, la validación falla.
+     */
+    public function test_superadmin_al_editar_falla_si_confirmacion_password_no_coincide(): void
+    {
+        $superadmin = User::factory()->superadmin()->create(['activo' => true]);
+
+        $usuario = User::factory()->admin()->create([
+            'email' => 'user-fail@andalucia.mesh',
+            'activo' => true,
+        ]);
+
+        Livewire::actingAs($superadmin)
+            ->test(EditUser::class, ['record' => $usuario->getKey()])
+            ->fillForm([
+                'password' => 'NuevaClaveSegura2026!#',
+                'password_confirmation' => 'OtraClaveDistinta2026!#',
+            ])
+            ->call('save')
+            ->assertHasFormErrors(['password']);
     }
 
     /**

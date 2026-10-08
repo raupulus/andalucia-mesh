@@ -144,7 +144,8 @@ class EditProfile extends BaseEditProfile
             ->dehydrated(fn (#[SensitiveParameter] $state): bool => filled($state))
             ->dehydrateStateUsing(fn (#[SensitiveParameter] $state): string => Hash::make($state))
             ->live(debounce: 500)
-            ->same('passwordConfirmation');
+            ->same('passwordConfirmation')
+            ->helperText(__('admin.profile.new_password_helper'));
     }
 
     /**
@@ -157,8 +158,9 @@ class EditProfile extends BaseEditProfile
             ->password()
             ->autocomplete('new-password')
             ->revealable(filament()->arePasswordsRevealable())
-            ->required()
-            ->visible(fn (Get $get): bool => filled($get('password')))
+            ->required(fn (Get $get): bool => filled($get('password')))
+            ->same('password')
+            ->helperText(__('admin.profile.confirm_password_helper'))
             ->dehydrated(false);
     }
 

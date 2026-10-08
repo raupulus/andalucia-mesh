@@ -256,6 +256,49 @@ class PanelOperadorTest extends TestCase
         $this->assertTrue(Hash::check('NuevaClaveSegura2026!', $user->password));
     }
 
+    public function test_operador_en_perfil_si_password_esta_vacia_se_mantiene_la_misma(): void
+    {
+        $user = User::factory()->create([
+            'activo' => true,
+            'name' => 'Nombre Previo',
+            'password' => bcrypt('ClaveSinCambiar2026!'),
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(EditProfile::class)
+            ->fillForm([
+                'name' => 'Nombre Nuevo',
+                'password' => '',
+                'passwordConfirmation' => '',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $user->refresh();
+        $this->assertEquals('Nombre Nuevo', $user->name);
+        $this->assertTrue(Hash::check('ClaveSinCambiar2026!', $user->password));
+    }
+
+    public function test_operador_en_perfil_falla_si_confirmacion_password_no_coincide(): void
+    {
+        $user = User::factory()->create([
+            'activo' => true,
+            'password' => bcrypt('ClaveAntigua2026!'),
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(EditProfile::class)
+            ->fillForm([
+                'currentPassword' => 'ClaveAntigua2026!',
+                'password' => 'NuevaClaveSegura2026!',
+                'passwordConfirmation' => 'ClaveDistinta2026!',
+            ])
+            ->call('save')
+            ->assertHasFormErrors(['password']);
+    }
+
     public function test_operador_puede_eliminar_su_cuenta_con_confirmacion(): void
     {
         $user = User::factory()->create([

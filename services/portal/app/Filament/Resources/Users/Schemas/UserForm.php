@@ -77,18 +77,30 @@ class UserForm
                     ->description(__('admin.users.section_security_desc'))
                     ->columnSpanFull()
                     ->schema([
-                        TextInput::make('password')
-                            ->label(__('admin.users.field_password'))
-                            ->password()
-                            ->revealable()
-                            ->rule(Password::default())
-                            ->required(fn (string $operation): bool => $operation === 'create')
-                            ->dehydrated(fn (#[SensitiveParameter] ?string $state): bool => filled($state))
-                            ->dehydrateStateUsing(fn (#[SensitiveParameter] string $state): string => Hash::make($state))
-                            ->helperText(fn (string $operation): string => $operation === 'edit'
-                                ? __('admin.users.field_password_edit_helper')
-                                : __('admin.users.field_password_create_helper')
-                            ),
+                        Grid::make(['default' => 1, 'sm' => 2])->schema([
+                            TextInput::make('password')
+                                ->label(__('admin.users.field_password'))
+                                ->password()
+                                ->revealable()
+                                ->rule(Password::default())
+                                ->required(fn (string $operation): bool => $operation === 'create')
+                                ->dehydrated(fn (#[SensitiveParameter] ?string $state): bool => filled($state))
+                                ->dehydrateStateUsing(fn (#[SensitiveParameter] string $state): string => Hash::make($state))
+                                ->same('password_confirmation')
+                                ->helperText(fn (string $operation): string => $operation === 'edit'
+                                    ? __('admin.users.field_password_edit_helper')
+                                    : __('admin.users.field_password_create_helper')
+                                ),
+
+                            TextInput::make('password_confirmation')
+                                ->label(__('admin.users.field_password_confirmation'))
+                                ->password()
+                                ->revealable()
+                                ->required(fn (string $operation): bool => $operation === 'create')
+                                ->same('password')
+                                ->dehydrated(false)
+                                ->helperText(__('admin.users.field_password_confirmation_helper')),
+                        ]),
                     ]),
             ]);
     }

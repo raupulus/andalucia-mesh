@@ -184,8 +184,8 @@ Recurso `UserResource` (`/admin/users`, base `portal`):
 - **Superadmin:**
   - Visualización completa en tabla: avatar, nombre, rol (badge destacado), correo electrónico, indicador de cuenta activa y fecha de último acceso.
   - Filtros por rol y estado activo.
-  - Creación de nuevos usuarios (`CreateUser`) con nombre, correo, rol, contraseña segura y subida de avatar.
-  - Edición de cuentas existentes (`EditUser`) con actualización de datos, cambio opcional de contraseña y reasignación de rol.
+  - Creación de nuevos usuarios (`CreateUser`) con nombre, correo, rol, contraseña con doble verificación obligatoria (`password` y `password_confirmation`) y subida de avatar.
+  - Edición de cuentas existentes (`EditUser`) con actualización de datos, cambio de contraseña con doble verificación obligatoria (`password` y `password_confirmation`, conservándose intacta la contraseña existente si se deja vacía) y reasignación de rol.
   - Eliminación de usuarios con salvaguarda que impide la autoeliminación de la cuenta propia para evitar bloqueos accidentales.
 - **Admin (acceso restringido para operadores estándar):**
   - Acceso de solo lectura al listado (`ListUsers`) para constancia de operadores existentes.
@@ -196,7 +196,7 @@ Recurso `UserResource` (`/admin/users`, base `portal`):
   - Cualquier intento de acceso directo por URL a `/admin/users/create` o `/admin/users/{id}/edit` por parte de un usuario con rol `admin` devuelve inmediatamente `403 Forbidden`.
 - **Comando de consola:** `php artisan operador:crear {email} {nombre} {--password=} {--role=admin}` permite dar de alta o actualizar operadores desde el servidor, admitiendo la asignación explícita de `--role=superadmin` o `--role=admin`.
 
-La página de edición de perfil personal (`/admin/profile`, `EditProfile`) utiliza un modal amplio para escritorio (`Width::FourExtraLarge`, 56rem / 896px) en lugar del ancho compacto de login, con avatar circular centrado horizontalmente y distribución en dos columnas (`sm: 2`) para optimizar la ergonomía en pantallas grandes.
+La página de edición de perfil personal (`/admin/profile`, `EditProfile`) utiliza un modal amplio para escritorio (`Width::FourExtraLarge`, 56rem / 896px) en lugar del ancho compacto de login, con avatar circular centrado horizontalmente y distribución en dos columnas (`sm: 2`) para optimizar la ergonomía en pantallas grandes. El cambio de contraseña personal incorpora campos visibles simultáneos para la nueva clave y su confirmación idéntica obligatoria, preservando la clave actual si ambos campos se dejan en blanco.
 
 ### Páginas y Artículos (`CustomPageResource`)
 
