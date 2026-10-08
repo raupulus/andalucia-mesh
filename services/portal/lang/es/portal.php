@@ -648,4 +648,14 @@ return [
         'keywords_label' => 'Temas y palabras clave:',
         'share' => 'Compartir',
     ],
+
+    'testing_notice' => [
+        'aria_label' => 'Aviso de entorno en pruebas',
+        'badge' => 'Entorno en pruebas',
+        'title' => 'Plataforma en fase de pruebas',
+        'message' => 'Esta plataforma se encuentra en fase activa de desarrollo y pruebas. Determinados datos, nodos y estadísticas mostrados son de prueba o pueden no estar 100% verificados al haberse cargado rápidamente para validar el sistema.',
+        'dismiss' => 'Entendido',
+        'close' => 'Minimizar aviso',
+        'reopen' => 'Aviso de pruebas',
+    ],
 ];

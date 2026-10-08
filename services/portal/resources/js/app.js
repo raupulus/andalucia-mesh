@@ -143,4 +143,50 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.replace(targetUrl.toString());
         }
     } catch (e) {}
+
+    // 5. Gestión del aviso flotante global de entorno en pruebas (x-aviso-pruebas)
+    const avisoContenido = document.getElementById('aviso-pruebas-contenido');
+    const btnMinimizar = document.getElementById('btn-minimizar-aviso');
+    const btnEntendido = document.getElementById('btn-entendido-aviso');
+    const btnExpandir = document.getElementById('btn-expandir-aviso');
+
+    if (avisoContenido && btnExpandir) {
+        const STORAGE_KEY = 'snm_aviso_pruebas_minimizado';
+
+        const aplicarEstado = (minimizado) => {
+            if (minimizado) {
+                avisoContenido.style.display = 'none';
+                btnExpandir.style.display = 'inline-flex';
+            } else {
+                avisoContenido.style.display = 'flex';
+                btnExpandir.style.display = 'none';
+            }
+        };
+
+        // Comprobar preferencia previa en sessionStorage
+        let estaMinimizado = false;
+        try {
+            estaMinimizado = sessionStorage.getItem(STORAGE_KEY) === '1';
+        } catch (e) {}
+
+        aplicarEstado(estaMinimizado);
+
+        const minimizar = () => {
+            aplicarEstado(true);
+            try {
+                sessionStorage.setItem(STORAGE_KEY, '1');
+            } catch (e) {}
+        };
+
+        const expandir = () => {
+            aplicarEstado(false);
+            try {
+                sessionStorage.removeItem(STORAGE_KEY);
+            } catch (e) {}
+        };
+
+        if (btnMinimizar) btnMinimizar.addEventListener('click', minimizar);
+        if (btnEntendido) btnEntendido.addEventListener('click', minimizar);
+        btnExpandir.addEventListener('click', expandir);
+    }
 });

@@ -129,6 +129,8 @@
 
     <x-pie />
 
+    <x-aviso-pruebas />
+
     {{ $scripts ?? '' }}
 </body>
 </html>

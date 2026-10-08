@@ -648,4 +648,14 @@ return [
         'keywords_label' => 'Topics and keywords:',
         'share' => 'Share',
     ],
+
+    'testing_notice' => [
+        'aria_label' => 'Testing environment notice',
+        'badge' => 'Testing environment',
+        'title' => 'Platform in testing phase',
+        'message' => 'This platform is currently under active development and testing. Some data, nodes, and statistics shown are for testing purposes or may not be 100% verified, as they were loaded quickly to validate system features.',
+        'dismiss' => 'Understood',
+        'close' => 'Minimize notice',
+        'reopen' => 'Testing notice',
+    ],
 ];

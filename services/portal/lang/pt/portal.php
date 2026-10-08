@@ -647,4 +647,14 @@ return [
         'keywords_label' => 'Tópicos e palavras-chave:',
         'share' => 'Partilhar',
     ],
+
+    'testing_notice' => [
+        'aria_label' => 'Aviso de ambiente de testes',
+        'badge' => 'Ambiente de testes',
+        'title' => 'Plataforma em fase de testes',
+        'message' => 'Esta plataforma encontra-se em fase ativa de desenvolvimento e testes. Determinados dados, nós e estatísticas apresentados são de teste ou podem não estar 100% verificados, por terem sido carregados rapidamente para validar o sistema.',
+        'dismiss' => 'Compreendido',
+        'close' => 'Minimizar aviso',
+        'reopen' => 'Aviso de testes',
+    ],
 ];
