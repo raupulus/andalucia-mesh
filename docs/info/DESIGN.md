@@ -116,7 +116,7 @@ Segmentos separados por un hueco de 2 px del color de la superficie. Leyenda sie
 | Ids de nodo (`!a1b2c3d4`) | Ubuntu Mono | 400 | 14/22 |
 
 - Ubuntu en títulos (redondeada, combina con el trazo del logo); Inter para texto largo por legibilidad.
-- Fuentes **autoalojadas** (nada de cargarlas desde servidores de terceros), con subconjunto latino y `font-display: swap`.
+- Fuentes **autoalojadas** en local bajo `public/fonts/` (`ubuntu-500.woff2`, `ubuntu-700.woff2`, `inter-variable.woff2`, `ubuntu-mono-400.woff2`, `ubuntu-mono-700.woff2`), con subconjunto latino, `font-display: swap` y declaradas mediante `@font-face` en `app.css`. Cero peticiones o conexiones a Google Fonts o servicios de terceros.
 - Longitud de línea máxima: 68 caracteres. En modo oscuro no se usa peso inferior a 400 (el texto fino se "come" sobre fondo oscuro).
 
 ## 6. Espaciado y rejilla

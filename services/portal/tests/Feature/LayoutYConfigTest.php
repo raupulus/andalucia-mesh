@@ -61,4 +61,31 @@ class LayoutYConfigTest extends TestCase
             $this->assertStringContainsString($token, $cssContent, "El token {$token} debe estar definido en app.css");
         }
     }
+
+    /**
+     * Verifica que las tipografías oficiales autoalojadas estén presentes en public/fonts/ y declaradas en app.css (DESIGN.md §5, AUD-UI-01).
+     */
+    public function test_tipografias_autoalojadas_presentes_y_declaradas(): void
+    {
+        $fuentesRequeridas = [
+            'ubuntu-500.woff2',
+            'ubuntu-700.woff2',
+            'inter-variable.woff2',
+            'ubuntu-mono-400.woff2',
+            'ubuntu-mono-700.woff2',
+        ];
+
+        foreach ($fuentesRequeridas as $fuente) {
+            $ruta = public_path("fonts/{$fuente}");
+            $this->assertFileExists($ruta, "El fichero tipográfico {$fuente} debe existir en public/fonts/");
+            $this->assertGreaterThan(5000, filesize($ruta), "El fichero {$fuente} debe ser un archivo binario válido");
+        }
+
+        $cssContent = (string) file_get_contents(resource_path('css/app.css'));
+        $this->assertStringContainsString("@font-face", $cssContent);
+        $this->assertStringContainsString("font-family: 'Ubuntu'", $cssContent);
+        $this->assertStringContainsString("font-family: 'Inter'", $cssContent);
+        $this->assertStringContainsString("font-family: 'Ubuntu Mono'", $cssContent);
+        $this->assertStringContainsString("--font-titulos", $cssContent);
+    }
 }
