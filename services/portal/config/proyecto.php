@@ -94,6 +94,7 @@ return [
             'url' => 'https://'.env('MESHVIEW_DOMAIN', 'meshview.'.$projectDomain),
             'imagen' => '/img/servicios/meshview.webp',
             'servicio_clave' => 'meshview',
+            'target_blank' => true,
         ],
         [
             'id' => 'potatomesh',
@@ -102,6 +103,7 @@ return [
             'url' => 'https://potato.'.$projectDomain,
             'imagen' => '/img/servicios/potatomesh.webp',
             'servicio_clave' => 'potatomesh',
+            'target_blank' => true,
         ],
         [
             'id' => 'rankings',
@@ -110,6 +112,7 @@ return [
             'url' => '/rankings',
             'imagen' => '/img/servicios/rankings.webp',
             'servicio_clave' => null,
+            'target_blank' => false,
         ],
     ],
 

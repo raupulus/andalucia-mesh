@@ -102,10 +102,95 @@ class GestionRoutersTest extends TestCase
             ->assertSuccessful()
             ->assertSee(__('admin.gestion_routers.tab_roles'))
             ->assertSee(__('admin.gestion_routers.tab_favorites'))
+            ->assertSee(__('admin.gestion_routers.tab_blocked'))
             ->assertSee(__('admin.gestion_routers.tab_poll'))
             ->assertSee(__('admin.gestion_routers.tab_unicast'))
             ->assertSee(__('admin.gestion_routers.tab_maintenance'))
             ->assertSee('SEV1')
             ->assertSee('!aabbccdd');
+    }
+
+    /**
+     * El método Livewire updateRouterFavoriteNode añade y quita favoritos del router en base de datos.
+     */
+    public function test_actualizar_favorito_de_router_mediante_livewire(): void
+    {
+        $user = User::factory()->create();
+
+        $router = CoordinatedRouter::create([
+            'node_id' => '!63760c00',
+            'short_name' => 'CC05',
+            'long_name' => 'Candidato05',
+            'role' => 'ROUTER',
+            'province' => 'ES-CA',
+            'status' => CoordinatedRouter::STATUS_MANAGED,
+            'favorite_nodes' => [],
+        ]);
+
+        $testNodeData = [
+            'short_name' => 'TST1',
+            'long_name' => 'Nodo Test',
+            'role' => 'ROUTER',
+        ];
+
+        // Añadir favorito
+        Livewire::actingAs($user)
+            ->test(GestionRouters::class)
+            ->call('updateRouterFavoriteNode', '!63760c00', '!5f3a3a29', true, $testNodeData);
+
+        $router->refresh();
+        $this->assertCount(1, $router->favorite_nodes);
+        $this->assertSame('!5f3a3a29', $router->favorite_nodes[0]['hex']);
+        $this->assertSame('TST1', $router->favorite_nodes[0]['short_name']);
+
+        // Eliminar favorito
+        Livewire::actingAs($user)
+            ->test(GestionRouters::class)
+            ->call('updateRouterFavoriteNode', '!63760c00', '!5f3a3a29', false);
+
+        $router->refresh();
+        $this->assertCount(0, $router->favorite_nodes);
+    }
+
+    /**
+     * El método Livewire updateRouterBlockedNode añade y quita nodos bloqueados del router en base de datos.
+     */
+    public function test_actualizar_bloqueado_de_router_mediante_livewire(): void
+    {
+        $user = User::factory()->create();
+
+        $router = CoordinatedRouter::create([
+            'node_id' => '!63760c00',
+            'short_name' => 'CC05',
+            'long_name' => 'Candidato05',
+            'role' => 'ROUTER',
+            'province' => 'ES-CA',
+            'status' => CoordinatedRouter::STATUS_MANAGED,
+            'blocked_nodes' => [],
+        ]);
+
+        $testNodeData = [
+            'short_name' => 'SPAM',
+            'long_name' => 'Spam Node',
+            'role' => 'CLIENT',
+        ];
+
+        // Añadir nodo bloqueado
+        Livewire::actingAs($user)
+            ->test(GestionRouters::class)
+            ->call('updateRouterBlockedNode', '!63760c00', '!bad0cafe', true, $testNodeData);
+
+        $router->refresh();
+        $this->assertCount(1, $router->blocked_nodes);
+        $this->assertSame('!bad0cafe', $router->blocked_nodes[0]['hex']);
+        $this->assertSame('SPAM', $router->blocked_nodes[0]['short_name']);
+
+        // Desbloquear nodo
+        Livewire::actingAs($user)
+            ->test(GestionRouters::class)
+            ->call('updateRouterBlockedNode', '!63760c00', '!bad0cafe', false);
+
+        $router->refresh();
+        $this->assertCount(0, $router->blocked_nodes);
     }
 }

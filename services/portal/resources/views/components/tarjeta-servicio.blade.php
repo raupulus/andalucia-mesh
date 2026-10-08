@@ -6,6 +6,7 @@
     'imagen' => null,
     'servicioClave' => null,
     'estado' => 'ok',
+    'targetBlank' => false,
 ])
 
 @php
@@ -15,12 +16,15 @@
         if ($tarjetaId === 'meshview') {
             $titulo = __('portal.services.meshview_title');
             $descripcion = __('portal.services.meshview_desc');
+            $targetBlank = true;
         } elseif ($tarjetaId === 'potatomesh') {
             $titulo = __('portal.services.potatomesh_title');
             $descripcion = __('portal.services.potatomesh_desc');
+            $targetBlank = true;
         } elseif ($tarjetaId === 'rankings') {
             $titulo = __('portal.services.rankings_title');
             $descripcion = __('portal.services.rankings_desc');
+            $targetBlank = false;
         } else {
             $titulo = $tarjeta['titulo'] ?? $titulo;
             $descripcion = $tarjeta['descripcion'] ?? $descripcion;
@@ -34,10 +38,13 @@
         $imagen = $tarjeta['imagen'] ?? $imagen;
         $servicioClave = $tarjeta['servicio_clave'] ?? $servicioClave;
         $estado = $tarjeta['estado'] ?? $estado;
+        if (isset($tarjeta['target_blank'])) {
+            $targetBlank = (bool) $tarjeta['target_blank'];
+        }
     }
 @endphp
 
-<a href="{{ $url }}" class="tarjeta tarjeta-hover" style="display: flex; flex-direction: column; text-decoration: none; color: inherit; height: 100%;">
+<a href="{{ $url }}" @if($targetBlank) target="_blank" rel="noopener noreferrer" @endif class="tarjeta tarjeta-hover" style="display: flex; flex-direction: column; text-decoration: none; color: inherit; height: 100%;">
     <!-- Zona de Imagen 16:9 con fondo suave de acento -->
     <div style="aspect-ratio: 16 / 9; background-color: var(--color-acento-suave); display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 1px solid var(--color-borde); overflow: hidden;">
         @if($imagen)

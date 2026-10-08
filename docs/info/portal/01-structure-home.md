@@ -25,7 +25,7 @@ Navegación principal: Inicio · Configura tu nodo · MQTT (`/conecta-tu-gateway
 
 1. Cabecera común con logotipo, selector de idioma, navegación y desplegable de Extras.
 2. Presentación institucional: `.portada-hero` con disposición horizontal (texto a la izquierda, logotipo de 130px a la derecha) en escritorio, y disposición vertical equilibrada (`flex-direction: column-reverse`, logotipo centrado arriba, título H1 centrado con escala fluida `clamp(1.85rem, 6vw, 2.35rem)` y texto lead centrado) en pantallas móviles (<= 768px).
-3. **Tres tarjetas** en este orden: MeshView (`https://meshview.${PROJECT_DOMAIN}`), PotatoMesh (`https://potato.${PROJECT_DOMAIN}`), Consumo y nodos en peligro (`/rankings`). Cada una: imagen 16:9, nombre, descripción de 2 líneas como máximo, toda la tarjeta es el enlace, misma pestaña. Fila de tres en escritorio, columna en móvil.
+3. **Tres tarjetas** en este orden: MeshView (`https://meshview.${PROJECT_DOMAIN}`), PotatoMesh (`https://potato.${PROJECT_DOMAIN}`), Consumo y nodos en peligro (`/rankings`). Cada una: imagen 16:9, nombre, descripción de 2 líneas como máximo, toda la tarjeta es el enlace. MeshView y PotatoMesh abren en nueva pestaña (`target="_blank" rel="noopener noreferrer"`) para no sacar al usuario de la web del portal; Rankings abre en la misma pestaña. Fila de tres en escritorio, columna en móvil.
 4. Mapa de Andalucía (`02-province-map.md`) con selector temporal (24h / 7d) y tabla accesible de nodos y saturación.
 5. **Tarjeta horizontal comunitaria: ¡Envía tu Sugerencia!**, con ilustración corporativa en formato 1:1 a la izquierda, descripción de ideas y botón verde del diseño centrado enlazando a `/sugerencias`.
 6. Configura tu nodo, resumen (`03-node-setup-guide.md`).

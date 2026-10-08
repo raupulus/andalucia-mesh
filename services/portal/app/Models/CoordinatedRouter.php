@@ -82,6 +82,8 @@ class CoordinatedRouter extends Model
         'approved',
         'is_gateway',
         'hw_model',
+        'favorite_nodes',
+        'blocked_nodes',
         'notes',
         'last_seen_at',
     ];
@@ -97,6 +99,8 @@ class CoordinatedRouter extends Model
             'status' => 'string',
             'approved' => 'boolean',
             'is_gateway' => 'boolean',
+            'favorite_nodes' => 'array',
+            'blocked_nodes' => 'array',
             'last_seen_at' => 'datetime',
         ];
     }

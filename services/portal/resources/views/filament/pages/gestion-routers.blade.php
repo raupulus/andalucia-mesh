@@ -1,4 +1,7 @@
 <x-filament-panels::page>
+    <script>
+        window.portalKnownNodes = @js($allKnownNodes);
+    </script>
     <script src="/js/mesh-admin.bundle.js"></script>
 
     <div x-data="meshAdmin()" class="fi-router-admin-page">
@@ -439,6 +442,137 @@
             }
             .dark .fi-ra-badge-new {
                 color: #FCD34D;
+            }
+            .fi-ra-badge-blocked {
+                background-color: rgba(239, 68, 68, 0.15);
+                color: #B91C1C;
+                border: 1px solid rgba(239, 68, 68, 0.35);
+            }
+            .dark .fi-ra-badge-blocked {
+                background-color: rgba(248, 113, 113, 0.18);
+                color: #FCA5A5;
+                border-color: rgba(248, 113, 113, 0.4);
+            }
+            .fi-ra-badge-favorite {
+                background-color: rgba(245, 158, 11, 0.15);
+                color: #B45309;
+                border: 1px solid rgba(245, 158, 11, 0.35);
+            }
+            .dark .fi-ra-badge-favorite {
+                background-color: rgba(251, 191, 36, 0.18);
+                color: #FCD34D;
+                border-color: rgba(251, 191, 36, 0.4);
+            }
+
+            /* Contenedores de ítems activos y tablas interactivas */
+            .fi-ra-active-items-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 0.85rem;
+            }
+            @media (min-width: 640px) {
+                .fi-ra-active-items-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+            @media (min-width: 1024px) {
+                .fi-ra-active-items-grid {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+            }
+            .fi-ra-active-item-card {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 0.75rem;
+                padding: 0.85rem 1rem;
+                background-color: #FFFFFF;
+                border: 1.5px solid #E0E1EB;
+                border-radius: 0.75rem;
+                transition: all 0.15s ease;
+            }
+            .dark .fi-ra-active-item-card {
+                background-color: #1F2029;
+                border-color: #3D3E4D;
+            }
+            .fi-ra-active-item-card:hover {
+                border-color: #007A33;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            }
+            .dark .fi-ra-active-item-card:hover {
+                border-color: #67EA94;
+            }
+
+            .fi-ra-table-container {
+                width: 100%;
+                overflow-x: auto;
+                border: 1.5px solid #E0E1EB;
+                border-radius: 0.75rem;
+                background-color: #FFFFFF;
+            }
+            .dark .fi-ra-table-container {
+                border-color: #3D3E4D;
+                background-color: #1F2029;
+            }
+            .fi-ra-table {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+                font-size: 0.825rem;
+            }
+            .fi-ra-table th {
+                padding: 0.85rem 1.15rem;
+                background-color: #F8FAFC;
+                border-bottom: 1.5px solid #E0E1EB;
+                font-weight: 700;
+                color: #515267;
+                text-transform: uppercase;
+                font-size: 0.725rem;
+                letter-spacing: 0.05em;
+            }
+            .dark .fi-ra-table th {
+                background-color: #181920;
+                border-bottom-color: #3D3E4D;
+                color: #9FA0B4;
+            }
+            .fi-ra-table td {
+                padding: 0.85rem 1.15rem;
+                border-bottom: 1px solid #F1F2F6;
+                vertical-align: middle;
+            }
+            .dark .fi-ra-table td {
+                border-bottom-color: #2D2E3C;
+            }
+            .fi-ra-table tr:last-child td {
+                border-bottom: none;
+            }
+            .fi-ra-table tr:hover td {
+                background-color: #F8FAFC;
+            }
+            .dark .fi-ra-table tr:hover td {
+                background-color: rgba(255, 255, 255, 0.02);
+            }
+
+            .fi-ra-search-input-wrap {
+                position: relative;
+                display: flex;
+                align-items: center;
+                width: 100%;
+            }
+            .fi-ra-search-icon {
+                position: absolute;
+                left: 1rem;
+                font-size: 1.1rem;
+                pointer-events: none;
+                color: #8D8EA6;
+            }
+            .fi-ra-search-input {
+                padding-left: 2.75rem !important;
+            }
+            .fi-ra-btn-sm {
+                padding: 0.45rem 0.9rem;
+                font-size: 0.8rem;
+                border-radius: 0.45rem;
             }
 
             /* Barra de Pestañas elegante y oxigenada */
@@ -1231,6 +1365,13 @@
                 <button type="button" @click="activeTab = 'favoritos'" :class="activeTab === 'favoritos' ? 'active' : ''" class="fi-ra-tab-button">
                     <span>⭐</span>
                     <span>{{ __('admin.gestion_routers.tab_favorites') }}</span>
+                    <span x-show="getActiveRouterFavorites().length > 0" class="fi-ra-badge fi-ra-badge-managed" style="font-size: 0.7rem; padding: 0.15rem 0.45rem;" x-text="getActiveRouterFavorites().length"></span>
+                </button>
+
+                <button type="button" @click="activeTab = 'bloqueados'" :class="activeTab === 'bloqueados' ? 'active' : ''" class="fi-ra-tab-button">
+                    <span>🚫</span>
+                    <span>{{ __('admin.gestion_routers.tab_blocked') }}</span>
+                    <span x-show="getActiveRouterBlocked().length > 0" class="fi-ra-badge fi-ra-badge-blocked" style="font-size: 0.7rem; padding: 0.15rem 0.45rem;" x-text="getActiveRouterBlocked().length"></span>
                 </button>
 
                 <button type="button" @click="activeTab = 'sondeo'" :class="activeTab === 'sondeo' ? 'active' : ''" class="fi-ra-tab-button">
@@ -1336,34 +1477,193 @@
 
                 {{-- PESTAÑA 2: FAVORITOS --}}
                 <div x-show="activeTab === 'favoritos'" class="space-y-6">
-                    <div>
-                        <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                            <span>⭐</span> {{ __('admin.gestion_routers.favorites_title') }}
-                        </h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                            {{ __('admin.gestion_routers.favorites_desc') }} Los routers priorizan la retransmisión de sus favoritos y facilitan la administración remota.
-                        </p>
-                    </div>
-
-                    {{-- Nota de contexto sobre favoritos --}}
-                    <div class="p-3 rounded-lg text-xs" style="background-color: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); color: #1E40AF;">
-                        <span>ℹ️</span> <strong>Nodos Favoritos:</strong> Los repetidores y routers priorizan la retransmisión de paquetes y telemetría de sus nodos favoritos en la malla LoRa.
-                    </div>
-
-                    <div class="fi-ra-form-grid" style="grid-template-columns: 2fr 1fr;">
-                        <div class="fi-ra-form-group">
-                            <label class="fi-ra-label">{{ __('admin.gestion_routers.favorite_input_label') }}</label>
-                            <input type="text" x-model="favoriteNodeInput" placeholder="!2df0a1b2 o ID decimal" class="fi-ra-input font-mono" />
+                    <div class="flex items-start justify-between flex-wrap gap-4">
+                        <div>
+                            <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <span>⭐</span> {{ __('admin.gestion_routers.favorites_title') }}
+                            </h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed max-w-2xl">
+                                {{ __('admin.gestion_routers.favorites_desc') }}
+                            </p>
                         </div>
 
-                        <div style="display: flex; gap: 0.75rem;">
-                            <button type="button" @click="applyRemoteFavorite('add')" :disabled="favoriteSending || !favoriteNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-primary" style="flex: 1;">
-                                <span>⭐</span> {{ __('admin.gestion_routers.btn_add_favorite') }}
-                            </button>
+                        {{-- Indicador del router objetivo activo --}}
+                        <div>
+                            <template x-if="getActiveRouterHex()">
+                                <div class="flex items-center gap-2 text-xs font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-lg">
+                                    <span>🎯 Router activo:</span>
+                                    <span class="font-mono font-bold" x-text="getActiveRouterHex()"></span>
+                                    <template x-if="selectedRouterName">
+                                        <span class="opacity-80" x-text="`· ${selectedRouterName}`"></span>
+                                    </template>
+                                </div>
+                            </template>
+                            <template x-if="!getActiveRouterHex()">
+                                <div class="flex items-center gap-2 text-xs text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-lg">
+                                    <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
 
-                            <button type="button" @click="applyRemoteFavorite('remove')" :disabled="favoriteSending || !favoriteNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-danger" style="flex: 1;">
-                                <span>🗑️</span> {{ __('admin.gestion_routers.btn_remove_favorite') }}
-                            </button>
+                    {{-- 1. Nodos favoritos configurados en este router --}}
+                    <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                <span>⭐</span>
+                                <span>{{ __('admin.gestion_routers.current_favorites_heading') }}</span>
+                                <span class="font-mono px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold"
+                                      x-text="`${getActiveRouterFavorites().length} configurados`"></span>
+                            </div>
+                        </div>
+
+                        {{-- Estado vacío --}}
+                        <template x-if="getActiveRouterFavorites().length === 0">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 py-3 text-center italic bg-white dark:bg-gray-900/40 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
+                                {{ __('admin.gestion_routers.no_favorites_registered') }}
+                            </div>
+                        </template>
+
+                        {{-- Rejilla de tarjetas de nodos favoritos actuales --}}
+                        <div x-show="getActiveRouterFavorites().length > 0" class="fi-ra-active-items-grid">
+                            <template x-for="(fav, fIdx) in getActiveRouterFavorites()" :key="fav.hex || fav">
+                                <div class="fi-ra-active-item-card">
+                                    <div class="flex items-center gap-3 overflow-hidden">
+                                        <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm font-bold shrink-0">
+                                            ⭐
+                                        </div>
+                                        <div class="overflow-hidden">
+                                            <div class="font-bold text-xs truncate text-gray-900 dark:text-gray-100" x-text="fav.shortName || (fav.hex || fav)"></div>
+                                            <div class="font-mono text-[11px] text-emerald-700 dark:text-emerald-400 truncate" x-text="fav.hex || fav"></div>
+                                            <template x-if="fav.longName && fav.longName !== fav.hex">
+                                                <div class="text-[10px] text-gray-500 truncate" x-text="fav.longName"></div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <button type="button" @click="applyRemoteFavorite(fav, 'remove')" :disabled="favoriteSending || connectionStatus !== 'connected'"
+                                            class="fi-ra-btn fi-ra-btn-danger fi-ra-btn-sm shrink-0" title="Quitar este nodo de favoritos del router">
+                                        <span>🗑️</span>
+                                        <span class="hidden sm:inline">Quitar</span>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    {{-- 2. Buscador en tiempo real de nodos del catálogo --}}
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                    <span>🔍</span> <span>Catálogo de Nodos de la Red</span>
+                                </h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    Escribe el nombre o ID para filtrar los nodos conocidos o introducir un nodo manual y añadirlo a favoritos.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="fi-ra-search-input-wrap">
+                            <span class="fi-ra-search-icon">🔍</span>
+                            <input type="text" x-model="searchFavoriteQuery" placeholder="{{ __('admin.gestion_routers.search_nodes_placeholder') }}" class="fi-ra-input fi-ra-search-input" />
+                        </div>
+
+                        {{-- Tabla de resultados de búsqueda --}}
+                        <div class="fi-ra-table-container">
+                            <table class="fi-ra-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nodo / Identidad</th>
+                                        <th>Provincia / Red</th>
+                                        <th>Rol</th>
+                                        <th>Estado en Router</th>
+                                        <th style="text-align: right;">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-if="getFilteredFavoriteCandidates().length === 0">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center; color: #8D8EA6; padding: 2rem;">
+                                                No se encontraron nodos coincidentes. Puedes introducir un Node ID arriba en el buscador o en el campo manual inferior.
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <template x-for="c in getFilteredFavoriteCandidates()" :key="c.hex">
+                                        <tr>
+                                            <td>
+                                                <div class="font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
+                                                    <span x-text="c.shortName || c.hex"></span>
+                                                    <template x-if="c.isCustom">
+                                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 font-mono">Manual</span>
+                                                    </template>
+                                                </div>
+                                                <div class="font-mono text-xs text-emerald-700 dark:text-emerald-400" x-text="c.hex"></div>
+                                                <template x-if="c.longName && c.longName !== c.hex">
+                                                    <div class="text-[11px] text-gray-500 dark:text-gray-400 truncate max-w-xs" x-text="c.longName"></div>
+                                                </template>
+                                            </td>
+                                            <td>
+                                                <template x-if="c.province">
+                                                    <span class="fi-ra-badge fi-ra-badge-known" x-text="c.province"></span>
+                                                </template>
+                                                <template x-if="!c.province">
+                                                    <span class="text-xs text-gray-500">Malla Local</span>
+                                                </template>
+                                            </td>
+                                            <td>
+                                                <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" x-text="c.role"></span>
+                                            </td>
+                                            <td>
+                                                <template x-if="isNodeFavoriteInActiveRouter(c.hex)">
+                                                    <span class="fi-ra-badge fi-ra-badge-favorite">⭐ En Favoritos</span>
+                                                </template>
+                                                <template x-if="!isNodeFavoriteInActiveRouter(c.hex) && isNodeBlockedInActiveRouter(c.hex)">
+                                                    <span class="fi-ra-badge fi-ra-badge-blocked">🚫 Bloqueado</span>
+                                                </template>
+                                                <template x-if="!isNodeFavoriteInActiveRouter(c.hex) && !isNodeBlockedInActiveRouter(c.hex)">
+                                                    <span class="text-xs text-gray-400">Normal</span>
+                                                </template>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <template x-if="isNodeFavoriteInActiveRouter(c.hex)">
+                                                    <button type="button" @click="applyRemoteFavorite(c, 'remove')" :disabled="favoriteSending || connectionStatus !== 'connected'"
+                                                            class="fi-ra-btn fi-ra-btn-danger fi-ra-btn-sm" title="Quitar de favoritos">
+                                                        <span>🗑️ Quitar</span>
+                                                    </button>
+                                                </template>
+                                                <template x-if="!isNodeFavoriteInActiveRouter(c.hex)">
+                                                    <button type="button" @click="applyRemoteFavorite(c, 'add')" :disabled="favoriteSending || connectionStatus !== 'connected'"
+                                                            class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm" title="Añadir este nodo a favoritos del router">
+                                                        <span>➕ Añadir</span>
+                                                    </button>
+                                                </template>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {{-- 3. Entrada manual rápida directa --}}
+                    <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                            <span>⌨️</span> <span>O introduce directamente un Node ID manual para añadir o quitar:</span>
+                        </div>
+                        <div class="fi-ra-form-grid" style="grid-template-columns: 2fr 1fr;">
+                            <div class="fi-ra-form-group">
+                                <input type="text" x-model="favoriteNodeInput" placeholder="!2df0a1b2 o ID decimal" class="fi-ra-input font-mono" />
+                            </div>
+
+                            <div style="display: flex; gap: 0.75rem;">
+                                <button type="button" @click="applyRemoteFavorite(favoriteNodeInput, 'add')" :disabled="favoriteSending || !favoriteNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-primary" style="flex: 1;">
+                                    <span>⭐</span> {{ __('admin.gestion_routers.btn_add_favorite') }}
+                                </button>
+
+                                <button type="button" @click="applyRemoteFavorite(favoriteNodeInput, 'remove')" :disabled="favoriteSending || !favoriteNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-danger" style="flex: 1;">
+                                    <span>🗑️</span> {{ __('admin.gestion_routers.btn_remove_favorite') }}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -1373,19 +1673,205 @@
                     <div x-show="connectionStatus === 'connected' && !selectedRouterNodeNum && !manualNodeInput" class="text-xs mt-1 flex items-center gap-1.5" style="color: #D97706;">
                         <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
                     </div>
+                </div>
 
-                    {{-- Lista de favoritos manipulados en la sesión --}}
-                    <div x-show="sessionFavorites.length > 0" style="padding-top: 1rem; border-top: 1px solid #E0E1EB;">
-                        <div class="fi-ra-label" style="margin-bottom: 0.6rem;">{{ __('admin.gestion_routers.session_favorites_heading') }}</div>
-                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                            <template x-for="fav in sessionFavorites" :key="fav">
-                                <span class="fi-ra-badge fi-ra-badge-managed font-mono cursor-pointer" style="padding: 0.4rem 0.75rem;" title="Haz clic para cargar este ID en el campo de texto" @click="favoriteNodeInput = fav">
-                                    <span>⭐</span>
-                                    <span x-text="fav"></span>
-                                    <button type="button" @click.stop="favoriteNodeInput = fav; applyRemoteFavorite('remove')" style="margin-left: 0.5rem; background: none; border: none; cursor: pointer; color: #E5484D; font-weight: bold;" title="Quitar de favoritos">×</button>
-                                </span>
+                {{-- PESTAÑA 3: BLOQUEADOS / IGNORADOS --}}
+                <div x-show="activeTab === 'bloqueados'" class="space-y-6">
+                    <div class="flex items-start justify-between flex-wrap gap-4">
+                        <div>
+                            <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <span>🚫</span> {{ __('admin.gestion_routers.blocked_title') }}
+                            </h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed max-w-2xl">
+                                {{ __('admin.gestion_routers.blocked_desc') }}
+                            </p>
+                        </div>
+
+                        {{-- Indicador del router objetivo activo --}}
+                        <div>
+                            <template x-if="getActiveRouterHex()">
+                                <div class="flex items-center gap-2 text-xs font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-lg">
+                                    <span>🎯 Router activo:</span>
+                                    <span class="font-mono font-bold" x-text="getActiveRouterHex()"></span>
+                                    <template x-if="selectedRouterName">
+                                        <span class="opacity-80" x-text="`· ${selectedRouterName}`"></span>
+                                    </template>
+                                </div>
+                            </template>
+                            <template x-if="!getActiveRouterHex()">
+                                <div class="flex items-center gap-2 text-xs text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-lg">
+                                    <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
+                                </div>
                             </template>
                         </div>
+                    </div>
+
+                    {{-- 1. Nodos bloqueados configurados en este router --}}
+                    <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                <span>🚫</span>
+                                <span>{{ __('admin.gestion_routers.current_blocked_heading') }}</span>
+                                <span class="font-mono px-2 py-0.5 rounded-full text-[10px] bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 font-bold"
+                                      x-text="`${getActiveRouterBlocked().length} bloqueados`"></span>
+                            </div>
+                        </div>
+
+                        {{-- Estado vacío --}}
+                        <template x-if="getActiveRouterBlocked().length === 0">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 py-3 text-center italic bg-white dark:bg-gray-900/40 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
+                                {{ __('admin.gestion_routers.no_blocked_registered') }}
+                            </div>
+                        </template>
+
+                        {{-- Rejilla de tarjetas de nodos bloqueados actuales --}}
+                        <div x-show="getActiveRouterBlocked().length > 0" class="fi-ra-active-items-grid">
+                            <template x-for="(blk, bIdx) in getActiveRouterBlocked()" :key="blk.hex || blk">
+                                <div class="fi-ra-active-item-card">
+                                    <div class="flex items-center gap-3 overflow-hidden">
+                                        <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-sm font-bold shrink-0">
+                                            🚫
+                                        </div>
+                                        <div class="overflow-hidden">
+                                            <div class="font-bold text-xs truncate text-gray-900 dark:text-gray-100" x-text="blk.shortName || (blk.hex || blk)"></div>
+                                            <div class="font-mono text-[11px] text-rose-700 dark:text-rose-400 truncate" x-text="blk.hex || blk"></div>
+                                            <template x-if="blk.longName && blk.longName !== blk.hex">
+                                                <div class="text-[10px] text-gray-500 truncate" x-text="blk.longName"></div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <button type="button" @click="applyRemoteBlocked(blk, 'remove')" :disabled="blockedSending || connectionStatus !== 'connected'"
+                                            class="fi-ra-btn fi-ra-btn-warning fi-ra-btn-sm shrink-0" title="Desbloquear este nodo en el router">
+                                        <span>🔓</span>
+                                        <span class="hidden sm:inline">Desbloquear</span>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    {{-- 2. Buscador en tiempo real de nodos a bloquear --}}
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                    <span>🔍</span> <span>Catálogo de Nodos de la Red</span>
+                                </h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    Localiza cualquier nodo conflictivo por nombre o ID y pulsa «Bloquear» para que el router descarte su tráfico.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="fi-ra-search-input-wrap">
+                            <span class="fi-ra-search-icon">🔍</span>
+                            <input type="text" x-model="searchBlockedQuery" placeholder="{{ __('admin.gestion_routers.search_nodes_placeholder') }}" class="fi-ra-input fi-ra-search-input" />
+                        </div>
+
+                        {{-- Tabla de resultados de búsqueda para bloqueo --}}
+                        <div class="fi-ra-table-container">
+                            <table class="fi-ra-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nodo / Identidad</th>
+                                        <th>Provincia / Red</th>
+                                        <th>Rol</th>
+                                        <th>Estado en Router</th>
+                                        <th style="text-align: right;">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-if="getFilteredBlockedCandidates().length === 0">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center; color: #8D8EA6; padding: 2rem;">
+                                                No se encontraron nodos coincidentes. Puedes introducir un Node ID arriba en el buscador o en el campo manual inferior.
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <template x-for="c in getFilteredBlockedCandidates()" :key="c.hex">
+                                        <tr>
+                                            <td>
+                                                <div class="font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
+                                                    <span x-text="c.shortName || c.hex"></span>
+                                                    <template x-if="c.isCustom">
+                                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600 font-mono">Manual</span>
+                                                    </template>
+                                                </div>
+                                                <div class="font-mono text-xs text-emerald-700 dark:text-emerald-400" x-text="c.hex"></div>
+                                                <template x-if="c.longName && c.longName !== c.hex">
+                                                    <div class="text-[11px] text-gray-500 dark:text-gray-400 truncate max-w-xs" x-text="c.longName"></div>
+                                                </template>
+                                            </td>
+                                            <td>
+                                                <template x-if="c.province">
+                                                    <span class="fi-ra-badge fi-ra-badge-known" x-text="c.province"></span>
+                                                </template>
+                                                <template x-if="!c.province">
+                                                    <span class="text-xs text-gray-500">Malla Local</span>
+                                                </template>
+                                            </td>
+                                            <td>
+                                                <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" x-text="c.role"></span>
+                                            </td>
+                                            <td>
+                                                <template x-if="isNodeBlockedInActiveRouter(c.hex)">
+                                                    <span class="fi-ra-badge fi-ra-badge-blocked">🚫 Bloqueado</span>
+                                                </template>
+                                                <template x-if="!isNodeBlockedInActiveRouter(c.hex) && isNodeFavoriteInActiveRouter(c.hex)">
+                                                    <span class="fi-ra-badge fi-ra-badge-favorite">⭐ En Favoritos</span>
+                                                </template>
+                                                <template x-if="!isNodeBlockedInActiveRouter(c.hex) && !isNodeFavoriteInActiveRouter(c.hex)">
+                                                    <span class="text-xs text-gray-400">Normal</span>
+                                                </template>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <template x-if="isNodeBlockedInActiveRouter(c.hex)">
+                                                    <button type="button" @click="applyRemoteBlocked(c, 'remove')" :disabled="blockedSending || connectionStatus !== 'connected'"
+                                                            class="fi-ra-btn fi-ra-btn-warning fi-ra-btn-sm" title="Desbloquear este nodo">
+                                                        <span>🔓 Desbloquear</span>
+                                                    </button>
+                                                </template>
+                                                <template x-if="!isNodeBlockedInActiveRouter(c.hex)">
+                                                    <button type="button" @click="applyRemoteBlocked(c, 'add')" :disabled="blockedSending || connectionStatus !== 'connected'"
+                                                            class="fi-ra-btn fi-ra-btn-danger fi-ra-btn-sm" title="Bloquear nodo en el router remoto">
+                                                        <span>🚫 Bloquear</span>
+                                                    </button>
+                                                </template>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {{-- 3. Entrada manual rápida directa --}}
+                    <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                            <span>⌨️</span> <span>O introduce directamente un Node ID manual para bloquear o desbloquear:</span>
+                        </div>
+                        <div class="fi-ra-form-grid" style="grid-template-columns: 2fr 1fr;">
+                            <div class="fi-ra-form-group">
+                                <input type="text" x-model="blockedNodeInput" placeholder="!2df0a1b2 o ID decimal" class="fi-ra-input font-mono" />
+                            </div>
+
+                            <div style="display: flex; gap: 0.75rem;">
+                                <button type="button" @click="applyRemoteBlocked(blockedNodeInput, 'add')" :disabled="blockedSending || !blockedNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-danger" style="flex: 1;">
+                                    <span>🚫</span> {{ __('admin.gestion_routers.btn_add_blocked') }}
+                                </button>
+
+                                <button type="button" @click="applyRemoteBlocked(blockedNodeInput, 'remove')" :disabled="blockedSending || !blockedNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-warning" style="flex: 1;">
+                                    <span>🔓</span> {{ __('admin.gestion_routers.btn_remove_blocked') }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div x-show="connectionStatus !== 'connected'" class="text-xs mt-1 flex items-center gap-1.5" style="color: #D97706;">
+                        <span>⚠️</span> <span>{{ __('admin.gestion_routers.connect_prompt_hint') }}</span>
+                    </div>
+                    <div x-show="connectionStatus === 'connected' && !selectedRouterNodeNum && !manualNodeInput" class="text-xs mt-1 flex items-center gap-1.5" style="color: #D97706;">
+                        <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
                     </div>
                 </div>
 

@@ -169,7 +169,7 @@ export function meshAdminComponent() {
         manualNodeInput: '',
 
         // Pestaña activa
-        activeTab: 'roles',               // 'roles' | 'favoritos' | 'sondeo' | 'unicast' | 'mantenimiento'
+        activeTab: 'roles',               // 'roles' | 'favoritos' | 'bloqueados' | 'sondeo' | 'unicast' | 'mantenimiento'
 
         // Datos del formulario de roles
         selectedRole: 1,                  // Default CLIENT_MUTE (1)
@@ -180,6 +180,18 @@ export function meshAdminComponent() {
         favoriteActionType: 'add',        // 'add' | 'remove'
         favoriteSending: false,
         sessionFavorites: [],
+        searchFavoriteQuery: '',
+
+        // Datos del formulario de bloqueados / ignorados
+        blockedNodeInput: '',
+        blockedActionType: 'add',         // 'add' | 'remove'
+        blockedSending: false,
+        searchBlockedQuery: '',
+
+        // Almacén reactivo de favoritos y bloqueados por router { [routerHex]: Array<{ hex, num, shortName, longName, role }> }
+        routerFavorites: {},
+        routerBlocked: {},
+        portalKnownNodes: [],
 
         // Datos de sondeo y unicast
         pollSending: false,
@@ -230,7 +242,225 @@ export function meshAdminComponent() {
          * Inicialización del componente.
          */
         init() {
+            if (typeof window !== 'undefined' && window.portalKnownNodes && Array.isArray(window.portalKnownNodes)) {
+                this.portalKnownNodes = window.portalKnownNodes.slice();
+                for (const r of this.portalKnownNodes) {
+                    if (r.node_id) {
+                        this.routerFavorites[r.node_id] = Array.isArray(r.favorite_nodes) ? r.favorite_nodes : [];
+                        this.routerBlocked[r.node_id] = Array.isArray(r.blocked_nodes) ? r.blocked_nodes : [];
+                    }
+                }
+            }
+            this.loadRouterListsFromStorage();
             this.log('info', 'Consola de Gestión Remota de Routers inicializada.');
+        },
+
+        /**
+         * Recupera listas de favoritos y bloqueados guardadas en localStorage.
+         */
+        loadRouterListsFromStorage() {
+            try {
+                if (typeof window === 'undefined' || !window.localStorage) return;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('mesh_favs_')) {
+                        const rHex = key.replace('mesh_favs_', '');
+                        const val = JSON.parse(localStorage.getItem(key) || '[]');
+                        if (!this.routerFavorites[rHex] || this.routerFavorites[rHex].length === 0) {
+                            this.routerFavorites[rHex] = val;
+                        }
+                    } else if (key && key.startsWith('mesh_blocked_')) {
+                        const rHex = key.replace('mesh_blocked_', '');
+                        const val = JSON.parse(localStorage.getItem(key) || '[]');
+                        if (!this.routerBlocked[rHex] || this.routerBlocked[rHex].length === 0) {
+                            this.routerBlocked[rHex] = val;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Error leyendo listas de localStorage:', e);
+            }
+        },
+
+        /**
+         * Persiste en localStorage las listas de favoritos y bloqueados del router.
+         */
+        saveRouterListsToStorage(rHex) {
+            try {
+                if (typeof window === 'undefined' || !window.localStorage || !rHex) return;
+                if (this.routerFavorites[rHex]) {
+                    localStorage.setItem('mesh_favs_' + rHex, JSON.stringify(this.routerFavorites[rHex]));
+                }
+                if (this.routerBlocked[rHex]) {
+                    localStorage.setItem('mesh_blocked_' + rHex, JSON.stringify(this.routerBlocked[rHex]));
+                }
+            } catch (e) {
+                console.warn('Error guardando listas en localStorage:', e);
+            }
+        },
+
+        /**
+         * Retorna el ID hexadecimal del router objetivo actualmente seleccionado.
+         */
+        getActiveRouterHex() {
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                return numToHex(targetNum);
+            } catch {
+                return this.selectedRouterHex || (this.manualNodeInput ? this.manualNodeInput.trim() : '');
+            }
+        },
+
+        /**
+         * Retorna la lista de favoritos configurados para el router activo.
+         */
+        getActiveRouterFavorites() {
+            const hex = this.getActiveRouterHex();
+            if (!hex) return [];
+            return this.routerFavorites[hex] || [];
+        },
+
+        /**
+         * Retorna la lista de bloqueados configurados para el router activo.
+         */
+        getActiveRouterBlocked() {
+            const hex = this.getActiveRouterHex();
+            if (!hex) return [];
+            return this.routerBlocked[hex] || [];
+        },
+
+        /**
+         * Comprueba si un nodo dado ya consta en los favoritos del router activo.
+         */
+        isNodeFavoriteInActiveRouter(targetHex) {
+            if (!targetHex) return false;
+            const favs = this.getActiveRouterFavorites();
+            return favs.some((f) => (f.hex || f) === targetHex);
+        },
+
+        /**
+         * Comprueba si un nodo dado ya consta en los bloqueados del router activo.
+         */
+        isNodeBlockedInActiveRouter(targetHex) {
+            if (!targetHex) return false;
+            const blk = this.getActiveRouterBlocked();
+            return blk.some((b) => (b.hex || b) === targetHex);
+        },
+
+        /**
+         * Combina todos los nodos disponibles del catálogo del portal y de la radio local.
+         */
+        getAllAvailableNodes() {
+            const map = new Map();
+            // Nodos del catálogo del portal
+            for (const n of this.portalKnownNodes) {
+                if (n.node_id) {
+                    map.set(n.node_id, {
+                        hex: n.node_id,
+                        num: Number(n.dec_id) || parseNodeNum(n.node_id),
+                        shortName: n.short_name || '',
+                        longName: n.long_name || '',
+                        role: n.role || 'ROUTER',
+                        province: n.province || '',
+                    });
+                }
+            }
+            // Nodos descubiertos en la sesión de radio local
+            for (const [num, n] of Object.entries(this.knownNodes)) {
+                if (n.hex && !map.has(n.hex)) {
+                    map.set(n.hex, {
+                        hex: n.hex,
+                        num: Number(num),
+                        shortName: n.shortName || '',
+                        longName: n.longName || '',
+                        role: n.role !== null ? this.getRoleName(n.role) : 'CLIENT',
+                        province: '',
+                    });
+                }
+            }
+            return Array.from(map.values());
+        },
+
+        /**
+         * Filtra candidatos para añadir a favoritos según el término de búsqueda.
+         */
+        getFilteredFavoriteCandidates() {
+            const q = (this.searchFavoriteQuery || '').trim().toLowerCase();
+            const activeHex = this.getActiveRouterHex();
+            const all = this.getAllAvailableNodes().filter((n) => n.hex !== activeHex);
+
+            if (!q) {
+                return all.slice(0, 8);
+            }
+
+            const results = all.filter((n) => {
+                const sName = (n.shortName || '').toLowerCase();
+                const lName = (n.longName || '').toLowerCase();
+                const hex = (n.hex || '').toLowerCase();
+                const prov = (n.province || '').toLowerCase();
+                return sName.includes(q) || lName.includes(q) || hex.includes(q) || prov.includes(q);
+            });
+
+            const isHexOrDec = /^!?([0-9a-fA-F]{8})$/.test(q) || (/^\d{8,10}$/.test(q) && Number(q) > 0);
+            if (isHexOrDec) {
+                const manualNum = parseNodeNum(q);
+                const manualHex = numToHex(manualNum);
+                const exists = results.some((r) => r.hex === manualHex);
+                if (!exists && manualHex !== activeHex) {
+                    results.unshift({
+                        hex: manualHex,
+                        num: manualNum,
+                        shortName: manualHex.substring(1, 5),
+                        longName: `Nodo Personalizado ${manualHex}`,
+                        role: 'MANUAL',
+                        province: '-',
+                        isCustom: true,
+                    });
+                }
+            }
+
+            return results.slice(0, 15);
+        },
+
+        /**
+         * Filtra candidatos para añadir a bloqueados según el término de búsqueda.
+         */
+        getFilteredBlockedCandidates() {
+            const q = (this.searchBlockedQuery || '').trim().toLowerCase();
+            const activeHex = this.getActiveRouterHex();
+            const all = this.getAllAvailableNodes().filter((n) => n.hex !== activeHex);
+
+            if (!q) {
+                return all.slice(0, 8);
+            }
+
+            const results = all.filter((n) => {
+                const sName = (n.shortName || '').toLowerCase();
+                const lName = (n.longName || '').toLowerCase();
+                const hex = (n.hex || '').toLowerCase();
+                const prov = (n.province || '').toLowerCase();
+                return sName.includes(q) || lName.includes(q) || hex.includes(q) || prov.includes(q);
+            });
+
+            const isHexOrDec = /^!?([0-9a-fA-F]{8})$/.test(q) || (/^\d{8,10}$/.test(q) && Number(q) > 0);
+            if (isHexOrDec) {
+                const manualNum = parseNodeNum(q);
+                const manualHex = numToHex(manualNum);
+                const exists = results.some((r) => r.hex === manualHex);
+                if (!exists && manualHex !== activeHex) {
+                    results.unshift({
+                        hex: manualHex,
+                        num: manualNum,
+                        shortName: manualHex.substring(1, 5),
+                        longName: `Nodo Personalizado ${manualHex}`,
+                        role: 'MANUAL',
+                        province: '-',
+                        isCustom: true,
+                    });
+                }
+            }
+
+            return results.slice(0, 15);
         },
 
         /**
@@ -1050,21 +1280,52 @@ export function meshAdminComponent() {
 
         /**
          * Gestiona favoritos (añadir o eliminar) en el router remoto.
+         *
+         * @param {string|number|object|null} targetNode - ID hex, num o candidato
+         * @param {'add'|'remove'} action
          */
-        async applyRemoteFavorite(action) {
+        async applyRemoteFavorite(targetNode = null, action = 'add') {
             if (this.connectionStatus !== 'connected' || !this._device) {
                 this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
                 return;
             }
 
-            const favNum = parseNodeNum(this.favoriteNodeInput);
+            let favNum;
+            let nodeData = null;
+
+            if (typeof targetNode === 'object' && targetNode !== null) {
+                favNum = targetNode.num || parseNodeNum(targetNode.hex);
+                nodeData = targetNode;
+            } else if (typeof targetNode === 'string' || typeof targetNode === 'number') {
+                favNum = parseNodeNum(targetNode);
+            } else {
+                favNum = parseNodeNum(this.favoriteNodeInput);
+            }
+
             if (!favNum) {
-                this.setNotification('warning', 'Introduce un Node ID válido para gestionar en favoritos (ej. !5f3a3a29 o decimal).');
+                this.setNotification('warning', 'Introduce o selecciona un Node ID válido para favoritos (ej. !5f3a3a29).');
                 return;
             }
 
             const favHex = numToHex(favNum);
             const isAdd = action === 'add';
+            const activeRouterHex = this.getActiveRouterHex();
+
+            if (!nodeData) {
+                nodeData = this.getAllAvailableNodes().find((n) => n.hex === favHex) || {
+                    hex: favHex,
+                    num: favNum,
+                    shortName: favHex.substring(1, 5),
+                    longName: favHex,
+                    role: 'ROUTER',
+                };
+            }
+
+            // Comprobación previa para evitar duplicados innecesarios
+            if (isAdd && this.isNodeFavoriteInActiveRouter(favHex)) {
+                this.setNotification('info', `El nodo ${favHex} ya consta en la lista de favoritos de este router.`);
+                return;
+            }
 
             this.favoriteSending = true;
             try {
@@ -1080,16 +1341,154 @@ export function meshAdminComponent() {
                 const opLabel = `${isAdd ? 'Añadir a' : 'Quitar de'} favoritos (${favHex})`;
                 await this.sendAdminMessageToTarget(targetNum, adminMsg, opLabel);
 
-                if (isAdd && !this.sessionFavorites.includes(favHex)) {
-                    this.sessionFavorites.push(favHex);
-                } else if (!isAdd) {
-                    this.sessionFavorites = this.sessionFavorites.filter((f) => f !== favHex);
+                // Actualizar lista local de favoritos del router
+                if (!this.routerFavorites[activeRouterHex]) {
+                    this.routerFavorites[activeRouterHex] = [];
                 }
+
+                if (isAdd) {
+                    if (!this.routerFavorites[activeRouterHex].some((f) => (f.hex || f) === favHex)) {
+                        this.routerFavorites[activeRouterHex].push({
+                            hex: favHex,
+                            num: favNum,
+                            shortName: nodeData.shortName || favHex.substring(1, 5),
+                            longName: nodeData.longName || favHex,
+                            role: nodeData.role || 'ROUTER',
+                            added_at: new Date().toISOString(),
+                        });
+                    }
+                    // Si estaba bloqueado, retirarlo automáticamente de bloqueados
+                    if (this.routerBlocked[activeRouterHex]) {
+                        this.routerBlocked[activeRouterHex] = this.routerBlocked[activeRouterHex].filter((b) => (b.hex || b) !== favHex);
+                    }
+                } else {
+                    this.routerFavorites[activeRouterHex] = this.routerFavorites[activeRouterHex].filter((f) => (f.hex || f) !== favHex);
+                }
+
+                this.saveRouterListsToStorage(activeRouterHex);
+
+                // Sincronizar en base de datos si Livewire está disponible
+                if (window.Livewire && this.$wire && typeof this.$wire.updateRouterFavoriteNode === 'function') {
+                    try {
+                        this.$wire.updateRouterFavoriteNode(activeRouterHex, favHex, isAdd, nodeData);
+                    } catch (lwErr) {
+                        console.warn('Error sincronizando con Livewire:', lwErr);
+                    }
+                }
+
                 this.setNotification('success', `Orden '${opLabel}' enviada con éxito al router ${targetHex}.`);
+                this.favoriteNodeInput = '';
             } catch (err) {
                 console.error('Error gestionando favorito:', err);
             } finally {
                 this.favoriteSending = false;
+            }
+        },
+
+        /**
+         * Gestiona nodos bloqueados / ignorados en el router remoto.
+         *
+         * @param {string|number|object|null} targetNode - ID hex, num o candidato
+         * @param {'add'|'remove'} action
+         */
+        async applyRemoteBlocked(targetNode = null, action = 'add') {
+            if (this.connectionStatus !== 'connected' || !this._device) {
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
+                return;
+            }
+
+            let ignNum;
+            let nodeData = null;
+
+            if (typeof targetNode === 'object' && targetNode !== null) {
+                ignNum = targetNode.num || parseNodeNum(targetNode.hex);
+                nodeData = targetNode;
+            } else if (typeof targetNode === 'string' || typeof targetNode === 'number') {
+                ignNum = parseNodeNum(targetNode);
+            } else {
+                ignNum = parseNodeNum(this.blockedNodeInput);
+            }
+
+            if (!ignNum) {
+                this.setNotification('warning', 'Introduce o selecciona un Node ID válido para bloquear (ej. !5f3a3a29).');
+                return;
+            }
+
+            const ignHex = numToHex(ignNum);
+            const isAdd = action === 'add';
+            const activeRouterHex = this.getActiveRouterHex();
+
+            if (!nodeData) {
+                nodeData = this.getAllAvailableNodes().find((n) => n.hex === ignHex) || {
+                    hex: ignHex,
+                    num: ignNum,
+                    shortName: ignHex.substring(1, 5),
+                    longName: ignHex,
+                    role: 'NODE',
+                };
+            }
+
+            // Comprobación previa para evitar duplicados innecesarios
+            if (isAdd && this.isNodeBlockedInActiveRouter(ignHex)) {
+                this.setNotification('info', `El nodo ${ignHex} ya consta en la lista de bloqueados de este router.`);
+                return;
+            }
+
+            this.blockedSending = true;
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                const targetHex = numToHex(targetNum);
+
+                const adminMsg = create(AdminMessageSchema, {
+                    payloadVariant: isAdd
+                        ? { case: 'setIgnoredNode', value: ignNum }
+                        : { case: 'removeIgnoredNode', value: ignNum },
+                });
+
+                const opLabel = `${isAdd ? 'Bloquear' : 'Desbloquear'} nodo (${ignHex})`;
+                await this.sendAdminMessageToTarget(targetNum, adminMsg, opLabel);
+
+                // Actualizar lista local de bloqueados del router
+                if (!this.routerBlocked[activeRouterHex]) {
+                    this.routerBlocked[activeRouterHex] = [];
+                }
+
+                if (isAdd) {
+                    if (!this.routerBlocked[activeRouterHex].some((b) => (b.hex || b) === ignHex)) {
+                        this.routerBlocked[activeRouterHex].push({
+                            hex: ignHex,
+                            num: ignNum,
+                            shortName: nodeData.shortName || ignHex.substring(1, 5),
+                            longName: nodeData.longName || ignHex,
+                            role: nodeData.role || 'NODE',
+                            added_at: new Date().toISOString(),
+                        });
+                    }
+                    // Si estaba en favoritos, retirarlo automáticamente de favoritos
+                    if (this.routerFavorites[activeRouterHex]) {
+                        this.routerFavorites[activeRouterHex] = this.routerFavorites[activeRouterHex].filter((f) => (f.hex || f) !== ignHex);
+                    }
+                } else {
+                    this.routerBlocked[activeRouterHex] = this.routerBlocked[activeRouterHex].filter((b) => (b.hex || b) !== ignHex);
+                }
+
+                this.saveRouterListsToStorage(activeRouterHex);
+
+                // Sincronizar en base de datos si Livewire está disponible
+                if (window.Livewire && this.$wire && typeof this.$wire.updateRouterBlockedNode === 'function') {
+                    try {
+                        this.$wire.updateRouterBlockedNode(activeRouterHex, ignHex, isAdd, nodeData);
+                    } catch (lwErr) {
+                        console.warn('Error sincronizando con Livewire:', lwErr);
+                    }
+                }
+
+                this.setNotification('success', `Orden '${opLabel}' enviada con éxito al router ${targetHex}.`);
+                this.blockedNodeInput = '';
+            } catch (err) {
+                console.error('Error gestionando nodo bloqueado:', err);
+            } finally {
+                this.blockedSending = false;
             }
         },
 

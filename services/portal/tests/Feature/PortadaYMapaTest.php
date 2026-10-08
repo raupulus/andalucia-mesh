@@ -39,6 +39,11 @@ class PortadaYMapaTest extends TestCase
 
         $this->assertTrue($posMeshView < $posPotatoMesh, 'MeshView debe preceder a PotatoMesh');
         $this->assertTrue($posPotatoMesh < $posRankings, 'PotatoMesh debe preceder a Rankings');
+
+        // Verificar que MeshView y PotatoMesh abren en nueva pestaña
+        $this->assertMatchesRegularExpression('/href="[^"]*meshview[^"]*"[^>]*target="_blank"/i', $contenido);
+        $this->assertMatchesRegularExpression('/href="[^"]*potato[^"]*"[^>]*target="_blank"/i', $contenido);
+        $this->assertDoesNotMatchRegularExpression('/href="[^"]*rankings"[^>]*target="_blank"/i', $contenido);
     }
 
     /**
