@@ -1,4 +1,4 @@
-<x-layout :title="$titulo" :description="$descripcion">
+<x-layout :title="$titulo" :description="$descripcion" :image="$image ?? asset('img/og/og-configura-nodo.webp')">
     <div class="contenedor seccion">
         <article style="width: 100%; margin: 0 auto;">
             <!-- Encabezado de la página -->

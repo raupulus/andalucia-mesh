@@ -15,6 +15,25 @@ use RuntimeException;
 class ContenidoMarkdown
 {
     /**
+     * Mapa de imágenes Open Graph en WebP asignadas por documento Markdown.
+     *
+     * @var array<string, string>
+     */
+    protected const array IMAGENES_OG = [
+        '02-project.md' => 'img/og/og-proyecto.webp',
+        '03-who.md' => 'img/og/og-quien-lo-impulsa.webp',
+        '04-governance.md' => 'img/og/og-como-se-gestiona.webp',
+        '05-node-setup.md' => 'img/og/og-configura-nodo.webp',
+        '06-gateway.md' => 'img/og/og-conecta-gateway.webp',
+        '07-bots.md' => 'img/og/og-bots.webp',
+        '10-api.md' => 'img/og/og-api.webp',
+        '11-legal-notice.md' => 'img/og/og-aviso-legal.webp',
+        '12-privacy.md' => 'img/og/og-privacidad.webp',
+        '13-cookies.md' => 'img/og/og-cookies.webp',
+        '15-firmware.md' => 'img/og/og-firmware.webp',
+    ];
+
+    /**
      * @var array<string, string>
      */
     protected array $variables;
@@ -84,10 +103,10 @@ class ContenidoMarkdown
     }
 
     /**
-     * Carga y procesa un documento Markdown devolviendo título, descripción y HTML.
+     * Carga y procesa un documento Markdown devolviendo título, descripción, HTML e imagen Open Graph.
      *
      * @param  string  $nombreFichero  Nombre relativo en resources/contenido/ (ej. '02-project.md')
-     * @return array{titulo: string, descripcion: string, html: string, h1: string}
+     * @return array{titulo: string, descripcion: string, html: string, h1: string, image: string}
      */
     public function render(string $nombreFichero): array
     {
@@ -112,10 +131,10 @@ class ContenidoMarkdown
         }
 
         $mtime = filemtime($path);
-        $cacheKey = "markdown_render_v4:{$locale}:{$ficheroEfectivo}:{$mtime}";
+        $cacheKey = "markdown_render_v5:{$locale}:{$ficheroEfectivo}:{$mtime}";
 
-        /** @var array{titulo: string, descripcion: string, html: string, h1: string} */
-        return Cache::rememberForever($cacheKey, function () use ($path): array {
+        /** @var array{titulo: string, descripcion: string, html: string, h1: string, image: string} */
+        return Cache::rememberForever($cacheKey, function () use ($path, $nombreFichero): array {
             $rawContent = (string) file_get_contents($path);
 
             // 1. Extraer metadatos de SEO si existen
@@ -172,11 +191,16 @@ class ContenidoMarkdown
             // 7. Convertir Markdown a HTML
             $html = (string) $this->converter->convert($body);
 
+            $baseNombre = (string) preg_replace('/\.(?:en|pt)\.md$/', '.md', $nombreFichero);
+            $relImage = self::IMAGENES_OG[$baseNombre] ?? self::IMAGENES_OG[$nombreFichero] ?? config('proyecto.seo.imagen_defecto');
+            $image = asset(ltrim((string) $relImage, '/'));
+
             return [
                 'titulo' => $titulo,
                 'descripcion' => $descripcion,
                 'h1' => $h1,
                 'html' => $html,
+                'image' => $image,
             ];
         });
     }

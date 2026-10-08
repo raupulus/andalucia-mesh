@@ -4,7 +4,7 @@
     $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
 @endphp
 
-<x-layout :title="__('portal.rankings.meta_title')" :description="__('portal.rankings.meta_description')">
+<x-layout :title="__('portal.rankings.meta_title')" :description="__('portal.rankings.meta_description')" :image="asset('img/og/og-rankings.webp')">
     <div class="contenedor seccion">
         <!-- Encabezado -->
         <header style="margin-bottom: 2.5rem;">

@@ -119,7 +119,7 @@ class LayoutYConfigTest extends TestCase
         $response->assertSee('<meta property="og:locale:alternate" content="pt_PT">', false);
         $response->assertSee('<meta property="og:image:width" content="1200">', false);
         $response->assertSee('<meta property="og:image:height" content="630">', false);
-        $response->assertSee('<meta property="og:image:type" content="image/png">', false);
+        $response->assertSee('<meta property="og:image:type" content="image/webp">', false);
 
         // Twitter Card con creador (SOC-B01)
         $response->assertSee('<meta name="twitter:card" content="summary_large_image">', false);

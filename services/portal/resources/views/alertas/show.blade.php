@@ -30,7 +30,7 @@
     $reaperturas = (int) ($alerta['reaperturas'] ?? 0);
 @endphp
 
-<x-layout :title="__('portal.alerts.single_title', ['id' => $alerta['id'] ?? '', 'name' => config('proyecto.nombre')])" :description="__('portal.alerts.single_desc')">
+<x-layout :title="__('portal.alerts.single_title', ['id' => $alerta['id'] ?? '', 'name' => config('proyecto.nombre')])" :description="__('portal.alerts.single_desc')" :image="asset('img/og/og-alertas.webp')">
     <div class="contenedor seccion">
         <div style="max-width: 820px; margin: 0 auto;">
             <!-- Enlace volver -->

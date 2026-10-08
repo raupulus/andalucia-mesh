@@ -6,6 +6,7 @@
 <x-layout 
     :title="__('portal.configurator.meta_title', ['name' => config('proyecto.nombre')])" 
     :description="__('portal.configurator.lead')"
+    :image="asset('img/og/og-configurador.webp')"
 >
     <x-slot:styles>
         <base href="/configurador/">

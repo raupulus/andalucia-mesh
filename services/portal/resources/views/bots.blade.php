@@ -3,7 +3,7 @@
     $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
 @endphp
 
-<x-layout :title="$titulo" :description="$descripcion">
+<x-layout :title="$titulo" :description="$descripcion" :image="$image ?? asset('img/og/og-bots.webp')">
     <div class="contenedor seccion">
         <article style="max-width: 960px; margin: 0 auto;">
             <!-- Encabezado de la página -->

@@ -1,4 +1,4 @@
-<x-layout :title="$titulo" :description="$descripcion">
+<x-layout :title="$titulo" :description="$descripcion" :image="$image ?? null">
     <div class="contenedor seccion">
         <article style="max-width: 760px; margin: 0 auto;">
             <!-- Encabezado de la página -->

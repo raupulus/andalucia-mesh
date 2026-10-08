@@ -24,7 +24,7 @@
     };
 @endphp
 
-<x-layout :title="__('portal.alerts.meta_title')" :description="__('portal.alerts.meta_description')">
+<x-layout :title="__('portal.alerts.meta_title')" :description="__('portal.alerts.meta_description')" :image="asset('img/og/og-alertas.webp')">
     <div class="contenedor seccion">
         <header style="margin-bottom: 2.5rem;">
             <h1 style="font-size: 2.25rem; font-weight: 800; color: var(--color-texto-1); margin-bottom: 0.5rem;">
