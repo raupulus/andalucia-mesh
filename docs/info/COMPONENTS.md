@@ -58,5 +58,15 @@ Catálogo de componentes reutilizables de interfaz de usuario de Andalucía Mesh
 ### `.btn-verde`
 - **Propósito:** Botón de acción principal verde Andalucía (`#007A33`) con texto blanco y realce interactivo para llamadas a la acción directas como el botón de catálogo en la portada.
 
+### `x-aviso-pruebas` (`aviso-pruebas.blade.php`)
+- **Propósito:** Aviso flotante global y persistente ubicado en la esquina inferior derecha de la pantalla (o barra inferior adaptable en móviles), indicando a los visitantes que la plataforma se encuentra en fase activa de desarrollo y pruebas, y que determinados datos o nodos pueden no estar 100% verificados.
+- **Comportamiento interactivo:**
+  - Botón de cierre (`✕`) y botón «Entendido» que colapsan la tarjeta en una píldora flotante compacta (`⚠️ Entorno en pruebas`).
+  - Al pulsar la píldora, el aviso vuelve a expandirse.
+  - El estado minimizado se persiste en `sessionStorage` (`snm_aviso_pruebas_minimizado = '1'`) para mantener la preferencia durante la sesión de navegación sin emitir cookies de seguimiento (cumpliendo estrictamente RN-06).
+- **Accesibilidad y diseño:**
+  - Rol ARIA semántico `role="status"` y `aria-live="polite"`.
+  - Estilo de advertencia/ámbar según `DESIGN.md` con borde semántico, icono de alerta, botón accesible y soporte nativo para temas claro y oscuro.
+
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08
