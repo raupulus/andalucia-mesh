@@ -32,7 +32,7 @@ Architectural and technical decisions are steered by Raúl as the project initia
 
 - The server is strictly uplink-only. Nothing received from the Internet is ever repeated back onto the radio spectrum, even if a gateway accidentally has downlink enabled.
 - Every gateway uses isolated MQTT credentials and may only publish on its designated topic tree.
-- Only approved public community channels from an established whitelist are ingested.
+- Only approved public community channels from an established whitelist are ingested: the primary channel `SFNarrow`, regional channels `Andalucia` and `Iberia`, and each province-specific channel (`Almeria`, `Cadiz`, `Cordoba`, `Granada`, `Huelva`, `Jaen`, `Malaga`, `Sevilla`, plus `Ceuta` and `Melilla`). Direct messages and private non-whitelisted channels are strictly ignored and discarded.
 - An automated detector monitors the mesh around the clock, warning of dying repeater batteries, reboot loops, offline gateways, packet floods, and anomalous hop counts.
 
 ### Service Availability

@@ -32,7 +32,7 @@ As decisões arquiteturais e técnicas são coordenadas por Raúl enquanto promo
 
 - O servidor funciona estritamente como recetor (apenas subida). Nada do que chega pela Internet é retransmitido para o rádio, mesmo que um gateway tenha downlink ativado por engano.
 - Cada gateway possui credenciais MQTT próprias e só pode publicar no seu próprio canal.
-- Apenas são aceites canais públicos constantes de uma lista fechada.
+- Apenas são aceites canais públicos constantes de uma lista fechada: o canal principal `SFNarrow`, os canais regionais `Andalucia` e `Iberia`, e os canais provinciais específicos (`Almeria`, `Cadiz`, `Cordoba`, `Granada`, `Huelva`, `Jaen`, `Malaga`, `Sevilla`, bem como `Ceuta` e `Melilla`). Mensagens diretas e canais privados fora desta lista são estritamente ignorados e descartados.
 - Um motor inteligente de alertas monitoriza a rede continuamente, avisando de baterias fracas, loops de reinício, gateways caídos ou saturação de canal.
 
 ### Disponibilidade

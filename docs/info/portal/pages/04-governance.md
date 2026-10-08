@@ -47,7 +47,7 @@ Las decisiones las toma Raúl como impulsor y responsable del proyecto. Las prop
 
 - El servidor solo recibe. Nada de lo que llega por internet vuelve a la radio, aunque un gateway tenga el downlink activado por error.
 - Cada gateway tiene su propio usuario y solo puede publicar en su nombre.
-- Solo se aceptan los canales públicos de una lista cerrada.
+- Solo se aceptan los canales públicos de una lista cerrada: el canal principal `SFNarrow`, los canales regionales `Andalucia` e `Iberia`, y los de cada provincia (`Almeria`, `Cadiz`, `Cordoba`, `Granada`, `Huelva`, `Jaen`, `Malaga`, `Sevilla`, además de `Ceuta` y `Melilla`). Cualquier mensaje directo o canal privado fuera de esta lista se ignora y descarta.
 - Un sistema de alertas vigila la red y avisa de baterías bajas, reinicios en bucle, gateways caídos, spam y otros problemas.
 
 ### Disponibilidad
@@ -75,4 +75,4 @@ Qué datos se tratan, durante cuánto tiempo y cómo no aparecer: [política de 
 - Código del proyecto: no se enlaza mientras no se decida publicarlo.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08
