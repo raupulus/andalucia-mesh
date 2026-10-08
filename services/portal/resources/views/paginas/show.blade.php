@@ -17,8 +17,8 @@
             </nav>
 
             <!-- Imagen de portada arriba -->
-            <div class="pagina-detalle-img-wrapper" style="width: 100%; border-radius: var(--radio-lg); overflow: hidden; margin-bottom: 2.25rem; border: 1.5px solid #007A33; box-shadow: 0 0 0 1.5px #FFFFFF, 0 0 0 3px rgba(0, 122, 51, 0.25), var(--sombra-2); background: #1B1C28;">
-                <img src="{{ $pagina->cover_image_url }}" alt="{{ $pagina->title }}" style="width: 100%; height: auto; max-height: 440px; object-fit: cover; display: block;" width="860" height="440">
+            <div class="pagina-detalle-img-wrapper">
+                <img src="{{ $pagina->cover_image_url }}" alt="{{ $pagina->title }}" width="860" height="440" loading="eager">
             </div>
 
             <!-- Cabecera de la página: Título, fecha, descripción -->
@@ -56,6 +56,21 @@
             <div class="prose" style="line-height: 1.8; font-size: 1.05rem;">
                 {!! $contenidoHtml !!}
             </div>
+
+            <!-- Footer del artículo con keywords y vuelta al listado -->
+            @if(!empty($pagina->keywords))
+                <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--color-borde); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--color-texto-3);">{{ __('portal.pages.keywords_label') }}</span>
+                        @foreach($pagina->keywords as $kw)
+                            <span class="badge-keyword">{{ $kw }}</span>
+                        @endforeach
+                    </div>
+                    <a href="{{ route('paginas.index') }}{{ $langQuery }}" class="tarjeta-pagina-accion">
+                        <span>← {{ __('portal.pages.btn_back') }}</span>
+                    </a>
+                </div>
+            @endif
 
             <!-- Banner de Emergencias -->
             <div style="margin-top: 3.5rem;">
