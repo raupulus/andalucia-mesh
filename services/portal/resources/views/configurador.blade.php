@@ -417,6 +417,10 @@
     </div>
 
     <x-slot:scripts>
+        <script>
+            window.global = window.global || window;
+            window.process = window.process || { env: { NODE_ENV: "production" }, version: "", versions: {}, platform: "browser", cwd: function() { return ""; } };
+        </script>
         <script src="/js/qrcode.min.js"></script>
         <script>
             if (typeof QRCode === 'undefined') {

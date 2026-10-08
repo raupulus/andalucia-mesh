@@ -65,6 +65,7 @@
 - **Web Serial y Web Bluetooth en Safari / Firefox:** Estas APIs solo están disponibles en navegadores basados en Chromium (Chrome, Edge, Opera, Brave). Para usuarios de otros navegadores, el configurador ofrece de forma nativa la descarga de archivo YAML, comandos CLI y el código QR escaneable con el móvil.
 - **Amplificadores de potencia (PA):** En módulos con amplificador externo o integrado como el Ebyte E22P-868M30S, configurar 27 dBm de potencia en el firmware satura el amplificador y supera con creces el límite legal europeo (ERP 27 dBm). Debe seleccionarse siempre 8 dBm para estos módulos.
 - **Resolución de assets relativos en `/configurador` (`TR-16`):** Al embeber la herramienta bajo `/configurador` sin barra final, los enlaces `./styles.css` resuelven contra `/` en el cliente. El portal inyecta `<base href="/configurador/">` y reescribe las rutas a absolutas (`/configurador/...`), con redirecciones defensivas en rutas de raíz.
+- **Shims de Node en bundles de cliente (`TR-17`):** Librerías internas de `@meshtastic/core` como el formateador de logs invocan `process?.version` o `process.cwd()`. En entornos de navegador sin Node, esto lanza `ReferenceError: process is not defined` abortando el módulo. Requiere `nodeShimsPlugin`, `define` en Vite, banner de inicialización y declaración en el HTML.
 
 ## Tests que lo cubren
 - `services/portal/tests/Feature/ConfiguradorTest.php`:

@@ -186,6 +186,6 @@ return [
 
     'seo' => [
         'descripcion_defecto' => 'Red regional comunitaria de radioenlaces de largo alcance LoRa Meshtastic en Andalucía.',
-        'imagen_defecto' => '/img/og-andalucia-mesh.png',
+        'imagen_defecto' => '/img/og/og-portada.webp',
     ],
 ];

@@ -13,7 +13,19 @@
         $ogLocale = $localeMap[$currentLocale] ?? 'es_ES';
         $pageTitle = str_contains($title ?? '', config('proyecto.nombre')) ? $title : (($title ? $title . ' — ' : '') . config('proyecto.nombre'));
         $metaDesc = $description ?? config('proyecto.seo.descripcion_defecto');
-        $metaImage = (!empty($image)) ? $image : asset(config('proyecto.seo.imagen_defecto'));
+
+        $rawImage = !empty($image) ? $image : config('proyecto.seo.imagen_defecto');
+        $metaImage = (str_starts_with($rawImage, 'http://') || str_starts_with($rawImage, 'https://'))
+            ? $rawImage
+            : asset(ltrim($rawImage, '/'));
+
+        $imagePath = parse_url($metaImage, PHP_URL_PATH) ?? '';
+        $metaImageType = match (strtolower(pathinfo($imagePath, PATHINFO_EXTENSION))) {
+            'webp' => 'image/webp',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'svg' => 'image/svg+xml',
+            default => 'image/png',
+        };
         $canonicalUrl = request()->fullUrl();
         $baseUrl = url()->current();
     @endphp
@@ -41,7 +53,7 @@
     <meta property="og:image" content="{{ $metaImage }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:type" content="{{ $metaImageType }}">
     <meta property="og:image:alt" content="{{ config('proyecto.nombre') }} — {{ $metaDesc }}">
     <meta property="og:locale" content="{{ $ogLocale }}">
     @foreach($localeMap as $locKey => $locVal)

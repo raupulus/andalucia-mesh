@@ -428,6 +428,11 @@
       </div>
     </footer>
 
+    <script>
+      window.global = window.global || window;
+      window.process = window.process || { env: { NODE_ENV: "production" }, version: "", versions: {}, platform: "browser", cwd: function() { return ""; } };
+    </script>
+
     <!-- Librería externa para generación de QR en cliente (bundle ligero sin dependencias) -->
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 

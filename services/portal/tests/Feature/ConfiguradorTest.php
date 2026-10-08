@@ -61,6 +61,7 @@ class ConfiguradorTest extends TestCase
         $response->assertHeader('Content-Type', 'application/javascript; charset=utf-8');
         $response->assertSee('construirYamlDeseado');
         $response->assertSee('actualizarConfiguracion');
+        $response->assertSee('window.process');
     }
 
     public function test_configurador_entrega_preset_client_mute(): void
@@ -101,6 +102,7 @@ class ConfiguradorTest extends TestCase
         $response->assertSee('<base href="/configurador/">', false);
         $response->assertSee('href="/configurador/styles.css"', false);
         $response->assertSee('src="/configurador/configurador.js"', false);
+        $response->assertSee('window.process = window.process', false);
     }
 
     public function test_redireccion_defensiva_para_recursos_en_raiz(): void
