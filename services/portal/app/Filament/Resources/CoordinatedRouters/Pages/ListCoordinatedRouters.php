@@ -123,10 +123,11 @@ class ListCoordinatedRouters extends ListRecords
     {
         $connection = DB::connection('ingesta');
         $driver = $connection->getDriverName();
+        $schema = Schema::connection('ingesta');
 
-        if (! Schema::connection('ingesta')->hasTable('api_routers')) {
+        if (! $schema->hasTable('api_routers') && ! $schema->hasView('api_routers')) {
             if ($driver === 'sqlite') {
-                Schema::connection('ingesta')->create('api_routers', function (Blueprint $table) {
+                $schema->create('api_routers', function (Blueprint $table) {
                     $table->string('id', 32)->primary();
                     $table->string('short_name', 32)->nullable();
                     $table->string('long_name', 128)->nullable();

@@ -86,7 +86,8 @@ class GestionRouters extends Page
         // Construir catálogo de búsqueda a partir de routers coordinados y base de datos de ingesta
         $allKnownNodes = $formattedRouters;
         try {
-            if (Schema::connection('ingesta')->hasTable('api_routers')) {
+            $schema = Schema::connection('ingesta');
+            if ($schema->hasTable('api_routers') || $schema->hasView('api_routers')) {
                 $ingestaRouters = DB::connection('ingesta')->table('api_routers')->get();
                 $existingIds = array_column($allKnownNodes, 'node_id');
                 foreach ($ingestaRouters as $ir) {
