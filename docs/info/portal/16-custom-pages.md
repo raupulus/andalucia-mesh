@@ -6,7 +6,7 @@
 - **Qué hace**:
   - Permite a los operadores crear, editar, publicar y retirar artículos y páginas dinámicas desde el panel `/admin` (`CustomPageResource`).
   - Valida de forma estricta la obligatoriedad y unicidad del `slug` antes de guardar.
-  - Ofrece listado público en `/paginas` con tarjetas horizontales de ancho completo: imagen a la izquierda, franja vertical verde/blanca/verde inspirada en la bandera de Andalucía, borde verde/blanco con contraste accesible (WCAG AAA) en temas claro y oscuro, fecha formateada, descripción y keywords como badges verdes en la esquina inferior derecha.
+  - Ofrece listado público en `/paginas` con tarjetas horizontales de ancho completo: imagen a la izquierda, franja separadora inspirada en la bandera de Andalucía con degradado vertical (verde en extremos y blanco en el centro), borde verde/blanco con contraste accesible (WCAG AAA) en temas claro y oscuro, fecha formateada, descripción y keywords como badges verdes en la esquina inferior derecha.
   - Ofrece vista de detalle en `/paginas/{slug}`: imagen de portada en la parte superior, título H1, fecha de publicación, descripción principal, badges de keywords, contenido completo renderizado desde Markdown mediante `ContenidoMarkdown` y aviso de emergencias.
   - Genera metadatos SEO completos: Open Graph, Twitter Cards y datos estructurados Schema.org `Article` en formato JSON-LD.
   - Muestra en la portada (`/`) un bloque con las 4 últimas páginas activas en tarjetas compactas (2 por fila en escritorio, 1 en móvil) colocado encima de la sección «Quién está detrás», con un botón verde centrado que enlaza al catálogo completo `/paginas`.
@@ -41,7 +41,7 @@
    - `PortadaController` recupera las 4 páginas activas más recientes.
    - Se renderizan en `portada.blade.php` en una cuadrícula de 2 columnas con tarjetas compactas y botón verde de acceso general.
 3. **Navegación del Catálogo (`/paginas`)**:
-   - `CustomPageController@index` lista todas las páginas activas ordenadas cronológicamente en tarjetas horizontales con la franja vertical de Andalucía (verde/blanca/verde), borde dual verde y blanco y badges verdes.
+   - `CustomPageController@index` lista todas las páginas activas ordenadas cronológicamente en tarjetas horizontales con la franja separadora con degradado verde-blanco-verde y badges verdes.
 4. **Lectura de Artículo (`/paginas/{slug}`)**:
    - `CustomPageController@show` busca por slug activo (devuelve 404 si está inactivo o no existe).
    - Renderiza con metadatos Open Graph, Twitter Card y Schema.org `Article`.

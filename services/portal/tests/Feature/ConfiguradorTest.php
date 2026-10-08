@@ -46,7 +46,7 @@ class ConfiguradorTest extends TestCase
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/javascript; charset=utf-8');
         $response->assertSee('construirYamlDeseado');
-        $response->assertSee('generarMeshtasticUrl');
+        $response->assertSee('actualizarConfiguracion');
     }
 
     public function test_configurador_entrega_preset_client_mute(): void

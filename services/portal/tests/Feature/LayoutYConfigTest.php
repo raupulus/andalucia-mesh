@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class LayoutYConfigTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * Comprueba que las configuraciones de proyecto y autoría contengan los datos obligatorios.
      */
@@ -126,5 +129,24 @@ class LayoutYConfigTest extends TestCase
         $response->assertSee('application/ld+json', false);
         $response->assertSee('"@type":"WebSite"', false);
         $response->assertSee('"@type":"Organization"', false);
+    }
+
+    /**
+     * Comprueba que el aviso flotante global de entorno en pruebas se renderiza en todas las páginas.
+     */
+    public function test_aviso_flotante_pruebas_presente_globalmente(): void
+    {
+        $rutas = ['/', '/proyecto', '/quien-lo-impulsa', '/legal/aviso-legal'];
+
+        foreach ($rutas as $ruta) {
+            $response = $this->get($ruta);
+            $response->assertStatus(200);
+            $response->assertSee('id="aviso-flotante-pruebas"', false);
+            $response->assertSee('aviso-pruebas-tarjeta', false);
+            $response->assertSee('Entorno en pruebas', false);
+            $response->assertSee('fase activa de desarrollo y pruebas', false);
+            $response->assertSee('btn-minimizar-aviso', false);
+            $response->assertSee('btn-expandir-aviso', false);
+        }
     }
 }

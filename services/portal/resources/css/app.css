@@ -1136,28 +1136,29 @@ pre code {
   transform: scale(1.05);
 }
 
-/* Franja con los colores verde/blanco/verde de la bandera de Andalucía */
+/* Franja inspirada en la bandera de Andalucía: verde arriba y abajo con blanco degradado en el centro */
 .franja-andalucia-vertical {
-  width: 9px;
+  width: 7px;
   flex-shrink: 0;
-  display: flex;
-  flex-direction: row;
+  display: block;
   height: auto;
   align-self: stretch;
+  background: linear-gradient(
+    180deg,
+    #007A33 0%,
+    #007A33 22%,
+    rgba(255, 255, 255, 0.85) 42%,
+    #FFFFFF 50%,
+    rgba(255, 255, 255, 0.85) 58%,
+    #007A33 78%,
+    #007A33 100%
+  );
+  box-shadow: 0 0 6px rgba(0, 122, 51, 0.25);
+  position: relative;
 }
 
 .franja-andalucia-vertical span {
-  flex: 1;
-}
-
-.franja-andalucia-verde {
-  background-color: #007A33;
-}
-
-.franja-andalucia-blanca {
-  background-color: #FFFFFF;
-  border-left: 1px solid rgba(0, 0, 0, 0.08);
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  display: none;
 }
 
 .tarjeta-pagina-cuerpo {
@@ -1410,20 +1411,165 @@ pre code {
 
   .franja-andalucia-vertical {
     width: 100% !important;
-    height: 9px !important;
-    flex-direction: column !important;
+    height: 7px !important;
     align-self: auto !important;
-  }
-
-  .franja-andalucia-blanca {
-    border-left: none !important;
-    border-right: none !important;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: linear-gradient(
+      180deg,
+      #007A33 0%,
+      #007A33 25%,
+      #FFFFFF 45%,
+      #FFFFFF 55%,
+      #007A33 75%,
+      #007A33 100%
+    ) !important;
   }
 
   .tarjeta-pagina-cuerpo {
     padding: 1.25rem !important;
+  }
+}
+
+/* ==============================================================================
+ * Aviso flotante global de entorno en pruebas (x-aviso-pruebas)
+ * ============================================================================== */
+.aviso-flotante-pruebas {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+  max-width: 440px;
+  width: calc(100vw - 3rem);
+  pointer-events: none;
+  font-family: inherit;
+}
+
+.aviso-pruebas-tarjeta {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  background-color: var(--color-superficie);
+  color: var(--color-texto);
+  border: 1.5px solid #F59E0B;
+  border-radius: var(--radio-lg);
+  padding: 1rem 1.15rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(245, 158, 11, 0.2);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+
+[data-theme="dark"] .aviso-pruebas-tarjeta {
+  background-color: #1A1B26;
+  border-color: #D97706;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(245, 158, 11, 0.25);
+}
+
+.aviso-pruebas-icono {
+  font-size: 1.35rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.aviso-pruebas-cuerpo {
+  flex: 1;
+  min-width: 0;
+}
+
+.aviso-pruebas-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.aviso-pruebas-texto {
+  font-size: 0.85rem;
+  line-height: 1.48;
+  color: var(--color-texto-2);
+  margin-bottom: 0.75rem;
+}
+
+.aviso-pruebas-acciones {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btn-cerrar-aviso {
+  background: transparent;
+  border: none;
+  color: var(--color-texto-3);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: var(--radio-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.btn-cerrar-aviso:hover {
+  color: var(--color-texto);
+  background-color: var(--color-superficie-sutil);
+}
+
+.btn-entendido-aviso {
+  background: var(--color-superficie-sutil);
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radio-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-entendido-aviso:hover {
+  background-color: var(--color-borde);
+  color: var(--color-texto);
+}
+
+.aviso-pruebas-pildora {
+  pointer-events: auto;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background-color: var(--color-superficie);
+  border: 1.5px solid #F59E0B;
+  border-radius: 9999px;
+  padding: 0.4rem 0.85rem;
+  color: var(--color-texto);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+[data-theme="dark"] .aviso-pruebas-pildora {
+  background-color: #1A1B26;
+  border-color: #D97706;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+.aviso-pruebas-pildora:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.3);
+}
+
+@media (max-width: 640px) {
+  .aviso-flotante-pruebas {
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    width: auto;
+    max-width: none;
   }
 }
 

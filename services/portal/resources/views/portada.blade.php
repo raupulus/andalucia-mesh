@@ -198,12 +198,8 @@
                                 </a>
                             </div>
 
-                            <!-- Franja Andalucía (verde/blanca/verde) -->
-                            <div class="franja-andalucia-vertical" aria-hidden="true">
-                                <span class="franja-andalucia-verde"></span>
-                                <span class="franja-andalucia-blanca"></span>
-                                <span class="franja-andalucia-verde"></span>
-                            </div>
+                            <!-- Franja Andalucía (verde/blanco/verde con degradado centrado) -->
+                            <div class="franja-andalucia-vertical" aria-hidden="true"></div>
 
                             <!-- Cuerpo de la tarjeta compacta -->
                             <div class="tarjeta-pagina-cuerpo">
