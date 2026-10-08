@@ -118,10 +118,13 @@ return [
         ['titulo' => 'Inicio', 'url' => '/'],
         ['titulo' => 'Configura tu nodo', 'url' => '/configura-tu-nodo'],
         ['titulo' => 'Configurador', 'url' => '/configurador'],
-        ['titulo' => 'Conecta tu gateway', 'url' => '/conecta-tu-gateway'],
+        ['titulo' => 'MQTT', 'url' => '/conecta-tu-gateway'],
         ['titulo' => 'Rankings', 'url' => '/rankings'],
         ['titulo' => 'Alertas', 'url' => '/alertas'],
         ['titulo' => 'Bots', 'url' => '/bots'],
+    ],
+
+    'extras' => [
         ['titulo' => 'Revisa tu nodo', 'url' => '/revisa-tu-nodo'],
         ['titulo' => 'Sugerencias', 'url' => '/sugerencias'],
     ],
