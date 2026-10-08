@@ -18,7 +18,7 @@ class ListSuggestions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()->label('Nueva sugerencia'),
+            CreateAction::make()->label(__('admin.suggestions.btn_create')),
         ];
     }
 }

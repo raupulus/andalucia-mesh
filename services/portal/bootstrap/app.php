@@ -27,6 +27,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
         ]);
 
+        // Registrar middleware de detección de idioma sin cookies (RN-48)
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\PortalLocaleMiddleware::class,
+        ]);
+
         // Configurar middleware del grupo api
         $middleware->appendToGroup('api', [
             'throttle:api-publica',

@@ -9,10 +9,28 @@
 ])
 
 @php
+    $currentLang = app()->getLocale();
     if ($tarjeta) {
-        $titulo = $tarjeta['titulo'] ?? $titulo;
-        $descripcion = $tarjeta['descripcion'] ?? $descripcion;
+        $tarjetaId = $tarjeta['id'] ?? null;
+        if ($tarjetaId === 'meshview') {
+            $titulo = __('portal.services.meshview_title');
+            $descripcion = __('portal.services.meshview_desc');
+        } elseif ($tarjetaId === 'potatomesh') {
+            $titulo = __('portal.services.potatomesh_title');
+            $descripcion = __('portal.services.potatomesh_desc');
+        } elseif ($tarjetaId === 'rankings') {
+            $titulo = __('portal.services.rankings_title');
+            $descripcion = __('portal.services.rankings_desc');
+        } else {
+            $titulo = $tarjeta['titulo'] ?? $titulo;
+            $descripcion = $tarjeta['descripcion'] ?? $descripcion;
+        }
+
         $url = $tarjeta['url'] ?? $url;
+        if (str_starts_with((string) $url, '/') && $currentLang !== 'es') {
+            $url .= (str_contains((string) $url, '?') ? '&' : '?') . 'lang=' . $currentLang;
+        }
+
         $imagen = $tarjeta['imagen'] ?? $imagen;
         $servicioClave = $tarjeta['servicio_clave'] ?? $servicioClave;
         $estado = $tarjeta['estado'] ?? $estado;

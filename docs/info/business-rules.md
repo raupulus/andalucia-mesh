@@ -73,6 +73,7 @@
 | RN-45 | Chat en directo por WebSocket: solo lectura, solo canales admitidos, sin almacenamiento | [chat-ws](chat-ws/README.md) |
 | RN-46 | Nombre, dominio, contacto, canales, radio y mapa siempre por configuración, nunca escritos en código ni textos | [integration §12](integration.md) |
 | RN-47 | Autoría visible: Raúl Caro Pastorino · @raupulus · public@raupulus.dev · https://raupulus.dev | [05-authorship](portal/05-authorship.md) |
+| RN-48 | Soporte multidioma exclusivo del portal (frontend público y panel operador `/admin`): español como idioma base/fallback y por defecto; detección automática del navegador (`Accept-Language`) entre español (`es`), inglés (`en`) y portugués (`pt`). Selector de idioma en el navbar con icono redondo mostrando la bandera de Andalucía para representar la variante y enfoque andaluz (en lugar de la bandera de España), además de selector en backend. Las demás piezas/servicios no se traducen | [portal](portal/README.md) |
 
 ## Historial de cambios de reglas
 
@@ -86,6 +87,7 @@
 | 2026-10-08 | RN-34 | Filtro geográfico en bots: nodos exteriores (fuera de Andalucía) desactivados por defecto al añadir el bot a grupos; configurables con /disableExterior y /enableExterior | Responsable del proyecto |
 | 2026-10-08 | RN-08, RN-09 | Persistencia estricta en UTC y visualización obligatoria en 24h peninsular (Europe/Madrid) con formato europeo; aislamiento frente a federaciones externas (PotatoMesh FEDERATION=0 forzado en compose) y registro de personalizaciones | Responsable del proyecto |
 | 2026-10-08 | RN-38 | Formateo estético y agrupación provincial obligatoria en /battery y /routers, con exclusión estricta de nodos de fuera de Andalucía | Responsable del proyecto |
+| 2026-10-08 | RN-48 | Soporte multidioma (ES/EN/PT) exclusivo para el portal (frontend y panel de operadores), con español por defecto y bandera de Andalucía en el selector | Responsable del proyecto |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

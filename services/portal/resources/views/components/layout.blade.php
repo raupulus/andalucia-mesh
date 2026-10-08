@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="light">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -46,7 +46,7 @@
     {{ $styles ?? '' }}
 </head>
 <body>
-    <a href="#contenido-principal" class="salto-accesible">Saltar al contenido principal</a>
+    <a href="#contenido-principal" class="salto-accesible">{{ __('portal.skip_to_content') }}</a>
 
     <x-cabecera />
 

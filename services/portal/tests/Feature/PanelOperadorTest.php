@@ -139,6 +139,9 @@ class PanelOperadorTest extends TestCase
 
         $response = $this->actingAs($user)->get('/admin');
         $response->assertStatus(200);
+        $response->assertSee('Presión del Aire (ChUtil)');
+        $response->assertSee('Saturación TX Repetidores');
+        $response->assertSee('Repetidores y Nodos de Infraestructura');
         $response->assertSee('Estado de la Red y Microservicios');
     }
 

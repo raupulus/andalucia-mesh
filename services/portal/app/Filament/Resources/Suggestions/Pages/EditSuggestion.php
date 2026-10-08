@@ -18,7 +18,7 @@ class EditSuggestion extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make()->label('Eliminar'),
+            DeleteAction::make()->label(__('admin.suggestions.action_delete')),
         ];
     }
 }

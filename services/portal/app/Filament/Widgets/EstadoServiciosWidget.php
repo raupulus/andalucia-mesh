@@ -21,7 +21,7 @@ class EstadoServiciosWidget extends Widget
 
     protected string $view = 'filament.widgets.estado-servicios-widget';
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected static ?int $sort = 1;
 
@@ -30,7 +30,7 @@ class EstadoServiciosWidget extends Widget
      */
     public function comprobarAhora(): void
     {
-        (new ComprobarServicios())->handle();
+        (new ComprobarServicios)->handle();
     }
 
     /**
@@ -73,22 +73,22 @@ class EstadoServiciosWidget extends Widget
             // Determinación de color y etiqueta según regla anti-parpadeo y fases
             if ($ok) {
                 $color = 'verde';
-                $etiqueta = 'Operativo';
+                $etiqueta = __('admin.widget_network_status.status_ok');
                 $operativos++;
             } elseif ($fase > 5 && (str_contains((string) $motivo, 'En fase posterior') || $reg === null)) {
                 $color = 'gris';
-                $etiqueta = 'Pendiente (Fase ' . $fase . ')';
+                $etiqueta = __('admin.widget_network_status.status_pending_phase', ['phase' => $fase]);
                 $pendientes++;
             } elseif ($fallos >= 2) {
                 $color = 'rojo';
-                $etiqueta = 'Caído (' . $fallos . ' fallos)';
+                $etiqueta = __('admin.widget_network_status.status_down_failures', ['count' => $fallos]);
                 $caidos++;
             } elseif ($fallos === 1) {
                 $color = 'amarillo';
-                $etiqueta = 'Aviso transitorio (1 fallo)';
+                $etiqueta = __('admin.widget_network_status.status_warning_transient');
             } else {
                 $color = 'gris';
-                $etiqueta = 'Sin comprobar';
+                $etiqueta = __('admin.widget_network_status.status_untested');
                 $pendientes++;
             }
 
@@ -104,13 +104,13 @@ class EstadoServiciosWidget extends Widget
                 'latencia_ms' => $latencia,
                 'motivo' => $motivo,
                 'detalle' => $detalle,
-                'hace' => $comprobadoEn ? $comprobadoEn->diffForHumans() : 'Nunca',
+                'hace' => $comprobadoEn ? $comprobadoEn->diffForHumans() : __('admin.widget_network_status.time_never'),
             ];
         }
 
         // Latido del daemon portal-tareas
         $latidoOk = false;
-        $latidoHace = 'Sin datos';
+        $latidoHace = __('admin.widget_network_status.no_data');
         try {
             $latido = DB::table('tareas_latido')->where('tarea', 'comprobar-servicios')->value('ultima_ejecucion');
             if ($latido !== null) {

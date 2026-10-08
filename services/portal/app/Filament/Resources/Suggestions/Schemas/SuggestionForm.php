@@ -25,44 +25,48 @@ class SuggestionForm
     {
         return $schema
             ->components([
-                Section::make('Detalle de la Sugerencia')
-                    ->description('Información y contenido enviado por el usuario.')
+                Section::make(__('admin.suggestions.section_detail'))
+                    ->description(__('admin.suggestions.section_detail_desc'))
                     ->schema([
                         Grid::make(2)->schema([
                             Select::make('category')
-                                ->label('Categoría')
-                                ->options(Suggestion::CATEGORIES)
+                                ->label(__('admin.suggestions.col_category'))
+                                ->options(fn () => collect(Suggestion::CATEGORIES)->mapWithKeys(fn ($v, $k) => [$k => __('admin.suggestions.categories.' . $k)])->toArray())
                                 ->required(),
 
                             Select::make('status')
-                                ->label('Estado')
-                                ->options(Suggestion::STATUSES)
+                                ->label(__('admin.suggestions.col_status'))
+                                ->options(fn () => [
+                                    Suggestion::STATUS_PENDING => __('admin.suggestions.statuses.pending'),
+                                    Suggestion::STATUS_APPROVED => __('admin.suggestions.statuses.approved'),
+                                    Suggestion::STATUS_REJECTED => __('admin.suggestions.statuses.rejected'),
+                                ])
                                 ->default(Suggestion::STATUS_PENDING)
                                 ->required(),
                         ]),
 
                         Textarea::make('content')
-                            ->label('Propuesta / Sugerencia')
+                            ->label(__('admin.suggestions.field_proposal'))
                             ->rows(6)
                             ->required(),
                     ]),
 
-                Section::make('Gestión Interna (Operador)')
-                    ->description('Anotaciones y metadatos visibles exclusivamente para administradores.')
+                Section::make(__('admin.suggestions.section_admin'))
+                    ->description(__('admin.suggestions.section_admin_desc'))
                     ->schema([
                         Textarea::make('operator_notes')
-                            ->label('Notas del operador')
-                            ->placeholder('Añade comentarios internos sobre la viabilidad, estado o respuesta de esta sugerencia...')
+                            ->label(__('admin.suggestions.field_operator_notes'))
+                            ->placeholder(__('admin.suggestions.placeholder_operator_notes'))
                             ->rows(4),
 
                         Grid::make(2)->schema([
                             TextInput::make('ip_hash')
-                                ->label('Hash identificador (anonimizado)')
+                                ->label(__('admin.suggestions.field_ip_hash'))
                                 ->disabled()
                                 ->dehydrated(false),
 
                             DateTimePicker::make('created_at')
-                                ->label('Fecha de recepción')
+                                ->label(__('admin.suggestions.field_created_at'))
                                 ->disabled()
                                 ->dehydrated(false),
                         ]),

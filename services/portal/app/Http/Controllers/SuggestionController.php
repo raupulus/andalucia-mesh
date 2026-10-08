@@ -49,7 +49,7 @@ class SuggestionController extends Controller
             ->count();
 
         if ($recentCount >= 10) {
-            $msg = 'Has enviado demasiadas sugerencias recientemente. Por favor, espera antes de enviar otra.';
+            $msg = __('portal.suggestions.err_too_many');
             if ($request->wantsJson()) {
                 return response()->json(['ok' => false, 'error' => $msg], 429);
             }
@@ -67,7 +67,7 @@ class SuggestionController extends Controller
         $contenido = trim((string) $request->input('content', ''));
 
         if (! $categoriaValida) {
-            $msg = 'Debes seleccionar un área o servicio válido de la lista.';
+            $msg = __('portal.suggestions.err_invalid_category');
             if ($request->wantsJson()) {
                 return response()->json(['ok' => false, 'error' => $msg], 422);
             }
@@ -81,7 +81,7 @@ class SuggestionController extends Controller
         }
 
         if (mb_strlen($contenido) < 10) {
-            $msg = 'La sugerencia debe contener al menos 10 caracteres.';
+            $msg = __('portal.suggestions.err_content_min');
             if ($request->wantsJson()) {
                 return response()->json(['ok' => false, 'error' => $msg], 422);
             }
@@ -95,7 +95,7 @@ class SuggestionController extends Controller
         }
 
         if (mb_strlen($contenido) > 3000) {
-            $msg = 'La sugerencia no puede exceder los 3000 caracteres.';
+            $msg = __('portal.suggestions.err_content_max');
             if ($request->wantsJson()) {
                 return response()->json(['ok' => false, 'error' => $msg], 422);
             }
@@ -112,7 +112,7 @@ class SuggestionController extends Controller
         if ($this->turnstile->isEnabled()) {
             $token = $request->input('cf-turnstile-response');
             if (empty($token) || ! is_string($token) || ! $this->turnstile->verify($token, $ip)) {
-                $msg = 'La verificación de seguridad de Cloudflare ha fallado o ha caducado. Por favor, resuélvela de nuevo.';
+                $msg = __('portal.suggestions.err_turnstile_fail');
                 if ($request->wantsJson()) {
                     return response()->json(['ok' => false, 'error' => $msg], 422);
                 }
@@ -138,7 +138,7 @@ class SuggestionController extends Controller
         if ($request->wantsJson()) {
             return response()->json([
                 'ok' => true,
-                'message' => '¡Muchas gracias! Tu sugerencia ha sido enviada con éxito.',
+                'message' => __('portal.suggestions.success_message'),
             ]);
         }
 

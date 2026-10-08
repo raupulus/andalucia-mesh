@@ -31,7 +31,16 @@
 | — | [`pages/`](pages/README.md) | Contenido y borrador del texto de cada página pública | — |
 | — | [`DESIGN.md`](../DESIGN.md) | Sistema visual | — |
 
-**Fuera de esta entrega:** inglés, analítica, alta de gateways desde el panel, edición de textos desde el panel, donaciones, notificaciones push, cualquier tiempo real que no sea sondeo.
+**Fuera de esta entrega:** analítica de terceros, alta de gateways desde el panel, edición de textos desde el panel, donaciones, notificaciones push, cualquier tiempo real que no sea sondeo.
+
+### 2.1 Soporte Multidioma (RN-48)
+
+El portal es la **única pieza** del proyecto con internacionalización y traducciones (las demás piezas operan exclusivamente en sus contratos técnicos en inglés y logs).
+- **Idiomas admitidos:** Español (`es`, por defecto y fallback), Inglés (`en`) y Portugués (`pt`).
+- **Detección automática:** Se evalúa la cabecera `Accept-Language` del navegador del visitante. Si coincide con una variante de `en`, `pt` o `es`, se establece automáticamente dicho idioma. Ante ausencia o cualquier otro idioma no soportado, se aplica el fallback en español.
+- **Selector de idioma en Frontend (Navbar):** Ubicado en la cabecera junto al conmutador de tema. Incluye un icono redondo con la bandera del idioma actual. Como la malla está enfocada a Andalucía, el idioma español está representado por la **bandera de Andalucía** (verde, blanca, verde) en lugar de la bandera de España. El selector permite cambiar entre Español, Inglés y Portugués, persistiendo la preferencia en `localStorage` (`portal_locale`) sin emitir cookies en el front público (RN-06).
+- **Selector de idioma en Backend (`/admin`):** En el panel de operadores (Filament) se dispone de selector de idioma en la barra superior (topbar/user menu) y en el formulario de acceso, persistiendo la selección en la sesión de administración.
+- **Traducciones de contenidos:** Cadenas de interfaz localizadas mediante archivos de idioma de Laravel (`lang/es/portal.php`, `lang/en/portal.php`, `lang/pt/portal.php`, `lang/*/admin.php`). Para páginas institucionales, `ContenidoMarkdown` carga la versión localizada (`*.en.md`, `*.pt.md`) si existe, con fallback transparente a la versión española.
 
 ## 3. Stack y versiones
 

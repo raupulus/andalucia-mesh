@@ -29,36 +29,36 @@ class SuggestionsTable
         return $table
             ->columns([
                 TextColumn::make('created_at')
-                    ->label('Fecha')
+                    ->label(__('admin.suggestions.col_created'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
 
                 TextColumn::make('category')
-                    ->label('Categoría')
+                    ->label(__('admin.suggestions.col_category'))
                     ->badge()
-                    ->formatStateUsing(fn (?string $state): string => Suggestion::CATEGORIES[$state] ?? (string) $state)
+                    ->formatStateUsing(fn (?string $state): string => ($state && __('admin.suggestions.categories.' . $state) !== 'admin.suggestions.categories.' . $state) ? __('admin.suggestions.categories.' . $state) : (Suggestion::CATEGORIES[$state] ?? (string) $state))
                     ->sortable(),
 
                 TextColumn::make('content')
-                    ->label('Sugerencia')
+                    ->label(__('admin.suggestions.col_content'))
                     ->limit(65)
                     ->tooltip(fn (Suggestion $record): string => $record->content)
                     ->searchable()
                     ->wrap(),
 
                 TextColumn::make('status')
-                    ->label('Estado')
+                    ->label(__('admin.suggestions.col_status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         Suggestion::STATUS_APPROVED => 'success',
                         Suggestion::STATUS_REJECTED => 'danger',
                         default => 'warning',
                     })
-                    ->formatStateUsing(fn (?string $state): string => Suggestion::STATUSES[$state] ?? (string) $state)
+                    ->formatStateUsing(fn (?string $state): string => ($state && __('admin.suggestions.statuses.' . $state) !== 'admin.suggestions.statuses.' . $state) ? __('admin.suggestions.statuses.' . $state) : (Suggestion::STATUSES[$state] ?? (string) $state))
                     ->sortable(),
 
                 TextColumn::make('operator_notes')
-                    ->label('Notas operador')
+                    ->label(__('admin.suggestions.col_operator_notes'))
                     ->limit(40)
                     ->placeholder('—')
                     ->tooltip(fn (Suggestion $record): ?string => $record->operator_notes)
@@ -67,45 +67,49 @@ class SuggestionsTable
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('status')
-                    ->label('Filtrar por estado')
-                    ->options(Suggestion::STATUSES),
+                    ->label(__('admin.suggestions.filter_status'))
+                    ->options(fn () => [
+                        Suggestion::STATUS_PENDING => __('admin.suggestions.statuses.pending'),
+                        Suggestion::STATUS_APPROVED => __('admin.suggestions.statuses.approved'),
+                        Suggestion::STATUS_REJECTED => __('admin.suggestions.statuses.rejected'),
+                    ]),
 
                 SelectFilter::make('category')
-                    ->label('Filtrar por categoría')
-                    ->options(Suggestion::CATEGORIES),
+                    ->label(__('admin.suggestions.filter_category'))
+                    ->options(fn () => collect(Suggestion::CATEGORIES)->mapWithKeys(fn ($v, $k) => [$k => __('admin.suggestions.categories.' . $k)])->toArray()),
             ])
             ->recordActions([
                 Action::make('approve')
-                    ->label('Aprobar')
+                    ->label(__('admin.suggestions.action_approve'))
                     ->icon(Heroicon::OutlinedCheck)
                     ->color('success')
                     ->visible(fn (Suggestion $record): bool => $record->status !== Suggestion::STATUS_APPROVED)
                     ->action(function (Suggestion $record): void {
                         $record->update(['status' => Suggestion::STATUS_APPROVED]);
                         Notification::make()
-                            ->title('Sugerencia aprobada')
+                            ->title(__('admin.suggestions.action_approve_success'))
                             ->success()
                             ->send();
                     }),
 
                 Action::make('reject')
-                    ->label('Rechazar')
+                    ->label(__('admin.suggestions.action_reject'))
                     ->icon(Heroicon::OutlinedXMark)
                     ->color('danger')
                     ->visible(fn (Suggestion $record): bool => $record->status !== Suggestion::STATUS_REJECTED)
                     ->action(function (Suggestion $record): void {
                         $record->update(['status' => Suggestion::STATUS_REJECTED]);
                         Notification::make()
-                            ->title('Sugerencia rechazada')
+                            ->title(__('admin.suggestions.action_reject_success'))
                             ->danger()
                             ->send();
                     }),
 
                 EditAction::make()
-                    ->label('Editar / Notas'),
+                    ->label(__('admin.suggestions.action_edit')),
 
                 DeleteAction::make()
-                    ->label('Eliminar'),
+                    ->label(__('admin.suggestions.action_delete')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

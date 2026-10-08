@@ -92,16 +92,31 @@ class ContenidoMarkdown
      */
     public function render(string $nombreFichero): array
     {
-        $path = resource_path('contenido/' . $nombreFichero);
+        $locale = app()->getLocale();
+        $ficheroEfectivo = $nombreFichero;
+
+        if ($locale !== 'es') {
+            $ficheroLocalizado = str_replace('.md', ".{$locale}.md", $nombreFichero);
+            if (file_exists(resource_path('contenido/' . $ficheroLocalizado))) {
+                $ficheroEfectivo = $ficheroLocalizado;
+            }
+        }
+
+        $path = resource_path('contenido/' . $ficheroEfectivo);
+        if (!file_exists($path)) {
+            $path = resource_path('contenido/' . $nombreFichero);
+            $ficheroEfectivo = $nombreFichero;
+        }
+
         if (!file_exists($path)) {
             throw new RuntimeException("El archivo de contenido {$nombreFichero} no existe.");
         }
 
         $mtime = filemtime($path);
-        $cacheKey = "markdown_render_v3:{$nombreFichero}:{$mtime}";
+        $cacheKey = "markdown_render_v4:{$locale}:{$ficheroEfectivo}:{$mtime}";
 
         /** @var array{titulo: string, descripcion: string, html: string, h1: string} */
-        return Cache::rememberForever($cacheKey, function () use ($path, $nombreFichero): array {
+        return Cache::rememberForever($cacheKey, function () use ($path, $ficheroEfectivo): array {
             $rawContent = (string) file_get_contents($path);
 
             // 1. Extraer metadatos de SEO si existen

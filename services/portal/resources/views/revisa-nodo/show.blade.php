@@ -1,21 +1,26 @@
-<x-layout :title="'Informe de Salud ' . $idBuscado . ' — ' . config('proyecto.nombre')" description="Auditoría técnica de configuración, radio, intervalos y batería del nodo.">
+@php
+    $currentLang = app()->getLocale();
+    $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
+@endphp
+
+<x-layout :title="__('portal.node_check.report_title', ['id' => $idBuscado, 'name' => config('proyecto.nombre')])" :description="__('portal.node_check.report_description')">
     <div class="contenedor seccion">
         <div style="max-width: 820px; margin: 0 auto;">
-            <a href="/revisa-tu-nodo" style="font-size: 0.9rem; color: var(--color-texto-2); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 1.5rem;">
-                ← Volver al buscador de nodos
+            <a href="/revisa-tu-nodo{{ $langQuery }}" style="font-size: 0.9rem; color: var(--color-texto-2); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 1.5rem;">
+                {{ __('portal.node_check.back_to_search') }}
             </a>
 
             @if(!empty($noEncontrado))
                 <div class="tarjeta" style="padding: 2.5rem; text-align: center;">
                     <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔍</div>
                     <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 0.5rem;">
-                        Nodo no localizado: <code>{{ $idBuscado }}</code>
+                        {{ __('portal.node_check.not_found_title', ['id' => $idBuscado]) }}
                     </h1>
                     <p style="color: var(--color-texto-2); max-width: 500px; margin: 0 auto 1.5rem auto; line-height: 1.5;">
-                        No existen registros de paquetes válidos para este identificador en los últimos días. Asegúrate de que el nodo esté encendido, configurado con el preset regional y con la opción de posición activada.
+                        {{ __('portal.node_check.not_found_desc') }}
                     </p>
-                    <a href="/configura-tu-nodo" class="btn btn-primario">
-                        Consultar guía de configuración regional →
+                    <a href="/configura-tu-nodo{{ $langQuery }}" class="btn btn-primario">
+                        {{ __('portal.node_check.btn_view_setup_guide') }}
                     </a>
                 </div>
             @else
@@ -44,10 +49,10 @@
                                 default => 'neutro',
                             };
                             $estadoTexto = match($estadoSalud) {
-                                'optimo' => 'Configuración óptima',
-                                'mejorable' => 'Mejoras recomendadas',
-                                'atencion_requerida' => 'Requiere atención',
-                                default => 'Sin clasificar',
+                                'optimo' => __('portal.node_check.health_optimal'),
+                                'mejorable' => __('portal.node_check.health_improvable'),
+                                'atencion_requerida' => __('portal.node_check.health_action_required'),
+                                default => __('portal.node_check.health_unclassified'),
                             };
                         @endphp
                         <div>
@@ -57,10 +62,10 @@
 
                     <!-- Ficha rápida de hardware y rol -->
                     <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; font-size: 0.9rem; color: var(--color-texto-2); border-top: 1px solid var(--color-borde); padding-top: 1rem;">
-                        <div>Provincia: <strong>{{ $informe['node']['province'] ?? 'Desconocida' }}</strong></div>
-                        <div>Rol: <code>{{ $informe['node']['role'] ?? 'CLIENT' }}</code></div>
-                        <div>Hardware: <strong>{{ $informe['node']['hw_model'] ?? 'No especificado' }}</strong></div>
-                        <div>Última vez visto: <strong>{{ $informe['node']['last_seen'] ?? 'Recientemente' }}</strong></div>
+                        <div>{{ __('portal.node_check.province') }} <strong>{{ $informe['node']['province'] ?? __('portal.node_check.unknown_province') }}</strong></div>
+                        <div>{{ __('portal.node_check.role') }} <code>{{ $informe['node']['role'] ?? 'CLIENT' }}</code></div>
+                        <div>{{ __('portal.node_check.hw_model') }} <strong>{{ $informe['node']['hw_model'] ?? __('portal.node_check.not_specified') }}</strong></div>
+                        <div>{{ __('portal.node_check.last_seen') }} <strong>{{ $informe['node']['last_seen'] ?? __('portal.node_check.recent_seen') }}</strong></div>
                     </div>
                 </header>
 
@@ -68,7 +73,7 @@
                 @if(!empty($informe['findings']))
                     <section class="tarjeta" style="padding: 1.75rem; margin-bottom: 2rem; border-left: 4px solid var(--color-aviso-texto);">
                         <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 1rem;">
-                            Recomendaciones de Optimización Detectadas
+                            {{ __('portal.node_check.section_findings') }}
                         </h2>
                         <div style="display: flex; flex-direction: column; gap: 1rem;">
                             @foreach($informe['findings'] as $f)
@@ -78,13 +83,19 @@
                                         'aviso' => 'aviso',
                                         default => 'info',
                                     };
+                                    $sevKey = strtolower((string) $f['severidad']);
+                                    $textoSev = match($sevKey) {
+                                        'critico' => __('portal.alerts.risk_levels.alto'),
+                                        'aviso' => __('portal.alerts.risk_levels.medio'),
+                                        default => __('portal.alerts.risk_levels.bajo'),
+                                    };
                                 @endphp
                                 <div style="background: var(--color-superficie-sutil); padding: 1.25rem; border-radius: var(--radio-md); border: 1px solid var(--color-borde);">
                                     <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem;">
                                         <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--color-texto-1); margin: 0;">
                                             {{ $f['titulo'] }}
                                         </h3>
-                                        <x-chip-estado :tipo="$chipTipo" :texto="ucfirst($f['severidad'])" />
+                                        <x-chip-estado :tipo="$chipTipo" :texto="$textoSev" />
                                     </div>
                                     <p style="font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.5; margin: 0;">
                                         {{ $f['descripcion'] }}
@@ -98,34 +109,34 @@
                 <!-- 2. Parámetros de Radio y Saltos -->
                 <section class="tarjeta" style="padding: 1.75rem; margin-bottom: 2rem;">
                     <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 1rem;">
-                        Radio y Propagación
+                        {{ __('portal.node_check.section_radio') }}
                     </h2>
                     <table class="tabla" style="width: 100%; border-collapse: collapse; font-size: 0.92rem;">
                         <tbody>
                             <tr style="border-bottom: 1px solid var(--color-borde);">
-                                <td style="padding: 0.6rem 0; font-weight: 600; width: 45%;">Límite de saltos emitido (Hop Limit)</td>
+                                <td style="padding: 0.6rem 0; font-weight: 600; width: 45%;">{{ __('portal.node_check.th_hop_limit') }}</td>
                                 <td style="padding: 0.6rem 0;">
-                                    <strong>{{ $informe['node']['hop_start_last'] ?? '3 (por defecto)' }}</strong> saltos
+                                    <strong>{{ $informe['node']['hop_start_last'] ?? __('portal.node_check.hops_default') }}</strong> {{ __('portal.node_check.hops_unit') }}
                                     @if(($informe['node']['hop_start_last'] ?? 3) <= 3)
-                                        <span style="color: var(--mapa-verde); margin-left: 0.5rem;">✓ Correcto</span>
+                                        <span style="color: var(--mapa-verde); margin-left: 0.5rem;">{{ __('portal.node_check.status_correct') }}</span>
                                     @else
-                                        <span style="color: var(--color-critico-texto); margin-left: 0.5rem;">⚠️ Recomendado máximo 3</span>
+                                        <span style="color: var(--color-critico-texto); margin-left: 0.5rem;">{{ __('portal.node_check.status_max_recommended') }}</span>
                                     @endif
                                 </td>
                             </tr>
                             <tr style="border-bottom: 1px solid var(--color-borde);">
-                                <td style="padding: 0.6rem 0; font-weight: 600;">Rol operativo</td>
+                                <td style="padding: 0.6rem 0; font-weight: 600;">{{ __('portal.node_check.th_operational_role') }}</td>
                                 <td style="padding: 0.6rem 0;">
                                     <code>{{ $informe['node']['role'] ?? 'CLIENT' }}</code>
                                     @if(($informe['node']['role'] ?? '') === 'ROUTER')
-                                        <span style="color: var(--color-aviso-texto); margin-left: 0.5rem;">(Coordinación requerida)</span>
+                                        <span style="color: var(--color-aviso-texto); margin-left: 0.5rem;">{{ __('portal.node_check.role_coordination') }}</span>
                                     @endif
                                 </td>
                             </tr>
                             <tr>
-                                <td style="padding: 0.6rem 0; font-weight: 600;">Función de gateway</td>
+                                <td style="padding: 0.6rem 0; font-weight: 600;">{{ __('portal.node_check.th_gateway_function') }}</td>
                                 <td style="padding: 0.6rem 0;">
-                                    {{ !empty($informe['node']['is_gateway']) ? 'Sí, conectado a MQTT' : 'No (nodo solo radio)' }}
+                                    {{ !empty($informe['node']['is_gateway']) ? __('portal.node_check.gateway_yes') : __('portal.node_check.gateway_no') }}
                                 </td>
                             </tr>
                         </tbody>
@@ -135,16 +146,16 @@
                 <!-- 3. Cadencia de Emisiones observada -->
                 <section class="tarjeta" style="padding: 1.75rem; margin-bottom: 2rem;">
                     <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 1rem;">
-                        Cadencia de Intervalos Observada (Últimos 7 días)
+                        {{ __('portal.node_check.section_cadence') }}
                     </h2>
                     <div style="overflow-x: auto;">
                         <table class="tabla" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                             <thead>
                                 <tr style="border-bottom: 2px solid var(--color-borde); text-align: left;">
-                                    <th style="padding: 0.6rem;">Tipo de Paquete</th>
-                                    <th style="padding: 0.6rem; text-align: right;">Emisiones</th>
-                                    <th style="padding: 0.6rem; text-align: right;">Intervalo Mediano</th>
-                                    <th style="padding: 0.6rem;">Recomendación Regional</th>
+                                    <th style="padding: 0.6rem;">{{ __('portal.node_check.th_packet_type') }}</th>
+                                    <th style="padding: 0.6rem; text-align: right;">{{ __('portal.node_check.th_broadcasts') }}</th>
+                                    <th style="padding: 0.6rem; text-align: right;">{{ __('portal.node_check.th_median_interval') }}</th>
+                                    <th style="padding: 0.6rem;">{{ __('portal.node_check.th_recommendation') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -153,7 +164,7 @@
                                         $mediana = $inv['median_interval_s'] !== null ? (float) $inv['median_interval_s'] : null;
                                         $textoMediana = $mediana !== null 
                                             ? ($mediana >= 3600 ? round($mediana / 3600, 1) . ' h' : round($mediana / 60) . ' min')
-                                            : 'Menos de 2 emisiones';
+                                            : __('portal.node_check.less_than_2_broadcasts');
                                     @endphp
                                     <tr style="border-bottom: 1px solid var(--color-borde);">
                                         <td style="padding: 0.6rem; font-weight: 600;">
@@ -170,20 +181,20 @@
                                         </td>
                                         <td style="padding: 0.6rem; font-size: 0.85rem; color: var(--color-texto-2);">
                                             @if($inv['portnum'] === 'nodeinfo')
-                                                72 horas (nodos fijos)
+                                                {{ __('portal.node_check.rec_nodeinfo') }}
                                             @elseif($inv['portnum'] === 'position')
-                                                72 horas (fijos) / 15 min (móviles)
+                                                {{ __('portal.node_check.rec_position') }}
                                             @elseif($inv['portnum'] === 'telemetry')
-                                                2 a 4 horas (solar) o desactivada
+                                                {{ __('portal.node_check.rec_telemetry') }}
                                             @else
-                                                Según necesidad
+                                                {{ __('portal.node_check.rec_as_needed') }}
                                             @endif
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
                                         <td colspan="4" style="padding: 1rem; text-align: center; color: var(--color-texto-3);">
-                                            No se han capturado emisiones periódicas en los últimos 7 días.
+                                            {{ __('portal.node_check.no_cadence') }}
                                         </td>
                                     </tr>
                                 @endforelse

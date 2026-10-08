@@ -32,12 +32,12 @@ class EditProfile extends BaseEditProfile
 
     public static function getLabel(): string
     {
-        return 'Mi perfil de operador';
+        return __('admin.profile.title');
     }
 
     public function getTitle(): string|Htmlable
     {
-        return 'Mi perfil de operador';
+        return __('admin.profile.title');
     }
 
     /**
@@ -47,16 +47,16 @@ class EditProfile extends BaseEditProfile
     {
         return $schema
             ->components([
-                Section::make('Identidad del Operador')
-                    ->description('Gestiona tu avatar personal (formato 1:1 con recorte circular), nombre visible y correo de acceso.')
+                Section::make(__('admin.profile.identity_section'))
+                    ->description(__('admin.profile.identity_desc'))
                     ->schema([
                         $this->getAvatarFormComponent(),
                         $this->getNameFormComponent(),
                         $this->getEmailFormComponent(),
                     ]),
 
-                Section::make('Seguridad y Contraseña')
-                    ->description('Para modificar tu contraseña, introduce tu clave actual y define la nueva clave con confirmación.')
+                Section::make(__('admin.profile.security_section'))
+                    ->description(__('admin.profile.security_desc'))
                     ->schema([
                         $this->getPasswordFormComponent(),
                         $this->getPasswordConfirmationFormComponent(),
@@ -71,7 +71,7 @@ class EditProfile extends BaseEditProfile
     protected function getAvatarFormComponent(): Component
     {
         return FileUpload::make('avatar_url')
-            ->label('Icono de perfil / Avatar')
+            ->label(__('admin.profile.avatar_label'))
             ->avatar()
             ->image()
             ->imageEditor()
@@ -81,7 +81,7 @@ class EditProfile extends BaseEditProfile
             ->directory('avatars')
             ->disk('public')
             ->maxSize(2048)
-            ->helperText('Formato cuadrado 1:1 con recorte circular disponible. Máximo 2 MB.');
+            ->helperText(__('admin.profile.avatar_helper'));
     }
 
     /**
@@ -90,7 +90,7 @@ class EditProfile extends BaseEditProfile
     protected function getNameFormComponent(): Component
     {
         return TextInput::make('name')
-            ->label('Nombre del operador')
+            ->label(__('admin.profile.name_label'))
             ->required()
             ->maxLength(255)
             ->autofocus();
@@ -102,7 +102,7 @@ class EditProfile extends BaseEditProfile
     protected function getEmailFormComponent(): Component
     {
         return TextInput::make('email')
-            ->label('Correo electrónico')
+            ->label(__('admin.profile.email_label'))
             ->email()
             ->required()
             ->maxLength(255)
@@ -115,7 +115,7 @@ class EditProfile extends BaseEditProfile
     protected function getPasswordFormComponent(): Component
     {
         return TextInput::make('password')
-            ->label('Nueva contraseña')
+            ->label(__('admin.profile.new_password'))
             ->password()
             ->revealable(filament()->arePasswordsRevealable())
             ->rule(Password::default())
@@ -132,7 +132,7 @@ class EditProfile extends BaseEditProfile
     protected function getPasswordConfirmationFormComponent(): Component
     {
         return TextInput::make('passwordConfirmation')
-            ->label('Confirmar nueva contraseña')
+            ->label(__('admin.profile.confirm_password'))
             ->password()
             ->autocomplete('new-password')
             ->revealable(filament()->arePasswordsRevealable())
@@ -147,8 +147,8 @@ class EditProfile extends BaseEditProfile
     protected function getCurrentPasswordFormComponent(): Component
     {
         return TextInput::make('currentPassword')
-            ->label('Contraseña actual')
-            ->helperText('Obligatoria para validar tu identidad al cambiar la contraseña o el correo.')
+            ->label(__('admin.profile.current_password'))
+            ->helperText(__('admin.profile.current_password_helper'))
             ->password()
             ->autocomplete('current-password')
             ->currentPassword(guard: Filament::getAuthGuard())
@@ -190,16 +190,16 @@ class EditProfile extends BaseEditProfile
     protected function getDeleteAccountAction(): Action
     {
         return Action::make('deleteAccount')
-            ->label('Eliminar cuenta')
+            ->label(__('admin.profile.delete_section'))
             ->icon('heroicon-o-trash')
             ->color('danger')
             ->requiresConfirmation()
-            ->modalHeading('¿Eliminar tu cuenta de operador?')
-            ->modalDescription('Esta acción es irreversible y eliminará definitivamente tu usuario, tu avatar y todos tus accesos al panel de administración. Para confirmar tu identidad, introduce tu contraseña actual.')
-            ->modalSubmitActionLabel('Sí, eliminar mi cuenta definitivamente')
+            ->modalHeading(__('admin.profile.delete_modal_heading'))
+            ->modalDescription(__('admin.profile.delete_modal_desc'))
+            ->modalSubmitActionLabel(__('admin.profile.btn_delete_confirm'))
             ->form([
                 TextInput::make('delete_confirm_password')
-                    ->label('Contraseña actual para confirmar')
+                    ->label(__('admin.profile.current_password_confirm'))
                     ->password()
                     ->revealable()
                     ->required()
@@ -226,7 +226,7 @@ class EditProfile extends BaseEditProfile
                 $user->delete();
 
                 Notification::make()
-                    ->title('Tu cuenta ha sido eliminada correctamente')
+                    ->title(__('admin.profile.delete_success'))
                     ->success()
                     ->send();
 

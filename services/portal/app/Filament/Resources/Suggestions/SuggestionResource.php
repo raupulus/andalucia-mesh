@@ -25,11 +25,20 @@ class SuggestionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLightBulb;
 
-    protected static ?string $navigationLabel = 'Sugerencias';
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.suggestions.navigation_label');
+    }
 
-    protected static ?string $modelLabel = 'Sugerencia';
+    public static function getModelLabel(): string
+    {
+        return __('admin.suggestions.model_label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Sugerencias';
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.suggestions.plural_model_label');
+    }
 
     /**
      * Muestra una insignia con el total de sugerencias pendientes de revisión en el menú de navegación.

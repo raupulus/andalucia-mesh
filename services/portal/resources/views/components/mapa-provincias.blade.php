@@ -30,6 +30,26 @@
     <script type="application/json" id="mapa-datos-iniciales">
         {!! json_encode($datos, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}
     </script>
+    <script type="application/json" id="mapa-i18n">
+        {!! json_encode([
+            'locale' => app()->getLocale(),
+            'panel_loading' => __('portal.map.panel_loading'),
+            'querying' => __('portal.map.querying'),
+            'nodes_count' => __('portal.map.nodes_count'),
+            'measured_by' => __('portal.map.measured_by'),
+            'estimation' => __('portal.map.estimation'),
+            'status_nodata' => __('portal.map.status_nodata'),
+            'no_telemetry_12h' => __('portal.map.no_telemetry_12h'),
+            'window_24h' => __('portal.map.window_24h'),
+            'window_7d' => __('portal.map.window_7d'),
+            'updated' => __('portal.map.updated'),
+            'updated_recently' => __('portal.map.updated_recently'),
+            'aria_province' => __('portal.map.aria_province'),
+            'status_clear' => __('portal.map.status_clear'),
+            'status_busy' => __('portal.map.status_busy'),
+            'status_saturated' => __('portal.map.status_saturated'),
+        ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}
+    </script>
 
     <!-- Encabezado de estadísticas del mapa -->
     <div class="mapa-cabecera" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; gap: 1rem;">
@@ -38,26 +58,26 @@
                 {{ number_format((int) $totalAndalucia, 0, ',', '.') }}
             </div>
             <div style="font-size: 1.1rem; color: var(--color-texto-2); font-weight: 500;">
-                nodos activos en Andalucía
+                {{ __('portal.map.active_nodes') }}
             </div>
             <div style="font-size: 0.85rem; color: var(--color-texto-3); margin-top: 0.25rem;" id="mapa-actualizado-texto">
-                <span id="mapa-ventana-label">{{ $ventana === '24h' ? 'Últimas 24 horas' : 'Últimos 7 días' }}</span> · actualizado {{ $actualizado }}
+                <span id="mapa-ventana-label">{{ $ventana === '24h' ? __('portal.map.window_24h') : __('portal.map.window_7d') }}</span> · {{ __('portal.map.updated', ['time' => $actualizado]) }}
             </div>
         </div>
 
         <!-- Selector accesible de ventana temporal -->
-        <div class="selector-ventana" role="group" aria-label="Ventana del recuento de nodos" style="display: flex; background: var(--color-superficie-sutil); padding: 4px; border-radius: var(--radio-sm); border: 1px solid var(--color-borde);">
+        <div class="selector-ventana" role="group" aria-label="{{ __('portal.map.aria_time_window') }}" style="display: flex; background: var(--color-superficie-sutil); padding: 4px; border-radius: var(--radio-sm); border: 1px solid var(--color-borde);">
             <button type="button" 
                     class="btn-ventana {{ $ventana === '7d' ? 'activo' : '' }}" 
                     data-ventana="7d"
                     aria-pressed="{{ $ventana === '7d' ? 'true' : 'false' }}">
-                7 días
+                {{ __('portal.map.btn_7d') }}
             </button>
             <button type="button" 
                     class="btn-ventana {{ $ventana === '24h' ? 'activo' : '' }}" 
                     data-ventana="24h"
                     aria-pressed="{{ $ventana === '24h' ? 'true' : 'false' }}">
-                24 horas
+                {{ __('portal.map.btn_24h') }}
             </button>
         </div>
     </div>
@@ -68,7 +88,7 @@
         <svg viewBox="0 0 1000 620" 
              class="mapa-andalucia-svg" 
              role="region" 
-             aria-label="Mapa de saturación del canal y recuento de nodos por provincia en Andalucía"
+             aria-label="{{ __('portal.map.aria_map_region') }}" 
              style="width: 100%; height: auto; display: block;">
             
             <defs>
@@ -88,7 +108,7 @@
                           tabindex="0"
                           role="button"
                           aria-haspopup="dialog"
-                          aria-label="{{ $mapaDatos['ES-AL']['name'] ?? 'Almería' }}: {{ $mapaDatos['ES-AL']['nodes'] ?? 0 }} nodos"
+                          aria-label="{{ __('portal.map.aria_province_initial', ['name' => $mapaDatos['ES-AL']['name'] ?? 'Almería', 'count' => $mapaDatos['ES-AL']['nodes'] ?? 0]) }}"
                           data-code="ES-AL" />
                     <g class="burbuja-grupo " transform="translate(930, 330)" pointer-events="none">
                         <circle r="22" class="burbuja-fondo" />
@@ -103,7 +123,7 @@
                           tabindex="0"
                           role="button"
                           aria-haspopup="dialog"
-                          aria-label="{{ $mapaDatos['ES-CA']['name'] ?? 'Cádiz' }}: {{ $mapaDatos['ES-CA']['nodes'] ?? 0 }} nodos"
+                          aria-label="{{ __('portal.map.aria_province_initial', ['name' => $mapaDatos['ES-CA']['name'] ?? 'Cádiz', 'count' => $mapaDatos['ES-CA']['nodes'] ?? 0]) }}"
                           data-code="ES-CA" />
                     <g class="burbuja-grupo burbuja-cadiz" transform="translate(305, 490)" pointer-events="none">
                         <circle r="22" class="burbuja-fondo" />
@@ -118,7 +138,7 @@
                           tabindex="0"
                           role="button"
                           aria-haspopup="dialog"
-                          aria-label="{{ $mapaDatos['ES-CO']['name'] ?? 'Córdoba' }}: {{ $mapaDatos['ES-CO']['nodes'] ?? 0 }} nodos"
+                          aria-label="{{ __('portal.map.aria_province_initial', ['name' => $mapaDatos['ES-CO']['name'] ?? 'Córdoba', 'count' => $mapaDatos['ES-CO']['nodes'] ?? 0]) }}"
                           data-code="ES-CO" />
                     <g class="burbuja-grupo " transform="translate(460, 205)" pointer-events="none">
                         <circle r="22" class="burbuja-fondo" />
@@ -133,7 +153,7 @@
                           tabindex="0"
                           role="button"
                           aria-haspopup="dialog"
-                          aria-label="{{ $mapaDatos['ES-GR']['name'] ?? 'Granada' }}: {{ $mapaDatos['ES-GR']['nodes'] ?? 0 }} nodos"
+                          aria-label="{{ __('portal.map.aria_province_initial', ['name' => $mapaDatos['ES-GR']['name'] ?? 'Granada', 'count' => $mapaDatos['ES-GR']['nodes'] ?? 0]) }}"
                           data-code="ES-GR" />
                     <g class="burbuja-grupo " transform="translate(730, 310)" pointer-events="none">
                         <circle r="22" class="burbuja-fondo" />
@@ -148,7 +168,7 @@
                           tabindex="0"
                           role="button"
                           aria-haspopup="dialog"
-                          aria-label="{{ $mapaDatos['ES-H']['name'] ?? 'Huelva' }}: {{ $mapaDatos['ES-H']['nodes'] ?? 0 }} nodos"
+                          aria-label="{{ __('portal.map.aria_province_initial', ['name' => $mapaDatos['ES-H']['name'] ?? 'Huelva', 'count' => $mapaDatos['ES-H']['nodes'] ?? 0]) }}"
                           data-code="ES-H" />
                     <g class="burbuja-grupo " transform="translate(150, 250)" pointer-events="none">
                         <circle r="22" class="burbuja-fondo" />
@@ -163,7 +183,7 @@
                           tabindex="0"
                           role="button"
                           aria-haspopup="dialog"
-                          aria-label="{{ $mapaDatos['ES-J']['name'] ?? 'Jaén' }}: {{ $mapaDatos['ES-J']['nodes'] ?? 0 }} nodos"
+                          aria-label="{{ __('portal.map.aria_province_initial', ['name' => $mapaDatos['ES-J']['name'] ?? 'Jaén', 'count' => $mapaDatos['ES-J']['nodes'] ?? 0]) }}"
                           data-code="ES-J" />
                     <g class="burbuja-grupo " transform="translate(675, 165)" pointer-events="none">
                         <circle r="22" class="burbuja-fondo" />
@@ -178,7 +198,7 @@
                           tabindex="0"
                           role="button"
                           aria-haspopup="dialog"
-                          aria-label="{{ $mapaDatos['ES-MA']['name'] ?? 'Málaga' }}: {{ $mapaDatos['ES-MA']['nodes'] ?? 0 }} nodos"
+                          aria-label="{{ __('portal.map.aria_province_initial', ['name' => $mapaDatos['ES-MA']['name'] ?? 'Málaga', 'count' => $mapaDatos['ES-MA']['nodes'] ?? 0]) }}"
                           data-code="ES-MA" />
                     <g class="burbuja-grupo " transform="translate(470, 400)" pointer-events="none">
                         <circle r="22" class="burbuja-fondo" />
@@ -193,7 +213,7 @@
                           tabindex="0"
                           role="button"
                           aria-haspopup="dialog"
-                          aria-label="{{ $mapaDatos['ES-SE']['name'] ?? 'Sevilla' }}: {{ $mapaDatos['ES-SE']['nodes'] ?? 0 }} nodos"
+                          aria-label="{{ __('portal.map.aria_province_initial', ['name' => $mapaDatos['ES-SE']['name'] ?? 'Sevilla', 'count' => $mapaDatos['ES-SE']['nodes'] ?? 0]) }}"
                           data-code="ES-SE" />
                     <g class="burbuja-grupo " transform="translate(350, 280)" pointer-events="none">
                         <circle r="22" class="burbuja-fondo" />
@@ -214,19 +234,19 @@
                     Cádiz
                 </div>
                 <div style="font-size: 0.95rem; color: var(--color-texto-2); margin-bottom: 0.75rem;" id="panel-provincia-recuento">
-                    0 nodos (0% del total)
+                    {{ __('portal.map.nodes_count', ['count' => 0, 'pct' => 0]) }}
                 </div>
                 <div style="border-top: 1px solid var(--color-borde); padding-top: 0.5rem; font-size: 0.85rem;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                        <span style="color: var(--color-texto-2);">Saturación estimada:</span>
+                        <span style="color: var(--color-texto-2);">{{ __('portal.map.panel_saturation') }}</span>
                         <strong id="panel-provincia-saturacion">-</strong>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                        <span style="color: var(--color-texto-2);">Carga máxima:</span>
+                        <span style="color: var(--color-texto-2);">{{ __('portal.map.panel_max') }}</span>
                         <span id="panel-provincia-max">-</span>
                     </div>
                     <div style="color: var(--color-texto-3); font-size: 0.78rem; margin-top: 0.5rem;" id="panel-provincia-detalle-nodos">
-                        Sin datos de telemetría recientes
+                        {{ __('portal.map.panel_no_telemetry') }}
                     </div>
                 </div>
             </div>
@@ -236,45 +256,45 @@
     <!-- Leyenda de colores y cálculo de saturación -->
     <div class="mapa-leyenda" style="margin-top: 1.5rem; background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-md); padding: 1.25rem;">
         <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--color-texto-1);">
-            Leyenda de ocupación del espectro (saturación):
+            {{ __('portal.map.legend_title') }}
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; font-size: 0.88rem; margin-bottom: 1.25rem;">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <span style="display: inline-block; width: 16px; height: 16px; border-radius: 4px; background: var(--mapa-verde);"></span>
-                <span>≤ 20 %: canal holgado</span>
+                <span>{{ __('portal.map.legend_green') }}</span>
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <span style="display: inline-block; width: 16px; height: 16px; border-radius: 4px; background: var(--mapa-naranja);"></span>
-                <span>20 % – 40 %: canal cargado</span>
+                <span>{{ __('portal.map.legend_orange') }}</span>
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <span style="display: inline-block; width: 16px; height: 16px; border-radius: 4px; background: var(--mapa-rojo);"></span>
-                <span>≥ 40 %: canal saturado</span>
+                <span>{{ __('portal.map.legend_red') }}</span>
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <span style="display: inline-block; width: 16px; height: 16px; border-radius: 4px; background: var(--mapa-nodata); border: 1px dashed var(--color-borde);"></span>
-                <span>Sin datos en 12 h</span>
+                <span>{{ __('portal.map.legend_nodata') }}</span>
             </div>
         </div>
         <p style="font-size: 0.82rem; color: var(--color-texto-3); line-height: 1.5; margin-bottom: 0;">
-            <strong>Cómo calculamos la saturación de cada provincia:</strong> con las coordenadas buscamos todos los nodos que están dentro de la provincia; sacamos la media de la ocupación del canal de los routers por un lado y la de todos los nodos CLIENT y CLIENT_BASE juntos por otro; y sumamos con pesos: routers 60 % y CLIENT con CLIENT_BASE 40 % (estos dos van juntos en una sola media). Los CLIENT_MUTE no cuentan porque suelen estar en interior o peor comunicados y su medida sale más baja de lo real. Se usa el último dato de cada nodo en las 12 últimas horas.
+            <strong>{{ __('portal.map.explanation_title') }}</strong> {{ __('portal.map.explanation_text') }}
         </p>
     </div>
 
     <!-- Tabla accesible para lectores de pantalla y consulta alternativa -->
     <details class="tabla-accesible-contenedor" style="margin-top: 1.5rem;" open>
         <summary style="font-weight: 600; cursor: pointer; color: var(--color-texto-1); padding: 0.5rem 0;">
-            Tabla de nodos y carga por provincia (alternativa accesible)
+            {{ __('portal.map.table_summary') }}
         </summary>
         <div style="overflow-x: auto; margin-top: 0.75rem;">
             <table class="tabla" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                 <thead>
                     <tr style="border-bottom: 2px solid var(--color-borde); text-align: left;">
-                        <th style="padding: 0.6rem;">Provincia</th>
-                        <th style="padding: 0.6rem; text-align: right;">Nodos</th>
-                        <th style="padding: 0.6rem; text-align: right;">% Total</th>
-                        <th style="padding: 0.6rem; text-align: right;">Saturación</th>
-                        <th style="padding: 0.6rem;">Estado</th>
+                        <th style="padding: 0.6rem;">{{ __('portal.map.th_province') }}</th>
+                        <th style="padding: 0.6rem; text-align: right;">{{ __('portal.map.th_nodes') }}</th>
+                        <th style="padding: 0.6rem; text-align: right;">{{ __('portal.map.th_pct') }}</th>
+                        <th style="padding: 0.6rem; text-align: right;">{{ __('portal.map.th_saturation') }}</th>
+                        <th style="padding: 0.6rem;">{{ __('portal.map.th_status') }}</th>
                     </tr>
                 </thead>
                 <tbody id="mapa-tabla-cuerpo">
@@ -286,10 +306,10 @@
                             $avg = $pInfo['avg'] ?? null;
                             $level = $pInfo['level'] ?? 'nodata';
                             $estadoTexto = match($level) {
-                                'green' => 'Holgado',
-                                'orange' => 'Cargado',
-                                'red' => 'Saturado',
-                                default => 'Sin datos',
+                                'green' => __('portal.map.status_clear'),
+                                'orange' => __('portal.map.status_busy'),
+                                'red' => __('portal.map.status_saturated'),
+                                default => __('portal.map.status_nodata'),
                             };
                             $chipTipo = match($level) {
                                 'green' => 'correcto',
@@ -300,7 +320,7 @@
                         @endphp
                         <tr id="fila-prov-{{ $codigo }}" data-code="{{ $codigo }}" style="border-bottom: 1px solid var(--color-borde);">
                             <td style="padding: 0.6rem; font-weight: 500;">
-                                {{ $nombre }} {{ $codigo === 'ES-CA' ? '(Foco)' : '' }}
+                                {{ $nombre }} {{ $codigo === 'ES-CA' ? __('portal.map.focus_badge') : '' }}
                             </td>
                             <td class="col-nodos" style="padding: 0.6rem; text-align: right; font-variant-numeric: tabular-nums;">
                                 {{ number_format((int) $nodos, 0, ',', '.') }}
@@ -321,7 +341,7 @@
         </div>
         @if($fueraAndalucia > 0)
             <div style="font-size: 0.8rem; color: var(--color-texto-3); margin-top: 0.5rem;">
-                * Además, {{ $fueraAndalucia }} nodos oídos desde nuestros gateways se encuentran situados fuera de Andalucía.
+                {{ __('portal.map.outside_andalusia', ['count' => $fueraAndalucia]) }}
             </div>
         @endif
     </details>

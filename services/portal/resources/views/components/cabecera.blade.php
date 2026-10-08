@@ -1,14 +1,28 @@
 @props(['activa' => null])
 
+@php
+    $navKeyMap = [
+        '/' => 'portal.nav.home',
+        '/configura-tu-nodo' => 'portal.nav.node_setup',
+        '/conecta-tu-gateway' => 'portal.nav.gateway',
+        '/rankings' => 'portal.nav.rankings',
+        '/alertas' => 'portal.nav.alerts',
+        '/bots' => 'portal.nav.bots',
+        '/revisa-tu-nodo' => 'portal.nav.node_check',
+        '/sugerencias' => 'portal.nav.suggestions',
+    ];
+    $currentLang = app()->getLocale();
+@endphp
+
 <header class="cabecera" style="background-color: var(--color-superficie); position: sticky; top: 0; z-index: 100;">
     <div class="contenedor" style="display: flex; align-items: center; justify-content: space-between; height: 4.5rem;">
         <!-- Logotipo e Identidad -->
-        <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--color-texto);">
+        <a href="{{ $currentLang !== 'es' ? '/?lang=' . $currentLang : '/' }}" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--color-texto);">
             <img src="{{ asset('img/logo.png') }}" alt="{{ config('proyecto.nombre') }}" style="width: 2.5rem; height: 2.5rem; object-fit: contain; flex-shrink: 0;" width="40" height="40">
 
             <div>
                 <span style="font-weight: 700; font-size: 1.15rem; display: block; line-height: 1.2;">{{ config('proyecto.nombre') }}</span>
-                <span style="font-size: 0.75rem; color: var(--color-texto-2); display: block;">Red Meshtastic Regional</span>
+                <span style="font-size: 0.75rem; color: var(--color-texto-2); display: block;">{{ __('portal.regional_network') }}</span>
             </div>
         </a>
 
@@ -16,21 +30,38 @@
         <nav class="nav-escritorio" aria-label="Navegación principal" style="display: flex; align-items: center; gap: 1.25rem;">
             @foreach(config('proyecto.navegacion') as $item)
                 @if($item['url'] !== '/')
-                    <a href="{{ $item['url'] }}" style="text-decoration: none; font-size: 0.95rem; font-weight: 500; color: {{ request()->is(trim($item['url'], '/')) ? 'var(--color-enlace)' : 'var(--color-texto)' }}; border-bottom: 2px solid {{ request()->is(trim($item['url'], '/')) ? 'var(--color-enlace)' : 'transparent' }}; padding-bottom: 0.25rem;">
-                        {{ $item['titulo'] }}
+                    @php
+                        $tituloNav = isset($navKeyMap[$item['url']]) ? __($navKeyMap[$item['url']]) : $item['titulo'];
+                        $enlaceNav = $currentLang !== 'es' ? $item['url'] . '?lang=' . $currentLang : $item['url'];
+                    @endphp
+                    <a href="{{ $enlaceNav }}" style="text-decoration: none; font-size: 0.95rem; font-weight: 500; color: {{ request()->is(trim($item['url'], '/')) ? 'var(--color-enlace)' : 'var(--color-texto)' }}; border-bottom: 2px solid {{ request()->is(trim($item['url'], '/')) ? 'var(--color-enlace)' : 'transparent' }}; padding-bottom: 0.25rem;">
+                        {{ $tituloNav }}
                     </a>
                 @endif
             @endforeach
 
+            <!-- Selector de Idioma con Bandera Redonda (Andalucía para ES) (RN-48) -->
+            <div class="selector-idioma-wrapper" style="display: flex; align-items: center; gap: 0.4rem; background: var(--color-superficie-sutil); border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); padding: 0.2rem 0.5rem; min-height: 44px;">
+                <div class="icono-bandera-redonda" id="bandera-idioma-actual" style="display: flex; align-items: center; justify-content: center;" title="{{ __('portal.nav.languages.' . $currentLang) }}">
+                    <x-icono-bandera :idioma="$currentLang" :tamano="22" />
+                </div>
+                <label for="selector-idioma-nav" class="sr-only">{{ __('portal.nav.select_language') }}</label>
+                <select id="selector-idioma-nav" class="selector-idioma-select" aria-label="{{ __('portal.nav.select_language') }}" style="background: transparent; border: none; color: var(--color-texto); font-size: 0.9rem; font-weight: 600; cursor: pointer; padding: 0.25rem 0.25rem 0.25rem 0; outline: none;">
+                    <option value="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}" data-lang="es" {{ $currentLang === 'es' ? 'selected' : '' }}>ES · {{ __('portal.nav.languages.es') }}</option>
+                    <option value="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" data-lang="en" {{ $currentLang === 'en' ? 'selected' : '' }}>EN · {{ __('portal.nav.languages.en') }}</option>
+                    <option value="{{ request()->fullUrlWithQuery(['lang' => 'pt']) }}" data-lang="pt" {{ $currentLang === 'pt' ? 'selected' : '' }}>PT · {{ __('portal.nav.languages.pt') }}</option>
+                </select>
+            </div>
+
             <!-- Selector de Tema (Claro / Oscuro) -->
-            <button id="btn-tema" type="button" aria-label="Cambiar tema claro u oscuro" style="background: none; border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); min-width: 44px; min-height: 44px; cursor: pointer; color: var(--color-texto); display: flex; align-items: center; justify-content: center;">
+            <button id="btn-tema" type="button" aria-label="{{ __('portal.nav.theme_toggle') }}" style="background: none; border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); min-width: 44px; min-height: 44px; cursor: pointer; color: var(--color-texto); display: flex; align-items: center; justify-content: center;">
                 <span id="icono-tema" aria-hidden="true">🌓</span>
             </button>
         </nav>
 
         <!-- Botón Menú Móvil -->
         <div class="nav-movil-toggle">
-            <button id="btn-menu-movil" type="button" aria-expanded="false" aria-controls="menu-movil" aria-label="Abrir menú de navegación" style="background: none; border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); min-width: 44px; min-height: 44px; cursor: pointer; color: var(--color-texto); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+            <button id="btn-menu-movil" type="button" aria-expanded="false" aria-controls="menu-movil" aria-label="{{ __('portal.nav.mobile_menu') }}" style="background: none; border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); min-width: 44px; min-height: 44px; cursor: pointer; color: var(--color-texto); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
                 <span aria-hidden="true">☰</span>
             </button>
         </div>
@@ -40,16 +71,33 @@
     <div id="menu-movil" style="display: none; background-color: var(--color-superficie); padding: 1.25rem; border-top: 1px solid var(--color-borde);">
         <nav aria-label="Navegación móvil" style="display: flex; flex-direction: column; gap: 0.5rem;">
             @foreach(config('proyecto.navegacion') as $item)
-                <a href="{{ $item['url'] }}" style="text-decoration: none; font-size: 1.05rem; font-weight: 500; color: {{ request()->is(trim($item['url'], '/')) ? 'var(--color-enlace)' : 'var(--color-texto)' }}; padding: 0.65rem 0.5rem; border-radius: var(--radio-sm);">
-                    {{ $item['titulo'] }}
+                @php
+                    $tituloNav = isset($navKeyMap[$item['url']]) ? __($navKeyMap[$item['url']]) : $item['titulo'];
+                    $enlaceNav = $currentLang !== 'es' ? $item['url'] . '?lang=' . $currentLang : $item['url'];
+                @endphp
+                <a href="{{ $enlaceNav }}" style="text-decoration: none; font-size: 1.05rem; font-weight: 500; color: {{ request()->is(trim($item['url'], '/')) ? 'var(--color-enlace)' : 'var(--color-texto)' }}; padding: 0.65rem 0.5rem; border-radius: var(--radio-sm);">
+                    {{ $tituloNav }}
                 </a>
             @endforeach
 
+            <!-- Cambio de idioma en móvil -->
+            <div style="border-top: 1px solid var(--color-borde); padding-top: 1rem; margin-top: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.95rem; color: var(--color-texto-2); font-weight: 500;">{{ __('portal.nav.select_language') }}:</span>
+                <div style="display: flex; align-items: center; gap: 0.5rem; background: var(--color-superficie-sutil); border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); padding: 0.25rem 0.6rem; min-height: 44px;">
+                    <x-icono-bandera :idioma="$currentLang" :tamano="22" />
+                    <select id="selector-idioma-movil" class="selector-idioma-select" aria-label="{{ __('portal.nav.select_language') }}" style="background: transparent; border: none; color: var(--color-texto); font-size: 0.95rem; font-weight: 600; cursor: pointer;">
+                        <option value="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}" data-lang="es" {{ $currentLang === 'es' ? 'selected' : '' }}>ES · {{ __('portal.nav.languages.es') }}</option>
+                        <option value="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" data-lang="en" {{ $currentLang === 'en' ? 'selected' : '' }}>EN · {{ __('portal.nav.languages.en') }}</option>
+                        <option value="{{ request()->fullUrlWithQuery(['lang' => 'pt']) }}" data-lang="pt" {{ $currentLang === 'pt' ? 'selected' : '' }}>PT · {{ __('portal.nav.languages.pt') }}</option>
+                    </select>
+                </div>
+            </div>
+
             <!-- Cambio de tema en móvil -->
             <div style="border-top: 1px solid var(--color-borde); padding-top: 1rem; margin-top: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
-                <span style="font-size: 0.95rem; color: var(--color-texto-2); font-weight: 500;">Apariencia visual:</span>
+                <span style="font-size: 0.95rem; color: var(--color-texto-2); font-weight: 500;">{{ __('portal.nav.visual_appearance') }}</span>
                 <button type="button" class="btn-tema-movil btn btn-secundario" style="padding: 0.5rem 0.85rem; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; gap: 0.5rem;">
-                    <span>Cambiar tema</span> <span aria-hidden="true">🌓</span>
+                    <span>{{ __('portal.nav.change_theme') }}</span> <span aria-hidden="true">🌓</span>
                 </button>
             </div>
         </nav>

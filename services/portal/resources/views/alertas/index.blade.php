@@ -1,26 +1,32 @@
-<x-layout title="Alertas y Estado de Incidencias" description="Registro automático de incidencias y anomalías detectadas en la red de Andalucía Mesh.">
+@php
+    $currentLang = app()->getLocale();
+    $langParam = $currentLang !== 'es' ? '&lang=' . $currentLang : '';
+    $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
+@endphp
+
+<x-layout :title="__('portal.alerts.meta_title')" :description="__('portal.alerts.meta_description')">
     <div class="contenedor seccion">
         <header style="margin-bottom: 2.5rem;">
             <h1 style="font-size: 2.25rem; font-weight: 800; color: var(--color-texto-1); margin-bottom: 0.5rem;">
-                Alertas de la Malla
+                {{ __('portal.alerts.heading') }}
             </h1>
             <p class="lead" style="margin-bottom: 1.5rem;">
-                Monitorización en tiempo real de anomalías de radio, bucles de reinicio, saturación de canal y caídas de infraestructura.
+                {{ __('portal.alerts.lead') }}
             </p>
 
             <!-- Filtros de severidad -->
             <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                <a href="/alertas" class="btn {{ empty($riesgoFiltro) ? 'btn-primario' : 'btn-secundario' }}">
-                    Todas
+                <a href="/alertas{{ $langQuery }}" class="btn {{ empty($riesgoFiltro) ? 'btn-primario' : 'btn-secundario' }}">
+                    {{ __('portal.alerts.filter_all') }}
                 </a>
-                <a href="/alertas?riesgo=alto" class="btn {{ $riesgoFiltro === 'alto' ? 'btn-primario' : 'btn-secundario' }}">
-                    Riesgo Alto
+                <a href="/alertas?riesgo=alto{{ $langParam }}" class="btn {{ $riesgoFiltro === 'alto' ? 'btn-primario' : 'btn-secundario' }}">
+                    {{ __('portal.alerts.filter_high') }}
                 </a>
-                <a href="/alertas?riesgo=medio" class="btn {{ $riesgoFiltro === 'medio' ? 'btn-primario' : 'btn-secundario' }}">
-                    Riesgo Medio
+                <a href="/alertas?riesgo=medio{{ $langParam }}" class="btn {{ $riesgoFiltro === 'medio' ? 'btn-primario' : 'btn-secundario' }}">
+                    {{ __('portal.alerts.filter_medium') }}
                 </a>
-                <a href="/alertas?riesgo=bajo" class="btn {{ $riesgoFiltro === 'bajo' ? 'btn-primario' : 'btn-secundario' }}">
-                    Riesgo Bajo
+                <a href="/alertas?riesgo=bajo{{ $langParam }}" class="btn {{ $riesgoFiltro === 'bajo' ? 'btn-primario' : 'btn-secundario' }}">
+                    {{ __('portal.alerts.filter_low') }}
                 </a>
             </div>
         </header>
@@ -32,10 +38,10 @@
                     <div style="font-size: 1.75rem; line-height: 1;">ℹ️</div>
                     <div>
                         <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 0.5rem;">
-                            Detector Automático de Anomalías de Red
+                            {{ __('portal.alerts.detector_calibrating_title') }}
                         </h2>
                         <p style="color: var(--color-texto-2); font-size: 0.95rem; line-height: 1.55; margin-bottom: 0;">
-                            El motor inteligente de detección continua de incidencias y caídas de infraestructura se encuentra actualmente en proceso de despliegue y calibración de umbrales. Ninguna anomalía crítica activa ha sido notificada en este momento.
+                            {{ __('portal.alerts.detector_calibrating_body') }}
                         </p>
                     </div>
                 </div>
@@ -47,45 +53,55 @@
                     <table class="tabla" style="width: 100%; border-collapse: collapse; font-size: 0.92rem;">
                         <thead>
                             <tr style="border-bottom: 2px solid var(--color-borde); text-align: left;">
-                                <th style="padding: 0.6rem;">Riesgo</th>
-                                <th style="padding: 0.6rem;">Regla / Incidencia</th>
-                                <th style="padding: 0.6rem;">Nodo / Ámbito</th>
-                                <th style="padding: 0.6rem;">Inicio</th>
-                                <th style="padding: 0.6rem;">Estado</th>
-                                <th style="padding: 0.6rem; text-align: right;">Detalle</th>
+                                <th style="padding: 0.6rem;">{{ __('portal.alerts.th_risk') }}</th>
+                                <th style="padding: 0.6rem;">{{ __('portal.alerts.th_rule') }}</th>
+                                <th style="padding: 0.6rem;">{{ __('portal.alerts.th_node') }}</th>
+                                <th style="padding: 0.6rem;">{{ __('portal.alerts.th_start') }}</th>
+                                <th style="padding: 0.6rem;">{{ __('portal.alerts.th_status') }}</th>
+                                <th style="padding: 0.6rem; text-align: right;">{{ __('portal.alerts.th_detail') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($alertas as $a)
                                 @php
-                                    $chipTipo = match(strtolower((string) $a->riesgo)) {
+                                    $riesgoKey = strtolower((string) $a->riesgo);
+                                    $chipTipo = match($riesgoKey) {
                                         'alto' => 'critico',
                                         'medio' => 'aviso',
                                         'bajo' => 'info',
                                         default => 'neutro',
                                     };
+                                    $textoRiesgo = __('portal.alerts.risk_levels.' . $riesgoKey);
+                                    if ($textoRiesgo === 'portal.alerts.risk_levels.' . $riesgoKey) {
+                                        $textoRiesgo = ucfirst((string) $a->riesgo);
+                                    }
+                                    $estadoKey = strtolower((string) ($a->estado ?? 'abierta'));
+                                    $textoEstado = __('portal.alerts.states.' . $estadoKey);
+                                    if ($textoEstado === 'portal.alerts.states.' . $estadoKey) {
+                                        $textoEstado = ucfirst($estadoKey);
+                                    }
                                 @endphp
                                 <tr style="border-bottom: 1px solid var(--color-borde);">
                                     <td style="padding: 0.6rem;">
-                                        <x-chip-estado :tipo="$chipTipo" :texto="ucfirst($a->riesgo)" />
+                                        <x-chip-estado :tipo="$chipTipo" :texto="$textoRiesgo" />
                                     </td>
                                     <td style="padding: 0.6rem; font-weight: 600;">
-                                        {{ $a->regla ?? 'Anomalía detectada' }}
+                                        {{ $a->regla ?? __('portal.alerts.detected_incident') }}
                                     </td>
                                     <td style="padding: 0.6rem;">
-                                        <code>{{ $a->nodo_id ?? 'Global' }}</code>
+                                        <code>{{ $a->nodo_id ?? __('portal.alerts.scope_global') }}</code>
                                     </td>
                                     <td style="padding: 0.6rem; color: var(--color-texto-2); font-size: 0.85rem;">
                                         {{ $a->inicio_at ?? '—' }}
                                     </td>
                                     <td style="padding: 0.6rem;">
-                                        <span style="font-weight: 600; color: {{ $a->estado === 'abierta' ? 'var(--color-critico-texto)' : 'var(--mapa-verde)' }};">
-                                            {{ ucfirst($a->estado ?? 'abierta') }}
+                                        <span style="font-weight: 600; color: {{ $estadoKey === 'abierta' ? 'var(--color-critico-texto)' : 'var(--mapa-verde)' }};">
+                                            {{ $textoEstado }}
                                         </span>
                                     </td>
                                     <td style="padding: 0.6rem; text-align: right;">
-                                        <a href="/alertas/{{ $a->id }}" class="btn btn-secundario" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">
-                                            Ver →
+                                        <a href="/alertas/{{ $a->id }}{{ $langQuery }}" class="btn btn-secundario" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">
+                                            {{ __('portal.alerts.btn_view') }}
                                         </a>
                                     </td>
                                 </tr>
@@ -99,30 +115,35 @@
         <!-- Catálogo de anomalías monitorizadas -->
         <section>
             <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 1rem;">
-                Catálogo de Anomalías Monitorizadas
+                {{ __('portal.alerts.catalog_title') }}
             </h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
                 @foreach($reglas as $regla)
                     @php
-                        $chipTipo = match($regla['risk']) {
+                        $riesgoKey = strtolower((string) $regla['risk']);
+                        $chipTipo = match($riesgoKey) {
                             'alto' => 'critico',
                             'medio' => 'aviso',
                             'bajo' => 'info',
                             default => 'neutro',
                         };
+                        $textoRiesgo = __('portal.alerts.risk_levels.' . $riesgoKey);
+                        if ($textoRiesgo === 'portal.alerts.risk_levels.' . $riesgoKey) {
+                            $textoRiesgo = ucfirst((string) $regla['risk']);
+                        }
                     @endphp
                     <div class="tarjeta" style="padding: 1.25rem; background: var(--color-superficie-sutil);">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
                             <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--color-texto-1); margin: 0;">
                                 {{ $regla['name'] }}
                             </h3>
-                            <x-chip-estado :tipo="$chipTipo" :texto="ucfirst($regla['risk'])" />
+                            <x-chip-estado :tipo="$chipTipo" :texto="$textoRiesgo" />
                         </div>
                         <p style="font-size: 0.88rem; color: var(--color-texto-2); line-height: 1.45; margin-bottom: 0.5rem;">
                             {{ $regla['description'] }}
                         </p>
                         <div style="font-size: 0.8rem; color: var(--color-texto-3);">
-                            Tipo: <strong>{{ ucfirst($regla['type']) }}</strong>
+                            {{ __('portal.alerts.type_label') }} <strong>{{ ucfirst($regla['type']) }}</strong>
                         </div>
                     </div>
                 @endforeach

@@ -2,10 +2,14 @@
     <div style="font-size: 1.5rem; line-height: 1;" aria-hidden="true">⚠️</div>
     <div>
         <h4 id="aviso-emergencias-titulo" style="font-size: 1rem; font-weight: 700; color: inherit; margin-bottom: 0.25rem;">
-            Aviso Importante sobre Telecomunicaciones de Emergencia
+            {{ __('portal.emergency.title') }}
         </h4>
         <p style="margin-bottom: 0; font-size: 0.9rem; line-height: 1.45;">
-            {{ config('proyecto.nombre') }} es una red experimental y comunitaria impulsada por radioaficionados y ciudadanos. <strong>NO es un servicio de emergencias</strong> ni sustituye bajo ningún concepto a los canales oficiales de socorro y protección civil (<strong>112</strong>, Guardia Civil, Policía o Salvamento Marítimo).
+            {!! str_replace(
+                [':name', '**NO es un servicio de emergencias**', '**112**', '**It is NOT an emergency service**', '**NÃO é um serviço de emergência**'],
+                [config('proyecto.nombre'), '<strong>' . (app()->getLocale() === 'en' ? 'It is NOT an emergency service' : (app()->getLocale() === 'pt' ? 'NÃO é um serviço de emergência' : 'NO es un servicio de emergencias')) . '</strong>', '<strong>112</strong>', '<strong>It is NOT an emergency service</strong>', '<strong>NÃO é um serviço de emergência</strong>'],
+                __('portal.emergency.body', ['name' => config('proyecto.nombre')])
+            ) !!}
         </p>
     </div>
 </section>

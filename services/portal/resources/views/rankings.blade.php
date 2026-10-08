@@ -1,31 +1,37 @@
-<x-layout title="Rankings y Estadísticas de Tráfico" description="Estadísticas de ocupación de canal, consumo de espectro y rankings de nodos en Andalucía Mesh.">
+@php
+    $currentLang = app()->getLocale();
+    $langParam = $currentLang !== 'es' ? '&lang=' . $currentLang : '';
+    $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
+@endphp
+
+<x-layout :title="__('portal.rankings.meta_title')" :description="__('portal.rankings.meta_description')">
     <div class="contenedor seccion">
         <!-- Encabezado -->
         <header style="margin-bottom: 2.5rem;">
             <h1 style="font-size: 2.25rem; font-weight: 800; color: var(--color-texto-1); margin-bottom: 0.5rem;">
-                Rankings y Actividad de la Red
+                {{ __('portal.rankings.heading') }}
             </h1>
             <p class="lead" style="margin-bottom: 1.5rem;">
-                Monitorización del consumo de espectro, distribución del tráfico y rendimiento de enlaces directos.
+                {{ __('portal.rankings.lead') }}
             </p>
 
             <!-- Selector de periodo -->
-            <div role="group" aria-label="Periodo de las estadísticas" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                <a href="/rankings?period=day&which=current" 
+            <div role="group" aria-label="{{ __('portal.rankings.heading') }}" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                <a href="/rankings?period=day&which=current{{ $langParam }}" 
                    class="btn {{ ($period === 'day' && $which === 'current') ? 'btn-primario' : 'btn-secundario' }}">
-                    Hoy
+                    {{ __('portal.rankings.period_today') }}
                 </a>
-                <a href="/rankings?period=day&which=previous" 
+                <a href="/rankings?period=day&which=previous{{ $langParam }}" 
                    class="btn {{ ($period === 'day' && $which === 'previous') ? 'btn-primario' : 'btn-secundario' }}">
-                    Ayer
+                    {{ __('portal.rankings.period_yesterday') }}
                 </a>
-                <a href="/rankings?period=week&which=current" 
+                <a href="/rankings?period=week&which=current{{ $langParam }}" 
                    class="btn {{ ($period === 'week' && $which === 'current') ? 'btn-primario' : 'btn-secundario' }}">
-                    Últimos 7 días
+                    {{ __('portal.rankings.period_last_7d') }}
                 </a>
-                <a href="/rankings?period=month&which=current" 
+                <a href="/rankings?period=month&which=current{{ $langParam }}" 
                    class="btn {{ ($period === 'month' && $which === 'current') ? 'btn-primario' : 'btn-secundario' }}">
-                    Últimos 30 días
+                    {{ __('portal.rankings.period_last_30d') }}
                 </a>
             </div>
         </header>
@@ -33,11 +39,11 @@
         <!-- 1. Distribución del tráfico (Traffic Mix) -->
         <section class="tarjeta" style="padding: 1.75rem; margin-bottom: 2.5rem;">
             <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 0.5rem;">
-                Distribución de Tráfico (Mix de Paquetes)
+                {{ __('portal.rankings.traffic_mix_title') }}
             </h2>
             <p style="color: var(--color-texto-2); font-size: 0.95rem; margin-bottom: 1.5rem;">
-                Total paquetes capturados: <strong>{{ number_format((int) ($trafico['total_packets'] ?? 0), 0, ',', '.') }}</strong> · 
-                Tiempo total en el aire: <strong>{{ number_format((float) ($trafico['total_airtime_s'] ?? 0), 1, ',', '.') }} s</strong>
+                {{ __('portal.rankings.total_packets') }} <strong>{{ number_format((int) ($trafico['total_packets'] ?? 0), 0, ',', '.') }}</strong> · 
+                {{ __('portal.rankings.total_airtime') }} <strong>{{ number_format((float) ($trafico['total_airtime_s'] ?? 0), 1, ',', '.') }} s</strong>
             </p>
 
             <!-- Barra gráfica de proporciones -->
@@ -67,11 +73,11 @@
                 <table class="tabla" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                     <thead>
                         <tr style="border-bottom: 2px solid var(--color-borde); text-align: left;">
-                            <th style="padding: 0.6rem;">Tipo de Paquete</th>
-                            <th style="padding: 0.6rem; text-align: right;">Paquetes</th>
-                            <th style="padding: 0.6rem; text-align: right;">% Paquetes</th>
-                            <th style="padding: 0.6rem; text-align: right;">Tiempo de Aire</th>
-                            <th style="padding: 0.6rem; text-align: right;">% Tiempo Aire</th>
+                            <th style="padding: 0.6rem;">{{ __('portal.rankings.th_packet_type') }}</th>
+                            <th style="padding: 0.6rem; text-align: right;">{{ __('portal.rankings.th_packets') }}</th>
+                            <th style="padding: 0.6rem; text-align: right;">{{ __('portal.rankings.th_packets_pct') }}</th>
+                            <th style="padding: 0.6rem; text-align: right;">{{ __('portal.rankings.th_airtime') }}</th>
+                            <th style="padding: 0.6rem; text-align: right;">{{ __('portal.rankings.th_airtime_pct') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -96,7 +102,7 @@
                         @empty
                             <tr>
                                 <td colspan="5" style="padding: 1rem; text-align: center; color: var(--color-texto-3);">
-                                    No se registran paquetes en el periodo seleccionado.
+                                    {{ __('portal.rankings.no_records') }}
                                 </td>
                             </tr>
                         @endforelse
@@ -108,21 +114,21 @@
         <!-- 2. Ranking Principal: Nodos con mayor uso de red -->
         <section class="tarjeta" style="padding: 1.75rem; margin-bottom: 2.5rem;">
             <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 0.5rem;">
-                Top Nodos por Uso del Espectro (Tiempo de Aire Originado)
+                {{ __('portal.rankings.top_nodes_airtime_title') }}
             </h2>
             <p style="color: var(--color-texto-2); font-size: 0.95rem; margin-bottom: 1.5rem;">
-                Nodos que más tiempo de transmisión ocupan en el canal regional durante el periodo.
+                {{ __('portal.rankings.top_nodes_airtime_desc') }}
             </p>
 
             <div style="overflow-x: auto;">
                 <table class="tabla" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                     <thead>
                         <tr style="border-bottom: 2px solid var(--color-borde); text-align: left;">
-                            <th style="padding: 0.6rem; width: 60px;">Puesto</th>
-                            <th style="padding: 0.6rem;">Nodo</th>
-                            <th style="padding: 0.6rem;">Provincia / Rol</th>
-                            <th style="padding: 0.6rem; text-align: right;">Tiempo de Aire</th>
-                            <th style="padding: 0.6rem; text-align: right;">Acciones</th>
+                            <th style="padding: 0.6rem; width: 60px;">{{ __('portal.rankings.th_rank') }}</th>
+                            <th style="padding: 0.6rem;">{{ __('portal.rankings.th_node') }}</th>
+                            <th style="padding: 0.6rem;">{{ __('portal.rankings.th_province_role') }}</th>
+                            <th style="padding: 0.6rem; text-align: right;">{{ __('portal.rankings.th_airtime') }}</th>
+                            <th style="padding: 0.6rem; text-align: right;">{{ __('portal.rankings.th_actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -144,15 +150,15 @@
                                     {{ number_format((float) $r['value'], 1, ',', '.') }} s
                                 </td>
                                 <td style="padding: 0.6rem; text-align: right;">
-                                    <a href="/revisa-tu-nodo/{{ $r['subject_id'] }}" class="btn btn-secundario" style="padding: 0.25rem 0.6rem; font-size: 0.8rem;">
-                                        Auditar nodo →
+                                    <a href="/revisa-tu-nodo/{{ $r['subject_id'] }}{{ $langQuery }}" class="btn btn-secundario" style="padding: 0.25rem 0.6rem; font-size: 0.8rem;">
+                                        {{ __('portal.rankings.btn_audit_node') }}
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="5" style="padding: 1rem; text-align: center; color: var(--color-texto-3);">
-                                    Sin datos disponibles en este periodo.
+                                    {{ __('portal.rankings.no_records') }}
                                 </td>
                             </tr>
                         @endforelse
@@ -164,7 +170,7 @@
         <!-- 3. Catálogo completo de los 11 rankings disponibles -->
         <section>
             <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 1rem;">
-                Catálogo de Rankings de la Red
+                {{ __('portal.rankings.catalog_title') }}
             </h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem;">
                 @foreach($catalogo as $cat)
@@ -176,8 +182,8 @@
                             {{ $cat['descripcion'] }}
                         </p>
                         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--color-texto-3);">
-                            <span>Métrica: <code>{{ $cat['unidad'] }}</code></span>
-                            <span>Sujeto: <strong>{{ $cat['sujeto'] }}</strong></span>
+                            <span>{{ __('portal.rankings.metric_label') }} <code>{{ $cat['unidad'] }}</code></span>
+                            <span>{{ __('portal.rankings.subject_label') }} <strong>{{ $cat['sujeto'] }}</strong></span>
                         </div>
                     </div>
                 @endforeach

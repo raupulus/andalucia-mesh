@@ -52,7 +52,7 @@ Bots, alertas y API no llevan tarjeta: van en navegación y pie.
 - `sitemap.xml` generado dinámicamente mediante el paquete `spatie/laravel-sitemap` a partir de las rutas públicas registradas en la aplicación (excluyendo áreas privadas y rutas paramétricas como `/alertas/{id}` o `/revisa-tu-nodo/{id}`). Comando CLI `php artisan portal:sitemap` para exportación estática opcional. Archivos de directivas de rastreo: `robots.txt` y `robots.xml` (`Disallow: /admin`, `Disallow: /api/v1`, `Sitemap:`).
 - Servidor web: la arquitectura opera bajo Nginx (en host y contenedor `serversideup/php:8.4-fpm-nginx`), por lo que `.htaccess` no aplica en producción. Las reglas de rewrite, proxies y bloqueo de archivos ocultos se gestionan directamente en la configuración de Nginx.
 
-- `lang="es"`, `meta theme-color` según modo.
+- `lang="es|en|pt"` dinámico según idioma activo (RN-48), `meta theme-color` según modo. Selector de idiomas accesible en navbar con icono redondo de bandera (Andalucía para `es`, Reino Unido para `en`, Portugal para `pt`) y cero cookies (RN-06).
 
 ### QR
 

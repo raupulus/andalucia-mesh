@@ -1,3 +1,8 @@
+@php
+    $currentLang = app()->getLocale();
+    $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
+@endphp
+
 <footer style="background-color: var(--color-superficie-sutil); border-top: 1px solid var(--color-borde); padding-top: 3.5rem; padding-bottom: 3.5rem; margin-top: auto;">
     <div class="contenedor">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2.5rem; margin-bottom: 2.5rem;">
@@ -8,33 +13,33 @@
                     <h3 style="font-size: 1.1rem; margin: 0; color: var(--color-texto);">{{ config('proyecto.nombre') }}</h3>
                 </div>
                 <p style="font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.5;">
-                    Red regional ciudadana de telecomunicaciones en malla LoRa Meshtastic. Proyecto libre, abierto y sin ánimo de lucro para Cádiz y Andalucía.
+                    {{ __('portal.footer.description') }}
                 </p>
                 <div style="margin-top: 1rem;">
-                    <a href="/qr.svg" target="_blank" style="font-size: 0.85rem; font-weight: 600;">Descargar QR del proyecto (.svg)</a>
+                    <a href="/qr.svg" target="_blank" style="font-size: 0.85rem; font-weight: 600;">{{ __('portal.footer.download_qr') }}</a>
                 </div>
             </div>
 
             <!-- Columna 2: Navegación Institucional -->
             <div>
-                <h4 style="font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-texto-2); margin-bottom: 0.75rem;">Documentación</h4>
+                <h4 style="font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-texto-2); margin-bottom: 0.75rem;">{{ __('portal.footer.documentation') }}</h4>
                 <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
-                    <li><a href="/proyecto" style="text-decoration: none; color: var(--color-texto);">El proyecto</a></li>
-                    <li><a href="/quien-lo-impulsa" style="text-decoration: none; color: var(--color-texto);">Quién lo impulsa</a></li>
-                    <li><a href="/como-se-gestiona" style="text-decoration: none; color: var(--color-texto);">Cómo se gestiona</a></li>
-                    <li><a href="/sugerencias" style="text-decoration: none; color: var(--color-texto);">Buzón de sugerencias</a></li>
-                    <li><a href="/firmware" style="text-decoration: none; color: var(--color-texto);">Firmware y apps</a></li>
-                    <li><a href="/api" style="text-decoration: none; color: var(--color-texto);">API pública</a></li>
+                    <li><a href="/proyecto{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.project') }}</a></li>
+                    <li><a href="/quien-lo-impulsa{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.who_drives') }}</a></li>
+                    <li><a href="/como-se-gestiona{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.governance') }}</a></li>
+                    <li><a href="/sugerencias{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.suggestions_box') }}</a></li>
+                    <li><a href="/firmware{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.firmware_apps') }}</a></li>
+                    <li><a href="/api{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.public_api') }}</a></li>
                 </ul>
             </div>
 
             <!-- Columna 3: Legal y Privacidad -->
             <div>
-                <h4 style="font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-texto-2); margin-bottom: 0.75rem;">Transparencia y Legal</h4>
+                <h4 style="font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-texto-2); margin-bottom: 0.75rem;">{{ __('portal.footer.transparency_legal') }}</h4>
                 <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
-                    <li><a href="/legal/aviso-legal" style="text-decoration: none; color: var(--color-texto);">Aviso legal</a></li>
-                    <li><a href="/legal/privacidad" style="text-decoration: none; color: var(--color-texto);">Política de privacidad</a></li>
-                    <li><a href="/legal/cookies" style="text-decoration: none; color: var(--color-texto);">Política de cookies</a></li>
+                    <li><a href="/legal/aviso-legal{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.legal_notice') }}</a></li>
+                    <li><a href="/legal/privacidad{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.privacy_policy') }}</a></li>
+                    <li><a href="/legal/cookies{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.cookies_policy') }}</a></li>
                 </ul>
                 <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--color-texto-2); line-height: 1.4;">
                     {{ config('proyecto.legal.credito_ign') }}
@@ -45,11 +50,10 @@
         <!-- Barra inferior de autoría y contacto -->
         <div style="border-top: 1px solid var(--color-borde); padding-top: 1.5rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--color-texto-2);">
             <div>
-                Impulsado con dedicación técnica por <strong><a href="https://raupulus.dev" target="_blank" rel="noopener noreferrer" style="color: var(--color-texto-1); text-decoration: underline;">{{ config('autoria.nombre') }}</a></strong> (<code><a href="https://raupulus.dev" target="_blank" rel="noopener noreferrer">{{ config('autoria.nick') }}</a></code>) · Contacto público: <a href="mailto:{{ config('autoria.email') }}">{{ config('autoria.email') }}</a>
-
+                {{ __('portal.footer.powered_by') }} <strong><a href="https://raupulus.dev" target="_blank" rel="noopener noreferrer" style="color: var(--color-texto-1); text-decoration: underline;">{{ config('autoria.nombre') }}</a></strong> (<code><a href="https://raupulus.dev" target="_blank" rel="noopener noreferrer">{{ config('autoria.nick') }}</a></code>) · {{ __('portal.footer.public_contact') }} <a href="mailto:{{ config('autoria.email') }}">{{ config('autoria.email') }}</a>
             </div>
             <div>
-                Sin rastreadores ni cookies de terceros · Infraestructura en la UE
+                {{ __('portal.footer.no_trackers') }}
             </div>
         </div>
     </div>

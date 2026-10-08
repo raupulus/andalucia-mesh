@@ -19,13 +19,27 @@ Que los operadores vean de un vistazo si cada pieza funciona y qué pasa en la m
   - **Seguridad:** Modificación de contraseña verificada requiriendo la clave actual mediante `currentPassword(guard: Filament::getAuthGuard())`, validación de complejidad mínima y confirmación idéntica obligatoria.
   - **Baja de cuenta:** Acción destructiva de eliminación de cuenta personal tanto en cabecera como al pie del formulario, con modal de confirmación reforzado que exige la contraseña actual antes de cerrar la sesión, invalidar tokens y eliminar al usuario y su avatar.
 - `throttle` de inicio de sesión: 5 intentos fallidos por IP y email → bloqueo 15 min. IP real por `trustProxies` (ver [11](11-public-api.md)).
+- **Internacionalización y selector de idioma (RN-48):** Soporte de interfaz en español (por defecto), inglés y portugués. Selector interactivo con banderas en la barra superior (topbar antes del menú de usuario) y en la pantalla de inicio de sesión, persistiendo la selección en la sesión de administración (`filament_locale`) mediante `FilamentLocaleMiddleware`.
 - `User::canAccessPanel()` = `activo = true`. Sesión de 8 h; cookie `Secure`, `HttpOnly`, `SameSite=Lax`.
 - Cabeceras: `X-Robots-Tag: noindex, nofollow` en todo `/admin`.
 
-### Estado de servicios (página de inicio del panel)
+### Página de inicio del panel (Dashboard operativo y widgets)
 
-- Comprobación cada minuto con `Schedule::job(new ComprobarServicios)->everyMinute()->withoutOverlapping()` en `portal-tareas`.
-- Destinos en `config/servicios.php` (contrato `integration.md` §11):
+El panel recibe a los operadores con un centro de control operativo estructurado en 3 niveles de supervisión en tiempo real con refresco automático (`wire:poll.30s`):
+
+1. **MallaStatsOverviewWidget (KPIs ejecutivos de la red y presión en el aire):**
+   - **Presión del Aire (`channel_utilization`):** % de utilización promedio del canal LoRa en Andalucía, chip semántico de severidad (🟢 Holgado $\le 20\%$, 🟡 Cargado $20\%-40\%$, 🔴 Saturado $\ge 40\%$) y provincia con el pico máximo detectado.
+   - **Saturación TX Repetidores (`air_util_tx`):** Tiempo medio de ocupación del aire en emisión de la infraestructura para verificar el cumplimiento del *duty cycle* legal ($< 10\%$).
+   - **Infraestructura y Energía:** Total de routers activos, desglose de nodos alimentados permanentemente a red/solar (`⚡`) frente a nodos a batería, con alerta prioritaria si hay nodos en nivel crítico ($< 20\%$).
+   - **Tráfico y Pasarelas:** Nodos activos 24h, total de paquetes por hora procesados y número de gateways publicando en el broker MQTT.
+
+2. **RoutersInfraestructuraWidget (Monitor de repetidores y nodos clave):**
+   - Tabla interactiva conectada a la vista de contrato `api_routers` de Ingesta (con degradación segura en caché y manejo de caídas vía `Fuente::recordar`).
+   - Muestra para cada router: identificador (`!hex`), modelo de hardware (`hw_model`), provincia, estado de alimentación (`⚡ Red/Solar` con voltaje o barra de batería porcentual con código de color dinámico), nivel de presión local ChUtil, saturación TX, tiempo desde el último contacto y botón de inspección directa a `/revisa-tu-nodo/{id}`.
+
+3. **EstadoServiciosWidget (Salud de la plataforma y microservicios):**
+   - Supervisión periódica (cada minuto por `portal-tareas`, con botón de forzado manual `comprobarAhora`).
+   - Destinos en `config/servicios.php` (contrato `integration.md` §11):
 
 | Clave | Comprobación | Tiempo de espera |
 |---|---|---|
@@ -36,8 +50,8 @@ Que los operadores vean de un vistazo si cada pieza funciona y qué pasa en la m
 | `postgresql` | `SELECT 1` por `pgsql`, `ingesta` y `alertas` | 3 s |
 | `portal-tareas` | Latido propio: la tarea escribe `ultima_ejecucion`; si tiene > 3 min, el panel lo marca en rojo al cargar | — |
 
-- Resultado en la tabla `estado_servicio` (base `portal`): última comprobación, `ok`, código, latencia, `motivo` del JSON de `/health` y el JSON completo (máx. 4 KB). Historial de cambios de estado en `estado_servicio_cambio` (90 días).
-- Widget con una fila por servicio: verde/rojo, hace cuánto, latencia y motivo. Rojo si falla 2 comprobaciones seguidas (evita parpadeos). Detalle con el JSON de salud (`sync-peers` muestra el estado de cada peer y destaca los caídos > 1 h).
+- Resultado en la tabla `estado_servicio` (base `portal`): última comprobación, `ok`, código, latencia, `motivo` del JSON de `/health` y el JSON completo (máx. 4 KB).
+- Historial reciente de transiciones en `estado_servicio_cambio` presentado en cuadrícula de tarjetas de evento con badges de recuperación/caída (`● RECUPERADO` / `▲ CAÍDA`).
 - Sin avisos externos: si cae el servidor entero, no hay aviso (limitación aceptada).
 
 ### Recursos de solo lectura

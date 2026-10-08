@@ -1,11 +1,16 @@
+@php
+    $currentLang = app()->getLocale();
+    $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
+@endphp
+
 <x-layout :title="$titulo" :description="$descripcion">
     <div class="contenedor seccion">
         <article style="max-width: 960px; margin: 0 auto;">
             <!-- Encabezado de la página -->
             <header style="margin-bottom: 3rem; border-bottom: 1px solid var(--color-borde); padding-bottom: 2rem;">
                 <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
-                    <span class="chip chip-correcto" style="font-weight: 700;">Integraciones Oficiales</span>
-                    <span style="font-size: 0.85rem; color: var(--color-texto-3);">Telegram & Discord</span>
+                    <span class="chip chip-correcto" style="font-weight: 700;">{{ __('portal.bots.badge') }}</span>
+                    <span style="font-size: 0.85rem; color: var(--color-texto-3);">{{ __('portal.bots.subtitle') }}</span>
                 </div>
                 <h1 style="margin-bottom: 1rem; font-size: clamp(2.2rem, 4vw, 2.85rem);">{{ $h1 }}</h1>
                 <p class="lead" style="margin-bottom: 0; line-height: 1.6; max-width: 840px;">{{ $descripcion }}</p>
@@ -14,35 +19,35 @@
             <!-- 1. Qué avisan: Riesgos y Tipos -->
             <section style="margin-bottom: 3.5rem;">
                 <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.75rem; color: var(--color-texto);">
-                    Qué avisan los bots
+                    {{ __('portal.bots.heading') }}
                 </h2>
                 <p style="color: var(--color-texto-2); font-size: 1rem; line-height: 1.6; margin-bottom: 1.75rem;">
-                    Cada alerta emitida por el sistema se clasifica con un <strong>nivel de riesgo</strong> y un <strong>tipo de problema</strong> para que puedas priorizar fácilmente lo que ocurre en la red comunitaria.
+                    {{ __('portal.bots.lead') }}
                 </p>
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 1.5rem; margin-bottom: 1.75rem;">
                     <!-- Clasificación por Riesgo -->
                     <div class="tarjeta" style="padding: 1.5rem; background: var(--color-superficie);">
                         <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: var(--color-texto);">
-                            Niveles de Riesgo
+                            {{ __('portal.bots.risk_levels') }}
                         </h3>
                         <div style="display: flex; flex-direction: column; gap: 0.85rem;">
                             <div style="display: flex; align-items: flex-start; gap: 0.75rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--color-borde);">
-                                <x-chip-estado nivel="critico" texto="Alto" />
+                                <x-chip-estado nivel="critico" :texto="__('portal.bots.risk_high')" />
                                 <div style="font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.45;">
-                                    <strong>Fallo activo o daño a la malla:</strong> Caída de repetidores estratégicos, particiones de red o bucles de reinicio severos.
+                                    <strong>{{ __('portal.bots.risk_active_fail') }}</strong> {{ __('portal.bots.risk_active_fail_desc') }}
                                 </div>
                             </div>
                             <div style="display: flex; align-items: flex-start; gap: 0.75rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--color-borde);">
-                                <x-chip-estado nivel="aviso" texto="Medio" />
+                                <x-chip-estado nivel="aviso" :texto="__('portal.bots.risk_medium')" />
                                 <div style="font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.45;">
-                                    <strong>Riesgo real o incidencia zonal:</strong> Baterías de infraestructura en nivel crítico o saturación elevada de canal.
+                                    <strong>{{ __('portal.bots.risk_real_risk') }}</strong> {{ __('portal.bots.risk_real_risk_desc') }}
                                 </div>
                             </div>
                             <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
-                                <x-chip-estado nivel="info" texto="Bajo" />
+                                <x-chip-estado nivel="info" :texto="__('portal.bots.risk_low')" />
                                 <div style="font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.45;">
-                                    <strong>Aviso informativo preventivo:</strong> Parámetros anómalos o cambios que conviene vigilar sin daño inmediato.
+                                    <strong>{{ __('portal.bots.risk_preventive') }}</strong> {{ __('portal.bots.risk_preventive_desc') }}
                                 </div>
                             </div>
                         </div>
@@ -51,23 +56,23 @@
                     <!-- Clasificación por Tipo -->
                     <div class="tarjeta" style="padding: 1.5rem; background: var(--color-superficie);">
                         <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: var(--color-texto);">
-                            Tipos de Incidencia
+                            {{ __('portal.bots.incident_types') }}
                         </h3>
                         <div style="display: flex; flex-direction: column; gap: 1rem;">
                             <div style="padding-bottom: 1rem; border-bottom: 1px solid var(--color-borde);">
                                 <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
-                                    <span style="font-weight: 700; font-size: 0.95rem; color: var(--color-enlace);">Infraestructura</span>
+                                    <span style="font-weight: 700; font-size: 0.95rem; color: var(--color-enlace);">{{ __('portal.bots.type_infra') }}</span>
                                 </div>
                                 <p style="font-size: 0.9rem; color: var(--color-texto-2); margin: 0; line-height: 1.45;">
-                                    Repetidores, routers y gateways MQTT. Cubre cualquier problema que afecte a múltiples nodos o a la conectividad global (saturación, spam o caídas).
+                                    {{ __('portal.bots.type_infra_desc_long') }}
                                 </p>
                             </div>
                             <div>
                                 <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
-                                    <span style="font-weight: 700; font-size: 0.95rem; color: var(--color-texto);">Clientes</span>
+                                    <span style="font-weight: 700; font-size: 0.95rem; color: var(--color-texto);">{{ __('portal.bots.type_clients') }}</span>
                                 </div>
                                 <p style="font-size: 0.9rem; color: var(--color-texto-2); margin: 0; line-height: 1.45;">
-                                    Nodos individuales de usuario que no forman parte del troncal de la red (ej. batería baja de un nodo personal o parámetros fuera de norma).
+                                    {{ __('portal.bots.type_client_desc_long') }}
                                 </p>
                             </div>
                         </div>
@@ -75,7 +80,7 @@
                 </div>
 
                 <div style="padding: 1rem 1.25rem; background: var(--color-superficie-sutil); border-radius: var(--radio-md); border-left: 4px solid var(--color-enlace); font-size: 0.95rem; color: var(--color-texto-2);">
-                    Puedes consultar todas las alertas activas e históricas en cualquier momento en el <a href="/alertas" style="font-weight: 600;">Panel de Alertas en directo →</a>
+                    {{ __('portal.bots.live_alerts_notice') }} <a href="/alertas{{ $langQuery }}" style="font-weight: 600;">{{ __('portal.bots.live_alerts_link') }}</a>
                 </div>
             </section>
 
@@ -84,10 +89,10 @@
                 <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: 1.5rem;">
                     <div>
                         <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.35rem; color: var(--color-texto);">
-                            Elige tu plataforma
+                            {{ __('portal.bots.choose_platform') }}
                         </h2>
                         <p style="color: var(--color-texto-2); font-size: 0.95rem; margin: 0;">
-                            Añade el bot a tu comunidad para mantener informados a tus compañeros de zona.
+                            {{ __('portal.bots.choose_platform_lead') }}
                         </p>
                     </div>
                 </div>
@@ -99,17 +104,17 @@
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                                 <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-enlace);">
-                                    Grupos & Canales
+                                    {{ __('portal.bots.groups_and_channels') }}
                                 </span>
-                                <x-chip-estado nivel="correcto" texto="Activo" />
+                                <x-chip-estado nivel="correcto" :texto="__('portal.bots.status_active')" />
                             </div>
 
                             <h3 style="font-size: 1.65rem; font-weight: 800; margin-bottom: 0.6rem; color: var(--color-texto);">
-                                Bot de Telegram
+                                {{ __('portal.bots.telegram_card_title') }}
                             </h3>
 
                             <p style="color: var(--color-texto-2); font-size: 0.95rem; line-height: 1.55; margin-bottom: 1.5rem;">
-                                Recibe alertas inmediatas en grupos y canales, o consulta telemetría y salud de la malla mediante mensaje privado.
+                                {{ __('portal.bots.telegram_desc') }}
                             </p>
 
                             <a href="https://t.me/{{ config('proyecto.bots.telegram_username') }}" 
@@ -117,7 +122,7 @@
                                rel="noopener noreferrer" 
                                class="btn btn-secundario" 
                                style="width: 100%; justify-content: center; margin-bottom: 2rem; font-weight: 700; padding: 0.75rem 1rem;">
-                                Abrir &#64;{{ config('proyecto.bots.telegram_username') }} en Telegram ↗
+                                {{ __('portal.bots.open_telegram', ['username' => config('proyecto.bots.telegram_username')]) }}
                             </a>
 
                             <!-- Pasos oxigenados -->
@@ -125,40 +130,40 @@
                                 <!-- En un grupo -->
                                 <div style="background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-md); padding: 1.25rem;">
                                     <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--color-texto);">
-                                        En un grupo
+                                        {{ __('portal.bots.in_a_group') }}
                                     </h4>
                                     <ol style="margin: 0; padding-left: 1.25rem; font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.6;">
-                                        <li style="margin-bottom: 0.4rem;">Añade a <code>&#64;{{ config('proyecto.bots.telegram_username') }}</code> como miembro.</li>
-                                        <li style="margin-bottom: 0.4rem;">El bot saludará y publicará alertas con los filtros estándar.</li>
-                                        <li>Los administradores pueden personalizar los filtros con <code>/levels</code> y <code>/types</code>.</li>
+                                        <li style="margin-bottom: 0.4rem;">{!! __('portal.bots.group_step_1', ['username' => config('proyecto.bots.telegram_username')]) !!}</li>
+                                        <li style="margin-bottom: 0.4rem;">{{ __('portal.bots.group_step_2') }}</li>
+                                        <li>{!! __('portal.bots.group_step_3') !!}</li>
                                     </ol>
                                 </div>
 
                                 <!-- En un canal -->
                                 <div style="background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-md); padding: 1.25rem;">
                                     <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--color-texto);">
-                                        En un canal
+                                        {{ __('portal.bots.in_a_channel') }}
                                     </h4>
                                     <ol style="margin: 0; padding-left: 1.25rem; font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.6;">
-                                        <li style="margin-bottom: 0.4rem;">Añade el bot como <strong>administrador</strong> con permiso de publicación.</li>
-                                        <li>Un administrador envía el comando (ej. <code>/levels medio alto</code>) en el canal. El bot lo aplica y elimina el mensaje para no ensuciar.</li>
+                                        <li style="margin-bottom: 0.4rem;">{!! __('portal.bots.channel_step_1') !!}</li>
+                                        <li>{!! __('portal.bots.channel_step_2') !!}</li>
                                     </ol>
                                 </div>
 
                                 <!-- En privado -->
                                 <div style="background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-md); padding: 1.25rem;">
                                     <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--color-texto);">
-                                        En privado
+                                        {{ __('portal.bots.in_private') }}
                                     </h4>
                                     <p style="margin: 0; font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.55;">
-                                        Escríbele para consultar <code>/status</code>, <code>/battery</code> y <code>/routers</code>. En chat privado no envía alertas para no molestar.
+                                        {!! __('portal.bots.private_desc') !!}
                                     </p>
                                 </div>
                             </div>
                         </div>
 
                         <div style="font-size: 0.85rem; color: var(--color-texto-3); padding-top: 1.5rem; margin-top: 1rem; border-top: 1px solid var(--color-borde);">
-                            <strong>Para quitarlo:</strong> Expúlsalo del grupo o canal. El bot detectará su salida y se desactivará de inmediato.
+                            <strong>{{ __('portal.bots.to_remove') }}</strong> {{ __('portal.bots.telegram_remove_desc') }}
                         </div>
                     </div>
 
@@ -167,17 +172,17 @@
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                                 <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-texto-3);">
-                                    Servidores Comunitarios
+                                    {{ __('portal.bots.community_servers') }}
                                 </span>
-                                <x-chip-estado nivel="aviso" texto="Próximamente" />
+                                <x-chip-estado nivel="aviso" :texto="__('portal.bots.status_coming_soon')" />
                             </div>
 
                             <h3 style="font-size: 1.65rem; font-weight: 800; margin-bottom: 0.6rem; color: var(--color-texto);">
-                                Bot de Discord
+                                {{ __('portal.bots.discord_card_title') }}
                             </h3>
 
                             <p style="color: var(--color-texto-2); font-size: 0.95rem; line-height: 1.55; margin-bottom: 1.5rem;">
-                                Integración comunitaria para servidores de Discord con alertas en hilos, canales dedicados y tarjetas enriquecidas.
+                                {{ __('portal.bots.discord_desc') }}
                             </p>
 
                             <button type="button" 
@@ -185,13 +190,13 @@
                                     disabled 
                                     style="width: 100%; justify-content: center; margin-bottom: 2rem; font-weight: 600; opacity: 0.65; cursor: not-allowed; background: var(--color-superficie-sutil); padding: 0.75rem 1rem;"
                                     title="Integración en proceso de homologación">
-                                Invitar bot a tu servidor (Próximamente)
+                                {{ __('portal.bots.invite_discord') }}
                             </button>
 
                             <!-- Aviso de Próximamente -->
                             <div style="background: var(--color-aviso-fondo); border-left: 3px solid var(--color-aviso-texto); border-radius: var(--radio-sm); padding: 0.85rem 1.15rem; margin-bottom: 1rem;">
                                 <p style="margin: 0; font-size: 0.88rem; color: var(--color-aviso-texto); line-height: 1.5;">
-                                    <strong>⏳ En desarrollo:</strong> La aplicación de Discord se encuentra en fase de pruebas de carga y homologación. La invitación pública estará disponible próximamente.
+                                    <strong>{{ __('portal.bots.discord_in_dev_title') }}</strong> {{ __('portal.bots.discord_in_dev_desc') }}
                                 </p>
                             </div>
 
@@ -199,28 +204,28 @@
                             <div style="display: flex; flex-direction: column; gap: 1rem;">
                                 <div style="background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-md); padding: 1.25rem;">
                                     <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--color-texto);">
-                                        Configuración en tu servidor
+                                        {{ __('portal.bots.discord_config_title') }}
                                     </h4>
                                     <ol style="margin: 0; padding-left: 1.25rem; font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.6;">
-                                        <li style="margin-bottom: 0.4rem;">Abrirás el enlace de invitación y seleccionarás tu servidor.</li>
-                                        <li style="margin-bottom: 0.4rem;">En el canal deseado para las alertas, alguien con permiso escribirá <code>/subscribe</code>.</li>
-                                        <li>Podrás ajustar filtros independientes por canal usando <code>/levels</code> y <code>/types</code>.</li>
+                                        <li style="margin-bottom: 0.4rem;">{{ __('portal.bots.discord_step_1') }}</li>
+                                        <li style="margin-bottom: 0.4rem;">{!! __('portal.bots.discord_step_2') !!}</li>
+                                        <li>{!! __('portal.bots.discord_step_3') !!}</li>
                                     </ol>
                                 </div>
 
                                 <div style="background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-md); padding: 1.25rem;">
                                     <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--color-texto);">
-                                        Múltiples canales
+                                        {{ __('portal.bots.multiple_channels_title') }}
                                     </h4>
                                     <p style="margin: 0; font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.55;">
-                                        Podrás habilitar varios canales en el mismo servidor (por ejemplo, uno exclusivo para alertas críticas y otro para toda la actividad).
+                                        {{ __('portal.bots.multiple_channels_desc') }}
                                     </p>
                                 </div>
                             </div>
                         </div>
 
                         <div style="font-size: 0.85rem; color: var(--color-texto-3); padding-top: 1.5rem; margin-top: 1rem; border-top: 1px solid var(--color-borde);">
-                            <strong>Para quitarlo:</strong> Ejecuta <code>/unsubscribe</code> en el canal o expulsa al bot del servidor para revocarlo por completo.
+                            <strong>{{ __('portal.bots.to_remove') }}</strong> {!! __('portal.bots.discord_remove_desc') !!}
                         </div>
                     </div>
 
@@ -230,66 +235,66 @@
             <!-- 3. Comandos Disponibles -->
             <section style="margin-bottom: 4rem;">
                 <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--color-texto);">
-                    Comandos Disponibles
+                    {{ __('portal.bots.commands_title') }}
                 </h2>
                 <p style="color: var(--color-texto-2); font-size: 1rem; margin-bottom: 1.5rem;">
-                    Los mismos comandos funcionan de forma análoga en Telegram y Discord para mantener una experiencia homogénea:
+                    {{ __('portal.bots.commands_lead') }}
                 </p>
 
                 <div class="tarjeta" style="overflow-x: auto; padding: 0.5rem; background: var(--color-superficie);">
                     <table class="tabla-accesible" style="margin-top: 0;">
                         <thead>
                             <tr>
-                                <th style="width: 28%;">Comando</th>
-                                <th style="width: 44%;">Qué hace</th>
-                                <th style="width: 28%;">Quién puede usarlo</th>
+                                <th style="width: 28%;">{{ __('portal.bots.th_command') }}</th>
+                                <th style="width: 44%;">{{ __('portal.bots.th_action') }}</th>
+                                <th style="width: 28%;">{{ __('portal.bots.th_permission') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td><code>/status</code></td>
-                                <td>Estado general de la malla: nodos activos en 24 h, routers, gateways, saturación estimada y alertas abiertas.</td>
-                                <td>Cualquiera</td>
+                                <td>{{ __('portal.bots.cmd_status_desc') }}</td>
+                                <td>{{ __('portal.bots.perm_anyone') }}</td>
                             </tr>
                             <tr>
                                 <td><code>/battery</code></td>
-                                <td>Batería de los routers y repetidores, ordenada de menor a mayor con la hora del dato.</td>
-                                <td>Cualquiera</td>
+                                <td>{{ __('portal.bots.cmd_battery_desc') }}</td>
+                                <td>{{ __('portal.bots.perm_anyone') }}</td>
                             </tr>
                             <tr>
                                 <td><code>/routers</code></td>
-                                <td>Listado de routers con su nivel de batería, uso de canal (<code>chutil</code>) y tiempo de emisión (<code>tx</code>).</td>
-                                <td>Cualquiera</td>
+                                <td>{!! __('portal.bots.cmd_routers_desc') !!}</td>
+                                <td>{{ __('portal.bots.perm_anyone') }}</td>
                             </tr>
                             <tr>
                                 <td><code>/levels [riesgos…]</code></td>
-                                <td>Muestra o actualiza los riesgos suscritos en este canal. Ejemplo: <code>/levels medio alto</code></td>
-                                <td>Ver: cualquiera · Modificar: administradores</td>
+                                <td>{!! __('portal.bots.cmd_levels_desc') !!}</td>
+                                <td>{{ __('portal.bots.perm_levels') }}</td>
                             </tr>
                             <tr>
                                 <td><code>/types [tipos…]</code></td>
-                                <td>Muestra o actualiza los tipos suscritos en este canal. Ejemplo: <code>/types infraestructura clientes</code></td>
-                                <td>Ver: cualquiera · Modificar: administradores</td>
+                                <td>{!! __('portal.bots.cmd_types_desc') !!}</td>
+                                <td>{{ __('portal.bots.perm_levels') }}</td>
                             </tr>
                             <tr>
                                 <td><code>/settings</code></td>
-                                <td>Muestra la configuración de alertas activa para el canal actual.</td>
-                                <td>Cualquiera</td>
+                                <td>{{ __('portal.bots.cmd_settings_desc') }}</td>
+                                <td>{{ __('portal.bots.perm_anyone') }}</td>
                             </tr>
                             <tr>
                                 <td><code>/help</code></td>
-                                <td>Ayuda rápida de sintaxis y enlace directo a esta página.</td>
-                                <td>Cualquiera</td>
+                                <td>{{ __('portal.bots.cmd_help_desc') }}</td>
+                                <td>{{ __('portal.bots.perm_anyone') }}</td>
                             </tr>
                             <tr>
                                 <td><code>/subscribe</code> <span style="font-size: 0.78rem; color: var(--color-texto-3);">(Discord)</span></td>
-                                <td>Activa la recepción de alertas en el canal donde se ejecuta.</td>
-                                <td>Gestores de canales</td>
+                                <td>{{ __('portal.bots.cmd_subscribe_desc') }}</td>
+                                <td>{{ __('portal.bots.perm_managers') }}</td>
                             </tr>
                             <tr>
                                 <td><code>/unsubscribe</code> <span style="font-size: 0.78rem; color: var(--color-texto-3);">(Discord)</span></td>
-                                <td>Desactiva las alertas en el canal donde se ejecuta.</td>
-                                <td>Gestores de canales</td>
+                                <td>{{ __('portal.bots.cmd_unsubscribe_desc') }}</td>
+                                <td>{{ __('portal.bots.perm_managers') }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -300,10 +305,10 @@
             <section style="margin-bottom: 4rem;">
                 <div style="margin-bottom: 1.75rem;">
                     <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--color-texto);">
-                        Ejemplos de Respuesta
+                        {{ __('portal.bots.commands_examples') }}
                     </h2>
                     <p style="color: var(--color-texto-2); font-size: 1rem; margin: 0;">
-                        Formato textual real y conciso que devuelven los bots al procesar cada comando de consulta:
+                        {{ __('portal.bots.examples_lead') }}
                     </p>
                 </div>
 
@@ -313,7 +318,7 @@
                     <div class="tarjeta-codigo">
                         <div class="tarjeta-codigo-cabecera">
                             <span style="font-family: var(--font-mono); color: var(--color-texto);">/status</span>
-                            <span>Estado general de la red</span>
+                            <span>{{ __('portal.bots.ex_status_header') }}</span>
                         </div>
                         <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code>Estado de la malla · 14:35:12
 Nodos activos (24 h): 142
@@ -329,7 +334,7 @@ Infraestructura: 1 · Clientes: 3</code></pre>
                     <div class="tarjeta-codigo">
                         <div class="tarjeta-codigo-cabecera">
                             <span style="font-family: var(--font-mono); color: var(--color-texto);">/battery</span>
-                            <span>Batería de repetidores</span>
+                            <span>{{ __('portal.bots.ex_battery_header') }}</span>
                         </div>
                         <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code>🔋 Batería de routers · Andalucía (5 activos)
 🔴 1 crítico · 🟠 1 bajo · 🟢 2 normales · 🔌 1 alimentado
@@ -350,7 +355,7 @@ Infraestructura: 1 · Clientes: 3</code></pre>
                     <div class="tarjeta-codigo">
                         <div class="tarjeta-codigo-cabecera">
                             <span style="font-family: var(--font-mono); color: var(--color-texto);">/routers</span>
-                            <span>Métricas de canal y transmisión</span>
+                            <span>{{ __('portal.bots.ex_routers_header') }}</span>
                         </div>
                         <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code>📶 Routers de la red · Andalucía (4 activos en 7d)
 
@@ -369,7 +374,7 @@ Infraestructura: 1 · Clientes: 3</code></pre>
                     <div class="tarjeta-codigo">
                         <div class="tarjeta-codigo-cabecera">
                             <span style="font-family: var(--font-mono); color: var(--color-texto);">/levels · /types</span>
-                            <span>Ajuste de filtros</span>
+                            <span>{{ __('portal.bots.ex_filters_header') }}</span>
                         </div>
                         <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code># Modificación de niveles de severidad:
 > /levels medio alto
@@ -384,7 +389,7 @@ Tipos activos en este canal: infraestructura</code></pre>
                     <div class="tarjeta-codigo">
                         <div class="tarjeta-codigo-cabecera">
                             <span style="font-family: var(--font-mono); color: var(--color-texto);">/settings</span>
-                            <span>Configuración activa</span>
+                            <span>{{ __('portal.bots.ex_settings_header') }}</span>
                         </div>
                         <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code>Configuración de este canal:
 Este canal recibe alertas de riesgo medio y alto, de tipo infraestructura.
@@ -395,7 +400,7 @@ Activo desde: 2026-09-15 10:20 UTC</code></pre>
                     <div class="tarjeta-codigo">
                         <div class="tarjeta-codigo-cabecera">
                             <span style="font-family: var(--font-mono); color: var(--color-texto);">/help</span>
-                            <span>Sintaxis y documentación</span>
+                            <span>{{ __('portal.bots.ex_help_header') }}</span>
                         </div>
                         <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code>/status · /battery · /routers · /levels · /types · /settings
 Cómo usar el bot: https://{{ config('proyecto.dominio') }}/bots</code></pre>
@@ -408,42 +413,42 @@ Cómo usar el bot: https://{{ config('proyecto.dominio') }}/bots</code></pre>
             <section style="margin-bottom: 4rem;">
                 <div class="tarjeta" style="padding: 2rem; background: var(--color-superficie); border-left: 4px solid var(--color-acento);">
                     <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.75rem; color: var(--color-texto);">
-                        Filtros por defecto y personalización
+                        {{ __('portal.bots.filters_title') }}
                     </h2>
                     <p style="color: var(--color-texto-2); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
-                        Cada canal o grupo tiene sus propios filtros independientes; modificarlos en uno nunca afecta a los demás. Al invitar al bot, comienza automáticamente con estos parámetros:
+                        {{ __('portal.bots.filters_lead') }}
                     </p>
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
                         <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
                             <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
-                                Riesgos por defecto
+                                {{ __('portal.bots.default_risks') }}
                             </div>
                             <div style="font-size: 1.15rem; font-weight: 800; color: var(--color-texto); font-family: var(--font-mono);">
                                 {{ config('proyecto.bots.riesgos_defecto') }}
                             </div>
                             <div style="font-size: 0.8rem; color: var(--color-texto-2); margin-top: 0.25rem;">
-                                Incidencias moderadas y graves
+                                {{ __('portal.bots.default_risks_desc') }}
                             </div>
                         </div>
 
                         <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
                             <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
-                                Tipos por defecto
+                                {{ __('portal.bots.default_types') }}
                             </div>
                             <div style="font-size: 1.15rem; font-weight: 800; color: var(--color-texto); font-family: var(--font-mono);">
                                 {{ config('proyecto.bots.tipos_defecto') }}
                             </div>
                             <div style="font-size: 0.8rem; color: var(--color-texto-2); margin-top: 0.25rem;">
-                                Solo repetidores y nodos troncales
+                                {{ __('portal.bots.default_types_desc') }}
                             </div>
                         </div>
                     </div>
 
                     <p style="color: var(--color-texto-2); font-size: 0.9rem; line-height: 1.5; margin: 0;">
-                        <strong>Recomendaciones prácticas:</strong><br>
-                        • Para recibir absolutamente todo: <code>/levels bajo medio alto</code> y <code>/types infraestructura clientes</code>.<br>
-                        • Para canales de máxima urgencia: <code>/levels alto</code>.
+                        <strong>{{ __('portal.bots.practical_recommendations') }}</strong><br>
+                        • {{ __('portal.bots.rec_all') }} <code>/levels bajo medio alto</code> {{ __('y') ?? 'y' }} <code>/types infraestructura clientes</code>.<br>
+                        • {{ __('portal.bots.rec_critical') }} <code>/levels alto</code>.
                     </p>
                 </div>
             </section>
@@ -452,10 +457,10 @@ Cómo usar el bot: https://{{ config('proyecto.dominio') }}/bots</code></pre>
             <section style="margin-bottom: 4rem;">
                 <div style="margin-bottom: 1.5rem;">
                     <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--color-texto);">
-                        Así es un Aviso en Directo
+                        {{ __('portal.bots.live_alert_title') }}
                     </h2>
                     <p style="color: var(--color-texto-2); font-size: 1rem; margin: 0;">
-                        Estructura limpia, concisa y sin ruido de las notificaciones que emite el bot cuando salta una regla:
+                        {{ __('portal.bots.live_alert_lead') }}
                     </p>
                 </div>
 
@@ -467,12 +472,12 @@ Cómo usar el bot: https://{{ config('proyecto.dominio') }}/bots</code></pre>
                         <div style="display: flex; align-items: center; gap: 0.6rem;">
                             <span style="font-size: 1.25rem;">🔴</span>
                             <span style="font-weight: 800; font-size: 0.95rem; color: var(--color-critico-texto); text-transform: uppercase; letter-spacing: 0.05em;">
-                                Notificación de Alerta de la Malla
+                                {{ __('portal.bots.live_alert_badge') }}
                             </span>
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
-                            <x-chip-estado nivel="critico" texto="Alto" />
-                            <x-chip-estado nivel="info" texto="Infraestructura" />
+                            <x-chip-estado nivel="critico" :texto="__('portal.bots.risk_high')" />
+                            <x-chip-estado nivel="info" :texto="__('portal.bots.type_infra')" />
                         </div>
                     </div>
 
@@ -480,7 +485,7 @@ Cómo usar el bot: https://{{ config('proyecto.dominio') }}/bots</code></pre>
                     <div style="padding: 1.75rem;">
                         <div style="margin-bottom: 1.5rem;">
                             <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.5rem; letter-spacing: 0.06em;">
-                                Formato del mensaje recibido en el chat
+                                {{ __('portal.bots.chat_format') }}
                             </div>
                             <div class="bloque-codigo" style="margin: 0; font-size: 1rem; line-height: 1.6; background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-left: 5px solid var(--color-critico-texto); padding: 1.25rem 1.5rem;"><code>🔴 ALTO · Infraestructura · Bucle de reinicio
 !3a8f1c04 (Cádiz-Repetidor-Norte) · ROUTER · Cádiz
@@ -493,40 +498,40 @@ https://{{ config('proyecto.dominio') }}/alertas/alt-90412</code></div>
                             <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
                                 <div style="font-weight: 700; font-size: 0.92rem; color: var(--color-texto); margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
                                     <span>🔵 🟠 🔴 ✅</span>
-                                    <span>Severidad Inmediata</span>
+                                    <span>{{ __('portal.bots.feat_severity_title') }}</span>
                                 </div>
                                 <p style="font-size: 0.85rem; color: var(--color-texto-2); margin: 0; line-height: 1.5;">
-                                    El icono inicial marca el estado: azul (bajo), naranja (medio), rojo (alto) y verde con marca de verificación (resuelta).
+                                    {{ __('portal.bots.feat_severity_desc') }}
                                 </p>
                             </div>
 
                             <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
                                 <div style="font-weight: 700; font-size: 0.92rem; color: var(--color-texto); margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
                                     <span>🧵</span>
-                                    <span>Actualizaciones en Hilo</span>
+                                    <span>{{ __('portal.bots.feat_threads_title') }}</span>
                                 </div>
                                 <p style="font-size: 0.85rem; color: var(--color-texto-2); margin: 0; line-height: 1.5;">
-                                    Si una alerta cambia de riesgo o concluye, el bot responde al mensaje original para no dispersar la conversación.
+                                    {{ __('portal.bots.feat_threads_desc') }}
                                 </p>
                             </div>
 
                             <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
                                 <div style="font-weight: 700; font-size: 0.92rem; color: var(--color-texto); margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
                                     <span>📍</span>
-                                    <span>Privacidad de Ubicación</span>
+                                    <span>{{ __('portal.bots.feat_location_title') }}</span>
                                 </div>
                                 <p style="font-size: 0.85rem; color: var(--color-texto-2); margin: 0; line-height: 1.5;">
-                                    Solo se menciona la provincia. Jamás se publican coordenadas GPS exactas ni información privada del operador.
+                                    {{ __('portal.bots.feat_location_desc') }}
                                 </p>
                             </div>
 
                             <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
                                 <div style="font-weight: 700; font-size: 0.92rem; color: var(--color-texto); margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
                                     <span>🛡️</span>
-                                    <span>Control Anti-Ráfagas</span>
+                                    <span>{{ __('portal.bots.feat_antispam_title') }}</span>
                                 </div>
                                 <p style="font-size: 0.85rem; color: var(--color-texto-2); margin: 0; line-height: 1.5;">
-                                    Si una anomalía afecta a varios nodos a la vez, se agrupa en un único mensaje resumen con enlace a la lista detallada.
+                                    {{ __('portal.bots.feat_antispam_desc') }}
                                 </p>
                             </div>
                         </div>
@@ -542,10 +547,10 @@ https://{{ config('proyecto.dominio') }}/alertas/alt-90412</code></div>
                     <div class="tarjeta" style="padding: 1.75rem; background: var(--color-superficie);">
                         <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔇</div>
                         <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-texto);">
-                            Para no llenar tu canal
+                            {{ __('portal.bots.card_rate_limit_title') }}
                         </h3>
                         <p style="font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.55; margin: 0;">
-                            El bot aplica limitación de tasa (rate limiting) por canal, agrupa ráfagas continuas de una misma regla y solo vuelve a notificar una alerta abierta si su nivel de severidad cambia.
+                            {{ __('portal.bots.card_rate_limit_desc') }}
                         </p>
                     </div>
 
@@ -553,24 +558,24 @@ https://{{ config('proyecto.dominio') }}/alertas/alt-90412</code></div>
                     <div class="tarjeta" style="padding: 1.75rem; background: var(--color-superficie);">
                         <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⚡</div>
                         <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-texto);">
-                            Webhooks para Sistemas
+                            {{ __('portal.bots.card_webhooks_title') }}
                         </h3>
                         <p style="font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.55; margin-bottom: 0.75rem;">
-                            ¿Prefieres recibir las alertas en tu propia infraestructura o servidor? Enviamos peticiones <code>POST</code> firmadas a tu URL cada vez que una alerta cambia de estado.
+                            {!! __('portal.bots.card_webhooks_desc') !!}
                         </p>
-                        <a href="/api" style="font-size: 0.88rem; font-weight: 600;">Ver documentación de API y Webhooks →</a>
+                        <a href="/api{{ $langQuery }}" style="font-size: 0.88rem; font-weight: 600;">{{ __('portal.bots.card_webhooks_link') }}</a>
                     </div>
 
                     <!-- Privacidad -->
                     <div class="tarjeta" style="padding: 1.75rem; background: var(--color-superficie);">
                         <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔒</div>
                         <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-texto);">
-                            Privacidad Garantizada
+                            {{ __('portal.bots.card_privacy_title') }}
                         </h3>
                         <p style="font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.55; margin-bottom: 0.75rem;">
-                            Los bots solo guardan el ID de chat o canal donde están presentes y sus filtros. No leen ni almacenan mensajes ajenos y operan en modo privacidad estricto en Telegram.
+                            {{ __('portal.bots.card_privacy_desc') }}
                         </p>
-                        <a href="/legal/privacidad" style="font-size: 0.88rem; font-weight: 600;">Leer política de privacidad →</a>
+                        <a href="/legal/privacidad{{ $langQuery }}" style="font-size: 0.88rem; font-weight: 600;">{{ __('portal.bots.card_privacy_link') }}</a>
                     </div>
 
                 </div>
@@ -579,10 +584,10 @@ https://{{ config('proyecto.dominio') }}/alertas/alt-90412</code></div>
             <!-- Sugerencias para bots -->
             <section style="margin-bottom: 3rem; background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-md); padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                 <div style="font-size: 0.92rem; color: var(--color-texto-2);">
-                    ¿Tienes ideas para nuevos comandos, alertas o integraciones en los bots?
+                    {{ __('portal.bots.suggestions_cta') }}
                 </div>
-                <a href="/sugerencias" class="btn btn-secundario" style="font-size: 0.85rem; padding: 0.45rem 0.9rem;">
-                    Proponer mejora →
+                <a href="/sugerencias{{ $langQuery }}" class="btn btn-secundario" style="font-size: 0.85rem; padding: 0.45rem 0.9rem;">
+                    {{ __('portal.bots.btn_propose') }}
                 </a>
             </section>
 

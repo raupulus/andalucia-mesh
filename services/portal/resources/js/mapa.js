@@ -24,6 +24,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const actualizadoTexto = document.getElementById('mapa-actualizado-texto');
     const botonesVentana = contenedor.querySelectorAll('.btn-ventana');
 
+    // Diccionario i18n con respaldo en español
+    let i18n = {
+        locale: 'es-ES',
+        panel_loading: 'Cargando datos…',
+        querying: 'Consultando estadísticas en tiempo real…',
+        nodes_count: ':count nodos (:pct% del total)',
+        measured_by: 'Medida por :routers routers y :clients clientes en 12 h',
+        estimation: 'Estimación con telemetría de las últimas 12 horas',
+        status_nodata: 'Sin datos',
+        no_telemetry_12h: 'Sin datos de telemetría en las últimas 12 horas',
+        window_24h: 'Últimas 24 horas',
+        window_7d: 'Últimos 7 días',
+        updated: 'actualizado :time',
+        updated_recently: 'actualizado recientemente',
+        aria_province: ':name: :count nodos, saturación :saturation',
+        status_clear: 'Holgado',
+        status_busy: 'Cargado',
+        status_saturated: 'Saturado',
+    };
+
+    const i18nEl = document.getElementById('mapa-i18n');
+    if (i18nEl && i18nEl.textContent) {
+        try {
+            i18n = Object.assign(i18n, JSON.parse(i18nEl.textContent));
+        } catch (e) {
+            console.error('Error al inicializar i18n del mapa:', e);
+        }
+    }
+
     // Estado local en memoria
     let datosActuales = null;
     let ventanaActiva = new URLSearchParams(window.location.search).get('ventana') === '24h' ? '24h' : '7d';
@@ -83,10 +112,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Si los datos todavía no han llegado o están vacíos
         if (!datosActuales || !Array.isArray(datosActuales.provinces)) {
             if (panelNombre) panelNombre.textContent = nombrePorDefecto;
-            if (panelRecuento) panelRecuento.textContent = 'Cargando datos…';
+            if (panelRecuento) panelRecuento.textContent = i18n.panel_loading;
             if (panelSaturacion) panelSaturacion.textContent = '…';
             if (panelMax) panelMax.textContent = '—';
-            if (panelDetalle) panelDetalle.textContent = 'Consultando estadísticas en tiempo real…';
+            if (panelDetalle) panelDetalle.textContent = i18n.querying;
             posicionarPanel(evt);
             return;
         }
@@ -98,7 +127,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const pct = total > 0 ? ((nodos / total) * 100).toFixed(1) : '0';
 
         if (panelNombre) panelNombre.textContent = nombre;
-        if (panelRecuento) panelRecuento.textContent = `${nodos} nodos (${pct}% del total)`;
+        if (panelRecuento) {
+            panelRecuento.textContent = i18n.nodes_count
+                .replace(':count', new Intl.NumberFormat(i18n.locale).format(nodos))
+                .replace(':pct', pct);
+        }
 
         if (pData && pData.avg !== null && pData.avg !== undefined) {
             if (panelSaturacion) panelSaturacion.textContent = `${pData.avg}%`;
@@ -108,15 +141,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const cCount = (pData.groups && pData.groups.clients && pData.groups.clients.n) || 0;
             if (panelDetalle) {
                 if (rCount > 0 || cCount > 0) {
-                    panelDetalle.textContent = `Medida por ${rCount} routers y ${cCount} clientes en 12 h`;
+                    panelDetalle.textContent = i18n.measured_by
+                        .replace(':routers', rCount)
+                        .replace(':clients', cCount);
                 } else {
-                    panelDetalle.textContent = 'Estimación con telemetría de las últimas 12 horas';
+                    panelDetalle.textContent = i18n.estimation;
                 }
             }
         } else {
-            if (panelSaturacion) panelSaturacion.textContent = 'Sin datos';
+            if (panelSaturacion) panelSaturacion.textContent = i18n.status_nodata;
             if (panelMax) panelMax.textContent = '—';
-            if (panelDetalle) panelDetalle.textContent = 'Sin datos de telemetría en las últimas 12 horas';
+            if (panelDetalle) panelDetalle.textContent = i18n.no_telemetry_12h;
         }
 
         posicionarPanel(evt);
@@ -169,12 +204,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const total = typeof datos.total_andalucia === 'number' ? datos.total_andalucia : 0;
         if (totalNodosEl && typeof datos.total_andalucia === 'number') {
-            totalNodosEl.textContent = new Intl.NumberFormat('es-ES').format(datos.total_andalucia);
+            totalNodosEl.textContent = new Intl.NumberFormat(i18n.locale).format(datos.total_andalucia);
         }
 
         if (actualizadoTexto && ventanaLabel) {
-            const vLabel = ventanaActiva === '24h' ? 'Últimas 24 horas' : 'Últimos 7 días';
-            actualizadoTexto.innerHTML = `<span id="mapa-ventana-label">${vLabel}</span> · actualizado recientemente`;
+            const vLabel = ventanaActiva === '24h' ? i18n.window_24h : i18n.window_7d;
+            actualizadoTexto.innerHTML = `<span id="mapa-ventana-label">${vLabel}</span> · ${i18n.updated_recently}`;
         }
 
         if (datos.provinces && Array.isArray(datos.provinces)) {
@@ -191,8 +226,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (path) {
                         path.classList.remove('nivel-green', 'nivel-orange', 'nivel-red', 'nivel-nodata');
                         path.classList.add(`nivel-${p.level || 'nodata'}`);
-                        const satText = p.avg !== null ? `${p.avg}%` : 'sin datos';
-                        path.setAttribute('aria-label', `${p.name}: ${p.nodes} nodos, saturación ${satText}`);
+                        const satText = p.avg !== null ? `${p.avg}%` : i18n.status_nodata.toLowerCase();
+                        path.setAttribute('aria-label', i18n.aria_province
+                            .replace(':name', p.name)
+                            .replace(':count', p.nodes)
+                            .replace(':saturation', satText));
                     }
                 }
 
@@ -205,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const colEstado = fila.querySelector('.col-estado');
 
                     if (colNodos) {
-                        colNodos.textContent = new Intl.NumberFormat('es-ES').format(p.nodes);
+                        colNodos.textContent = new Intl.NumberFormat(i18n.locale).format(p.nodes);
                     }
                     if (colPct) {
                         const pct = total > 0 ? ((p.nodes / total) * 100).toFixed(1) : '0';
@@ -221,9 +259,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         const icono = nivel === 'correcto' ? '✓' :
                                       (nivel === 'aviso' ? '▲' :
                                       (nivel === 'critico' ? '✕' : '—'));
-                        const texto = p.level === 'green' ? 'Holgado' :
-                                      (p.level === 'orange' ? 'Cargado' :
-                                      (p.level === 'red' ? 'Saturado' : 'Sin datos'));
+                        const texto = p.level === 'green' ? i18n.status_clear :
+                                      (p.level === 'orange' ? i18n.status_busy :
+                                      (p.level === 'red' ? i18n.status_saturated : i18n.status_nodata));
                         colEstado.innerHTML = `<span class="chip chip-${nivel}"><span aria-hidden="true" style="font-weight: 800; font-size: 0.75rem;">${icono}</span> <span>${texto}</span></span>`;
                     }
                 }
@@ -281,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (ventanaLabel) {
-                ventanaLabel.textContent = v === '24h' ? 'Últimas 24 horas' : 'Últimos 7 días';
+                ventanaLabel.textContent = v === '24h' ? i18n.window_24h : i18n.window_7d;
             }
 
             const url = new URL(window.location.href);

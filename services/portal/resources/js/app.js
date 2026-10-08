@@ -1,8 +1,8 @@
 /**
  * app.js (services/portal/resources/js/app.js)
  *
- * Lógica esencial de interfaz: conmutador de modo claro/oscuro y menú responsive.
- * Sin dependencias pesadas ni rastreadores de terceros.
+ * Lógica esencial de interfaz: conmutador de modo claro/oscuro, selector de idioma y menú responsive.
+ * Sin dependencias pesadas ni rastreadores de terceros (cumple RN-06 y RN-48).
  */
 
 import './mapa.js';
@@ -36,4 +36,33 @@ document.addEventListener('DOMContentLoaded', () => {
             menuMovil.style.display = expanded ? 'none' : 'block';
         });
     }
+
+    // 3. Selector de Idioma (Frontend, RN-48)
+    const selectoresIdioma = document.querySelectorAll('.selector-idioma-select');
+    selectoresIdioma.forEach(select => {
+        select.addEventListener('change', (e) => {
+            const url = e.target.value;
+            try {
+                const urlObj = new URL(url, window.location.origin);
+                const lang = urlObj.searchParams.get('lang');
+                if (lang) {
+                    localStorage.setItem('portal_locale', lang);
+                }
+            } catch (err) {}
+            window.location.href = url;
+        });
+    });
+
+    // 4. Recordar preferencia de idioma en el navegador sin cookies (RN-06 / RN-48)
+    try {
+        const savedLocale = localStorage.getItem('portal_locale');
+        const currentDocLocale = (document.documentElement.lang || 'es').split('-')[0].toLowerCase();
+        const hasLangParam = new URLSearchParams(window.location.search).has('lang');
+
+        if (!hasLangParam && savedLocale && ['es', 'en', 'pt'].includes(savedLocale) && savedLocale !== currentDocLocale) {
+            const targetUrl = new URL(window.location.href);
+            targetUrl.searchParams.set('lang', savedLocale);
+            window.location.replace(targetUrl.toString());
+        }
+    } catch (e) {}
 });

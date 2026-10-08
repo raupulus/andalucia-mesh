@@ -1,26 +1,27 @@
 <x-filament-widgets::widget>
     <x-filament::section wire:poll.30s>
         <x-slot name="heading">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <span class="text-lg font-bold text-gray-900 dark:text-white">Estado de la Red y Microservicios</span>
-                    <span class="text-xs px-2 py-0.5 rounded-full font-mono {{ $latido_ok ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' }}">
+            <div class="fi-widget-header-flex">
+                <div class="fi-widget-title-group">
+                    <span class="fi-widget-icon" aria-hidden="true">🖥️</span>
+                    <span class="fi-widget-title">Estado de la Red y Microservicios</span>
+                    <span class="fi-widget-pill {{ $latido_ok ? 'fi-widget-pill-success' : 'fi-widget-pill-danger' }}">
                         Daemon: {{ $latido_ok ? 'Activo (' . $latido_hace . ')' : 'Sin latido reciente' }}
                     </span>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-2 text-xs">
-                        <span class="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> {{ $operativos }} OK
+                <div class="fi-widget-actions-group">
+                    <div class="fi-status-counter-group">
+                        <span class="fi-status-counter fi-status-counter-ok">
+                            <span class="fi-status-dot-sm bg-emerald-500"></span> {{ $operativos }} OK
                         </span>
                         @if($caidos > 0)
-                            <span class="inline-flex items-center gap-1 font-semibold text-rose-600 dark:text-rose-400">
-                                <span class="w-2 h-2 rounded-full bg-rose-500"></span> {{ $caidos }} Caídos
+                            <span class="fi-status-counter fi-status-counter-danger">
+                                <span class="fi-status-dot-sm bg-rose-500"></span> {{ $caidos }} Caídos
                             </span>
                         @endif
-                        <span class="inline-flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                            <span class="w-2 h-2 rounded-full bg-gray-400"></span> {{ $pendientes }} Pendientes
+                        <span class="fi-status-counter fi-status-counter-pending">
+                            <span class="fi-status-dot-sm bg-gray-400"></span> {{ $pendientes }} Pendientes
                         </span>
                     </div>
 
@@ -28,7 +29,7 @@
                         type="button"
                         wire:click="comprobarAhora"
                         wire:loading.attr="disabled"
-                        class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded bg-[#E9FCEF] text-[#15612F] hover:bg-[#d5f7e0] dark:bg-[#1C3A28] dark:text-[#9CF1BA] dark:hover:bg-[#254d35] transition-colors font-medium border border-[#15612F]/20 dark:border-[#9CF1BA]/30"
+                        class="fi-btn-refresh"
                     >
                         <span wire:loading.remove wire:target="comprobarAhora">↻ Comprobar ahora</span>
                         <span wire:loading wire:target="comprobarAhora">Comprobando...</span>
@@ -38,72 +39,68 @@
         </x-slot>
 
         {{-- Tabla de servicios --}}
-        <div class="overflow-x-auto mt-2">
-            <table class="w-full text-left text-xs border-collapse">
+        <div class="fi-table-responsive-container mt-2">
+            <table class="fi-dashboard-table">
                 <thead>
-                    <tr class="border-b border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 font-mono uppercase tracking-wider">
-                        <th class="py-2 px-3">Servicio</th>
-                        <th class="py-2 px-3">Tipo / Fase</th>
-                        <th class="py-2 px-3">Estado</th>
-                        <th class="py-2 px-3">Latencia</th>
-                        <th class="py-2 px-3">Último chequeo</th>
-                        <th class="py-2 px-3">Detalle / Diagnóstico</th>
+                    <tr>
+                        <th class="fi-th">Servicio</th>
+                        <th class="fi-th">Tipo / Fase</th>
+                        <th class="fi-th">Estado</th>
+                        <th class="fi-th">Latencia</th>
+                        <th class="fi-th">Último chequeo</th>
+                        <th class="fi-th">Detalle / Diagnóstico</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                <tbody>
                     @foreach($servicios as $s)
-                        <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
-                            <td class="py-2.5 px-3 font-semibold text-gray-900 dark:text-gray-100">
-                                {{ $s['nombre'] }}
-                                <span class="block text-[11px] font-mono text-gray-400 font-normal">{{ $s['clave'] }}</span>
+                        <tr class="fi-tr">
+                            <td class="fi-td">
+                                <div class="font-bold text-sm text-gray-900 dark:text-gray-100">{{ $s['nombre'] }}</div>
+                                <div class="font-mono text-[11px] opacity-60">{{ $s['clave'] }}</div>
                             </td>
-                            <td class="py-2.5 px-3 font-mono text-gray-500 dark:text-gray-400">
+                            <td class="fi-td font-mono text-xs opacity-80">
                                 <span class="uppercase">{{ $s['tipo'] }}</span>
-                                <span class="text-gray-400">· F{{ $s['fase'] }}</span>
+                                <span class="opacity-60">· F{{ $s['fase'] }}</span>
                             </td>
-                            <td class="py-2.5 px-3">
+                            <td class="fi-td">
                                 @if($s['color'] === 'verde')
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                        {{ $s['etiqueta'] }}
+                                    <span class="fi-badge-pill fi-badge-success">
+                                        <span class="fi-status-dot-sm bg-emerald-500"></span> {{ $s['etiqueta'] }}
                                     </span>
                                 @elseif($s['color'] === 'amarillo')
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                        {{ $s['etiqueta'] }}
+                                    <span class="fi-badge-pill fi-badge-warning">
+                                        <span class="fi-status-dot-sm bg-amber-500"></span> {{ $s['etiqueta'] }}
                                     </span>
                                 @elseif($s['color'] === 'rojo')
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                                        {{ $s['etiqueta'] }}
+                                    <span class="fi-badge-pill fi-badge-danger">
+                                        <span class="fi-status-dot-sm bg-rose-500"></span> {{ $s['etiqueta'] }}
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                                        {{ $s['etiqueta'] }}
+                                    <span class="fi-badge-pill fi-badge-neutral">
+                                        <span class="fi-status-dot-sm bg-gray-400"></span> {{ $s['etiqueta'] }}
                                     </span>
                                 @endif
                             </td>
-                            <td class="py-2.5 px-3 font-mono text-gray-600 dark:text-gray-300">
+                            <td class="fi-td font-mono text-xs">
                                 @if($s['latencia_ms'] !== null)
-                                    {{ $s['latencia_ms'] }} ms
+                                    <span>{{ $s['latencia_ms'] }} ms</span>
                                 @else
-                                    <span class="text-gray-400">—</span>
+                                    <span class="opacity-40">—</span>
                                 @endif
                             </td>
-                            <td class="py-2.5 px-3 text-gray-500 dark:text-gray-400">
+                            <td class="fi-td text-xs opacity-75">
                                 {{ $s['hace'] }}
                             </td>
-                            <td class="py-2.5 px-3 max-w-xs truncate text-gray-600 dark:text-gray-300 font-mono text-[11px]">
+                            <td class="fi-td text-xs font-mono max-w-xs truncate">
                                 @if($s['motivo'])
-                                    <span class="{{ $s['color'] === 'rojo' ? 'text-rose-600 dark:text-rose-400 font-semibold' : '' }}">{{ $s['motivo'] }}</span>
+                                    <span class="{{ $s['color'] === 'rojo' ? 'text-rose-500 font-semibold' : 'opacity-80' }}">{{ $s['motivo'] }}</span>
                                 @elseif($s['clave'] === 'sync-peers' && is_array($s['detalle']) && isset($s['detalle']['peers']))
                                     @php $peers = (array) $s['detalle']['peers']; @endphp
-                                    <span>{{ count($peers) }} peers ({{ collect($peers)->where('ok', true)->count() }} activos)</span>
+                                    <span class="opacity-80">{{ count($peers) }} peers ({{ collect($peers)->where('ok', true)->count() }} activos)</span>
                                 @elseif($s['ok'])
-                                    <span class="text-gray-400">OK</span>
+                                    <span class="opacity-60">Operativo</span>
                                 @else
-                                    <span class="text-gray-400">—</span>
+                                    <span class="opacity-40">—</span>
                                 @endif
                             </td>
                         </tr>
@@ -112,22 +109,25 @@
             </table>
         </div>
 
-        {{-- Historial reciente de transiciones --}}
+        {{-- Historial reciente de transiciones estilizado --}}
         @if($transiciones->isNotEmpty())
-            <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
-                <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Transiciones de Estado Recientes</h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+            <div class="fi-transitions-wrapper">
+                <div class="fi-transitions-header">
+                    <span class="fi-transitions-title">Historial de Eventos Recientes</span>
+                    <span class="text-xs opacity-60">Últimos cambios de estado registrados en la plataforma</span>
+                </div>
+                <div class="fi-transitions-grid">
                     @foreach($transiciones as $t)
-                        <div class="p-2 rounded bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800 text-[11px]">
-                            <div class="flex items-center justify-between font-mono">
-                                <span class="font-bold {{ $t['ok'] ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400' }}">
+                        <div class="fi-transition-card {{ $t['ok'] ? 'fi-transition-ok' : 'fi-transition-fail' }}">
+                            <div class="flex items-center justify-between font-mono text-xs">
+                                <span class="font-bold {{ $t['ok'] ? 'text-emerald-500' : 'text-rose-500' }}">
                                     {{ $t['ok'] ? '● RECUPERADO' : '▲ CAÍDA' }}
                                 </span>
-                                <span class="text-gray-400">{{ $t['hace'] }}</span>
+                                <span class="opacity-60 text-[11px]">{{ $t['hace'] }}</span>
                             </div>
-                            <div class="font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{{ $t['servicio'] }}</div>
+                            <div class="font-bold text-sm mt-1 text-gray-900 dark:text-gray-100">{{ $t['servicio'] }}</div>
                             @if($t['motivo'])
-                                <div class="text-gray-500 truncate text-[10px] mt-0.5" title="{{ $t['motivo'] }}">{{ $t['motivo'] }}</div>
+                                <div class="text-[11px] opacity-75 truncate mt-0.5" title="{{ $t['motivo'] }}">{{ $t['motivo'] }}</div>
                             @endif
                         </div>
                     @endforeach
