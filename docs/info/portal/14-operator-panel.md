@@ -48,6 +48,14 @@ Que los operadores vean de un vistazo si cada pieza funciona y qué pasa en la m
 - Recursos Filament sobre modelos Eloquent de solo lectura (`$connection = 'ingesta'` o `'alertas'`, sin `create/edit/delete`; políticas que devuelven `false`). Las vistas no tienen clave primaria real: `getKeyName()` = `id` (o `node_id`).
 - Paginación de tablas en servidor; sin exportaciones.
 
+### Sugerencias (`SuggestionResource`)
+
+Gestión interna de propuestas ciudadanas (base `portal`, tabla `suggestions`):
+- Listado formateado con filtros por estado (`pending`, `approved`, `rejected`) y categoría (`bot_telegram`, `web`, `meshview`, `potatomesh`, `nueva_funcionalidad`, `otros`).
+- Acciones directas por fila: Aprobar, Rechazar y Editar para redactar notas privadas de operador (`operator_notes`).
+- Badge en el menú de navegación con el recuento de propuestas pendientes en color ámbar.
+- Privacidad estricta: los usuarios únicamente envían su propuesta de forma anónima; las notas y el estado son visibles exclusivamente para los operadores en Filament.
+
 ### Usuarios
 
 Recurso `Operadores` (base `portal`): listar, desactivar/activar, forzar nuevo TOTP. Crear solo por comando (evita que un panel comprometido cree cuentas).
@@ -62,6 +70,7 @@ Recurso `Operadores` (base `portal`): listar, desactivar/activar, forzar nuevo T
 | `estado_servicio` | `servicio` PK, `ok` bool, `fallos_seguidos` int, `codigo` int null, `latencia_ms` int null, `motivo` text null, `detalle` jsonb null, `comprobado_en` timestamptz |
 | `estado_servicio_cambio` | `id`, `servicio`, `ok`, `motivo`, `en`; purga diaria > 90 días |
 | `tareas_latido` | `tarea` PK, `ultima_ejecucion` |
+| `suggestions` | `id`, `category`, `content`, `status`, `operator_notes`, `ip_hash`, `created_at`, `updated_at` |
 
 ### Configuración
 

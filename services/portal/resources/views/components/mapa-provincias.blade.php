@@ -58,7 +58,7 @@
     </div>
 
     <!-- Contenedor del Mapa SVG con Tooltip Emergente -->
-    <div style="position: relative; width: 100%; border-radius: var(--radio-md); border: 1px solid var(--color-borde); background: var(--color-superficie); padding: 1rem; overflow: hidden;">
+    <div id="caja-mapa-svg" style="position: relative; width: 100%; border-radius: var(--radio-md); border: 1px solid var(--color-borde); background: var(--color-superficie); padding: 1rem;">
         
         <svg viewBox="0 0 1000 620" 
              class="mapa-andalucia-svg" 
@@ -201,10 +201,10 @@
         <!-- Panel flotante (Tooltip) para detalles de provincia -->
         <div id="mapa-panel-detalle" 
              class="mapa-panel-detalle" 
-             role="dialog" 
+             role="tooltip" 
              aria-hidden="true" 
-             style="display: none; position: absolute; pointer-events: none; z-index: 20;">
-            <div class="tarjeta" style="padding: 1rem; width: 280px; box-shadow: var(--sombra-lg); border-color: var(--color-borde);">
+             style="display: none; position: absolute; pointer-events: none; z-index: 50;">
+            <div class="tarjeta" style="padding: 1rem; width: 280px; max-width: calc(100vw - 3rem); box-shadow: var(--sombra-2); border-color: var(--color-borde); background: var(--color-superficie);">
                 <div style="font-weight: 700; font-size: 1.15rem; color: var(--color-texto-1); margin-bottom: 0.25rem;" id="panel-provincia-nombre">
                     Cádiz
                 </div>

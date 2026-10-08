@@ -12,11 +12,16 @@
 
             <!-- Formulario de búsqueda -->
             <form action="/revisa-tu-nodo" method="GET" style="margin-bottom: 3rem;">
+                <label for="campo-buscar-nodo" class="sr-only">
+                    Introduce el ID o nombre del nodo
+                </label>
                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                     <input type="search" 
+                           id="campo-buscar-nodo"
                            name="buscar" 
                            value="{{ $busqueda }}" 
                            placeholder="Introduce el ID (!a1b2c3d4) o nombre del nodo..." 
+                           aria-label="Introduce el ID o nombre del nodo"
                            required 
                            minlength="2" 
                            style="flex-grow: 1; padding: 0.85rem 1.25rem; font-size: 1.05rem; border: 2px solid var(--color-borde); border-radius: var(--radio-md); background: var(--color-superficie); color: var(--color-texto);" />

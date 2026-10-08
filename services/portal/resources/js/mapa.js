@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let datosActuales = null;
     let ventanaActiva = new URLSearchParams(window.location.search).get('ventana') === '24h' ? '24h' : '7d';
 
+    const cajaMapa = document.getElementById('caja-mapa-svg') || (panel && panel.parentElement) || contenedor;
+
     /**
      * Muestra el panel con los datos de una provincia
      */
@@ -60,21 +62,36 @@ document.addEventListener('DOMContentLoaded', () => {
             if (panelDetalle) panelDetalle.textContent = 'Sin datos de telemetría en las últimas 12 horas';
         }
 
-        // Posicionar panel cerca del ratón o elemento
+        // Posicionar panel cerca del ratón o elemento con ajuste de bordes
         panel.style.display = 'block';
         panel.setAttribute('aria-hidden', 'false');
 
-        if (evt && evt.clientX && evt.clientY) {
-            const rect = contenedor.getBoundingClientRect();
+        if (evt && typeof evt.clientX === 'number' && typeof evt.clientY === 'number') {
+            const rect = cajaMapa.getBoundingClientRect();
+            const panelWidth = panel.offsetWidth || 280;
+            const panelHeight = panel.offsetHeight || 170;
+
             let x = evt.clientX - rect.left + 15;
             let y = evt.clientY - rect.top + 15;
 
-            // Evitar salir del contenedor horizontalmente
-            if (x + 290 > rect.width) {
-                x = x - 310;
+            // Si sobrepasa por la derecha, invertir horizontalmente a la izquierda del cursor
+            if (x + panelWidth > rect.width - 15) {
+                x = evt.clientX - rect.left - panelWidth - 15;
             }
-            panel.style.left = `${Math.max(10, x)}px`;
-            panel.style.top = `${Math.max(10, y)}px`;
+
+            // Si sobrepasa por abajo, invertir verticalmente hacia arriba del cursor
+            if (y + panelHeight > rect.height - 15) {
+                y = evt.clientY - rect.top - panelHeight - 15;
+            }
+
+            // Confinar estrictamente dentro de los límites visibles de la caja
+            const maxX = Math.max(10, rect.width - panelWidth - 10);
+            const maxY = Math.max(10, rect.height - panelHeight - 10);
+            x = Math.max(10, Math.min(x, maxX));
+            y = Math.max(10, Math.min(y, maxY));
+
+            panel.style.left = `${Math.round(x)}px`;
+            panel.style.top = `${Math.round(y)}px`;
         } else {
             panel.style.left = '20px';
             panel.style.top = '20px';

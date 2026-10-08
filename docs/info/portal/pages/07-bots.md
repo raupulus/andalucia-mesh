@@ -118,18 +118,22 @@ Infraestructura: {infraestructura} · Clientes: {clientes}
 `/battery`
 
 ```
-Batería de los routers (de menor a mayor)
-{short} · {provincia} · {level} % · hace {tiempo}
-…
-Alimentados por red: {short}, {short}…
+🔋 Batería de routers · Andalucía ({total} activos)
+🔴 {criticos} crítico · 🟠 {bajos} bajo · 🟢 {normales} normales · 🔌 {alimentados} alimentados
+
+📍 {provincia} ({total_prov})
+• 🔴 {short} · {level} % ({voltaje} V) · hace {tiempo}
+• 🔌 {short} · Alimentado · hace {tiempo}
 ```
 
 `/routers`
 
 ```
-Routers vistos en los últimos 7 días
-{short} · {provincia} · batería {level} % · chutil {chutil} % · tx {tx} %
-…
+📶 Routers de la red · Andalucía ({total} activos en 7d)
+
+📍 {provincia} ({total_prov})
+• {short} · 🟠 {level} % · 📡 ch {chutil} % · ⬆️ tx {tx} % · hace {tiempo}
+• {short} · 🔌 Red · 📡 ch {chutil} % · ⬆️ tx {tx} % · hace {tiempo}
 ```
 
 `/levels medio alto`

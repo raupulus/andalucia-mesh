@@ -9,7 +9,6 @@ declare(strict_types=1);
  * Todos los valores provienen de variables de entorno o valores por defecto del proyecto.
  * Ningún texto en vistas o markdown debe tener estos datos quemados.
  */
-
 $projectDomain = env('PROJECT_DOMAIN', 'mesh.desdechipiona.es');
 
 return [
@@ -41,7 +40,7 @@ return [
 
     // Conexión pública a Mosquitto para gateways
     'mqtt' => [
-        'host_publico' => 'mqtt.' . $projectDomain,
+        'host_publico' => 'mqtt.'.$projectDomain,
         'puerto_plano' => 1883,
         'puerto_tls' => 8883,
         'topic_root' => env('MQTT_TOPIC_ROOT', 'msh/EU_868'),
@@ -67,8 +66,8 @@ return [
             'ES-CA' => ['x' => 305, 'y' => 490], // Cádiz
             'ES-CO' => ['x' => 460, 'y' => 205], // Córdoba
             'ES-GR' => ['x' => 730, 'y' => 310], // Granada
-            'ES-H'  => ['x' => 150, 'y' => 250], // Huelva
-            'ES-J'  => ['x' => 675, 'y' => 165], // Jaén
+            'ES-H' => ['x' => 150, 'y' => 250], // Huelva
+            'ES-J' => ['x' => 675, 'y' => 165], // Jaén
             'ES-MA' => ['x' => 470, 'y' => 400], // Málaga
             'ES-SE' => ['x' => 350, 'y' => 280], // Sevilla
         ],
@@ -80,8 +79,8 @@ return [
         'ES-CA' => 'Cádiz',
         'ES-CO' => 'Córdoba',
         'ES-GR' => 'Granada',
-        'ES-H'  => 'Huelva',
-        'ES-J'  => 'Jaén',
+        'ES-H' => 'Huelva',
+        'ES-J' => 'Jaén',
         'ES-MA' => 'Málaga',
         'ES-SE' => 'Sevilla',
     ],
@@ -92,7 +91,7 @@ return [
             'id' => 'meshview',
             'titulo' => 'MeshView',
             'descripcion' => 'Visor técnico detallado con mapa topológico, nodos, enlaces y métricas de paquetes en directo.',
-            'url' => 'https://' . env('MESHVIEW_DOMAIN', 'meshview.' . $projectDomain),
+            'url' => 'https://'.env('MESHVIEW_DOMAIN', 'meshview.'.$projectDomain),
             'imagen' => '/img/servicios/meshview.webp',
             'servicio_clave' => 'meshview',
         ],
@@ -100,7 +99,7 @@ return [
             'id' => 'potatomesh',
             'titulo' => 'PotatoMesh',
             'descripcion' => 'Mapa web ligero y ágil optimizado para dispositivos móviles y consulta rápida en exteriores.',
-            'url' => 'https://potato.' . $projectDomain,
+            'url' => 'https://potato.'.$projectDomain,
             'imagen' => '/img/servicios/potatomesh.webp',
             'servicio_clave' => 'potatomesh',
         ],
@@ -123,12 +122,14 @@ return [
         ['titulo' => 'Alertas', 'url' => '/alertas'],
         ['titulo' => 'Bots', 'url' => '/bots'],
         ['titulo' => 'Revisa tu nodo', 'url' => '/revisa-tu-nodo'],
+        ['titulo' => 'Sugerencias', 'url' => '/sugerencias'],
     ],
 
     'pie' => [
         ['titulo' => 'El proyecto', 'url' => '/proyecto'],
         ['titulo' => 'Quién lo impulsa', 'url' => '/quien-lo-impulsa'],
         ['titulo' => 'Cómo se gestiona', 'url' => '/como-se-gestiona'],
+        ['titulo' => 'Sugerencias', 'url' => '/sugerencias'],
         ['titulo' => 'Firmware y apps', 'url' => '/firmware'],
         ['titulo' => 'API pública', 'url' => '/api'],
         ['titulo' => 'Aviso legal', 'url' => '/legal/aviso-legal'],

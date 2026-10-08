@@ -35,7 +35,7 @@ Ver la malla de Andalucía de un vistazo, sin peticiones a terceros, con una alt
 
 ### Interacción
 
-- Provincia enfocable (`tabindex=0`, `role="button"`, `aria-label` con nombre, nodos y carga en texto). Clic, toque o Intro → panel con nodos, % del total, saturación, carga máxima y, por grupo (routers; `CLIENT` y `CLIENT_BASE` juntos), su media y cuántos nodos la miden. Hover en escritorio muestra el mismo panel.
+- Provincia enfocable (`tabindex=0`, `role="button"`, `aria-label` con nombre, nodos y carga en texto). Clic, toque o Intro → panel con nodos, % del total, saturación, carga máxima y, por grupo (routers; `CLIENT` y `CLIENT_BASE` juntos), su media y cuántos nodos la miden. Hover en escritorio muestra el mismo panel. El panel cuenta con posicionamiento adaptativo sin `overflow: hidden`, invirtiendo el eje vertical automáticamente hacia arriba si la provincia queda próxima al borde inferior (Cádiz, Granada, etc.).
 - Leyenda con los cuatro colores y, debajo, el texto fijo de cómo se calcula:
 
   > "Cómo calculamos la saturación de cada provincia: con las coordenadas buscamos todos los nodos que están dentro de la provincia; sacamos la media de la ocupación del canal de los routers por un lado y la de todos los nodos CLIENT y CLIENT_BASE juntos por otro; y sumamos con pesos: routers 60 % y CLIENT con CLIENT_BASE 40 % (estos dos van juntos en una sola media). Los CLIENT_MUTE no cuentan porque suelen estar en interior o peor comunicados y su medida sale más baja de lo real. Se usa el último dato de cada nodo en las 12 últimas horas."

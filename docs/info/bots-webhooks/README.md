@@ -246,8 +246,8 @@ https://mesh.example.org/alertas/01JABD0000000000000000000A
 | Comando | Quién | Dónde | Fuente | Responde |
 |---|---|---|---|---|
 | `/status` | Cualquiera | Grupos, canales y privado (Telegram); servidores (Discord) | `GET /stats/summary` | Estado general de la malla |
-| `/battery [provincia]` | Cualquiera | Ídem | `GET /routers?province=` | Batería **solo de routers**, de menor a mayor |
-| `/routers [provincia]` | Cualquiera | Ídem | `GET /routers?province=` | Todos los routers con batería, `chutil` y `tx` |
+| `/battery [provincia]` | Cualquiera | Ídem | `GET /routers?province=` | Batería **solo de routers**, agrupados por provincia y de menor a mayor (excluye exterior) |
+| `/routers [provincia]` | Cualquiera | Ídem | `GET /routers?province=` | Routers agrupados por provincia con batería, `chutil` y `tx` (excluye exterior) |
 | `/levels [riesgos…]` | Ver: cualquiera. Cambiar: administradores | Destinos (no privado) | Catálogo | Muestra riesgos activos, descripción de opciones y ejemplos; o los cambia |
 | `/types [tipos…]` | Igual que `/levels` | Destinos | Catálogo | Muestra tipos activos, descripción de opciones y ejemplos; o los cambia |
 | `/disableExterior` | Administradores | Destinos | Base propia | Solo recibir alertas de nodos en Andalucía (excluye exterior) |
@@ -262,7 +262,7 @@ https://mesh.example.org/alertas/01JABD0000000000000000000A
 
 **Argumentos**
 
-- `provincia`: nombre (sin importar tildes ni mayúsculas: `cadiz`, `Cádiz`), código (`ES-CA`, `ca`) o `fuera`. Sin argumento: todas.
+- `provincia`: nombre (sin importar tildes ni mayúsculas: `cadiz`, `Cádiz`), código (`ES-CA`, `ca`). Sin argumento: todas las provincias andaluzas. Los comandos de routers solo muestran nodos pertenecientes a provincias de Andalucía.
 - `/levels` y `/types`: valores separados por espacios o comas, sin distinguir mayúsculas, validados contra el catálogo; `todos` = todos los del catálogo. Al menos un valor para cambiar. Sin argumentos: muestra los activos, la descripción de cada opción y ejemplos de uso sin necesidad de salir de la aplicación.
 - `/disableExterior` y `/enableExterior`: no requieren argumentos. Modifican `incluir_exterior` en el destino. `/exterior` sin argumentos muestra el estado actual del filtro, o acepta `on`/`off` para conmutarlo.
 - `/pause` y `/resume`: no requieren argumentos. `/pause` marca el destino como inactivo y descarta envíos pendientes en cola para frenar spam inmediato; `/resume` reactiva el destino.
@@ -288,28 +288,36 @@ Provincias de mayor a menor carga, icono por los cortes del mapa (🟢 ≤ 20 %,
 `/battery`
 
 ```
-🔋 Batería de los routers · de menor a mayor
-🔴 CAD1 · Cádiz · 18 % (3,52 V) · hace 20 min
-🟠 SEV2 · Sevilla · 34 % · hace 2 h
-🟢 MAL4 · Málaga · 81 % · hace 5 min
-Alimentados: CAD3, HUE1
-Sin dato de batería: GRA2
+🔋 Batería de routers · Andalucía (38 activos)
+🔴 1 crítico · 🟠 1 bajo · 🟢 34 normales · 🔌 2 alimentados
+
+📍 Cádiz (2)
+• 🔴 CAD1 · 18 % (3,52 V) · hace 20 min
+• 🔌 CAD3 · Alimentado · hace 1 min
+
+📍 Sevilla (1)
+• 🟠 SEV2 · 34 % (3,71 V) · hace 2 h
+
+📍 Málaga (1)
+• 🟢 MAL4 · 81 % (4,05 V) · hace 5 min
 ```
 
-Icono por los cortes de la regla `battery-low` para infraestructura: 🔴 < 20 %, 🟠 < 40 %, 🟢 el resto. `powered: true` va a "Alimentados".
+Agrupado por provincia (orden alfabético). Resumen superior con recuento de estados. Dentro de cada provincia: nodos ordenados de menor a mayor nivel de batería, seguidos de alimentados y sin telemetría. Icono por los cortes de la regla `battery-low` para infraestructura: 🔴 < 20 %, 🟠 < 40 %, 🟢 el resto, 🔌 alimentado, ⚪ sin telemetría. Nunca incluye nodos de fuera de Andalucía.
 
 `/routers`
 
 ```
-📶 Routers vistos en 7 días · 38
-Cádiz
-CAD1 · 🔋 34 % · chutil 22,5 % · tx 3,1 % · hace 2 min
-CAD3 · 🔌 · chutil 8,0 % · tx 1,2 % · hace 1 min
-Sevilla
-SEV2 · 🔋 34 % · chutil — · tx — · hace 3 h
+📶 Routers de la red · Andalucía (38 activos en 7d)
+
+📍 Cádiz (2)
+• CAD1 · 🟠 34 % · 📡 ch 22,5 % · ⬆️ tx 3,1 % · hace 2 min
+• CAD3 · 🔌 Red · 📡 ch 8,0 % · ⬆️ tx 1,2 % · hace 1 min
+
+📍 Sevilla (1)
+• SEV2 · 🔋 75 % · 📡 ch — · ⬆️ tx — · hace 3 h
 ```
 
-Agrupado por provincia (orden alfabético del nombre) y, dentro, por nombre corto. 🔌 = alimentado.
+Agrupado por provincia (orden alfabético del nombre) con contador de routers por provincia, y dentro, por nombre corto. Iconos de estado de batería (🔴 < 20 %, 🟠 < 40 %, 🔋 normal, 🔌 Red alimentado, ⚪ sin datos) y métricas de canal (`chutil`) y transmisión (`tx`). Nunca incluye nodos de fuera de Andalucía.
 
 `/levels medio alto` → `Riesgos activos en este chat: medio, alto.` · `/types` → `Tipos activos en este chat: infraestructura (por defecto).`
 

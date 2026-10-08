@@ -331,11 +331,19 @@ Infraestructura: 1 · Clientes: 3</code></pre>
                             <span style="font-family: var(--font-mono); color: var(--color-texto);">/battery</span>
                             <span>Batería de repetidores</span>
                         </div>
-                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code>Batería de los routers (de menor a mayor)
-!3a8f1c04 · Cádiz · 38 % · hace 4 min
-!7b29a100 · Sevilla · 62 % · hace 11 min
-!90de45f1 · Málaga · 89 % · hace 2 min
-Alimentados por red: !10cc44ab, !8811ee30</code></pre>
+                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code>🔋 Batería de routers · Andalucía (5 activos)
+🔴 1 crítico · 🟠 1 bajo · 🟢 2 normales · 🔌 1 alimentado
+
+📍 Cádiz (2)
+• 🔴 CAD1 · 18 % (3,5 V) · hace 20 min
+• 🔌 CAD3 · Alimentado · hace 1 min
+
+📍 Sevilla (1)
+• 🟠 SEV2 · 34 % (3,7 V) · hace 2 h
+
+📍 Málaga (2)
+• 🟢 MAL4 · 81 % (4,1 V) · hace 5 min
+• 🟢 MAL5 · 92 % (4,2 V) · hace 12 min</code></pre>
                     </div>
 
                     <!-- Ejemplo: /routers -->
@@ -344,10 +352,17 @@ Alimentados por red: !10cc44ab, !8811ee30</code></pre>
                             <span style="font-family: var(--font-mono); color: var(--color-texto);">/routers</span>
                             <span>Métricas de canal y transmisión</span>
                         </div>
-                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code>Routers vistos en los últimos 7 días
-!3a8f1c04 · Cádiz · batería 38 % · chutil 18 % · tx 2.4 %
-!7b29a100 · Sevilla · batería 62 % · chutil 12 % · tx 1.1 %
-!90de45f1 · Málaga · batería 89 % · chutil 15 % · tx 1.8 %</code></pre>
+                        <pre class="bloque-codigo" style="margin: 0; border: none; border-radius: 0;"><code>📶 Routers de la red · Andalucía (4 activos en 7d)
+
+📍 Cádiz (2)
+• CAD1 · 🟠 34 % · 📡 ch 22,5 % · ⬆️ tx 3,1 % · hace 2 min
+• CAD3 · 🔌 Red · 📡 ch 8,0 % · ⬆️ tx 1,2 % · hace 1 min
+
+📍 Sevilla (1)
+• SEV2 · 🔋 75 % · 📡 ch — · ⬆️ tx — · hace 3 h
+
+📍 Málaga (1)
+• MAL4 · 🔋 81 % · 📡 ch 14,2 % · ⬆️ tx 0,9 % · hace 5 min</code></pre>
                     </div>
 
                     <!-- Ejemplo: /levels y /types -->
@@ -559,6 +574,16 @@ https://{{ config('proyecto.dominio') }}/alertas/alt-90412</code></div>
                     </div>
 
                 </div>
+            </section>
+
+            <!-- Sugerencias para bots -->
+            <section style="margin-bottom: 3rem; background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-md); padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                <div style="font-size: 0.92rem; color: var(--color-texto-2);">
+                    ¿Tienes ideas para nuevos comandos, alertas o integraciones en los bots?
+                </div>
+                <a href="/sugerencias" class="btn btn-secundario" style="font-size: 0.85rem; padding: 0.45rem 0.9rem;">
+                    Proponer mejora →
+                </a>
             </section>
 
             <!-- Banner de Emergencias -->

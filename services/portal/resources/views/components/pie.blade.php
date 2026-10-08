@@ -22,6 +22,7 @@
                     <li><a href="/proyecto" style="text-decoration: none; color: var(--color-texto);">El proyecto</a></li>
                     <li><a href="/quien-lo-impulsa" style="text-decoration: none; color: var(--color-texto);">Quién lo impulsa</a></li>
                     <li><a href="/como-se-gestiona" style="text-decoration: none; color: var(--color-texto);">Cómo se gestiona</a></li>
+                    <li><a href="/sugerencias" style="text-decoration: none; color: var(--color-texto);">Buzón de sugerencias</a></li>
                     <li><a href="/firmware" style="text-decoration: none; color: var(--color-texto);">Firmware y apps</a></li>
                     <li><a href="/api" style="text-decoration: none; color: var(--color-texto);">API pública</a></li>
                 </ul>

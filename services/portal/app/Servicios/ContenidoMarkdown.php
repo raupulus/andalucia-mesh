@@ -152,7 +152,8 @@ class ContenidoMarkdown
                 throw new RuntimeException("Variable desconocida sin sustituir '{$mErr[0]}' en {$nombreFichero}");
             }
 
-            // 6. Convertir los encabezados ### a ## (ya que cada ### representa un H2 según la convención del proyecto)
+            // 6. Normalizar los encabezados para preservar la jerarquía H1 (título de página) -> H2 -> H3
+            $body = preg_replace('/^####\s+/m', '### ', $body) ?? $body;
             $body = preg_replace('/^###\s+/m', '## ', $body) ?? $body;
 
             // 7. Convertir Markdown a HTML

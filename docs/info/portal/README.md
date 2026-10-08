@@ -57,6 +57,7 @@
 | `/bots`, `/firmware` | Público | 06, 07 |
 | `/rankings`, `/alertas`, `/alertas/{id}` | Público | 08 |
 | `/revisa-tu-nodo`, `/revisa-tu-nodo/{id}` | Público | 09 |
+| `/sugerencias` | Público | 01, 14 |
 | `/legal/aviso-legal`, `/legal/privacidad`, `/legal/cookies` | Público | 10 |
 | `/api` (documentación) | Público | 11 |
 | `/sitemap.xml`, `/robots.txt`, `/qr.svg`, `/qr.pdf` | Público | 01 |
@@ -105,6 +106,7 @@
 | `TELEGRAM_BOT_USERNAME` / `DISCORD_INVITE_URL` | usuario del bot / enlace de invitación | Propia | No |
 | `HOSTING_PROVIDER` / `HOSTING_LOCATION` | Proveedor del servidor / ubicación del centro de datos (textos legales) | Propia | No |
 | `BOT_RIESGOS_DEFECTO` / `BOT_TIPOS_DEFECTO` | `alto` / `infraestructura` | Propia | No |
+| `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | Claves pública y secreta de Cloudflare Turnstile (opcionales) | Propia | Secreta sí |
 | `AUTORUN_ENABLED` | `true` en `portal`, `false` en `portal-tareas` | Propia | No |
 
 ## 6. Datos
@@ -115,6 +117,7 @@
 | `sessions` | Solo `/admin` | `SESSION_LIFETIME` (8 h) |
 | `cache`, `cache_locks` | Caché y copia de respaldo de la API, límite por IP (con hash) | Purga horaria de expirados |
 | `estado_servicio`, `estado_servicio_cambio`, `tareas_latido` | Salud | Cambios 90 días |
+| `suggestions` | Buzón de sugerencias ciudadanas, estado y notas privadas de operador | Mientras sean de utilidad |
 
 Sin datos de visitantes: Nginx no guarda registros de acceso (`access_log off`, `../infrastructure/03-nginx-dns.md`). Copias: fuera del proyecto.
 

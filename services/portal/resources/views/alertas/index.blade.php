@@ -32,7 +32,7 @@
                     <div style="font-size: 1.75rem; line-height: 1;">ℹ️</div>
                     <div>
                         <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 0.5rem;">
-                            Detector Automático de Anomalías (Fase 6)
+                            Detector Automático de Anomalías de Red
                         </h2>
                         <p style="color: var(--color-texto-2); font-size: 0.95rem; line-height: 1.55; margin-bottom: 0;">
                             El motor inteligente de detección continua de incidencias y caídas de infraestructura se encuentra actualmente en proceso de despliegue y calibración de umbrales. Ninguna anomalía crítica activa ha sido notificada en este momento.

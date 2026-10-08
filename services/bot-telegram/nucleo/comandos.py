@@ -8,7 +8,9 @@ from nucleo.api_portal import ClientePortal
 from nucleo.base import GestorBase
 from nucleo.catalogo import GestorCatalogo
 from nucleo.config import ConfiguracionBots
-from nucleo.formato import PROVINCIAS, formatear_fecha_hora, obtener_nombre_provincia
+from nucleo.formato import PROVINCIAS, PROVINCIAS_ANDALUCIA, formatear_fecha_hora, obtener_nombre_provincia
+
+ROLES_ROUTER: frozenset[str] = frozenset({"ROUTER", "ROUTER_LATE", "REPEATER"})
 
 MAPA_PROVINCIAS_ALIAS: dict[str, str] = {
     "almeria": "ES-AL",
@@ -187,65 +189,151 @@ class GestorComandos:
         return "\n".join(lineas)
 
     async def ejecutar_battery(self, provincia_arg: str | None = None) -> str:
-        """Genera el mensaje de estado de batería de routers (/battery)."""
+        """Genera el mensaje de estado de batería de routers agrupados por provincia (/battery)."""
         valido, cod_prov = self.normalizar_provincia(provincia_arg)
         if not valido:
             return "Provincia no reconocida. Usa el nombre o el código: Almería (ES-AL), Cádiz (ES-CA), …"
+
+        if cod_prov == "FUERA":
+            return "Solo se muestran routers ubicados en Andalucía: Almería, Cádiz, Córdoba, Granada, Huelva, Jaén, Málaga y Sevilla."
 
         datos = await self.cliente_portal.obtener_routers(cod_prov)
         if not datos:
             return "No puedo consultar los datos ahora mismo. Las alertas siguen llegando con normalidad."
 
-        items = [i for i in datos.get("items", []) if str(i.get("role", "")).upper() == "ROUTER"]
+        items = [
+            i
+            for i in datos.get("items", [])
+            if (not i.get("role") or str(i.get("role")).upper() in ROLES_ROUTER)
+            and (i.get("province") or "").upper() in PROVINCIAS_ANDALUCIA
+        ]
         if not items:
-            return "No hay routers vistos en los últimos 7 días."
+            if cod_prov:
+                p_nom = obtener_nombre_provincia(cod_prov) or cod_prov
+                return f"No hay routers vistos en los últimos 7 días en {p_nom}."
+            return "No hay routers vistos en los últimos 7 días en Andalucía."
 
-        # Separar por alimentados, con batería y sin dato
-        con_bateria: list[dict[str, Any]] = []
-        alimentados: list[str] = []
-        sin_dato: list[str] = []
+        total_routers = len(items)
+
+        # Contar estados para el resumen global
+        criticos = 0
+        bajos = 0
+        normales = 0
+        alimentados = 0
+        sin_datos = 0
 
         for it in items:
-            nombre = it.get("short") or it.get("id")
             bat = it.get("battery", {}) or {}
-            powered = bat.get("powered", False)
-            nivel = bat.get("level")
-
-            if powered:
-                alimentados.append(nombre)
-            elif nivel is not None:
-                con_bateria.append(it)
+            if bat.get("powered"):
+                alimentados += 1
+            elif bat.get("level") is not None:
+                try:
+                    lvl = int(round(float(bat["level"])))
+                except (ValueError, TypeError):
+                    lvl = 0
+                if lvl < 20:
+                    criticos += 1
+                elif lvl < 40:
+                    bajos += 1
+                else:
+                    normales += 1
             else:
-                sin_dato.append(nombre)
+                sin_datos += 1
 
-        # Ordenar batería de menor a mayor
-        con_bateria.sort(key=lambda x: (x.get("battery", {}).get("level", 100)))
+        if cod_prov:
+            p_nom = obtener_nombre_provincia(cod_prov) or cod_prov
+            titulo = f"🔋 Batería de routers · {p_nom} ({total_routers} activos)"
+        else:
+            titulo = f"🔋 Batería de routers · Andalucía ({total_routers} activos)"
 
-        lineas: list[str] = ["🔋 Batería de los routers · de menor a mayor"]
-        for it in con_bateria:
-            nom = it.get("short") or it.get("id")
-            prov_cod = it.get("province")
-            prov_nom = obtener_nombre_provincia(prov_cod) or "—"
-            bat = it.get("battery", {})
-            nivel = bat.get("level", 0)
-            voltaje = bat.get("voltage")
-            at_str = bat.get("at") or it.get("last_seen")
-            relativo = formatear_relativo_reciente(at_str, self.config.tz)
-
-            if nivel < 20:
-                icono = "🔴"
-            elif nivel < 40:
-                icono = "🟠"
-            else:
-                icono = "🟢"
-
-            txt_v = f" ({formatear_decimal(voltaje)} V)" if voltaje is not None else ""
-            lineas.append(f"{icono} {nom} · {prov_nom} · {nivel} %{txt_v} · {relativo}")
-
+        trozos_resumen: list[str] = []
+        if criticos:
+            trozos_resumen.append(f"🔴 {criticos} {'crítico' if criticos == 1 else 'críticos'}")
+        if bajos:
+            trozos_resumen.append(f"🟠 {bajos} {'bajo' if bajos == 1 else 'bajos'}")
+        if normales:
+            trozos_resumen.append(f"🟢 {normales} {'normal' if normales == 1 else 'normales'}")
         if alimentados:
-            lineas.append(f"Alimentados: {', '.join(sorted(alimentados))}")
-        if sin_dato:
-            lineas.append(f"Sin dato de batería: {', '.join(sorted(sin_dato))}")
+            trozos_resumen.append(f"🔌 {alimentados} {'alimentado' if alimentados == 1 else 'alimentados'}")
+        if sin_datos:
+            trozos_resumen.append(f"⚪ {sin_datos} sin datos")
+
+        lineas: list[str] = [titulo]
+        if trozos_resumen:
+            lineas.append(" · ".join(trozos_resumen))
+
+        # Agrupar por provincia
+        por_provincia: dict[str, list[dict[str, Any]]] = {}
+        for it in items:
+            p = (it.get("province") or "").upper()
+            por_provincia.setdefault(p, []).append(it)
+
+        # Ordenar provincias alfabéticamente por su nombre visible
+        provincias_ordenadas = sorted(
+            por_provincia.keys(),
+            key=lambda c: obtener_nombre_provincia(c) or c,
+        )
+
+        def clave_orden_bateria(nodo: dict[str, Any]) -> tuple[int, int, str]:
+            bat = nodo.get("battery", {}) or {}
+            nom = str(nodo.get("short") or nodo.get("id") or "").lower()
+            if bat.get("powered"):
+                return (1, 0, nom)
+            if bat.get("level") is not None:
+                try:
+                    lvl_val = int(round(float(bat["level"])))
+                except (ValueError, TypeError):
+                    lvl_val = 0
+                return (0, lvl_val, nom)
+            return (2, 0, nom)
+
+        for p_cod in provincias_ordenadas:
+            p_nom = obtener_nombre_provincia(p_cod) or p_cod
+            grupo = por_provincia[p_cod]
+            grupo.sort(key=clave_orden_bateria)
+
+            lineas.append("")
+            lineas.append(f"📍 {p_nom} ({len(grupo)})")
+
+            for it in grupo:
+                nom = it.get("short") or it.get("id")
+                bat = it.get("battery", {}) or {}
+                powered = bool(bat.get("powered", False))
+                nivel_raw = bat.get("level")
+                voltaje_raw = bat.get("voltage")
+                at_str = bat.get("at") or it.get("last_seen")
+                relativo = formatear_relativo_reciente(at_str, self.config.tz)
+
+                if powered:
+                    txt_lvl = ""
+                    if nivel_raw is not None:
+                        try:
+                            txt_lvl = f" ({int(round(float(nivel_raw)))} %)"
+                        except (ValueError, TypeError):
+                            pass
+                    lineas.append(f"• 🔌 {nom} · Alimentado{txt_lvl} · {relativo}")
+                elif nivel_raw is not None:
+                    try:
+                        nivel = int(round(float(nivel_raw)))
+                    except (ValueError, TypeError):
+                        nivel = 0
+                    if nivel < 20:
+                        icono = "🔴"
+                    elif nivel < 40:
+                        icono = "🟠"
+                    else:
+                        icono = "🟢"
+
+                    txt_v = ""
+                    if voltaje_raw is not None:
+                        try:
+                            txt_v = f" ({formatear_decimal(float(voltaje_raw))} V)"
+                        except (ValueError, TypeError):
+                            pass
+
+                    lineas.append(f"• {icono} {nom} · {nivel} %{txt_v} · {relativo}")
+                else:
+                    lineas.append(f"• ⚪ {nom} · Sin telemetría · {relativo}")
 
         return "\n".join(lineas)
 
@@ -255,21 +343,38 @@ class GestorComandos:
         if not valido:
             return "Provincia no reconocida. Usa el nombre o el código: Almería (ES-AL), Cádiz (ES-CA), …"
 
+        if cod_prov == "FUERA":
+            return "Solo se muestran routers ubicados en Andalucía: Almería, Cádiz, Córdoba, Granada, Huelva, Jaén, Málaga y Sevilla."
+
         datos = await self.cliente_portal.obtener_routers(cod_prov)
         if not datos:
             return "No puedo consultar los datos ahora mismo. Las alertas siguen llegando con normalidad."
 
-        items = [i for i in datos.get("items", []) if str(i.get("role", "")).upper() == "ROUTER"]
+        items = [
+            i
+            for i in datos.get("items", [])
+            if (not i.get("role") or str(i.get("role")).upper() in ROLES_ROUTER)
+            and (i.get("province") or "").upper() in PROVINCIAS_ANDALUCIA
+        ]
         if not items:
-            return "No hay routers vistos en los últimos 7 días."
+            if cod_prov:
+                p_nom = obtener_nombre_provincia(cod_prov) or cod_prov
+                return f"No hay routers vistos en los últimos 7 días en {p_nom}."
+            return "No hay routers vistos en los últimos 7 días en Andalucía."
 
         total_routers = len(items)
-        lineas: list[str] = [f"📶 Routers vistos en 7 días · {total_routers}"]
+        if cod_prov:
+            p_nom = obtener_nombre_provincia(cod_prov) or cod_prov
+            titulo = f"📶 Routers · {p_nom} ({total_routers} activos en 7d)"
+        else:
+            titulo = f"📶 Routers de la red · Andalucía ({total_routers} activos en 7d)"
+
+        lineas: list[str] = [titulo]
 
         # Agrupar por provincia en orden alfabético
         por_provincia: dict[str, list[dict[str, Any]]] = {}
         for it in items:
-            p = it.get("province") or "FUERA"
+            p = (it.get("province") or "").upper()
             por_provincia.setdefault(p, []).append(it)
 
         # Ordenar provincias alfabéticamente por su nombre visible
@@ -280,28 +385,35 @@ class GestorComandos:
 
         for p_cod in provincias_ordenadas:
             p_nom = obtener_nombre_provincia(p_cod) or p_cod
-            lineas.append(p_nom)
             grupo = por_provincia[p_cod]
             # Ordenar por nombre corto
             grupo.sort(key=lambda x: str(x.get("short") or x.get("id")).lower())
+
+            lineas.append("")
+            lineas.append(f"📍 {p_nom} ({len(grupo)})")
 
             for it in grupo:
                 nom = it.get("short") or it.get("id")
                 bat = it.get("battery", {}) or {}
                 if bat.get("powered"):
-                    bat_txt = "🔌"
+                    bat_txt = "🔌 Red"
                 elif bat.get("level") is not None:
-                    bat_txt = f"🔋 {bat.get('level')} %"
+                    try:
+                        lvl = int(round(float(bat["level"])))
+                    except (ValueError, TypeError):
+                        lvl = 0
+                    icono_bat = "🔴" if lvl < 20 else ("🟠" if lvl < 40 else "🔋")
+                    bat_txt = f"{icono_bat} {lvl} %"
                 else:
-                    bat_txt = "🔋 —"
+                    bat_txt = "⚪ bat —"
 
                 ch = it.get("chutil")
                 tx = it.get("tx")
-                ch_txt = f"chutil {formatear_decimal(ch)} %" if ch is not None else "chutil —"
-                tx_txt = f"tx {formatear_decimal(tx)} %" if tx is not None else "tx —"
+                ch_txt = f"📡 ch {formatear_decimal(ch)} %" if ch is not None else "📡 ch —"
+                tx_txt = f"⬆️ tx {formatear_decimal(tx)} %" if tx is not None else "⬆️ tx —"
                 rel = formatear_relativo_reciente(it.get("last_seen"), self.config.tz)
 
-                lineas.append(f"{nom} · {bat_txt} · {ch_txt} · {tx_txt} · {rel}")
+                lineas.append(f"• {nom} · {bat_txt} · {ch_txt} · {tx_txt} · {rel}")
 
         return "\n".join(lineas)
 

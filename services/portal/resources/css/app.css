@@ -459,6 +459,31 @@ pre code {
   margin-bottom: 1.25rem;
 }
 
+/* Tablas adaptables dentro de artículos y páginas Markdown */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.prose th,
+.prose td {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--color-borde);
+  text-align: left;
+  font-size: 0.92rem;
+}
+
+.prose th {
+  font-weight: 600;
+  color: var(--color-texto);
+  background-color: var(--color-superficie-sutil);
+}
+
+
 /* Trama diagonal para "sin datos" */
 .trama-nodata {
   background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(141, 142, 166, 0.25) 5px, rgba(141, 142, 166, 0.25) 10px);
@@ -579,4 +604,48 @@ pre code {
   outline: 3px solid var(--color-acento);
   outline-offset: 2px;
 }
+
+/* ==============================================================================
+ * Navegación y Cabecera Responsive
+ * ============================================================================== */
+.nav-escritorio {
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+}
+
+.nav-movil-toggle {
+  display: none;
+}
+
+#btn-tema,
+#btn-menu-movil {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@media (max-width: 900px) {
+  .nav-escritorio {
+    display: none !important;
+  }
+  .nav-movil-toggle {
+    display: flex !important;
+    align-items: center;
+  }
+}
+
+/* Utilidad para elementos accesibles solo para lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+
 

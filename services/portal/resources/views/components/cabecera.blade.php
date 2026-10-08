@@ -23,27 +23,35 @@
             @endforeach
 
             <!-- Selector de Tema (Claro / Oscuro) -->
-            <button id="btn-tema" type="button" aria-label="Cambiar tema claro u oscuro" style="background: none; border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); padding: 0.4rem 0.6rem; cursor: pointer; color: var(--color-texto); display: flex; align-items: center; justify-content: center;">
+            <button id="btn-tema" type="button" aria-label="Cambiar tema claro u oscuro" style="background: none; border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); min-width: 44px; min-height: 44px; cursor: pointer; color: var(--color-texto); display: flex; align-items: center; justify-content: center;">
                 <span id="icono-tema" aria-hidden="true">🌓</span>
             </button>
         </nav>
 
         <!-- Botón Menú Móvil -->
-        <div class="nav-movil-toggle" style="display: none;">
-            <button id="btn-menu-movil" type="button" aria-expanded="false" aria-controls="menu-movil" aria-label="Abrir menú de navegación" style="background: none; border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); padding: 0.5rem; cursor: pointer; color: var(--color-texto);">
-                ☰
+        <div class="nav-movil-toggle">
+            <button id="btn-menu-movil" type="button" aria-expanded="false" aria-controls="menu-movil" aria-label="Abrir menú de navegación" style="background: none; border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); min-width: 44px; min-height: 44px; cursor: pointer; color: var(--color-texto); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                <span aria-hidden="true">☰</span>
             </button>
         </div>
     </div>
 
     <!-- Menú Desplegable Móvil -->
-    <div id="menu-movil" style="display: none; background-color: var(--color-superficie); padding: 1rem 1.25rem;">
-        <nav aria-label="Navegación móvil" style="display: flex; flex-direction: column; gap: 0.75rem;">
+    <div id="menu-movil" style="display: none; background-color: var(--color-superficie); padding: 1.25rem; border-top: 1px solid var(--color-borde);">
+        <nav aria-label="Navegación móvil" style="display: flex; flex-direction: column; gap: 0.5rem;">
             @foreach(config('proyecto.navegacion') as $item)
-                <a href="{{ $item['url'] }}" style="text-decoration: none; font-size: 1rem; font-weight: 500; color: var(--color-texto); padding: 0.5rem 0;">
+                <a href="{{ $item['url'] }}" style="text-decoration: none; font-size: 1.05rem; font-weight: 500; color: {{ request()->is(trim($item['url'], '/')) ? 'var(--color-enlace)' : 'var(--color-texto)' }}; padding: 0.65rem 0.5rem; border-radius: var(--radio-sm);">
                     {{ $item['titulo'] }}
                 </a>
             @endforeach
+
+            <!-- Cambio de tema en móvil -->
+            <div style="border-top: 1px solid var(--color-borde); padding-top: 1rem; margin-top: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.95rem; color: var(--color-texto-2); font-weight: 500;">Apariencia visual:</span>
+                <button type="button" class="btn-tema-movil btn btn-secundario" style="padding: 0.5rem 0.85rem; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <span>Cambiar tema</span> <span aria-hidden="true">🌓</span>
+                </button>
+            </div>
         </nav>
     </div>
 

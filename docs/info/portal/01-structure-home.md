@@ -16,9 +16,10 @@ Que quien llega por el enlace o el QR entienda en 10 segundos qué es esto, vea 
 | El proyecto | `/proyecto` | `PaginaController` (Markdown) | `pages/02-project.md` |
 | Quién lo impulsa | `/quien-lo-impulsa` | `PaginaController` + bloque de autoría | `pages/03-who.md` |
 | Cómo se gestiona | `/como-se-gestiona` | `PaginaController` | `pages/04-governance.md` |
+| Sugerencias | `/sugerencias` | `SuggestionController` | Buzón ciudadano con Turnstile y categorías |
 | Resto | Ver `README.md` §4.1 | Su módulo | Su documento en `pages/` |
 
-Navegación principal: Inicio · Configura tu nodo · Conecta tu gateway · Rankings · Alertas · Bots · Revisa tu nodo. Pie: El proyecto · Quién lo impulsa · Cómo se gestiona · Firmware y apps · API · Aviso legal · Privacidad · Cookies · línea de autoría (`05-authorship.md`). Cabecera y pie se definen una vez (`pages/01-home.md`).
+Navegación principal: Inicio · Configura tu nodo · Conecta tu gateway · Rankings · Alertas · Bots · Revisa tu nodo. Pie: El proyecto · Quién lo impulsa · Cómo se gestiona · Sugerencias · Firmware y apps · API · Aviso legal · Privacidad · Cookies · línea de autoría (`05-authorship.md`). Accesos discretos y no invasivos al buzón de sugerencias en pie, menú móvil, pie de portada y sección final de bots.
 
 ### Portada (orden fijo)
 

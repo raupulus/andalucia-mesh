@@ -59,6 +59,7 @@
 | RN-35 | Anti-ruido: actualizaciones como respuesta al mensaje original; máximo 10 mensajes/min por destino | Ídem |
 | RN-36 | Los bots no leen conversaciones ni guardan nombres de grupos o usuarios; guardan lo que envían | Ídem |
 | RN-37 | Panel de operadores privado con estado de todas las piezas; sin página de estado pública | [14-operator-panel](portal/14-operator-panel.md) |
+| RN-38 | Los comandos de consulta de routers (`/battery` y `/routers`) agrupan obligatoriamente por provincia andaluza y nunca muestran nodos ubicados fuera de Andalucía | [bots-webhooks](bots-webhooks/README.md) |
 
 ## 6. Portal, API y chat
 
@@ -84,6 +85,7 @@
 | 2026-10-08 | RN-22 | Umbrales de saltos (hops-high): 6 saltos genera riesgo bajo y >= 7 genera riesgo alto; clasificación de tipo según nodo (infraestructura para routers/gateways y clientes para nodos de usuario) | Responsable del proyecto |
 | 2026-10-08 | RN-34 | Filtro geográfico en bots: nodos exteriores (fuera de Andalucía) desactivados por defecto al añadir el bot a grupos; configurables con /disableExterior y /enableExterior | Responsable del proyecto |
 | 2026-10-08 | RN-08, RN-09 | Persistencia estricta en UTC y visualización obligatoria en 24h peninsular (Europe/Madrid) con formato europeo; aislamiento frente a federaciones externas (PotatoMesh FEDERATION=0 forzado en compose) y registro de personalizaciones | Responsable del proyecto |
+| 2026-10-08 | RN-38 | Formateo estético y agrupación provincial obligatoria en /battery y /routers, con exclusión estricta de nodos de fuera de Andalucía | Responsable del proyecto |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

@@ -135,7 +135,24 @@
             </div>
         </section>
 
-        <!-- 7. Aviso legal y descargo de emergencias -->
+        <!-- 7. Buzón de sugerencias comunitario -->
+        <section class="seccion" style="border-top: 1px solid var(--color-borde); padding-top: 3rem; padding-bottom: 3rem;">
+            <div style="max-width: 820px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem; background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-lg); padding: 1.75rem 2rem;">
+                <div>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 0.35rem;">
+                        ¿Tienes alguna propuesta o sugerencia?
+                    </h3>
+                    <p style="color: var(--color-texto-2); font-size: 0.95rem; margin: 0; line-height: 1.5;">
+                        Disponemos de un buzón abierto para aportar ideas sobre la web, bots, herramientas o cobertura en Andalucía.
+                    </p>
+                </div>
+                <a href="/sugerencias" class="btn btn-secundario" style="flex-shrink: 0;">
+                    Buzón de sugerencias →
+                </a>
+            </div>
+        </section>
+
+        <!-- 8. Aviso legal y descargo de emergencias -->
         <div style="margin-bottom: 3.5rem;">
             <x-aviso-emergencias />
         </div>

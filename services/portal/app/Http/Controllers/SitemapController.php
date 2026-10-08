@@ -28,6 +28,7 @@ class SitemapController extends Controller
             ['path' => '/quien-lo-impulsa', 'frecuencia' => 'monthly', 'prioridad' => '0.7'],
             ['path' => '/como-se-gestiona', 'frecuencia' => 'monthly', 'prioridad' => '0.7'],
             ['path' => '/api', 'frecuencia' => 'weekly', 'prioridad' => '0.6'],
+            ['path' => '/sugerencias', 'frecuencia' => 'monthly', 'prioridad' => '0.5'],
             ['path' => '/legal/aviso-legal', 'frecuencia' => 'monthly', 'prioridad' => '0.3'],
             ['path' => '/legal/privacidad', 'frecuencia' => 'monthly', 'prioridad' => '0.3'],
             ['path' => '/legal/cookies', 'frecuencia' => 'monthly', 'prioridad' => '0.3'],

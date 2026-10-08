@@ -19,7 +19,6 @@ OPCIONES_PROVINCIAS = [
     app_commands.Choice(name="Jaén", value="ES-J"),
     app_commands.Choice(name="Málaga", value="ES-MA"),
     app_commands.Choice(name="Sevilla", value="ES-SE"),
-    app_commands.Choice(name="Fuera de Andalucía", value="FUERA"),
 ]
 
 

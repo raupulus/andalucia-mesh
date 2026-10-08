@@ -2,8 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\AlertasController;
+use App\Http\Controllers\DiagnosticoController;
 use App\Http\Controllers\PaginaController;
+use App\Http\Controllers\PortadaController;
+use App\Http\Controllers\RankingsController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SuggestionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Portada principal
-Route::get('/', App\Http\Controllers\PortadaController::class)->name('inicio');
+Route::get('/', PortadaController::class)->name('inicio');
 
 // Páginas institucionales basadas en Markdown
 Route::get('/proyecto', [PaginaController::class, 'proyecto'])->name('pagina.proyecto');
@@ -31,11 +36,13 @@ Route::get('/firmware', [PaginaController::class, 'firmware'])->name('pagina.fir
 Route::get('/api', [PaginaController::class, 'apiDocs'])->name('pagina.api');
 
 // Páginas dinámicas y herramientas
-Route::get('/rankings', [App\Http\Controllers\RankingsController::class, 'index'])->name('rankings');
-Route::get('/alertas', [App\Http\Controllers\AlertasController::class, 'index'])->name('alertas');
-Route::get('/alertas/{id}', [App\Http\Controllers\AlertasController::class, 'show'])->name('alertas.show');
-Route::get('/revisa-tu-nodo', [App\Http\Controllers\DiagnosticoController::class, 'index'])->name('revisa-nodo');
-Route::get('/revisa-tu-nodo/{id}', [App\Http\Controllers\DiagnosticoController::class, 'show'])->name('revisa-nodo.show');
+Route::get('/rankings', [RankingsController::class, 'index'])->name('rankings');
+Route::get('/alertas', [AlertasController::class, 'index'])->name('alertas');
+Route::get('/alertas/{id}', [AlertasController::class, 'show'])->name('alertas.show');
+Route::get('/revisa-tu-nodo', [DiagnosticoController::class, 'index'])->name('revisa-nodo');
+Route::get('/revisa-tu-nodo/{id}', [DiagnosticoController::class, 'show'])->name('revisa-nodo.show');
+Route::get('/sugerencias', [SuggestionController::class, 'create'])->name('sugerencias.create');
+Route::post('/sugerencias', [SuggestionController::class, 'store'])->name('sugerencias.store');
 
 // Textos legales
 Route::prefix('legal')->group(function () {
@@ -51,4 +58,3 @@ Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 // Endpoints de salud para Docker healthcheck y red mesh
 Route::get('/health', fn () => response()->json(['ok' => true, 'service' => 'portal', 'timestamp' => now()->toIso8601String()]))->name('health');
 Route::get('/healthcheck', fn () => response()->json(['ok' => true, 'service' => 'portal', 'timestamp' => now()->toIso8601String()]))->name('healthcheck');
-

@@ -23,7 +23,7 @@
     <!-- Zona de Imagen 16:9 con fondo suave de acento -->
     <div style="aspect-ratio: 16 / 9; background-color: var(--color-acento-suave); display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 1px solid var(--color-borde); overflow: hidden;">
         @if($imagen)
-            <img src="{{ $imagen }}" alt="Ilustración representativa de {{ $titulo }}" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
+            <img src="{{ $imagen }}" alt="Ilustración representativa de {{ $titulo }}" width="640" height="360" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
         @else
             <div style="font-size: 2.5rem; font-weight: 800; color: var(--color-enlace);">
                 {{ substr($titulo, 0, 1) }}
