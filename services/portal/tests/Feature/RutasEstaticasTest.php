@@ -89,8 +89,24 @@ class RutasEstaticasTest extends TestCase
         $response->assertSee('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"', false);
         $response->assertSee('/configura-tu-nodo', false);
         $response->assertSee('/legal/privacidad', false);
+        $response->assertSee('/hardware', false);
+        $response->assertSee('/faq', false);
         $response->assertHeaderMissing('Set-Cookie');
     }
+
+    public function test_sitemap_esta_programado_para_regeneracion_nocturna(): void
+    {
+        $schedule = app(\Illuminate\Console\Scheduling\Schedule::class);
+        $events = collect($schedule->events());
+
+        $sitemapEvent = $events->first(function (\Illuminate\Console\Scheduling\Event $event) {
+            return str_contains($event->command ?? '', 'portal:sitemap');
+        });
+
+        $this->assertNotNull($sitemapEvent, 'El comando portal:sitemap debe estar registrado en el scheduler.');
+        $this->assertSame('0 4 * * *', $sitemapEvent->expression);
+    }
+
 
     public function test_robots_txt_bloquea_admin_y_api(): void
     {

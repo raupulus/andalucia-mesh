@@ -118,7 +118,7 @@ Recurso `Operadores` (base `portal`): listar, desactivar/activar, forzar nuevo T
 - **UT-06.14.3 — Widget de estado.** Refresco con `poll` de Livewire cada 30 s. *Aceptación:* muestra los 13 destinos con hace cuánto.
 - **UT-06.14.4 — Recursos de solo lectura.** Gateways, nodos, routers, alertas, catálogo. *Aceptación:* ningún botón de crear/editar/borrar; una petición forzada de edición devuelve `403`.
 - **UT-06.14.5 — Operadores.** *Aceptación:* desactivar un operador cierra sus sesiones.
-- **UT-06.14.6 — Purga.** `estado_servicio_cambio` > 90 días. *Aceptación:* tarea diaria registrada en el scheduler.
+- **UT-06.14.6 — Tareas programadas y purga.** `portal-tareas` ejecuta `php artisan schedule:work` de forma continua: `ComprobarServicios` cada minuto (con auditoría de salud y purga de `estado_servicio_cambio` > 90 días) y `portal:sitemap` cada noche a las 04:00 (regeneración de `sitemap.xml`).
 
 ## Escenarios de prueba
 

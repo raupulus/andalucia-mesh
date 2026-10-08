@@ -23,3 +23,17 @@ Artisan::command('inspire', function () {
 Schedule::job(new ComprobarServicios)
     ->everyMinute()
     ->withoutOverlapping();
+
+/*
+|--------------------------------------------------------------------------
+| Regeneración Periódica del Sitemap (portal:sitemap)
+|--------------------------------------------------------------------------
+|
+| Regenera cada noche a las 04:00 el archivo sitemap.xml con las rutas públicas
+| e indexables del portal, con prevención de solapamiento.
+|
+*/
+Schedule::command('portal:sitemap')
+    ->dailyAt('04:00')
+    ->withoutOverlapping();
+
