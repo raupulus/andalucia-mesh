@@ -28,7 +28,7 @@
                         type="button"
                         wire:click="comprobarAhora"
                         wire:loading.attr="disabled"
-                        class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950 dark:text-indigo-300 dark:hover:bg-indigo-900 transition-colors font-medium border border-indigo-200 dark:border-indigo-800"
+                        class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded bg-[#E9FCEF] text-[#15612F] hover:bg-[#d5f7e0] dark:bg-[#1C3A28] dark:text-[#9CF1BA] dark:hover:bg-[#254d35] transition-colors font-medium border border-[#15612F]/20 dark:border-[#9CF1BA]/30"
                     >
                         <span wire:loading.remove wire:target="comprobarAhora">↻ Comprobar ahora</span>
                         <span wire:loading wire:target="comprobarAhora">Comprobando...</span>

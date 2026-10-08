@@ -9,11 +9,15 @@ Que los operadores vean de un vistazo si cada pieza funciona y qué pasa en la m
 ## Especificación
 
 ### Acceso
-
+ 
 - Panel Filament único `admin` en `/admin` (`App\Providers\Filament\AdminPanelProvider`), con sesión y CSRF (grupo `web`; las rutas públicas van en otro grupo sin sesión).
-- **Identidad y diseño de acceso:** Logotipo integrado con tipografía corporativa (`filament.brand-logo`), paleta de acento verde esmeralda (`Color::Emerald` acorde a `DESIGN.md`), franja tricolor andaluza decorativa en cabecera de autenticación (`filament.auth.login-before`) y enlace de retorno al portal público (`filament.auth.login-after`).
+- **Identidad y diseño corporativo:** Logotipo integrado con tipografía corporativa (`filament.brand-logo`), paleta semántica estricta acorde a `DESIGN.md` (primario verde institucional `#007A33`, éxito `#15612F`, peligro `Color::Rose`, aviso `Color::Amber`, info `Color::Blue`, grises `Color::Slate`), tipografía `Inter` con cifras tabulares activadas en tablas y métricas, modo oscuro con superficies Navy (`#1F2029`, `#2C2D3C`, `#363748`) y foco accesible WCAG AAA de 2 px (`#15612F` en claro / `#67EA94` en oscuro). Franja tricolor andaluza en cabecera de autenticación (`filament.auth.login-before`) y enlace accesible de retorno al portal público (`filament.auth.login-after`).
 - **Assets de interfaz:** Publicación garantizada en el build de producción mediante `RUN php artisan filament:assets` en el `Dockerfile` y versión persistente en `public/css/filament/`, `public/js/` y `public/fonts/`.
-- Sin registro ni recuperación pública: los operadores se crean con `php artisan operador:crear {email} {nombre}` (pide la contraseña por consola, mínimo 8 caracteres) y se desactivan con `operador:desactivar {email}`. Cambio de contraseña disponible desde el perfil del operador (`->profile()`).
+- Sin registro ni recuperación pública: los operadores se crean con `php artisan operador:crear {email} {nombre}` (pide la contraseña por consola, mínimo 8 caracteres) y se desactivan con `operador:desactivar {email}`.
+- **Editor de cuenta y perfil de operador (`App\Filament\Pages\Auth\EditProfile`):**
+  - **Identidad:** Cambio de nombre visible, correo y subida de avatar / icono de perfil con editor interactivo de recorte en proporción cuadrada estricta 1:1 (`circleCropper()`, `imageCropAspectRatio('1:1')`, máx. 2 MB) almacenado en `disk('public')` bajo el directorio `avatars/`. Eliminación automática de avatares antiguos reemplazados.
+  - **Seguridad:** Modificación de contraseña verificada requiriendo la clave actual mediante `currentPassword(guard: Filament::getAuthGuard())`, validación de complejidad mínima y confirmación idéntica obligatoria.
+  - **Baja de cuenta:** Acción destructiva de eliminación de cuenta personal tanto en cabecera como al pie del formulario, con modal de confirmación reforzado que exige la contraseña actual antes de cerrar la sesión, invalidar tokens y eliminar al usuario y su avatar.
 - `throttle` de inicio de sesión: 5 intentos fallidos por IP y email → bloqueo 15 min. IP real por `trustProxies` (ver [11](11-public-api.md)).
 - `User::canAccessPanel()` = `activo = true`. Sesión de 8 h; cookie `Secure`, `HttpOnly`, `SameSite=Lax`.
 - Cabeceras: `X-Robots-Tag: noindex, nofollow` en todo `/admin`.
@@ -67,7 +71,7 @@ Recurso `Operadores` (base `portal`): listar, desactivar/activar, forzar nuevo T
 
 | Tabla | Columnas clave |
 |---|---|
-| `users` | `id`, `name`, `email` único, `password`, `activo` bool, campos de MFA de Filament, `ultimo_acceso` |
+| `users` | `id`, `name`, `email` único, `password`, `avatar_url` null, `activo` bool, campos de MFA de Filament, `ultimo_acceso` |
 | `estado_servicio` | `servicio` PK, `ok` bool, `fallos_seguidos` int, `codigo` int null, `latencia_ms` int null, `motivo` text null, `detalle` jsonb null, `comprobado_en` timestamptz |
 | `estado_servicio_cambio` | `id`, `servicio`, `ok`, `motivo`, `en`; purga diaria > 90 días |
 | `tareas_latido` | `tarea` PK, `ultima_ejecucion` |

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Widgets\EstadoServiciosWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -35,10 +36,15 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('2.5rem')
             ->favicon(asset('favicon.ico'))
             ->login()
-            ->profile()
+            ->profile(EditProfile::class)
+            ->font('Inter')
             ->colors([
-                'primary' => Color::Emerald,
+                'primary' => Color::hex('#007A33'),
                 'gray' => Color::Slate,
+                'danger' => Color::Rose,
+                'warning' => Color::Amber,
+                'info' => Color::Blue,
+                'success' => Color::hex('#15612F'),
             ])
             ->renderHook(
                 PanelsRenderHook::HEAD_END,

@@ -1,5 +1,5 @@
-<div style="margin-top: 1.5rem; text-align: center; border-top: 1px solid rgba(0, 0, 0, 0.08); padding-top: 1.25rem;">
-    <a href="/" style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.875rem; font-weight: 500; color: #059669; text-decoration: none; transition: opacity 0.15s ease;">
+<div class="mt-6 pt-5 text-center border-t border-gray-200 dark:border-gray-800">
+    <a href="/" class="inline-flex items-center gap-1.5 text-sm font-semibold text-[#15612F] dark:text-[#67EA94] hover:underline focus:outline-none focus:ring-2 focus:ring-[#15612F] dark:focus:ring-[#67EA94] rounded">
         <span aria-hidden="true">←</span>
         <span>Volver al portal público de {{ config('proyecto.nombre') }}</span>
     </a>

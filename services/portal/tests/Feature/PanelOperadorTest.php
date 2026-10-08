@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Filament\Pages\Auth\EditProfile;
 use App\Jobs\ComprobarServicios;
 use App\Models\User;
 use Filament\Auth\Pages\Login;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -136,5 +140,109 @@ class PanelOperadorTest extends TestCase
         $response = $this->actingAs($user)->get('/admin');
         $response->assertStatus(200);
         $response->assertSee('Estado de la Red y Microservicios');
+    }
+
+    public function test_operador_activo_puede_ver_su_perfil(): void
+    {
+        $user = User::factory()->create([
+            'activo' => true,
+            'name' => 'Operador Test',
+        ]);
+
+        $response = $this->actingAs($user)->get('/admin/profile');
+        $response->assertStatus(200);
+        $response->assertSee('Mi perfil de operador');
+        $response->assertSee('Identidad del Operador');
+        $response->assertSee('Seguridad y Contraseña');
+        $response->assertSee('Eliminar cuenta');
+    }
+
+    public function test_operador_puede_modificar_su_nombre_desde_perfil(): void
+    {
+        $user = User::factory()->create([
+            'activo' => true,
+            'name' => 'Nombre Antiguo',
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(EditProfile::class)
+            ->fillForm([
+                'name' => 'Nombre Renovado',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => 'Nombre Renovado',
+        ]);
+    }
+
+    public function test_operador_puede_actualizar_su_password_con_confirmacion(): void
+    {
+        $user = User::factory()->create([
+            'activo' => true,
+            'password' => bcrypt('ClaveAntigua2026!'),
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(EditProfile::class)
+            ->fillForm([
+                'currentPassword' => 'ClaveAntigua2026!',
+                'password' => 'NuevaClaveSegura2026!',
+                'passwordConfirmation' => 'NuevaClaveSegura2026!',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $user->refresh();
+        $this->assertTrue(Hash::check('NuevaClaveSegura2026!', $user->password));
+    }
+
+    public function test_operador_puede_eliminar_su_cuenta_con_confirmacion(): void
+    {
+        $user = User::factory()->create([
+            'activo' => true,
+            'password' => bcrypt('PasswordBorrado123!'),
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(EditProfile::class)
+            ->callAction('deleteAccount', data: [
+                'delete_confirm_password' => 'PasswordBorrado123!',
+            ])
+            ->assertHasNoActionErrors();
+
+        $this->assertDatabaseMissing('users', [
+            'id' => $user->id,
+        ]);
+    }
+
+    public function test_operador_puede_actualizar_avatar_desde_perfil(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create([
+            'activo' => true,
+            'avatar_url' => null,
+        ]);
+
+        $this->actingAs($user);
+
+        $file = UploadedFile::fake()->image('avatar.png', 200, 200);
+
+        Livewire::test(EditProfile::class)
+            ->fillForm([
+                'avatar_url' => $file,
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $user->refresh();
+        $this->assertNotNull($user->avatar_url);
+        Storage::disk('public')->assertExists($user->avatar_url);
     }
 }
