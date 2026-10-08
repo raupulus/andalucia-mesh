@@ -800,6 +800,42 @@ pre code {
   }
 }
 
+/* ==============================================================================
+ * Tarjeta Código Fuente / Repositorios en Footer
+ * ============================================================================== */
+.tarjeta-repo-footer {
+  margin-top: 1.25rem;
+  padding: 0.85rem 1rem;
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  box-shadow: var(--sombra-1);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
 
+.tarjeta-repo-footer:hover {
+  border-color: var(--color-borde-control);
+  box-shadow: var(--sombra-2);
+}
 
+.badge-repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--color-texto);
+  background-color: var(--color-superficie-sutil);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-sm);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
 
+.badge-repo-link:hover {
+  background-color: var(--color-superficie-resaltada);
+  border-color: var(--color-borde-control);
+  color: var(--color-enlace);
+  text-decoration: none;
+}

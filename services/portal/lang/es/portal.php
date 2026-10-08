@@ -25,6 +25,7 @@ return [
         'node_check' => 'Revisa tu nodo',
         'suggestions' => 'Sugerencias',
         'hardware' => 'Hardware',
+        'api' => 'API/Websockets',
         'faq' => 'FAQ',
         'theme_toggle' => 'Cambiar tema claro u oscuro',
         'mobile_menu' => 'Abrir menú de navegación',
@@ -41,6 +42,10 @@ return [
     'footer' => [
         'description' => 'Red regional ciudadana de telecomunicaciones en malla LoRa Meshtastic. Proyecto libre, abierto y sin ánimo de lucro para Cádiz y Andalucía.',
         'download_qr' => 'Descargar QR del proyecto (.svg)',
+        'source_code_title' => 'Código Fuente',
+        'source_code_desc' => 'Proyecto libre y abierto disponible para la comunidad en:',
+        'repo_main' => 'principal',
+        'repo_mirror' => 'mirror',
         'documentation' => 'Documentación',
         'project' => 'El proyecto',
         'who_drives' => 'Quién lo impulsa',

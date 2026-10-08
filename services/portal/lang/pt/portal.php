@@ -25,6 +25,7 @@ return [
         'node_check' => 'Verifica o teu nó',
         'suggestions' => 'Sugestões',
         'hardware' => 'Hardware',
+        'api' => 'API/Websockets',
         'faq' => 'FAQ',
         'theme_toggle' => 'Alternar tema claro ou escuro',
         'mobile_menu' => 'Abrir menu de navegação',
@@ -41,6 +42,10 @@ return [
     'footer' => [
         'description' => 'Rede regional comunitária de telecomunicações em malha LoRa Meshtastic. Projeto livre, aberto e sem fins lucrativos para Cádis e Andaluzia.',
         'download_qr' => 'Descarregar QR do projeto (.svg)',
+        'source_code_title' => 'Código Fonte',
+        'source_code_desc' => 'Projeto livre e aberto disponível para a comunidade em:',
+        'repo_main' => 'principal',
+        'repo_mirror' => 'mirror',
         'documentation' => 'Documentação',
         'project' => 'O projeto',
         'who_drives' => 'Quem o promove',

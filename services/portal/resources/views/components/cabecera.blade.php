@@ -43,9 +43,9 @@
                 @endif
             @endforeach
 
-            <!-- Menú Desplegable Extras (Configurador, Revisa tu nodo, Hardware, Sugerencias, FAQ) -->
+            <!-- Menú Desplegable Extras (Configurador, Revisa tu nodo, Hardware, API/Websockets, Sugerencias, FAQ) -->
             @php
-                $extrasActivo = request()->is('configurador*') || request()->is('revisa-tu-nodo*') || request()->is('hardware*') || request()->is('sugerencias*') || request()->is('faq*');
+                $extrasActivo = request()->is('configurador*') || request()->is('revisa-tu-nodo*') || request()->is('hardware*') || request()->is('api*') || request()->is('sugerencias*') || request()->is('faq*');
             @endphp
             <div class="dropdown-extras-wrapper">
                 <button
@@ -97,6 +97,13 @@
                             <line x1="1" y1="14" x2="4" y2="14"></line>
                         </svg>
                         <span>{{ __('portal.nav.hardware') }}</span>
+                    </a>
+                    <a href="/api{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" class="dropdown-extras-item {{ request()->is('api*') ? 'activo' : '' }}" role="menuitem">
+                        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
+                            <polyline points="16 18 22 12 16 6"></polyline>
+                            <polyline points="8 6 2 12 8 18"></polyline>
+                        </svg>
+                        <span>{{ __('portal.nav.api') }}</span>
                     </a>
                     <a href="/sugerencias{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" class="dropdown-extras-item {{ request()->is('sugerencias*') ? 'activo' : '' }}" role="menuitem">
                         <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
@@ -244,6 +251,13 @@
                         <line x1="1" y1="14" x2="4" y2="14"></line>
                     </svg>
                     <span>{{ __('portal.nav.hardware') }}</span>
+                </a>
+                <a href="/api{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-size: 1.05rem; font-weight: 500; color: {{ request()->is('api*') ? 'var(--color-enlace)' : 'var(--color-texto)' }}; padding: 0.65rem 0.5rem; border-radius: var(--radio-sm);">
+                    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                    <span>{{ __('portal.nav.api') }}</span>
                 </a>
                 <a href="/sugerencias{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-size: 1.05rem; font-weight: 500; color: {{ request()->is('sugerencias*') ? 'var(--color-enlace)' : 'var(--color-texto)' }}; padding: 0.65rem 0.5rem; border-radius: var(--radio-sm);">
                     <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">

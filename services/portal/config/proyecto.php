@@ -127,6 +127,7 @@ return [
         ['titulo' => 'Configurador automático', 'url' => '/configurador'],
         ['titulo' => 'Revisa tu nodo', 'url' => '/revisa-tu-nodo'],
         ['titulo' => 'Hardware', 'url' => '/hardware'],
+        ['titulo' => 'API/Websockets', 'url' => '/api'],
         ['titulo' => 'Sugerencias', 'url' => '/sugerencias'],
         ['titulo' => 'FAQ', 'url' => '/faq'],
     ],
@@ -171,6 +172,12 @@ return [
         'proveedor_hosting' => env('HOSTING_PROVIDER', 'Servidor dedicado en España / UE'),
         'ubicacion_hosting' => env('HOSTING_LOCATION', 'Unión Europea'),
         'credito_ign' => 'Límites provinciales: © Instituto Geográfico Nacional (IGN) bajo licencia CC BY 4.0',
+    ],
+
+    // Repositorios de código abierto
+    'repositorios' => [
+        'gitlab' => env('REPO_GITLAB', 'https://gitlab.com/raupulus/andalucia-mesh'),
+        'github' => env('REPO_GITHUB', 'https://github.com/raupulus/andalucia-mesh'),
     ],
 
     'seo' => [

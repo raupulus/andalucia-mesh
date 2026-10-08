@@ -25,6 +25,7 @@ return [
         'node_check' => 'Check your node',
         'suggestions' => 'Suggestions',
         'hardware' => 'Hardware',
+        'api' => 'API/Websockets',
         'faq' => 'FAQ',
         'theme_toggle' => 'Toggle light or dark theme',
         'mobile_menu' => 'Open navigation menu',
@@ -41,6 +42,10 @@ return [
     'footer' => [
         'description' => 'Regional citizen mesh telecommunications network using LoRa Meshtastic. Free, open-source and non-profit project for Cádiz and Andalusia.',
         'download_qr' => 'Download project QR (.svg)',
+        'source_code_title' => 'Source Code',
+        'source_code_desc' => 'Free and open-source project available to the community at:',
+        'repo_main' => 'primary',
+        'repo_mirror' => 'mirror',
         'documentation' => 'Documentation',
         'project' => 'The project',
         'who_drives' => 'Who drives it',

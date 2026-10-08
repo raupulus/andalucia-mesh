@@ -154,10 +154,35 @@ class PortadaYMapaTest extends TestCase
         $response->assertSee('MQTT', false);
         $response->assertSee('/conecta-tu-gateway', false);
 
-        // Menú Extras con Revisa tu nodo y Sugerencias
+        // Menú Extras con Revisa tu nodo, Sugerencias y API/Websockets
         $response->assertSee('Extras', false);
         $response->assertSee('btn-extras-nav', false);
         $response->assertSee('dropdown-extras-nav', false);
+        $response->assertSee('API/Websockets', false);
+        $response->assertSee('/api', false);
+    }
+
+    /**
+     * Comprueba que el pie de página incluye la tarjeta rectangular de código fuente con enlaces a GitLab y GitHub.
+     */
+    public function test_pie_muestra_tarjeta_repositorios_codigo_fuente(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+
+        // Enlace de descarga de QR
+        $response->assertSee('/qr.svg', false);
+
+        // Tarjeta rectangular de código fuente
+        $response->assertSee('tarjeta-repo-footer', false);
+        $response->assertSee('Código Fuente', false);
+        $response->assertSee('https://gitlab.com/raupulus/andalucia-mesh', false);
+        $response->assertSee('https://github.com/raupulus/andalucia-mesh', false);
+        $response->assertSee('GitLab', false);
+        $response->assertSee('GitHub', false);
+        $response->assertSee('principal', false);
+        $response->assertSee('mirror', false);
     }
 
     /**
