@@ -16,6 +16,7 @@
 # Contenedores de integraciones:
 #   - meshview
 #   - potatomesh
+#   - meshconfig
 #
 # Contenedores de microservicios:
 #   - adaptador-potato
@@ -59,6 +60,7 @@ Componentes disponibles:
   Integraciones:
     - meshview         Despliega el visor técnico MeshView
     - potatomesh       Despliega la instancia PotatoMesh
+    - meshconfig       Despliega el configurador web de dispositivos
 
   Servicios:
     - adaptador-potato Despliega el puente PotatoMesh <-> Mosquitto
@@ -178,10 +180,10 @@ deploy_container() {
         env_args+=("--env-file" "${local_env}")
     fi
 
-    # Comprobar si tiene Dockerfile (servicio propio -> build)
-    if [[ -f "${dir_path}/Dockerfile" ]]; then
-        log "[INFO] Construyendo imagen propia para ${name}..."
-        docker compose "${env_args[@]}" -f "${compose_file}" build --pull
+    # Comprobar si requiere compilación (Dockerfile propio o build: en compose)
+    if [[ -f "${dir_path}/Dockerfile" ]] || grep -q 'build:' "${compose_file}" 2>/dev/null; then
+        log "[INFO] Construyendo imagen para ${name}..."
+        docker compose "${env_args[@]}" -f "${compose_file}" build
     else
         log "[INFO] Descargando imagen externa para ${name}..."
         docker compose "${env_args[@]}" -f "${compose_file}" pull --quiet || true
@@ -204,7 +206,7 @@ resolve_and_deploy() {
         mosquitto|postgresql|nginx)
             deploy_native "${target}"
             ;;
-        meshview|potatomesh)
+        meshview|potatomesh|meshconfig)
             deploy_container "${BASE_DIR}/integrations/${target}" "${target}"
             ;;
         adaptador-potato|sync-peers|ingesta|portal|chat-ws|detector-alertas|bot-telegram|bot-discord|webhooks)
@@ -216,7 +218,7 @@ resolve_and_deploy() {
             deploy_native "postgresql"
             deploy_native "nginx"
             
-            for item in meshview potatomesh; do
+            for item in meshview potatomesh meshconfig; do
                 deploy_container "${BASE_DIR}/integrations/${item}" "${item}"
             done
 
