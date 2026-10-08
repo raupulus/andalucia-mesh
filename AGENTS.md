@@ -56,7 +56,7 @@ Este documento define las normas operativas, la estructura del proyecto y el pro
         ├── meshconfig/
         ├── potatomesh/          README + adaptador-potato, sync-peers
         ├── ingesta/             README + módulos 01–06
-        ├── portal/              README + módulos 01–14 + pages/
+        ├── portal/              README + módulos 01–15 + pages/
         ├── detector-alertas/    README + módulos 01–03
         ├── bots-webhooks/       README + 01-bot-telegram, 02-bot-discord, 03-webhooks
         └── chat-ws/

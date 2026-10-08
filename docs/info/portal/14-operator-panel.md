@@ -75,6 +75,13 @@ Gestión interna de propuestas ciudadanas (base `portal`, tabla `suggestions`):
 - Badge en el menú de navegación con el recuento de propuestas pendientes en color ámbar.
 - Privacidad estricta: los usuarios únicamente envían su propuesta de forma anónima; las notas y el estado son visibles exclusivamente para los operadores en Filament.
 
+### Preguntas Frecuentes (`FaqResource`)
+
+Gestión editorial de preguntas y respuestas frecuentes (base `portal`, tabla `faqs`):
+- Formulario directo con dos bloques principales: **Pregunta** (`question`) y **Respuesta** (`answer`), con soporte para formato enriquecido Markdown (listas, negritas, enlaces, código).
+- Ajustes de visibilidad pública (`is_active`) y prioridad de ordenación (`sort_order`).
+- Listado interactivo con búsqueda en preguntas y respuestas, ordenación por prioridad, filtro por visibilidad y acciones de edición y eliminación.
+
 ### Usuarios
 
 Recurso `Operadores` (base `portal`): listar, desactivar/activar, forzar nuevo TOTP. Crear solo por comando (evita que un panel comprometido cree cuentas).
@@ -90,6 +97,7 @@ Recurso `Operadores` (base `portal`): listar, desactivar/activar, forzar nuevo T
 | `estado_servicio_cambio` | `id`, `servicio`, `ok`, `motivo`, `en`; purga diaria > 90 días |
 | `tareas_latido` | `tarea` PK, `ultima_ejecucion` |
 | `suggestions` | `id`, `category`, `content`, `status`, `operator_notes`, `ip_hash`, `created_at`, `updated_at` |
+| `faqs` | `id`, `question`, `answer`, `is_active`, `sort_order`, `created_at`, `updated_at` |
 
 ### Configuración
 

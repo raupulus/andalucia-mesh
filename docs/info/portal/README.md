@@ -28,6 +28,7 @@
 | 06.12 | [`12-stats-api.md`](12-stats-api.md) | `stats/*` y `routers` | Media |
 | 06.13 | [`13-nodes-alerts-api.md`](13-nodes-alerts-api.md) | `nodes*` y `alerts*` | Media |
 | 06.14 | [`14-operator-panel.md`](14-operator-panel.md) | `/admin`: estado de servicios, recursos de solo lectura, operadores | Media |
+| 06.15 | [`15-hardware-catalog.md`](15-hardware-catalog.md) | Catálogo de hardware recomendado: front interactivo `/hardware`, recorte 1:1 y gestión en `/admin` | Media |
 | — | [`pages/`](pages/README.md) | Contenido y borrador del texto de cada página pública | — |
 | — | [`DESIGN.md`](../DESIGN.md) | Sistema visual | — |
 
@@ -66,7 +67,7 @@ El portal es la **única pieza** del proyecto con internacionalización y traduc
 | `/bots`, `/firmware` | Público | 06, 07 |
 | `/rankings`, `/alertas`, `/alertas/{id}` | Público | 08 |
 | `/revisa-tu-nodo`, `/revisa-tu-nodo/{id}` | Público | 09 |
-| `/sugerencias` | Público | 01, 14 |
+| `/sugerencias`, `/faq` | Público | 01, 14 |
 | `/legal/aviso-legal`, `/legal/privacidad`, `/legal/cookies` | Público | 10 |
 | `/api` (documentación) | Público | 11 |
 | `/sitemap.xml`, `/robots.txt`, `/robots.xml`, `/qr.svg`, `/qr.pdf` | Público | 01 |
@@ -80,7 +81,7 @@ El portal es la **única pieza** del proyecto con internacionalización y traduc
 
 | Conexión | Base | Rol | Uso |
 |---|---|---|---|
-| `pgsql` | `portal` | `portal` (propietario) | Operadores, sesiones de `/admin`, caché, estado de servicios |
+| `pgsql` | `portal` | `portal` (propietario) | Operadores, sesiones de `/admin`, caché, estado de servicios, sugerencias, faqs |
 | `ingesta` | `ingest` | `portal_lector_ingesta` | Solo vistas `api_*` |
 | `alertas` | `alertas` | `portal_lector_alertas` | Solo vistas `api_*` |
 

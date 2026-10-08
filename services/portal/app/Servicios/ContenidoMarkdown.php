@@ -182,4 +182,18 @@ class ContenidoMarkdown
             ];
         });
     }
+
+    /**
+     * Convierte una cadena de texto en formato Markdown a HTML seguro sustituyendo variables globales.
+     *
+     * @param string $markdown Texto con sintaxis Markdown
+     * @return string HTML sanitizado resultante
+     */
+    public function convertText(string $markdown): string
+    {
+        $texto = strtr($markdown, $this->variables);
+
+        return (string) $this->converter->convert($texto);
+    }
 }
+

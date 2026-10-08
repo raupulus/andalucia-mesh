@@ -27,6 +27,7 @@
                     <li><a href="/proyecto{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.project') }}</a></li>
                     <li><a href="/quien-lo-impulsa{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.who_drives') }}</a></li>
                     <li><a href="/como-se-gestiona{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.governance') }}</a></li>
+                    <li><a href="/hardware{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.hardware.heading') }}</a></li>
                     <li><a href="/sugerencias{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.suggestions_box') }}</a></li>
                     <li><a href="/firmware{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.firmware_apps') }}</a></li>
                     <li><a href="/api{{ $langQuery }}" style="text-decoration: none; color: var(--color-texto);">{{ __('portal.footer.public_api') }}</a></li>

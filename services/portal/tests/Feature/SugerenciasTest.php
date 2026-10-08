@@ -33,6 +33,7 @@ class SugerenciasTest extends TestCase
         $response->assertSee('Potato Mesh');
         $response->assertSee('Nueva Funcionalidad');
         $response->assertSee('campo-content', false);
+        $response->assertSee('Las propuestas viables se implementan en el repositorio de código abierto del proyecto Andalucía Mesh.');
     }
 
     /**

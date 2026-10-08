@@ -117,7 +117,6 @@ return [
     'navegacion' => [
         ['titulo' => 'Inicio', 'url' => '/'],
         ['titulo' => 'Configura tu nodo', 'url' => '/configura-tu-nodo'],
-        ['titulo' => 'Configurador', 'url' => '/configurador'],
         ['titulo' => 'MQTT', 'url' => '/conecta-tu-gateway'],
         ['titulo' => 'Rankings', 'url' => '/rankings'],
         ['titulo' => 'Alertas', 'url' => '/alertas'],
@@ -125,14 +124,18 @@ return [
     ],
 
     'extras' => [
+        ['titulo' => 'Configurador automático', 'url' => '/configurador'],
         ['titulo' => 'Revisa tu nodo', 'url' => '/revisa-tu-nodo'],
+        ['titulo' => 'Hardware', 'url' => '/hardware'],
         ['titulo' => 'Sugerencias', 'url' => '/sugerencias'],
+        ['titulo' => 'FAQ', 'url' => '/faq'],
     ],
 
     'pie' => [
         ['titulo' => 'El proyecto', 'url' => '/proyecto'],
         ['titulo' => 'Quién lo impulsa', 'url' => '/quien-lo-impulsa'],
         ['titulo' => 'Cómo se gestiona', 'url' => '/como-se-gestiona'],
+        ['titulo' => 'Hardware', 'url' => '/hardware'],
         ['titulo' => 'Sugerencias', 'url' => '/sugerencias'],
         ['titulo' => 'Firmware y apps', 'url' => '/firmware'],
         ['titulo' => 'API pública', 'url' => '/api'],

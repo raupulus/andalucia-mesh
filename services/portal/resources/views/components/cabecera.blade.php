@@ -8,8 +8,11 @@
         '/rankings' => 'portal.nav.rankings',
         '/alertas' => 'portal.nav.alerts',
         '/bots' => 'portal.nav.bots',
+        '/configurador' => 'portal.nav.configurator',
         '/revisa-tu-nodo' => 'portal.nav.node_check',
+        '/hardware' => 'portal.nav.hardware',
         '/sugerencias' => 'portal.nav.suggestions',
+        '/faq' => 'portal.nav.faq',
     ];
     $currentLang = app()->getLocale();
 @endphp
@@ -40,9 +43,9 @@
                 @endif
             @endforeach
 
-            <!-- Menú Desplegable Extras (Revisa tu nodo, Sugerencias) -->
+            <!-- Menú Desplegable Extras (Configurador, Revisa tu nodo, Hardware, Sugerencias, FAQ) -->
             @php
-                $extrasActivo = request()->is('revisa-tu-nodo*') || request()->is('sugerencias*');
+                $extrasActivo = request()->is('configurador*') || request()->is('revisa-tu-nodo*') || request()->is('hardware*') || request()->is('sugerencias*') || request()->is('faq*');
             @endphp
             <div class="dropdown-extras-wrapper">
                 <button
@@ -65,6 +68,14 @@
                     role="menu"
                     aria-label="{{ __('portal.nav.extras') }}"
                 >
+                    <a href="/configurador{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" class="dropdown-extras-item {{ request()->is('configurador*') ? 'activo' : '' }}" role="menuitem">
+                        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                        <span>{{ __('portal.nav.configurator') }}</span>
+                    </a>
                     <a href="/revisa-tu-nodo{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" class="dropdown-extras-item {{ request()->is('revisa-tu-nodo*') ? 'activo' : '' }}" role="menuitem">
                         <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
                             <circle cx="11" cy="11" r="8"></circle>
@@ -72,11 +83,34 @@
                         </svg>
                         <span>{{ __('portal.nav.node_check') }}</span>
                     </a>
+                    <a href="/hardware{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" class="dropdown-extras-item {{ request()->is('hardware*') ? 'activo' : '' }}" role="menuitem">
+                        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
+                            <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                            <rect x="9" y="9" width="6" height="6"></rect>
+                            <line x1="9" y1="1" x2="9" y2="4"></line>
+                            <line x1="15" y1="1" x2="15" y2="4"></line>
+                            <line x1="9" y1="20" x2="9" y2="23"></line>
+                            <line x1="15" y1="20" x2="15" y2="23"></line>
+                            <line x1="20" y1="9" x2="23" y2="9"></line>
+                            <line x1="20" y1="14" x2="23" y2="14"></line>
+                            <line x1="1" y1="9" x2="4" y2="9"></line>
+                            <line x1="1" y1="14" x2="4" y2="14"></line>
+                        </svg>
+                        <span>{{ __('portal.nav.hardware') }}</span>
+                    </a>
                     <a href="/sugerencias{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" class="dropdown-extras-item {{ request()->is('sugerencias*') ? 'activo' : '' }}" role="menuitem">
                         <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                         </svg>
                         <span>{{ __('portal.nav.suggestions') }}</span>
+                    </a>
+                    <a href="/faq{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" class="dropdown-extras-item {{ request()->is('faq*') ? 'activo' : '' }}" role="menuitem">
+                        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span>{{ __('portal.nav.faq') }}</span>
                     </a>
                 </div>
             </div>
@@ -181,6 +215,14 @@
                 <span style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-texto-2); padding: 0.25rem 0.5rem 0.5rem;">
                     {{ __('portal.nav.extras') }}
                 </span>
+                <a href="/configurador{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-size: 1.05rem; font-weight: 500; color: {{ request()->is('configurador*') ? 'var(--color-enlace)' : 'var(--color-texto)' }}; padding: 0.65rem 0.5rem; border-radius: var(--radio-sm);">
+                    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                    </svg>
+                    <span>{{ __('portal.nav.configurator') }}</span>
+                </a>
                 <a href="/revisa-tu-nodo{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-size: 1.05rem; font-weight: 500; color: {{ request()->is('revisa-tu-nodo*') ? 'var(--color-enlace)' : 'var(--color-texto)' }}; padding: 0.65rem 0.5rem; border-radius: var(--radio-sm);">
                     <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
                         <circle cx="11" cy="11" r="8"></circle>
@@ -188,11 +230,34 @@
                     </svg>
                     <span>{{ __('portal.nav.node_check') }}</span>
                 </a>
+                <a href="/hardware{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-size: 1.05rem; font-weight: 500; color: {{ request()->is('hardware*') ? 'var(--color-enlace)' : 'var(--color-texto)' }}; padding: 0.65rem 0.5rem; border-radius: var(--radio-sm);">
+                    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
+                        <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                        <rect x="9" y="9" width="6" height="6"></rect>
+                        <line x1="9" y1="1" x2="9" y2="4"></line>
+                        <line x1="15" y1="1" x2="15" y2="4"></line>
+                        <line x1="9" y1="20" x2="9" y2="23"></line>
+                        <line x1="15" y1="20" x2="15" y2="23"></line>
+                        <line x1="20" y1="9" x2="23" y2="9"></line>
+                        <line x1="20" y1="14" x2="23" y2="14"></line>
+                        <line x1="1" y1="9" x2="4" y2="9"></line>
+                        <line x1="1" y1="14" x2="4" y2="14"></line>
+                    </svg>
+                    <span>{{ __('portal.nav.hardware') }}</span>
+                </a>
                 <a href="/sugerencias{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-size: 1.05rem; font-weight: 500; color: {{ request()->is('sugerencias*') ? 'var(--color-enlace)' : 'var(--color-texto)' }}; padding: 0.65rem 0.5rem; border-radius: var(--radio-sm);">
                     <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     </svg>
                     <span>{{ __('portal.nav.suggestions') }}</span>
+                </a>
+                <a href="/faq{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-size: 1.05rem; font-weight: 500; color: {{ request()->is('faq*') ? 'var(--color-enlace)' : 'var(--color-texto)' }}; padding: 0.65rem 0.5rem; border-radius: var(--radio-sm);">
+                    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    <span>{{ __('portal.nav.faq') }}</span>
                 </a>
             </div>
 

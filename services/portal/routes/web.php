@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Http\Controllers\AlertasController;
 use App\Http\Controllers\ConfiguradorController;
 use App\Http\Controllers\DiagnosticoController;
+use App\Http\Controllers\FaqController;
+use App\Http\Controllers\HardwareController;
 use App\Http\Controllers\PaginaController;
 use App\Http\Controllers\PortadaController;
 use App\Http\Controllers\RankingsController;
@@ -44,6 +46,8 @@ Route::get('/revisa-tu-nodo', [DiagnosticoController::class, 'index'])->name('re
 Route::get('/revisa-tu-nodo/{id}', [DiagnosticoController::class, 'show'])->name('revisa-nodo.show');
 Route::get('/configurador', [ConfiguradorController::class, 'index'])->name('configurador');
 Route::get('/configurador/{file}', [ConfiguradorController::class, 'asset'])->where('file', '.*')->name('configurador.asset');
+Route::get('/hardware', [HardwareController::class, 'index'])->name('hardware.index');
+Route::get('/faq', [FaqController::class, 'index'])->name('faq');
 Route::get('/sugerencias', [SuggestionController::class, 'create'])->name('sugerencias.create');
 Route::post('/sugerencias', [SuggestionController::class, 'store'])->name('sugerencias.store');
 
