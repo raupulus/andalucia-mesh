@@ -20,7 +20,7 @@ class Provincias
      * @param  string  $ventana  '30m', '1h', '6h', '12h', '1d', '24h', '7d' o '30d'
      * @return array<string, mixed>
      */
-    public function obtener(string $ventana = '30m'): array
+    public function obtener(string $ventana = '12h'): array
     {
         $res = $this->obtenerResultado($ventana);
 
@@ -30,7 +30,7 @@ class Provincias
     /**
      * Obtiene el Resultado completo con metadatos de caché.
      */
-    public function obtenerResultado(string $ventana = '30m'): Resultado
+    public function obtenerResultado(string $ventana = '12h'): Resultado
     {
         $intervalo = match ($ventana) {
             '30m' => '30 minutes',

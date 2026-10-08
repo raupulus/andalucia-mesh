@@ -42,7 +42,7 @@ class StatsApiController extends Controller
      */
     public function provinces(Request $request): JsonResponse
     {
-        $ventana = $request->query('window', '30m');
+        $ventana = $request->query('window', '12h');
         if (! in_array($ventana, ['30m', '1h', '6h', '12h', '1d', '24h', '7d', '30d'], true)) {
             return response()->json([
                 'error' => [

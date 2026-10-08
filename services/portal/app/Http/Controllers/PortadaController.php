@@ -17,9 +17,9 @@ class PortadaController extends Controller
      */
     public function __invoke(Request $request): View
     {
-        $ventanaParam = (string) $request->query('ventana', '30m');
+        $ventanaParam = (string) $request->query('ventana', '12h');
         $ventanasValidas = ['30m', '1h', '6h', '12h', '1d', '24h', '7d'];
-        $ventana = in_array($ventanaParam, $ventanasValidas, true) ? $ventanaParam : '30m';
+        $ventana = in_array($ventanaParam, $ventanasValidas, true) ? $ventanaParam : '12h';
 
         $datosMapa = [
             'generated_at' => now()->toIso8601String(),

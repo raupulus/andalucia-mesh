@@ -17,7 +17,7 @@ Ver la malla de Andalucía de un vistazo, sin peticiones a terceros, con una alt
 
 ### Datos
 
-- `GET /api/v1/stats/provinces?window=30m|1h|6h|12h|1d|7d` (`12-stats-api.md`). La API admite también `30d`; el mapa ofrece las 6 opciones de filtro `30m`, `1h`, `6h`, `12h`, `1d` y `7d`, con `30m` seleccionado por defecto para mostrar la presión y ocupación real de la malla en el momento.
+- `GET /api/v1/stats/provinces?window=30m|1h|6h|12h|1d|7d` (`12-stats-api.md`). La API admite también `30d`; el mapa ofrece las 6 opciones de filtro `30m`, `1h`, `6h`, `12h`, `1d` y `7d`, con `12h` seleccionado por defecto para mostrar la cobertura y ocupación representativa de la malla.
 - Primera pintura con los datos del servidor (`App\Data\Ingest\Provincias`, misma caché), serializados en un bloque `<script type="application/json" id="mapa-datos-iniciales">` para que el tooltip y la interactividad en cliente dispongan de todas las métricas de saturación y recuentos de forma instantánea al entrar sin latencia ni dependencias de peticiones asíncronas iniciales. Si por contingencia no hay datos iniciales válidos en el HTML, el cliente ejecuta un `fetch` inmediato a la API. Refresco cada 5 min con `fetch` mientras la pestaña está visible (`visibilitychange`).
 - Encima: "**{total_andalucia}** nodos en Andalucía", la ventana activa y "actualizado hace X min" (`generated_at`).
 
@@ -30,7 +30,7 @@ Ver la malla de Andalucía de un vistazo, sin peticiones a terceros, con una alt
 | `red` | Rojo | ≥ 40 % |
 | `nodata` | Gris | Ningún router, `CLIENT` ni `CLIENT_BASE` con telemetría en la ventana seleccionada |
 
-- La saturación la calcula la API (`12-stats-api.md`, `../integration.md` §13): nodos con posición en la provincia, media de `channel_utilization` por grupo y suma ponderada **routers 60 % + `CLIENT` y `CLIENT_BASE` juntos 40 %**; `CLIENT_MUTE` no cuenta; si falta un grupo, su peso se reparte entre los demás. Se computa sobre las mediciones en la ventana seleccionada (`30m` por defecto). El cliente no calcula niveles: usa `level`.
+- La saturación la calcula la API (`12-stats-api.md`, `../integration.md` §13): nodos con posición en la provincia, media de `channel_utilization` por grupo y suma ponderada **routers 60 % + `CLIENT` y `CLIENT_BASE` juntos 40 %**; `CLIENT_MUTE` no cuenta; si falta un grupo, su peso se reparte entre los demás. Se computa sobre las mediciones en la ventana seleccionada (`12h` por defecto). El cliente no calcula niveles: usa `level`.
 
 ### Interacción
 

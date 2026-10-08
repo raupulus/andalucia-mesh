@@ -74,11 +74,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Estado local en memoria (30m por defecto)
+    // Estado local en memoria (12h por defecto)
     let datosActuales = null;
     const urlVentana = new URLSearchParams(window.location.search).get('ventana');
     const ventanasValidas = ['30m', '1h', '6h', '12h', '1d', '24h', '7d'];
-    let ventanaActiva = (urlVentana && ventanasValidas.includes(urlVentana)) ? urlVentana : '30m';
+    let ventanaActiva = (urlVentana && ventanasValidas.includes(urlVentana)) ? urlVentana : '12h';
     if (ventanaActiva === '24h') {
         ventanaActiva = '1d';
     }
@@ -349,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const url = new URL(window.location.href);
-            if (v === '30m') {
+            if (v === '12h') {
                 url.searchParams.delete('ventana');
             } else {
                 url.searchParams.set('ventana', v);

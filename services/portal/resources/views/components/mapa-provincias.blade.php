@@ -4,7 +4,7 @@
 --}}
 @props([
     'datos' => null, // Array o colección con estadísticas por provincia
-    'ventana' => '30m',
+    'ventana' => '12h',
 ])
 
 @php
@@ -92,7 +92,7 @@
                 ];
                 $ventanaActivaNorm = ($ventana === '24h') ? '1d' : $ventana;
                 if (!array_key_exists($ventanaActivaNorm, $opcionesVentana)) {
-                    $ventanaActivaNorm = '30m';
+                    $ventanaActivaNorm = '12h';
                 }
             @endphp
             @foreach($opcionesVentana as $clave => $etiqueta)

@@ -38,8 +38,8 @@ class ApiPublicaTest extends TestCase
             'generado_en' => '2026-10-07T12:00:00Z',
         ], 60);
 
-        // Sembrar caché fresca para stats_provincias (30m por defecto y 7d)
-        foreach (['30m', '7d'] as $v) {
+        // Sembrar caché fresca para stats_provincias (12h por defecto y 7d)
+        foreach (['12h', '7d'] as $v) {
             $paramsProv = ['ventana' => $v];
             ksort($paramsProv);
             $hashProv = sha1(json_encode($paramsProv) ?: '');
@@ -136,7 +136,7 @@ class ApiPublicaTest extends TestCase
     {
         $responseDefault = $this->get('/api/v1/stats/provinces');
         $responseDefault->assertStatus(200);
-        $responseDefault->assertJsonPath('window', '30m');
+        $responseDefault->assertJsonPath('window', '12h');
 
         $responseOk = $this->get('/api/v1/stats/provinces?window=7d');
         $responseOk->assertStatus(200);

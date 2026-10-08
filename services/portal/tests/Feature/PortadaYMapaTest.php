@@ -78,7 +78,7 @@ class PortadaYMapaTest extends TestCase
         $response->assertSee('data-ventana="12h"', false);
         $response->assertSee('data-ventana="1d"', false);
         $response->assertSee('data-ventana="7d"', false);
-        $response->assertSee('Últimos 30 minutos', false);
+        $response->assertSee('Últimas 12 horas', false);
         $response->assertSee('NO es un servicio de emergencias', false);
         $response->assertSee(config('autoria.nick'));
     }

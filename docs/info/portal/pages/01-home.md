@@ -185,7 +185,7 @@ Desarrollador web full stack especializado en backend · @raupulus
 
 | Dato | Origen |
 |---|---|
-| Total, nodos por provincia, carga (`avg`, `max`, `routers`, `level`), `outside_andalucia`, `generated_at`, `stale` | `GET /api/v1/stats/provinces?window=30m` (por defecto) u opciones `?window=1h|6h|12h|1d|7d`. Refresco cada 5 min mientras la página esté visible |
+| Total, nodos por provincia, carga (`avg`, `max`, `routers`, `level`), `outside_andalucia`, `generated_at`, `stale` | `GET /api/v1/stats/provinces?window=12h` (por defecto) u opciones `?window=30m|1h|6h|1d|7d`. Refresco cada 5 min mientras la página esté visible |
 | Cortes de la leyenda `{green_max}` y `{red_min}` | `load_levels` de la misma respuesta (configurables) |
 | `{porcentaje}` del panel | Calculado en la página: `nodes / total_andalucia` |
 | `{nivel}` y estado de la tabla | `level`: `green` → holgado, `orange` → cargado, `red` → saturado, `nodata` → sin datos |
