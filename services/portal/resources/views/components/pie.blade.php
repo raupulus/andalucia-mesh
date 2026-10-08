@@ -9,7 +9,7 @@
             <!-- Columna 1: Proyecto -->
             <div>
                 <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
-                    <img src="{{ asset('img/logo.png') }}" alt="{{ config('proyecto.nombre') }}" style="width: 2rem; height: 2rem; object-fit: contain; flex-shrink: 0;" width="32" height="32">
+                    <img src="{{ asset('img/logo.png') }}" alt="" aria-hidden="true" style="width: 2rem; height: 2rem; object-fit: contain; flex-shrink: 0;" width="32" height="32">
                     <h3 style="font-size: 1.1rem; margin: 0; color: var(--color-texto);">{{ config('proyecto.nombre') }}</h3>
                 </div>
                 <p style="font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.5;">
@@ -52,7 +52,7 @@
         <div class="tarjeta-repo-footer">
             <div class="tarjeta-repo-footer-info">
                 <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.25rem;">
-                    <img src="{{ asset('img/logo.png') }}" alt="{{ config('proyecto.nombre') }}" style="width: 1.5rem; height: 1.5rem; object-fit: contain; flex-shrink: 0;" width="24" height="24">
+                    <img src="{{ asset('img/logo.png') }}" alt="" aria-hidden="true" style="width: 1.5rem; height: 1.5rem; object-fit: contain; flex-shrink: 0;" width="24" height="24">
                     <span style="font-size: 0.95rem; font-weight: 700; color: var(--color-texto); letter-spacing: 0.02em; text-transform: uppercase;">
                         {{ __('portal.footer.source_code_title') }}
                     </span>

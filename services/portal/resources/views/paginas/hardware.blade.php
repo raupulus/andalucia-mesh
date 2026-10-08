@@ -533,6 +533,8 @@
                                     <img
                                         src="{{ $item->image_url }}"
                                         alt="{{ $item->translated_name }}"
+                                        width="400"
+                                        height="400"
                                         loading="lazy"
                                         class="hardware-card-img"
                                     >

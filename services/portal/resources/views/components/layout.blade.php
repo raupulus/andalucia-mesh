@@ -1,25 +1,94 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="ltr" data-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ str_contains($title ?? '', config('proyecto.nombre')) ? $title : (($title ? $title . ' — ' : '') . config('proyecto.nombre')) }}</title>
-    <meta name="description" content="{{ $description ?? config('proyecto.seo.descripcion_defecto') }}">
+    @php
+        $currentLocale = app()->getLocale();
+        $localeMap = [
+            'es' => 'es_ES',
+            'en' => 'en_GB',
+            'pt' => 'pt_PT',
+        ];
+        $ogLocale = $localeMap[$currentLocale] ?? 'es_ES';
+        $pageTitle = str_contains($title ?? '', config('proyecto.nombre')) ? $title : (($title ? $title . ' — ' : '') . config('proyecto.nombre'));
+        $metaDesc = $description ?? config('proyecto.seo.descripcion_defecto');
+        $canonicalUrl = request()->fullUrl();
+        $baseUrl = url()->current();
+    @endphp
+
+    <title>{{ $pageTitle }}</title>
+    <meta name="description" content="{{ $metaDesc }}">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+
+    <!-- Etiquetas multilingües hreflang (SEO internacional) -->
+    <link rel="alternate" hreflang="es" href="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}">
+    <link rel="alternate" hreflang="en" href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}">
+    <link rel="alternate" hreflang="pt" href="{{ request()->fullUrlWithQuery(['lang' => 'pt']) }}">
+    <link rel="alternate" hreflang="x-default" href="{{ $baseUrl }}">
 
     <!-- Open Graph & Metadatos Sociales -->
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="{{ config('proyecto.nombre') }}">
     <meta property="og:title" content="{{ $title ?? config('proyecto.nombre') }}">
-    <meta property="og:description" content="{{ $description ?? config('proyecto.seo.descripcion_defecto') }}">
-    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:description" content="{{ $metaDesc }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
     <meta property="og:image" content="{{ asset(config('proyecto.seo.imagen_defecto')) }}">
-    <link rel="canonical" href="{{ url()->current() }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:alt" content="{{ config('proyecto.nombre') }} — {{ $metaDesc }}">
+    <meta property="og:locale" content="{{ $ogLocale }}">
+    @foreach($localeMap as $locKey => $locVal)
+        @if($locKey !== $currentLocale)
+            <meta property="og:locale:alternate" content="{{ $locVal }}">
+        @endif
+    @endforeach
 
     <!-- Twitter Card -->
+    @php
+        $twitterHandle = str_starts_with((string) config('autoria.nick'), '@') ? config('autoria.nick') : '@' . config('autoria.nick');
+    @endphp
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="{{ $twitterHandle }}">
+    <meta name="twitter:creator" content="{{ $twitterHandle }}">
     <meta name="twitter:title" content="{{ $title ?? config('proyecto.nombre') }}">
-    <meta name="twitter:description" content="{{ $description ?? config('proyecto.seo.descripcion_defecto') }}">
+    <meta name="twitter:description" content="{{ $metaDesc }}">
     <meta name="twitter:image" content="{{ asset(config('proyecto.seo.imagen_defecto')) }}">
+    <meta name="twitter:image:alt" content="{{ config('proyecto.nombre') }} — {{ $metaDesc }}">
+
+    <!-- Datos estructurados Schema.org (JSON-LD) -->
+    @php
+        $siteSchema = [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'WebSite',
+                    '@id' => url('/') . '/#website',
+                    'url' => url('/'),
+                    'name' => config('proyecto.nombre'),
+                    'description' => config('proyecto.seo.descripcion_defecto'),
+                    'inLanguage' => $currentLocale,
+                ],
+                [
+                    '@type' => 'Organization',
+                    '@id' => url('/') . '/#organization',
+                    'name' => config('proyecto.nombre'),
+                    'url' => url('/'),
+                    'logo' => [
+                        '@type' => 'ImageObject',
+                        'url' => asset('img/logo-512.png'),
+                        'width' => 512,
+                        'height' => 512,
+                    ],
+                ],
+            ],
+        ];
+    @endphp
+    <script type="application/ld+json">
+    {!! json_encode($siteSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
 
     <!-- Favicon & Color de tema -->
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">

@@ -297,4 +297,27 @@ class FaqTest extends TestCase
         $this->assertEquals(1, $faq1->sort_order);
         $this->assertEquals(2, $faq2->sort_order);
     }
+
+    /**
+     * Comprueba que la página /faq incluya el schema JSON-LD estructurado de tipo FAQPage
+     * con sus entidades Question y Answer para motores de búsqueda.
+     */
+    public function test_faq_incluye_schema_faqpage_json_ld(): void
+    {
+        Faq::create([
+            'question' => '¿Qué es Andalucía Mesh?',
+            'answer' => 'Es una red de radio en malla abierta basada en Meshtastic.',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+
+        $response = $this->get('/faq');
+
+        $response->assertStatus(200);
+        $response->assertSee('application/ld+json', false);
+        $response->assertSee('"@type":"FAQPage"', false);
+        $response->assertSee('¿Qué es Andalucía Mesh?', false);
+        $response->assertSee('Es una red de radio en malla abierta basada en Meshtastic.', false);
+    }
 }
+

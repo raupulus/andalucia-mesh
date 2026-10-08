@@ -21,7 +21,7 @@
     <div class="contenedor" style="display: flex; align-items: center; justify-content: space-between; height: 4.5rem;">
         <!-- Logotipo e Identidad -->
         <a href="{{ $currentLang !== 'es' ? '/?lang=' . $currentLang : '/' }}" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--color-texto);">
-            <img src="{{ asset('img/logo.png') }}" alt="{{ config('proyecto.nombre') }}" style="width: 2.5rem; height: 2.5rem; object-fit: contain; flex-shrink: 0;" width="40" height="40">
+            <img src="{{ asset('img/logo.png') }}" alt="" aria-hidden="true" style="width: 2.5rem; height: 2.5rem; object-fit: contain; flex-shrink: 0;" width="40" height="40">
 
             <div>
                 <span style="font-weight: 700; font-size: 1.15rem; display: block; line-height: 1.2;">{{ config('proyecto.nombre') }}</span>

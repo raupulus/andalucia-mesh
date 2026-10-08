@@ -4,6 +4,28 @@
 @endphp
 
 <x-layout :title="__('portal.faq.meta_title')" :description="__('portal.faq.meta_description')">
+    @if(count($faqs) > 0)
+        @php
+            $faqSchema = [
+                '@context' => 'https://schema.org',
+                '@type' => 'FAQPage',
+                'mainEntity' => collect($faqs)->map(function($f) {
+                    return [
+                        '@type' => 'Question',
+                        'name' => (string) data_get($f, 'question', ''),
+                        'acceptedAnswer' => [
+                            '@type' => 'Answer',
+                            'text' => strip_tags((string) data_get($f, 'answer_html', '')),
+                        ],
+                    ];
+                })->values()->all(),
+            ];
+        @endphp
+        <script type="application/ld+json">
+        {!! json_encode($faqSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+        </script>
+    @endif
+
     <div class="contenedor seccion" style="max-width: 860px; margin: 0 auto; padding-top: 2rem; padding-bottom: 5rem;">
         
         <!-- Enlace superior de retorno al inicio -->

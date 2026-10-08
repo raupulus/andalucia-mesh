@@ -88,4 +88,43 @@ class LayoutYConfigTest extends TestCase
         $this->assertStringContainsString("font-family: 'Ubuntu Mono'", $cssContent);
         $this->assertStringContainsString("--font-titulos", $cssContent);
     }
+
+    /**
+     * Verifica que el layout incluya metatags sociales completos, SEO hreflang, robots y Schema.org.
+     */
+    public function test_metatags_seo_y_redes_sociales_completos(): void
+    {
+        $response = $this->get('/');
+        $response->assertStatus(200);
+
+        // Atributo dir="ltr" en html (W3C-B02)
+        $response->assertSee('dir="ltr"', false);
+
+        // Directivas de rastreo robots (SEO-A02)
+        $response->assertSee('<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">', false);
+
+        // Etiquetas multilingües hreflang (SEO-A01)
+        $response->assertSee('hreflang="es"', false);
+        $response->assertSee('hreflang="en"', false);
+        $response->assertSee('hreflang="pt"', false);
+        $response->assertSee('hreflang="x-default"', false);
+
+        // Open Graph completo (SOC-M01)
+        $response->assertSee('<meta property="og:type" content="website">', false);
+        $response->assertSee('<meta property="og:locale" content="es_ES">', false);
+        $response->assertSee('<meta property="og:locale:alternate" content="en_GB">', false);
+        $response->assertSee('<meta property="og:locale:alternate" content="pt_PT">', false);
+        $response->assertSee('<meta property="og:image:width" content="1200">', false);
+        $response->assertSee('<meta property="og:image:height" content="630">', false);
+        $response->assertSee('<meta property="og:image:type" content="image/png">', false);
+
+        // Twitter Card con creador (SOC-B01)
+        $response->assertSee('<meta name="twitter:card" content="summary_large_image">', false);
+        $response->assertSee('<meta name="twitter:creator" content="@raupulus">', false);
+
+        // Schema.org WebSite y Organization (SEO-M02)
+        $response->assertSee('application/ld+json', false);
+        $response->assertSee('"@type":"WebSite"', false);
+        $response->assertSee('"@type":"Organization"', false);
+    }
 }
