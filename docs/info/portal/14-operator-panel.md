@@ -119,6 +119,30 @@ Gestión y gobernanza comunitaria de la infraestructura de repetidores en Andalu
   - **Resiliencia en entornos locales:** En entornos de desarrollo local y pruebas con SQLite, el sistema inicializa y asegura la estructura de `api_routers` poblándola con nodos de prueba si se encuentra vacía, evitando excepciones de base de datos ausente.
 - **Edición manual:** Permite registrar nuevos routers de forma anticipada antes de su despliegue físico o añadir anotaciones de operador sobre ubicación, responsable o cota de instalación.
 
+### Gestión y Control Remoto de Routers (`GestionRouters`)
+
+Consola de operaciones y control administrativo de routers de la malla (`/admin/gestion-routers`, grupo `Infraestructura`):
+- **Arquitectura de conexión cliente-nodo:**
+  - El portal se ejecuta en el servidor/VPS. El operador físico conecta su nodo Meshtastic controlador directamente a su equipo local mediante Web Serial (USB @ 115200 baudios), Web Bluetooth (BLE) o red local (HTTP).
+  - La interfaz web del operador en Filament se comunica directamente desde el navegador con su nodo local físico utilizando las APIs estándares del navegador (`navigator.serial`, `navigator.bluetooth`), sin que el VPS requiera pasarelas físicas ni puertos de radiofrecuencia acoplados.
+  - El nodo local físico del operador actúa como puente de radiofrecuencia (transceiver) para inyectar paquetes administrativos `AdminMessage` de Meshtastic en la malla comunitaria LoRa hacia los routers remotos.
+- **Selector de router objetivo:**
+  - Filtrado estricto a los routers coordinados de las 8 provincias de Andalucía (`CoordinatedRouter::andalucia()`), presentando nombre, provincia, identificador hexadecimal, rol y estado de gobernanza (`managed`, `known`, `new`).
+  - Admite alternativamente la introducción manual de cualquier Node ID en formato hexadecimal (`!XXXXXXXX`) o decimal uint32 para pruebas o nodos en despliegue.
+- **Pestañas operativas de control:**
+  - **1. Roles (`roles`):** Permite reconfigurar el rol de un router a través de la malla mediante `AdminMessage.setConfig` con `Config.DeviceConfig.role`. Posibilita la conmutación ágil a `CLIENT_MUTE` ante incidentes de saturación o emisores de spam cercanos para silenciar los reenvíos de un repetidor sin apagarlo, y restablecerlo posteriormente a `ROUTER` o `ROUTER_LATE`. Admite igualmente `CLIENT` y `REPEATER`.
+  - **2. Favoritos (`favoritos`):** Gestión de la lista de nodos prioritarios del router mediante `setFavoriteNode` y `removeFavoriteNode` de `AdminMessage`. Permite que el router priorice los mensajes y telemetrías de los nodos clave de su zona.
+  - **3. Sondeo de Malla (`sondeo`):** Emisión de paquetes broadcast (`^all`, constante `0xFFFFFFFF`) con `want_response = true` para sondeo masivo: identificación (`NodeInfo`), coordenadas (`Position`) y estado energético/canal (`Telemetry`).
+  - **4. Petición a un Nodo (`unicast`):** Envío de solicitudes directas a un nodo concreto: `NodeInfo`, `Position`, `Telemetry` y trazado de saltos de ruta `Traceroute` (`TRACEROUTE_APP` con `RouteDiscoverySchema`).
+  - **5. Mantenimiento (`mantenimiento`):** Envío de comandos de reinicio remoto diferido (`reboot_seconds`) con confirmación de seguridad y retardo configurable en segundos para permitir la propagación y confirmación ACK del paquete antes del reinicio del hardware.
+- **Consola de actividad en tiempo real:**
+  - Terminal interactiva integrada con registro cronológico de eventos: eventos de conexión física, paquetes transmitidos (`TX ➡️`), paquetes recibidos (`RX ⬅️`), confirmaciones de entrega (`ACK ✅`) y fallos.
+  - Descodificación en caliente de telemetría (batería, voltaje, ChUtil), posiciones GPS, respuestas `AdminMessage` y rutas de Traceroute.
+  - Filtros por tipo de tráfico, limpieza de terminal y copiado directo al portapapeles.
+- **Empaquetado y eliminación de dependencias de CDN:**
+  - Bundle compilado con Vite (`resources/js/mesh-admin.js` -> `public/build/assets/`) e integración de `@meshtastic/core`, `@meshtastic/transport-web-serial`, `@meshtastic/transport-web-bluetooth` y `@bufbuild/protobuf` como dependencias locales versionadas.
+  - Compilación autónoma de `configurador.js` (`npm run build:configurador`) eliminando las dependencias externas a `esm.sh` para garantizar funcionamiento autónomo e inmune a cortes de CDN externos.
+
 ### Usuarios y Perfil de Operador
 
 Recurso `UserResource` (`/admin/users`, base `portal`):
