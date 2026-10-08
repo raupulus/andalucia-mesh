@@ -48,6 +48,16 @@ class HealthServer:
         peers_list: list[dict[str, Any]] = []
         try:
             peers_list = await get_all_peer_states(self.pool)
+            current_peers = self.syncer.peer_manager._current_peers
+            for p in peers_list:
+                p_cfg = current_peers.get(p["id"])
+                is_active = p_cfg.activo if p_cfg else False
+                p["activo"] = is_active
+                if not is_active:
+                    p["estado"] = "desactivado"
+                    p["ok"] = False
+                else:
+                    p["ok"] = (p["estado"] == "ok")
         except Exception as exc:
             is_ok = False
             motivos.append(f"Fallo de conexión con PostgreSQL: {exc}")

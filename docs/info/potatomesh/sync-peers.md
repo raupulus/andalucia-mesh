@@ -60,11 +60,12 @@ Migraciones versionadas al arrancar. Sin datos personales. Copia: la del Postgre
 
 ```json
 {"ok": true, "potatomesh": "ok", "peers": [
-  {"id": "vecina-1", "estado": "ok", "ultimo_ok": "2026-10-04T10:14:00Z", "fallos_consecutivos": 0},
-  {"id": "vecina-2", "estado": "caido", "ultimo_ok": "2026-10-04T08:02:00Z", "fallos_consecutivos": 9}]}
+  {"id": "vecina-1", "estado": "ok", "activo": true, "ok": true, "ultimo_ok": "2026-10-04T10:14:00Z", "fallos_consecutivos": 0},
+  {"id": "vecina-2", "estado": "caido", "activo": true, "ok": false, "ultimo_ok": "2026-10-04T08:02:00Z", "fallos_consecutivos": 9},
+  {"id": "vecina-3", "estado": "desactivado", "activo": false, "ok": false, "ultimo_ok": null, "fallos_consecutivos": 0}]}
 ```
 
-`503` solo si falla la base o nuestra API de PotatoMesh (`401/403` o caída > 5 min). Un peer caído **no** pone el servicio en rojo: aparece con `estado: "caido"` y el panel de operadores lo destaca si lleva > 1 h (`../portal/14-operator-panel.md`).
+`503` solo si falla la base o nuestra API de PotatoMesh (`401/403` o caída > 5 min). Un peer caído **no** pone el servicio en rojo: aparece con `estado: "caido"` (o `estado: "desactivado"` si `activo: false`) y el panel de operadores lo destaca si lleva > 1 h (`../portal/14-operator-panel.md`).
 
 ### Configuración
 
