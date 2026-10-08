@@ -27,7 +27,7 @@ Registro de funcionalidades y conceptos que han sido decididos formalmente pero 
 | Gestión visual de routers en /admin (mapa, Web Serial y CLI) | Interfaz en el panel de operadores para seleccionar routers en un mapa interactivo o desplegable y enviar comandos/acciones; integrando conexión local por Web Serial (Chromium) y generación de comandos CLI de Meshtastic listos para copiar y pegar en terminal |
 | Sistema de bloqueos y baneo federado (autoban y manual) | Panel de reglas para autoban, bloqueos manuales, listado unificado y sincronización bidireccional por API autenticada (Sanctum) con instancias amigas ([ver detalle](#sistema-de-bloqueos-y-baneo-federado)) |
 | Desbloqueador público de nodos en el frontend | Comprobador y autoservicio de desbloqueo por Node ID para nodos autobaneados (excluyendo bloqueos manuales o federados), con guía de motivos de ban y FAQ ([ver detalle](#desbloqueador-publico-de-nodos-en-el-frontend)) |
-| Catálogo de hardware recomendado con gestión en /admin | Sección pública de recomendaciones de compra/montaje (dispositivos, DIY, antenas) gestionable desde el panel de administración con categorías, imágenes 1:1 y precios ([ver detalle](#catalogo-de-hardware-recomendado-con-gestion-en-admin)) |
+| Catálogo de hardware recomendado con gestión en /admin | Sección y página pública dinámica de recomendaciones de compra/montaje (dispositivos, DIY, antenas) con soporte multi-idioma y gestión desde /admin con cropper 1:1 y precios ([ver detalle](#catalogo-de-hardware-recomendado-con-gestion-en-admin)) |
 
 ## Detalle de Ideas
 
@@ -63,20 +63,71 @@ Página y herramienta pública de autoservicio en el portal para verificar si un
 
 ### Catálogo de hardware recomendado con gestión en /admin
 
-Sección pública en el portal con recomendaciones comunitarias de dispositivos, componentes y antenas probados con éxito, administrable de forma dinámica desde el panel de operadores (`/admin` en Filament):
+Sección y página dinámica pública en el portal para centralizar recomendaciones comunitarias de dispositivos, kits DIY, componentes, antenas y sistemas de alimentación probados con éxito en la malla:
 
-- **Vista pública (frontend):**
-  - Listado visual clasificado o filtrable por categorías con tarjetas de productos o componentes.
-  - Tarjetas con imagen cuadrada (relación 1:1), título, descripción funcional, categoría asociada, último precio conocido orientativo y enlace/botón de compra o tutorial de montaje.
-- **Gestión en el panel de administración (/admin):**
-  - **Tabla y recurso de Categorías:** Mantenimiento de categorías editables por los operadores (ej. *Dispositivo Montado*, *DIY (Hazlo tú mismo)*, *Antenas*, etc.).
-  - **Tabla y recurso de Hardware:** Gestión de artículos individuales con los campos requeridos:
-    - **Categoría:** Relación directa con la tabla de categorías.
-    - **Nombre:** Denominación del modelo, antena o componente.
-    - **Descripción:** Explicación técnica y recomendaciones de uso en la malla.
-    - **Imagen:** Carga de imagen con herramienta de recorte (*cropper*) forzado a aspecto 1:1.
-    - **Enlace:** URL de compra directa o enlace a guía de montaje.
-    - **Último precio conocido:** Precio de referencia para la comunidad.
+1. **Objetivo y Filosofía:**
+   - Orientar a nuevos integrantes y operadores veteranos sobre qué adquirir para participar en la red comunitaria sin cometer errores de compra (frecuencias incorrectas, antenas de mala calidad o dispositivos inadecuados para el rol deseado).
+   - Contenido curado y avalado por las pruebas reales de la comunidad, independiente y transparente.
+
+2. **Modelo de Datos en Base de Datos (PostgreSQL en Laravel):**
+   - **Tabla `hardware_categories`:**
+     - `id`: Identificador único (bigint / ULID).
+     - `slug`: Identificador URL único (ej. `dispositivo-montado`, `diy`, `antenas`, `energia-solar`).
+     - `name`: Nombre transducible en formato JSONB (`{"es": "Dispositivo Montado", "en": "Assembled Device"}`).
+     - `description`: Descripción transducible en JSONB (`{"es": "...", "en": "..."}`), nullable.
+     - `sort_order`: Entero para ordenación manual personalizada (por defecto 0).
+     - `is_active`: Booleano para visibilidad pública.
+     - Timestamps estándar (`created_at`, `updated_at`).
+   - **Tabla `hardware_items`:**
+     - `id`: Identificador único.
+     - `category_id`: Clave foránea referenciando a `hardware_categories.id`.
+     - `slug`: Identificador URL amigable.
+     - `name`: Nombre comercial o título del proyecto (JSONB o cadena).
+     - `description`: Explicación técnica y recomendaciones de uso transducibles en JSONB (`{"es": "...", "en": "..."}`).
+     - `image_path`: Ruta del fichero de imagen recortada.
+     - `buy_url`: Enlace externo directo a tienda, distribuidor oficial o fabricante.
+     - `guide_url`: Enlace opcional a tutorial de montaje, flasheo o esquemático (nullable).
+     - `last_price`: Valor decimal orientativo del coste de mercado (nullable).
+     - `currency`: Moneda de referencia (por defecto `EUR`).
+     - `is_featured`: Booleano para resaltar productos destacados en cabecera.
+     - `is_active`: Booleano para activar o pausar visibilidad.
+     - `sort_order`: Entero de ordenación.
+     - Timestamps estándar (`created_at`, `updated_at`).
+
+3. **Soporte Multi-idioma y Traducciones (i18n):**
+   - **Campos de contenido:** Almacenamiento transducible en JSONB (`es` y `en`) compatible con la configuración de localización de Laravel y Filament (mediante *translatable fields* / Spatie Translatable).
+   - **Panel `/admin`:** Pestañas o conmutador de idioma en el formulario para rellenar títulos, descripciones y notas técnicas en español (idioma canónico) e inglés.
+   - **Frontend:** Resolución automática del texto según el idioma activo (`app()->getLocale()`) con fallback seguro a español.
+   - **Textos de interfaz:** Claves de localización en ficheros de idioma (`lang/es.json`, `lang/en.json`) para botones, etiquetas de filtro ("Todas las categorías", "Último precio conocido", "Dónde comprar", "Guía de montaje", "Sin resultados").
+
+4. **Gestión en el Panel de Operadores (/admin en Filament):**
+   - **Recurso `HardwareCategoryResource`:**
+     - Listado con reordenación interactiva (*drag and drop*), contador de productos vinculados e interruptor rápido de activación.
+     - Formulario con campos de nombre y descripción traducibles, y generación automática de *slug*.
+   - **Recurso `HardwareItemResource`:**
+     - Selector desplegable de categoría.
+     - Nombre y descripción con soporte bilingüe (ES / EN).
+     - Campo de subida de imagen (`FileUpload`) con editor integrado configurado obligatoriamente en recorte cuadrado 1:1 (`imageEditorAspectRatios(['1:1'])`).
+     - Entradas para URL de compra (`buy_url`) y URL de guía técnica (`guide_url`).
+     - Campo monetario para último precio conocido con sufijo de divisa (`€`).
+     - Controles de estado: interruptor de activo/inactivo, interruptor de destacado (*featured*) y ordenación.
+
+5. **Nueva Página Dinámica en el Frontend (`/hardware`):**
+   - **Ruta y Controlador:** `GET /hardware` atendido por `HardwareController@index`, consultando categorías activas y artículos visibles con eager loading (`with('category')`).
+   - **Diseño visual (conforme a `DESIGN.md`):**
+     - Cabecera con H1, resumen explicativo y texto aclaratorio sobre la independencia de las recomendaciones comunitarias.
+     - **Barra de navegación y filtros interactivos:**
+       - Chips / botones estilo *pill* (`x-chip`) para filtrar por categoría (*Todas*, *Dispositivos montados*, *DIY*, *Antenas*, *Alimentación / Solar*...).
+       - Filtrado reactivo en URL (`/hardware?categoria=antenas`) o interactividad ligera vía Alpine.js sin recarga obligatoria.
+       - Buscador de texto en tiempo real para localizar modelos o componentes específicos.
+     - **Rejilla responsive de tarjetas (Grid):**
+       - Imagen cuadrada 1:1 optimizada en WebP con *lazy loading* y texto alternativo semántico.
+       - Etiqueta o *badge* de categoría.
+       - Título y distintivo de recomendado/destacado si aplica.
+       - Resumen técnico destacando por qué la comunidad lo recomienda y su comportamiento en la malla.
+       - Indicador de precio estimado ("Último precio conocido: ~XX €").
+       - Botonera de acción: Enlace principal "Comprar / Adquirir" y enlace secundario "Guía de montaje / Flasheo" si está disponible.
+     - **Estado vacío:** Mensaje visual amigable si no hay productos disponibles bajo el filtro seleccionado.
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

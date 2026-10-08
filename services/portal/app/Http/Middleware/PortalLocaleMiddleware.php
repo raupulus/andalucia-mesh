@@ -37,6 +37,7 @@ class PortalLocaleMiddleware
         $locale = $this->determineLocale($request);
 
         app()->setLocale($locale);
+        \Carbon\Carbon::setLocale($locale);
 
         return $next($request);
     }
