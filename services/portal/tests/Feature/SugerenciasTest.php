@@ -216,4 +216,47 @@ class SugerenciasTest extends TestCase
         $this->assertEquals(Suggestion::STATUS_APPROVED, $sugerencia->fresh()->status);
         $this->assertEquals('Aprobado para la próxima versión de PotatoMesh.', $sugerencia->fresh()->operator_notes);
     }
+
+    /**
+     * Comprueba que claves con marcadores dummy/placeholder desactiven Turnstile de forma segura.
+     */
+    public function test_turnstile_ignora_claves_placeholder_y_opera_degradado(): void
+    {
+        config([
+            'services.turnstile.site_key' => '0x4AAAAAAAxxxxxxxxxxxxxx',
+            'services.turnstile.secret_key' => '0x4AAAAAAAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+        ]);
+
+        $service = app(\App\Servicios\TurnstileService::class);
+        $this->assertFalse($service->isEnabled());
+        $this->assertNull($service->getSiteKey());
+        $this->assertTrue($service->verify(null));
+    }
+
+    /**
+     * Comprueba que la verificación no envíe remoteip cuando la IP sea privada o loopback.
+     */
+    public function test_turnstile_no_envia_remoteip_en_ips_privadas(): void
+    {
+        config([
+            'services.turnstile.site_key' => '0x4AAAAAAA_real_site_key',
+            'services.turnstile.secret_key' => '0x4AAAAAAA_real_secret_key',
+        ]);
+
+        Http::fake([
+            'https://challenges.cloudflare.com/turnstile/v0/siteverify' => function (\Illuminate\Http\Client\Request $request) {
+                // Comprobar que en el cuerpo del form no se incluye remoteip para 127.0.0.1
+                $body = $request->data();
+                if (isset($body['remoteip'])) {
+                    return Http::response(['success' => false], 400);
+                }
+
+                return Http::response(['success' => true], 200);
+            },
+        ]);
+
+        $service = app(\App\Servicios\TurnstileService::class);
+        $this->assertTrue($service->verify('token-valido', '127.0.0.1'));
+        $this->assertTrue($service->verify('token-valido', '172.18.0.2'));
+    }
 }

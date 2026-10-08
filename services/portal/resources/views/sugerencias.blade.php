@@ -93,7 +93,12 @@
                     <!-- 3. Cloudflare Turnstile (si está habilitado con clave pública) -->
                     @if(!empty($siteKey))
                         <div style="margin-top: 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: flex-start;">
-                            <div class="cf-turnstile" data-sitekey="{{ $siteKey }}" data-theme="auto"></div>
+                            <div class="cf-turnstile" 
+                                 data-sitekey="{{ $siteKey }}" 
+                                 data-theme="auto"
+                                 data-callback="alCompletarTurnstile"
+                                 data-error-callback="alErrorTurnstile"
+                                 data-expired-callback="alExpirarTurnstile"></div>
                         </div>
                     @endif
 
@@ -151,6 +156,22 @@
                     actualizarContador();
                 }
 
+                // Callbacks globales de Cloudflare Turnstile
+                window.alCompletarTurnstile = function(token) {
+                    if (alertaError) {
+                        alertaError.style.display = 'none';
+                    }
+                };
+
+                window.alErrorTurnstile = function() {
+                    mostrarError('No se pudo verificar la comprobación de seguridad de Cloudflare. Si utilizas extensiones de privacidad o bloqueador de anuncios, permítele cargar para completar el envío.');
+                };
+
+                window.alExpirarTurnstile = function() {
+                    mostrarError('La comprobación de seguridad ha caducado por inactividad. Por favor, márcala de nuevo antes de enviar.');
+                    resetearTurnstile();
+                };
+
                 if (form) {
                     form.addEventListener('submit', function(e) {
                         e.preventDefault();
@@ -166,6 +187,16 @@
                         if (content.length < 10) {
                             mostrarError('La sugerencia debe tener al menos 10 caracteres.');
                             return;
+                        }
+
+                        // Verificar si Turnstile está presente en el DOM y si ya ha sido resuelto
+                        var widgetTurnstile = document.querySelector('.cf-turnstile');
+                        if (widgetTurnstile) {
+                            var inputToken = form.querySelector('[name="cf-turnstile-response"]');
+                            if (!inputToken || !inputToken.value) {
+                                mostrarError('Por favor, completa la verificación de seguridad antes de enviar tu propuesta.');
+                                return;
+                            }
                         }
 
                         alertaError.style.display = 'none';

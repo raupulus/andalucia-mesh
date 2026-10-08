@@ -22,12 +22,23 @@ class TurnstileService
 
     /**
      * Determina si la verificación de Turnstile está activa en el entorno actual.
+     * Requiere que ambas claves (pública y secreta) estén definidas y no sean marcadores de ejemplo.
      */
     public function isEnabled(): bool
     {
+        $siteKey = config('services.turnstile.site_key');
         $secret = config('services.turnstile.secret_key');
 
-        return ! empty($secret) && is_string($secret);
+        if (empty($siteKey) || empty($secret) || ! is_string($siteKey) || ! is_string($secret)) {
+            return false;
+        }
+
+        // Si son valores placeholder de plantilla, no activar para evitar bloqueos
+        if (str_contains($siteKey, 'xxxx') || str_contains($secret, 'xxxx')) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -35,9 +46,7 @@ class TurnstileService
      */
     public function getSiteKey(): ?string
     {
-        $siteKey = config('services.turnstile.site_key');
-
-        return is_string($siteKey) && ! empty($siteKey) ? $siteKey : null;
+        return $this->isEnabled() ? (string) config('services.turnstile.site_key') : null;
     }
 
     /**
@@ -64,7 +73,9 @@ class TurnstileService
                 'response' => $token,
             ];
 
-            if (! empty($ip)) {
+            // Solo enviar remoteip si es una IP pública válida para evitar que Cloudflare
+            // rechace el token por discrepancias de NAT o Docker (127.0.0.1, 172.x.x.x, etc.)
+            if (! empty($ip) && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
                 $params['remoteip'] = $ip;
             }
 
