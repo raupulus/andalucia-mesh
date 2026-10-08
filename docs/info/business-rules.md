@@ -43,7 +43,7 @@
 |---|---|---|
 | RN-20 | Radio recomendada (configurable): EU_868, sin preset, BW 62, SF 7, CR 5, slot 4 (869,618 MHz), canal 0 `SFNarrow`, 3 saltos | [03-node-setup-guide](portal/03-node-setup-guide.md) |
 | RN-21 | Roles: `CLIENT_MUTE` por defecto, `CLIENT` en exterior bien situado, `ROUTER` solo coordinado | Ídem |
-| RN-22 | Saltos: 3; 4–5 válidos en casos justificados; ≥ 6 genera alerta | Ídem, [02-rule-catalog](detector-alertas/02-rule-catalog.md) |
+| RN-22 | Saltos: 3 recomendado; 4–5 válidos en extremos o casos justificados; 6 genera alerta de riesgo `bajo`; ≥ 7 genera alerta de riesgo `alto`. En nodos cliente clasifica como `clientes` y en routers/gateways como `infraestructura` | Ídem, [02-rule-catalog](detector-alertas/02-rule-catalog.md) |
 | RN-23 | Intervalos: NodeInfo 72 h; posición fija 72 h, móvil ≥ 1 h; telemetría de dispositivo solar ≥ 4 h, troncal ≥ 6 h, enchufado desactivada; entorno desactivada o > 4 h | [03-node-setup-guide](portal/03-node-setup-guide.md) |
 | RN-24 | Una sola fuente de umbrales: guía, diagnóstico ("Revisa tu nodo") y detector usan los mismos valores; un nodo que sigue la guía no recibe alertas de configuración ni hallazgos | [13-nodes-alerts-api](portal/13-nodes-alerts-api.md) |
 
@@ -81,6 +81,7 @@
 | 2026-10-07 | RN-08, OB-02, OB-03 | Canalización de sync-peers a la ingesta para deduplicación unificada y cobertura regional completa de alertas y métricas | Responsable del proyecto |
 | 2026-10-08 | RN-02 | Credenciales públicas compartidas (meshdev / large4cats) para gateways con permisos de solo subida a canales autorizados por TLS 8883 | Responsable del proyecto |
 | 2026-10-08 | RN-34 | Filtros por defecto de bots: solo avisos de infraestructura altos (riesgo 'alto') al integrarlo a grupos para evitar spam | Responsable del proyecto |
+| 2026-10-08 | RN-22 | Umbrales de saltos (hops-high): 6 saltos genera riesgo bajo y >= 7 genera riesgo alto; clasificación de tipo según nodo (infraestructura para routers/gateways y clientes para nodos de usuario) | Responsable del proyecto |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

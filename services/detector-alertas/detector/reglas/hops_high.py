@@ -12,19 +12,20 @@ class ConfigHopsHigh(BaseModel):
     """Configuración para la regla hops-high."""
 
     activa: bool = True
-    medio_desde: int = 6
+    bajo_desde: int = 6
+    alto_desde: int = 7
     resolver_paquetes: int = 2
 
 
 @registrar
 class ReglaHopsHigh:
-    """Supervisa el hop_start en origen alertando ante valores desproporcionados (>= 6)."""
+    """Supervisa el hop_start en origen alertando ante valores excesivos (6 bajo, >= 7 alto)."""
 
     id: ClassVar[str] = "hops-high"
     nombre: ClassVar[str] = "Saltos excesivos"
-    descripcion: ClassVar[str] = "Nodo originando paquetes con hop_start superior a lo recomendado"
+    descripcion: ClassVar[str] = "Nodo originando paquetes con hop_start superior a lo recomendado (6 bajo, >= 7 alto)"
     fase: ClassVar[Literal["mvp", "ampliacion"]] = "mvp"
-    afecta_malla: ClassVar[bool] = True
+    afecta_malla: ClassVar[bool] = False
     suscrita_a: ClassVar[frozenset[str]] = frozenset({"all"})
     Config: ClassVar[type[BaseModel]] = ConfigHopsHigh
 
@@ -33,7 +34,7 @@ class ReglaHopsHigh:
         self.config = config or ConfigHopsHigh()
 
     def comprobar(self, ctx: Contexto) -> list[Alerta]:
-        """Evalúa si el hop_start del paquete es mayor o igual a 6."""
+        """Evalúa si el hop_start del paquete es 6 (bajo) o mayor/igual a 7 (alto)."""
         if ctx.nodo is None or not isinstance(ctx.evento, PaqueteDecodificado):
             return []
 
@@ -41,23 +42,29 @@ class ReglaHopsHigh:
         if hop_start is None or hop_start == 0:
             return []
 
-        if hop_start >= self.config.medio_desde:
-            nombre_corto = ctx.nodo.short or (
-                ctx.evento.from_node.short if ctx.evento.from_node and ctx.evento.from_node.short else None
-            ) or ctx.nodo.node_id
-            return [
-                Alerta(
-                    regla=self.id,
-                    riesgo="medio",
-                    mensaje=f"{nombre_corto} usa {hop_start} saltos (recomendado 3, máximo 5)",
-                    nodo=ctx.nodo.node_id,
-                    datos={
-                        "hop_start": hop_start,
-                        "recomendado": 3,
-                        "maximo_valido": 5,
-                    },
-                )
-            ]
+        if hop_start >= self.config.alto_desde:
+            riesgo = "alto"
+        elif hop_start >= self.config.bajo_desde:
+            riesgo = "bajo"
+        else:
+            return []
+
+        nombre_corto = ctx.nodo.short or (
+            ctx.evento.from_node.short if ctx.evento.from_node and ctx.evento.from_node.short else None
+        ) or ctx.nodo.node_id
+        return [
+            Alerta(
+                regla=self.id,
+                riesgo=riesgo,
+                mensaje=f"{nombre_corto} usa {hop_start} saltos (recomendado 3, máximo 5)",
+                nodo=ctx.nodo.node_id,
+                datos={
+                    "hop_start": hop_start,
+                    "recomendado": 3,
+                    "maximo_valido": 5,
+                },
+            )
+        ]
 
         return []
 

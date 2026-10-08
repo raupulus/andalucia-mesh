@@ -30,7 +30,7 @@ Leyenda: **MVP** = esta entrega, activa; **Ampl.** = ampliación, se implementa 
 |---|---|---|---|---|---|---|
 | `flood` | MVP | Un nodo emite demasiados paquetes propios (spam o firmware desbocado), sin contar `routing` | Red: `medio` > max(30, 5 × ritmo) en 10 min · `alto` > max(100, 15 × ritmo) | Ritmo típico del nodo | 30 min bajo el umbral `medio` | `from`, `portnum`, `rx_first` |
 | `rafaga-masiva` | MVP | Muchos nodos emiten a la vez (p. ej. 200 respondiendo telemetría a un sondeo) | Red: `alto`, `nodo: "all"` | Nodos por 2 min a esa hora; umbral max(50, 5 × base) | 15 min bajo el umbral | `from`, `portnum`, `rx_first` |
-| `hops-high` | MVP | Límite de saltos excesivo en origen | Red: `medio` con `hop_start` ≥ 6 (3 recomendado; 4–5 válidos según la guía) | — | 2 paquetes seguidos con `hop_start` ≤ 5 | `hop_start` (se ignoran `null` y 0) |
+| `hops-high` | MVP | Límite de saltos excesivo en origen | Red/nodo: `bajo` con `hop_start` = 6 · `alto` con `hop_start` ≥ 7 (3 recomendado; 4–5 válidos según la guía) | — | 2 paquetes seguidos con `hop_start` ≤ 5 | `hop_start` (se ignoran `null` y 0) |
 | `text-flood` | Ampl. | Spam de texto de un nodo | Red: `medio` > 10 mensajes en 5 min | — | 30 min sin exceso | `portnum=text`, `from`, `channel` |
 | `config-intervals` | Ampl. | Intervalos de emisión más cortos que las recomendaciones del portal (tabla abajo) | Red: `bajo`, una alerta por nodo con todos los intervalos cortos en `datos` | Nodo fijo o móvil según su desplazamiento en 24 h | 24 h dentro de los intervalos | `portnum`, `to`, `payload.*_metrics`, `payload.latitude_i/longitude_i` |
 | `router-role` | Ampl. | Rol de router no coordinado (fuera de `routers_coordinados`) | Infra: `bajo` | — | Entra en la lista o cambia de rol | `fn.role` |
@@ -94,7 +94,7 @@ gateway-offline: {activa: true, medio: {minimo_min: 15, factor_intervalo: 3}, al
 flood:           {activa: true, ventana_min: 10, excluir: [routing], resolver_min: 30,
                   medio: {minimo: 30, factor_ritmo: 5}, alto: {minimo: 100, factor_ritmo: 15}}
 rafaga-masiva:   {activa: true, ventana_s: 120, nodos_minimos: 50, factor_linea_base: 5, resolver_min: 15}
-hops-high:       {activa: true, medio_desde: 6, resolver_paquetes: 2}
+hops-high:       {activa: true, bajo_desde: 6, alto_desde: 7, resolver_paquetes: 2}
 # --- Ampliación (activa: false hasta implementarlas y calibrarlas) ---
 battery-drain:        {activa: false, voltaje_vacio: 3.3, dias_proyeccion: 3, ventana_h: 72}
 chutil-high:          {activa: false, medio: 20, alto: 40, resolver: 20, muestras_minimas: 2}
@@ -150,4 +150,4 @@ silencios: []
 5. Dado un nodo con `hop_start` 7 / Cuando emite dos paquetes con `hop_start` 3 / Entonces `hops-high` se resuelve; con `hop_start` 5 nunca se abre.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

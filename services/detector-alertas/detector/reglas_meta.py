@@ -54,11 +54,11 @@ METADATOS_REGLAS: dict[str, dict[str, Any]] = {
     },
     "hops-high": {
         "nombre": "Saltos excesivos",
-        "descripcion": "Nodo originando paquetes con hop_start superior a lo recomendado",
+        "descripcion": "Nodo originando paquetes con hop_start superior a lo recomendado (6 bajo, >= 7 alto)",
         "fase": "mvp",
-        "afecta_malla": True,
-        "riesgos": ["medio"],
-        "tipos": ["infraestructura"],
+        "afecta_malla": False,
+        "riesgos": ["bajo", "alto"],
+        "tipos": ["infraestructura", "clientes"],
     },
     # --- Reglas de Ampliación ---
     "battery-drain": {

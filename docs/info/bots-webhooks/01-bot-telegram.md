@@ -49,10 +49,10 @@ Los administradores pueden cambiarlos con /levels y /types. Ayuda: /help
 
 ### Comandos
 
-- Reconoce `/comando` y `/comando@usuario_del_bot` (sin distinguir mayúsculas); `/comando@otro_bot` se ignora. Argumentos: el resto de la línea. `/start` en privado responde como `/help`; en grupos se ignora (ya hubo saludo).
+- Reconoce `/comando` y `/comando@usuario_del_bot` (sin distinguir mayúsculas); `/comando@otro_bot` se ignora. Argumentos: el resto de la línea. `/start` en privado responde como `/help`; en grupos se ignora (ya hubo saludo). Admite alias comunes como `/silenciar`, `/mute` o `/stop` para `/pause`, y `/activar` o `/unmute` para `/resume`.
 - **Administrador** (`es_admin` para `nucleo/comandos.py`): en un canal, siempre (solo publican administradores); en un grupo, mensaje con `sender_chat.id == chat.id` (administrador anónimo) o `getChatMember` con estado `creator` o `administrator` (caché en memoria 60 s por chat y usuario). Un mensaje en nombre de otro canal (`sender_chat` distinto del chat) no es administrador.
-- En privado, `/levels`, `/types` y `/settings` responden `Este comando solo funciona en grupos y canales.`
-- **Canales:** la respuesta a `/levels`, `/types` y `/settings` se publica y, a los `TELEGRAM_BORRAR_COMANDOS_CANAL_S`, el bot borra el comando y su respuesta (`deleteMessage`; sin permiso de borrar, se quedan). `/status`, `/battery`, `/routers` y `/help` quedan publicados.
+- En privado, `/levels`, `/types`, `/settings`, `/pause` y `/resume` responden `Este comando solo funciona en grupos y canales.`
+- **Canales:** la respuesta a `/levels`, `/types`, `/settings`, `/pause` y `/resume` se publica y, a los `TELEGRAM_BORRAR_COMANDOS_CANAL_S`, el bot borra el comando y su respuesta (`deleteMessage`; sin permiso de borrar, se quedan). `/status`, `/battery`, `/routers` y `/help` quedan publicados.
 - **Temas:** en supergrupos con temas la respuesta va al mismo `message_thread_id`; las alertas van al tema General (`README.md` §2).
 - Respuestas en texto plano (sin `parse_mode`), previsualización de enlaces desactivada, troceadas por líneas a 4.000 caracteres (máximo 3 mensajes, regla de `README.md` §4.4). Límite de un comando cada 5 s por chat: el resto se ignora.
 - **Privacidad:** con el modo privacidad, en grupos solo llegan comandos y respuestas al bot. Si alguien lo hace administrador de un grupo, o en canales, Telegram entrega **todos** los mensajes: todo lo que no es un comando del bot se descarta en memoria, sin registrarlo ni guardarlo. Nunca se registra el texto de un mensaje, ni `from.id`, ni nombres.
@@ -98,7 +98,7 @@ Hilo: `reply_parameters = {"message_id": <mensaje_id del hilo>, "allow_sending_w
 
 | Ámbito (`scope`) | Comandos |
 |---|---|
-| `all_group_chats` | `status` Estado general de la malla · `battery` Batería de los routers [provincia] · `routers` Routers con batería, chutil y tx [provincia] · `levels` Ver o cambiar los riesgos (administradores) · `types` Ver o cambiar los tipos (administradores) · `settings` Configuración de este chat · `help` Ayuda y enlace a la web |
+| `all_group_chats` | `status` Estado general de la malla · `battery` Batería de los routers [provincia] · `routers` Routers con batería, chutil y tx [provincia] · `levels` Ver o cambiar los riesgos (administradores) · `types` Ver o cambiar los tipos (administradores) · `pause` Pausar o silenciar alertas · `resume` Reanudar alertas · `settings` Configuración de este chat · `help` Ayuda y enlace a la web |
 | `all_private_chats` | `status`, `battery`, `routers`, `help` |
 
 Descripción (`setMyDescription`): `Avisos de los problemas de la malla de ${PROJECT_NAME}. Añádeme a un grupo o canal. Más información: https://${PROJECT_DOMAIN}/bots`. Corta: `Alertas de la malla de ${PROJECT_NAME}`.

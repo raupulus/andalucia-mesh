@@ -24,7 +24,23 @@ from nucleo.comandos import GestorComandos
 
 logger = logging.getLogger("bot_telegram.manejadores")
 
-COMANDOS_VALIDOS = {"status", "battery", "routers", "levels", "types", "settings", "help", "start"}
+COMANDOS_VALIDOS = {
+    "status",
+    "battery",
+    "routers",
+    "levels",
+    "types",
+    "settings",
+    "help",
+    "start",
+    "pause",
+    "resume",
+    "silenciar",
+    "activar",
+    "mute",
+    "unmute",
+    "stop",
+}
 
 
 class ManejadoresTelegram:
@@ -219,7 +235,19 @@ class ManejadoresTelegram:
                 return  # En grupos /start se ignora
 
         # Verificar si los comandos de destino se ejecutaron en privado
-        if es_privado and comando_raw in ("levels", "types", "settings"):
+        comandos_solo_destino = (
+            "levels",
+            "types",
+            "settings",
+            "pause",
+            "resume",
+            "silenciar",
+            "activar",
+            "mute",
+            "unmute",
+            "stop",
+        )
+        if es_privado and comando_raw in comandos_solo_destino:
             await message.reply("Este comando solo funciona en grupos y canales.")
             return
 
@@ -244,6 +272,10 @@ class ManejadoresTelegram:
             respuesta = await self.comandos.ejecutar_levels(chat_id, es_admin, argumentos)
         elif comando_raw == "types":
             respuesta = await self.comandos.ejecutar_types(chat_id, es_admin, argumentos)
+        elif comando_raw in ("pause", "silenciar", "mute", "stop"):
+            respuesta = await self.comandos.ejecutar_pause(chat_id, es_admin)
+        elif comando_raw in ("resume", "activar", "unmute"):
+            respuesta = await self.comandos.ejecutar_resume(chat_id, es_admin)
         elif comando_raw == "settings":
             respuesta = await self.comandos.ejecutar_settings(chat_id)
         elif comando_raw == "help":
@@ -268,8 +300,8 @@ class ManejadoresTelegram:
             except Exception as e:
                 logger.error("Error enviando respuesta a comando /%s en chat %d: %s", comando_raw, chat_id, e)
 
-        # En canales: borrado diferido de comandos /levels, /types y /settings
-        if es_canal and comando_raw in ("levels", "types", "settings"):
+        # En canales: borrado diferido de comandos de gestión
+        if es_canal and comando_raw in comandos_solo_destino:
             asyncio.create_task(
                 self._borrar_comando_canal_diferido(
                     chat_id=chat_id,

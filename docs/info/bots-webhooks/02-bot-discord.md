@@ -73,6 +73,8 @@ Los anuncios se publican en el canal de anuncios, pero no se difunden (*crosspos
 | `/battery`, `/routers` | `provincia` (opcional, 9 opciones fijas: valor `ES-AL` … `ES-SE`, `FUERA`; nombre visible Almería … Sevilla, Fuera de Andalucía) | Cualquiera | Pública |
 | `/levels` | `riesgos` (texto opcional: `medio alto`, `todos`) | Ver: cualquiera. Cambiar: Gestionar canales | Pública |
 | `/types` | `tipos` (texto opcional) | Igual que `/levels` | Pública |
+| `/pause` | — | Gestionar canales | Efímera si error/sin permiso; pública si pausa |
+| `/resume` | — | Gestionar canales | Efímera si error/sin permiso; pública si reanuda |
 | `/settings` | — | Cualquiera | Pública |
 | `/help` | — | Cualquiera | Efímera |
 | `/subscribe`, `/unsubscribe` | — | Gestionar canales | Pública |

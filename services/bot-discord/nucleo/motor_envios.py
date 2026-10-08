@@ -161,25 +161,31 @@ class MotorEnvios:
 
             tiene_hilo = ultimo_envio is not None
             riesgo_previo = ultimo_envio[1] if ultimo_envio else None
+            transicion_previa = ultimo_envio[2] if ultimo_envio else None
 
             # Tabla de decisión según UT-08.5 y §4.6
             debe_enviar = False
             inicia_hilo = False
             es_reapertura = False
 
-            if not tiene_hilo:
-                if transicion == "abierta" and pasa_filtros or transicion == "actualizada" and pasa_filtros:
+            if not tiene_hilo or transicion_previa == "resuelta":
+                if transicion == "abierta" and pasa_filtros:
+                    debe_enviar = True
+                    inicia_hilo = not tiene_hilo
+                    es_reapertura = tiene_hilo
+                elif transicion == "actualizada" and pasa_filtros:
                     debe_enviar = True
                     inicia_hilo = True
                 elif transicion == "resuelta":
                     debe_enviar = False
             else:
                 if transicion == "abierta":
-                    debe_enviar = True
-                    es_reapertura = True
+                    if pasa_filtros:
+                        debe_enviar = True
+                        es_reapertura = True
                 elif transicion == "actualizada":
-                    # Solo enviar si cambia el riesgo respecto al último enviado
-                    if riesgo_previo and riesgo != riesgo_previo:
+                    # Solo enviar si cambia el riesgo respecto al último enviado y pasa filtros
+                    if riesgo_previo and riesgo != riesgo_previo and pasa_filtros:
                         debe_enviar = True
                 elif transicion == "resuelta":
                     debe_enviar = True

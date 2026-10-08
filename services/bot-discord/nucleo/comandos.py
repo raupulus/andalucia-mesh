@@ -325,8 +325,23 @@ class GestorComandos:
             riesgos = fila[0]
             if not riesgos:
                 defecto_txt = ", ".join(self.config.lista_riesgos_defecto)
-                return f"Riesgos activos en este chat: {defecto_txt} (por defecto)."
-            return f"Riesgos activos en este chat: {', '.join(riesgos)}."
+                activos_txt = f"{defecto_txt} (por defecto)"
+            else:
+                activos_txt = ", ".join(riesgos)
+
+            return (
+                f"Riesgos activos en este chat: {activos_txt}.\n\n"
+                "Niveles disponibles:\n"
+                "• alto: Fallo activo o daño directo a la malla.\n"
+                "• medio: Anomalías y degradación importante.\n"
+                "• bajo: Avisos informativos y preventivos.\n"
+                "• todos: Activa todos los niveles de riesgo.\n\n"
+                "Para cambiarlos: /levels <niveles>\n"
+                "Ejemplos:\n"
+                "  /levels alto\n"
+                "  /levels medio alto\n"
+                "  /levels todos"
+            )
 
         # Modificación: requiere administrador
         if not es_admin:
@@ -381,8 +396,22 @@ class GestorComandos:
             tipos = fila[0]
             if not tipos:
                 defecto_txt = ", ".join(self.config.lista_tipos_defecto)
-                return f"Tipos activos en este chat: {defecto_txt} (por defecto)."
-            return f"Tipos activos en este chat: {', '.join(tipos)}."
+                activos_txt = f"{defecto_txt} (por defecto)"
+            else:
+                activos_txt = ", ".join(tipos)
+
+            return (
+                f"Tipos activos en este chat: {activos_txt}.\n\n"
+                "Tipos disponibles:\n"
+                "• infraestructura: Routers, repetidores, gateways y degradación de red.\n"
+                "• clientes: Problemas de nodos personales de usuario (batería, etc.).\n"
+                "• todos: Activa todos los tipos.\n\n"
+                "Para cambiarlos: /types <tipos>\n"
+                "Ejemplos:\n"
+                "  /types infraestructura\n"
+                "  /types clientes\n"
+                "  /types todos"
+            )
 
         # Modificación: requiere administrador
         if not es_admin:
@@ -412,6 +441,73 @@ class GestorComandos:
 
         return f"Tipos activos en este chat: {', '.join(nuevos)}."
 
+    async def ejecutar_pause(self, plataforma_id: int, es_admin: bool) -> str:
+        """Pausa temporalmente el envío de alertas en el chat (/pause o /silenciar)."""
+        if not es_admin:
+            return "Solo los administradores pueden pausar o reactivar las alertas."
+
+        async with self.gestor_base.conexion() as conn, conn.transaction(), conn.cursor() as cur:
+            await cur.execute(
+                """
+                UPDATE destino
+                SET activo = false, motivo_baja = 'pausado_usuario', baja_en = now(), actualizado_en = now()
+                WHERE plataforma_id = %s AND activo = true
+                RETURNING id
+                """,
+                (plataforma_id,),
+            )
+            fila = await cur.fetchone()
+            if not fila:
+                return "Las alertas ya están silenciadas o este chat no recibe alertas. Usa /resume para reactivarlas."
+
+            dest_id = fila[0]
+            await cur.execute(
+                """
+                UPDATE envio
+                SET estado = 'caducado', ultimo_error = 'Pausado por usuario con /pause'
+                WHERE destino_id = %s AND estado = 'pendiente'
+                """,
+                (dest_id,),
+            )
+
+        return (
+            "⏸️ Alertas silenciadas en este chat.\n"
+            "No se enviará ningún aviso hasta que un administrador las reanude con /resume (o /activar)."
+        )
+
+    async def ejecutar_resume(self, plataforma_id: int, es_admin: bool) -> str:
+        """Reanuda el envío de alertas en el chat (/resume o /activar)."""
+        if not es_admin:
+            return "Solo los administradores pueden pausar o reactivar las alertas."
+
+        async with self.gestor_base.conexion() as conn, conn.transaction(), conn.cursor() as cur:
+            await cur.execute(
+                """
+                UPDATE destino
+                SET activo = true, motivo_baja = NULL, baja_en = NULL, fallando_desde = NULL, actualizado_en = now()
+                WHERE plataforma_id = %s
+                RETURNING id, riesgos, tipos
+                """,
+                (plataforma_id,),
+            )
+            fila = await cur.fetchone()
+            if not fila:
+                return "Este chat no está registrado. Si el bot acaba de entrar, escribe /status para activarlo."
+
+            _dest_id, riesgos, tipos = fila
+            riesgos_txt = (
+                ", ".join(riesgos) if riesgos else f"{', '.join(self.config.lista_riesgos_defecto)} (por defecto)"
+            )
+            tipos_txt = (
+                ", ".join(tipos) if tipos else f"{', '.join(self.config.lista_tipos_defecto)} (por defecto)"
+            )
+
+        return (
+            "▶️ Alertas reanudadas en este chat.\n"
+            f"Filtros activos: Riesgos: {riesgos_txt} · Tipos: {tipos_txt}.\n"
+            "Usa /settings para ver la configuración o /pause para pausarlas de nuevo."
+        )
+
     async def ejecutar_settings(self, plataforma_id: int) -> str:
         """Devuelve la configuración y estadísticas del chat (/settings)."""
         async with self.gestor_base.conexion() as conn, conn.cursor() as cur:
@@ -431,6 +527,12 @@ class GestorComandos:
             dest_id, activo, motivo_baja, alta_en, baja_en, riesgos, tipos = dest
 
             if not activo:
+                if motivo_baja == "pausado_usuario":
+                    return (
+                        "⚙️ Configuración de este chat\n"
+                        "Estado: ⏸️ Silenciado / Pausado por un administrador.\n\n"
+                        "Para volver a recibir alertas de la red, usa /resume (o /activar)."
+                    )
                 baja_txt = alta_en.strftime("%d/%m/%Y") if alta_en else "desconocido"
                 motivo = motivo_baja or "desactivado"
                 return (
@@ -466,10 +568,16 @@ class GestorComandos:
 
         return (
             "⚙️ Configuración de este chat\n"
-            f"Riesgos: {riesgos_txt}\n"
-            f"Tipos: {tipos_txt}\n"
+            f"Riesgos: {riesgos_txt} (opciones: bajo, medio, alto, todos)\n"
+            f"Tipos: {tipos_txt} (opciones: infraestructura, clientes, todos)\n"
+            "Estado: ✅ Activo (recibiendo alertas)\n"
             f"Activo desde el {alta_txt}\n"
-            f"Avisos enviados aquí: {total_enviados} (último: {ult_txt})"
+            f"Avisos enviados aquí: {total_enviados} (último: {ult_txt})\n\n"
+            "Comandos de control:\n"
+            "• /levels — ver u opciones de riesgo\n"
+            "• /types — ver u opciones de tipo\n"
+            "• /pause — silenciar/pausar alertas de la malla\n"
+            "• /resume — reanudar alertas de la malla"
         )
 
     def ejecutar_help(self) -> str:
@@ -481,9 +589,11 @@ class GestorComandos:
             "/status — estado general de la malla\n"
             "/battery [provincia] — batería de los routers\n"
             "/routers [provincia] — routers con batería, chutil y tx\n"
-            "/levels [riesgos] — ver o cambiar los riesgos (administradores)\n"
-            "/types [tipos] — ver o cambiar los tipos (administradores)\n"
-            "/settings — configuración de este chat\n"
+            "/levels [riesgos] — ver o cambiar niveles (bajo, medio, alto, todos)\n"
+            "/types [tipos] — ver o cambiar tipos (infraestructura, clientes, todos)\n"
+            "/pause — silenciar o pausar las alertas (administradores)\n"
+            "/resume — reanudar las alertas (administradores)\n"
+            "/settings — configuración y estado de este chat\n"
             f"Riesgos: {riesgos_txt} · Tipos: {tipos_txt}\n"
             f"Más información: https://{self.config.project_domain}/bots"
         )

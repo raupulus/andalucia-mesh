@@ -68,7 +68,8 @@ rafaga-masiva:
 
 hops-high:
   activa: true
-  medio_desde: 6
+  bajo_desde: 6
+  alto_desde: 7
   resolver_paquetes: 2
 
 # --- Reglas de Ampliación (Inactivas hasta calibración con telemetría real) ---

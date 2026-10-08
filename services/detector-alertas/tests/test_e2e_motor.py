@@ -53,8 +53,22 @@ def test_motor_flujo_completo_alertas_y_resolucion() -> None:
     assert len(transiciones) == 1
     assert transiciones[0].transicion == "abierta"
     assert transiciones[0].alerta.regla == "hops-high"
-    assert transiciones[0].alerta.riesgo == "medio"
+    assert transiciones[0].alerta.riesgo == "alto"
     assert transiciones[0].alerta.tipo == "infraestructura"
+
+    # Verificar que un paquete de CLIENT clasifica como clientes
+    pkt_cli = PaqueteDecodificado(
+        packet_id=1010,
+        from_node_id="!client1",
+        from_node=FromNodeInfo(short="CLI1", role="CLIENT", province="ES-CA"),
+        portnum="telemetry",
+        rx_first=t0,
+        hop_start=6,
+    )
+    trans_cli = motor.procesar_paquete(pkt_cli, ahora=t0)
+    assert len(trans_cli) == 1
+    assert trans_cli[0].alerta.riesgo == "bajo"
+    assert trans_cli[0].alerta.tipo == "clientes"
 
     # 2. Enviar 2 paquetes consecutivos válidos con hop_start = 3 -> debe resolverse
     t1 = t0 + timedelta(minutes=2)

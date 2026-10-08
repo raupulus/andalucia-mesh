@@ -248,9 +248,11 @@ https://mesh.example.org/alertas/01JABD0000000000000000000A
 | `/status` | Cualquiera | Grupos, canales y privado (Telegram); servidores (Discord) | `GET /stats/summary` | Estado general de la malla |
 | `/battery [provincia]` | Cualquiera | Ídem | `GET /routers?province=` | Batería **solo de routers**, de menor a mayor |
 | `/routers [provincia]` | Cualquiera | Ídem | `GET /routers?province=` | Todos los routers con batería, `chutil` y `tx` |
-| `/levels [riesgos…]` | Ver: cualquiera. Cambiar: administradores | Destinos (no privado) | Catálogo | Riesgos activos en el destino, o los cambia |
-| `/types [tipos…]` | Igual que `/levels` | Destinos | Catálogo | Tipos activos, o los cambia |
-| `/settings` | Cualquiera | Destinos | Base propia | Filtros, alta y avisos enviados |
+| `/levels [riesgos…]` | Ver: cualquiera. Cambiar: administradores | Destinos (no privado) | Catálogo | Muestra riesgos activos, descripción de opciones y ejemplos; o los cambia |
+| `/types [tipos…]` | Igual que `/levels` | Destinos | Catálogo | Muestra tipos activos, descripción de opciones y ejemplos; o los cambia |
+| `/pause` | Administradores | Destinos | Base propia | Pausa o silencia temporalmente los avisos en el chat (anti-spam) |
+| `/resume` | Administradores | Destinos | Base propia | Reanuda el envío de avisos si estaban pausados |
+| `/settings` | Cualquiera | Destinos | Base propia | Estado de avisos, filtros, alta y estadísticas |
 | `/help` | Cualquiera | Todos | — | Ayuda breve y enlace a `https://${PROJECT_DOMAIN}/bots` |
 
 "Administradores" = administradores del grupo o quien publica en el canal (Telegram), o quien tiene el permiso de gestionar canales en ese canal (Discord). `/subscribe` y `/unsubscribe` existen solo en Discord (`02-bot-discord.md`).
@@ -258,7 +260,8 @@ https://mesh.example.org/alertas/01JABD0000000000000000000A
 **Argumentos**
 
 - `provincia`: nombre (sin importar tildes ni mayúsculas: `cadiz`, `Cádiz`), código (`ES-CA`, `ca`) o `fuera`. Sin argumento: todas.
-- `/levels` y `/types`: valores separados por espacios o comas, sin distinguir mayúsculas, validados contra el catálogo; `todos` = todos los del catálogo. Al menos un valor. Sin argumentos: solo muestra.
+- `/levels` y `/types`: valores separados por espacios o comas, sin distinguir mayúsculas, validados contra el catálogo; `todos` = todos los del catálogo. Al menos un valor para cambiar. Sin argumentos: muestra los activos, la descripción de cada opción y ejemplos de uso sin necesidad de salir de la aplicación.
+- `/pause` y `/resume`: no requieren argumentos. `/pause` marca el destino como inactivo y descarta envíos pendientes en cola para frenar spam inmediato; `/resume` reactiva el destino.
 
 **Respuestas** (los números con coma decimal y punto de millares):
 
@@ -310,10 +313,17 @@ Agrupado por provincia (orden alfabético del nombre) y, dentro, por nombre cort
 
 ```
 ⚙️ Configuración de este chat
-Riesgos: alto (por defecto)
-Tipos: infraestructura (por defecto)
+Estado: ✅ Activo (recibiendo avisos)
+Riesgos activos: alto (por defecto)
+Tipos activos: infraestructura (por defecto)
 Activo desde el 02/10/2026
 Avisos enviados aquí: 37 (último: hoy 12:03)
+
+Opciones y comandos:
+• /levels — ver opciones y cambiar riesgos
+• /types — ver opciones y cambiar tipos
+• /pause — silenciar/pausar avisos de la malla
+• /resume — reanudar avisos
 ```
 
 `/help`
@@ -325,6 +335,8 @@ Bot de alertas de Sur Nodos en Mallas
 /routers [provincia] — routers con batería, chutil y tx
 /levels [riesgos] — ver o cambiar los riesgos (administradores)
 /types [tipos] — ver o cambiar los tipos (administradores)
+/pause — silenciar o pausar las alertas (administradores)
+/resume — reanudar el envío de alertas (administradores)
 /settings — configuración de este chat
 Riesgos: bajo, medio, alto · Tipos: infraestructura, clientes
 Más información: https://mesh.example.org/bots

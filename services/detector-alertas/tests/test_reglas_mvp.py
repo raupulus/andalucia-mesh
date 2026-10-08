@@ -372,15 +372,38 @@ def test_regla_hops_high() -> None:
     alertas = regla.comprobar(ctx)
     assert len(alertas) == 1
     assert alertas[0].regla == "hops-high"
-    assert alertas[0].riesgo == "medio"
+    assert alertas[0].riesgo == "alto"
     assert "BADHOP usa 7 saltos" in alertas[0].mensaje
+
+    # Probar con hop_start = 6 (debe ser bajo)
+    pkt_6 = PaqueteDecodificado(
+        packet_id=102,
+        from_node_id="!hop_bad",
+        from_node=FromNodeInfo(short="BADHOP", role="CLIENT"),
+        portnum="telemetry",
+        rx_first=t0,
+        hop_start=6,
+    )
+    ctx_6 = Contexto(
+        ahora=t0,
+        evento=pkt_6,
+        nodo=nodo,
+        estado=estado,
+        bases=bases,
+        config=ConfigHopsHigh(),
+        general=ConfigGeneral(),
+        es_infraestructura=lambda _: False,
+    )
+    alertas_6 = regla.comprobar(ctx_6)
+    assert len(alertas_6) == 1
+    assert alertas_6[0].riesgo == "bajo"
 
     abierta = AlertaAbierta(
         id="01JAC0Q4M1K2J3H4G5F6E7D8C9",
         regla="hops-high",
         nodo="!hop_bad",
-        riesgo="medio",
-        tipo="infraestructura",
+        riesgo="alto",
+        tipo="clientes",
         mensaje="",
     )
 

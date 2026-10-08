@@ -280,3 +280,21 @@ def registrar_comandos_barra(
             )
 
         await interaction.response.send_message("Este canal ya no recibirá alertas.")
+
+    # 10. /pause
+    @tree.command(name="pause", description="Pausar o silenciar temporalmente las alertas")
+    async def cmd_pause(interaction: discord.Interaction) -> None:
+        if not interaction.channel_id:
+            return
+        es_admin = verificar_admin_interaccion(interaction)
+        resp = await comandos.ejecutar_pause(interaction.channel_id, es_admin=es_admin)
+        await interaction.response.send_message(resp, ephemeral=not es_admin)
+
+    # 11. /resume
+    @tree.command(name="resume", description="Reanudar el envío de alertas")
+    async def cmd_resume(interaction: discord.Interaction) -> None:
+        if not interaction.channel_id:
+            return
+        es_admin = verificar_admin_interaccion(interaction)
+        resp = await comandos.ejecutar_resume(interaction.channel_id, es_admin=es_admin)
+        await interaction.response.send_message(resp, ephemeral=not es_admin)
