@@ -27,6 +27,7 @@ Documentación técnica canónica del proyecto. Todavía no hay código: cada do
 | Infraestructura | [infrastructure/](infrastructure/README.md): [servidor](infrastructure/01-server.md), [PostgreSQL](infrastructure/02-postgresql.md), [Nginx y DNS](infrastructure/03-nginx-dns.md), [operación](infrastructure/04-operations.md) | `infrastructure/` | Desplegado y verificado |
 | Broker MQTT (Mosquitto) | [mosquitto/](mosquitto/README.md) | `integrations/mosquitto/` | Desplegado y verificado |
 | MeshView | [meshview/](meshview/README.md) | `integrations/meshview/` | Desplegado y verificado |
+| MeshConfig | [meshconfig/](meshconfig/README.md) | `integrations/meshconfig/` | Desplegado y verificado |
 | PotatoMesh | [potatomesh/](potatomesh/README.md) | `integrations/potatomesh/` | Desplegado y verificado |
 | adaptador-potato | [potatomesh/adaptador-potato.md](potatomesh/adaptador-potato.md) | `services/adaptador-potato/` | Desplegado y verificado |
 | sync-peers | [potatomesh/sync-peers.md](potatomesh/sync-peers.md) | `services/sync-peers/` | Desplegado y verificado |

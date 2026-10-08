@@ -58,8 +58,9 @@ flowchart LR
 | bot-discord | Propio (Python) | `bots-webhooks/02-bot-discord.md` | `services/bot-discord/` | `bot-discord` | `mesh` | — | `bot_discord` |
 | webhooks | Propio (Python) | `bots-webhooks/03-webhooks.md` | `services/webhooks/` | `webhooks` | `mesh` | — | `webhooks` |
 | chat-ws | Propio (Python) | `chat-ws/` | `services/chat-ws/` | `chat-ws` | `mesh` | `mesh.example.org/ws/chat` | — |
+| MeshConfig | Comunidad (pdxlocations) | `meshconfig/` | `integrations/meshconfig/` | `meshconfig` | `mesh` | `config.mesh.example.org` (o `/configurador`) | — |
 
-Total: 9 desarrollos propios, 2 piezas de comunidad (PotatoMesh, MeshView), y Nginx, PostgreSQL 17 + Mosquitto nativos del servidor.
+Total: 9 desarrollos propios, 3 piezas de comunidad (PotatoMesh, MeshView, MeshConfig), y Nginx, PostgreSQL 17 + Mosquitto nativos del servidor.
 
 ## 3. Flujos
 
@@ -81,6 +82,7 @@ Total: 9 desarrollos propios, 2 piezas de comunidad (PotatoMesh, MeshView), y Ng
 | `mesh.example.org` | Portal (web, `/api/v1`, `/admin`); `/ws/` → `chat-ws` | 443 (80 → 443) |
 | `potato.mesh.example.org` | PotatoMesh | 443 |
 | `meshview.mesh.example.org` (o `${MESHVIEW_DOMAIN}`) | MeshView | 443 |
+| `config.mesh.example.org` (o `${CONFIG_DOMAIN}`) | MeshConfig | 443 |
 | `mqtt.mesh.example.org` | Mosquitto | 1883 (MQTT) y 8883 (MQTT con TLS terminado en Nginx `stream` → `127.0.0.1:1883`) |
 
 DNS: `mesh.example.org` y `*.mesh.example.org` → IPv4 e IPv6 del servidor, **sin proxy de CDN**.
@@ -95,6 +97,7 @@ Solo `80`, `443`, `8883` (Nginx nativo) y `1883` (Mosquitto nativo), más SSH. N
 | `chat-ws` | `127.0.0.1:8090` | 8000 |
 | `potatomesh` | `127.0.0.1:41447` | 41447 |
 | `meshview` | `127.0.0.1:8081` | 8081 |
+| `meshconfig` | `127.0.0.1:8420` | 8080 |
 
  PostgreSQL (5432) y Mosquitto interno (1884) solo escuchan en `localhost` y en la puerta de la red `mesh` (`172.30.0.1`).
 
@@ -375,7 +378,7 @@ Cada pieza se puede volver a desplegar sola sin parar las demás.
 
 ```text
 infrastructure/       host/ (sistema), nginx/ (sitios, stream e install.sh), postgresql/ (roles, bases, extensiones, pg_hba), common/.env.example, deploy.sh, check-compose.sh
-integrations/         mosquitto/, potatomesh/, meshview/   ← referencia + versión fijada + configuración propia; nunca su código
+integrations/         mosquitto/, potatomesh/, meshview/, meshconfig/   ← referencia + versión fijada + configuración propia; nunca su código
 services/             portal/, ingesta/, detector-alertas/, bot-telegram/, bot-discord/, webhooks/, adaptador-potato/, sync-peers/, chat-ws/
 ```
 
@@ -385,4 +388,4 @@ services/             portal/, ingesta/, detector-alertas/, bot-telegram/, bot-d
 - Sin secretos ni `.env` reales en git. Commits sin firmas de atribución de herramientas.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

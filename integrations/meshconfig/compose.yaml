@@ -1,0 +1,61 @@
+# ==============================================================================
+# compose.yaml (integrations/meshconfig/)
+#
+# Despliegue del Configurador Web de Dispositivos Meshtastic para Andalucía Mesh.
+#
+# Construye la imagen estática basada en Nginx sin privilegios a partir del
+# repositorio oficial upstream (pdxlocations/meshconfig) anclado al commit 658f461.
+# Las personalizaciones visuales (DESIGN.md), presets de red (SFNarrow) y asistente
+# se montan como volúmenes de solo lectura (:ro) sobre el directorio web de Nginx.
+# ==============================================================================
+
+services:
+  meshconfig:
+    build:
+      context: https://github.com/pdxlocations/meshconfig.git#658f46111da28d4444e45ab3eacd89fd53cc2ab3
+      dockerfile: Containerfile
+    image: snm-meshconfig:658f461
+    container_name: meshconfig
+    restart: unless-stopped
+    networks:
+      - mesh
+    ports:
+      - "127.0.0.1:${MESHCONFIG_PORT:-8420}:8080"
+    volumes:
+      - ./configs:/usr/share/nginx/html/configs:ro
+      - ./custom/index.html:/usr/share/nginx/html/index.html:ro
+      - ./custom/styles.css:/usr/share/nginx/html/styles.css:ro
+      - ./custom/configurador.js:/usr/share/nginx/html/configurador.js:ro
+    env_file:
+      - path: /srv/comun/.env
+        required: false
+      - path: /srv/meshconfig/.env
+        required: false
+      - path: .env
+        required: false
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - "no-new-privileges:true"
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/"]
+      interval: 30s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+    mem_limit: 128m
+    pids_limit: 64
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  mesh:
+    external: true

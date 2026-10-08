@@ -117,6 +117,7 @@ return [
     'navegacion' => [
         ['titulo' => 'Inicio', 'url' => '/'],
         ['titulo' => 'Configura tu nodo', 'url' => '/configura-tu-nodo'],
+        ['titulo' => 'Configurador', 'url' => '/configurador'],
         ['titulo' => 'Conecta tu gateway', 'url' => '/conecta-tu-gateway'],
         ['titulo' => 'Rankings', 'url' => '/rankings'],
         ['titulo' => 'Alertas', 'url' => '/alertas'],

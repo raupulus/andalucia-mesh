@@ -14,8 +14,9 @@ Este documento define las normas operativas, la estructura del proyecto y el pro
 ├── README.md
 ├── infrastructure/              host, nginx, postgresql, common/.env.example, deploy.sh, check-compose.sh
 ├── integrations/
-│   ├── mosquitto/
+│   ├── meshconfig/
 │   ├── meshview/
+│   ├── mosquitto/
 │   └── potatomesh/
 ├── services/
 │   ├── adaptador-potato/
@@ -52,6 +53,7 @@ Este documento define las normas operativas, la estructura del proyecto y el pro
         ├── infrastructure/      README + 01-server, 02-postgresql, 03-nginx-dns, 04-operations
         ├── mosquitto/
         ├── meshview/
+        ├── meshconfig/
         ├── potatomesh/          README + adaptador-potato, sync-peers
         ├── ingesta/             README + módulos 01–06
         ├── portal/              README + módulos 01–14 + pages/
@@ -91,6 +93,7 @@ El repositorio contiene muchas aplicaciones independientes. **No se carga toda l
 | Servidor, Docker, redes, PostgreSQL, Nginx, DNS, despliegue | `docs/info/infrastructure/` (solo el módulo afectado) | Servicios |
 | Broker MQTT, usuarios, ACL | `docs/info/mosquitto/README.md` | Resto |
 | MeshView | `docs/info/meshview/README.md` | Resto |
+| MeshConfig | `docs/info/meshconfig/README.md` | Resto |
 | PotatoMesh (instancia) | `docs/info/potatomesh/README.md` | Módulos de adaptador y sync si no se tocan |
 | `services/adaptador-potato/` | `docs/info/potatomesh/adaptador-potato.md` | Resto |
 | `services/sync-peers/` | `docs/info/potatomesh/sync-peers.md` | Resto |
@@ -124,7 +127,7 @@ El repositorio contiene muchas aplicaciones independientes. **No se carga toda l
 | [`_MODULE_TEMPLATE.md`](docs/info/_MODULE_TEMPLATE.md) | Plantilla para documentar un módulo implementado |
 | [`apis/README.md`](docs/info/apis/README.md) | Cómo se integran APIs de terceros |
 | `infrastructure/` | Servidor (`01-server`), PostgreSQL (`02-postgresql`), Nginx y DNS (`03-nginx-dns`), operación y despliegue (`04-operations`) |
-| `mosquitto/`, `meshview/`, `chat-ws/` | Una ficha por pieza |
+| `mosquitto/`, `meshview/`, `meshconfig/`, `chat-ws/` | Una ficha por pieza |
 | `potatomesh/` | Instancia (`README`), `adaptador-potato.md`, `sync-peers.md` |
 | `ingesta/` | Ficha + entrada y descifrado, decodificación y deduplicación, provincias y registros, persistencia y retención, vistas contrato, flujo `decoded` |
 | `portal/` | Ficha + módulos web (01–10), API (11–13), panel (14) y `pages/` (contenido de cada página pública) |
@@ -138,6 +141,7 @@ El repositorio contiene muchas aplicaciones independientes. **No se carga toda l
 | Infraestructura | `infrastructure/` | `docs/info/infrastructure/` |
 | Mosquitto | `integrations/mosquitto/` | `docs/info/mosquitto/` |
 | MeshView | `integrations/meshview/` | `docs/info/meshview/` |
+| MeshConfig | `integrations/meshconfig/` | `docs/info/meshconfig/` |
 | PotatoMesh | `integrations/potatomesh/` | `docs/info/potatomesh/README.md` |
 | adaptador-potato | `services/adaptador-potato/` | `docs/info/potatomesh/adaptador-potato.md` |
 | sync-peers | `services/sync-peers/` | `docs/info/potatomesh/sync-peers.md` |

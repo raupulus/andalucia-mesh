@@ -1,0 +1,84 @@
+# ==============================================================================
+# andalucia-sfnarrow-client.yaml
+#
+# Preset oficial para estaciones base exteriores en Andalucía Mesh:
+# - Rol CLIENT: nodo exterior con buena ubicación y línea de vista despejada.
+# - Radio SFNarrow: EU_868, BW 62.5 kHz, SF 7, CR 5, Slot 4 (869.61875 MHz).
+# - Límite de saltos: 3 saltos.
+# - Intervalo de posición: 72 horas (Smart Position desactivado, flags a 0).
+# - Intervalo de NodeInfo: 72 horas (259200 s).
+# - Telemetría: desactivada por defecto.
+# - Canal 0: SFNarrow (PSK pública comunitaria AQ==).
+# ==============================================================================
+
+owner: "Base-Andalucia"
+owner_short: "BAS1"
+is_unmessagable: false
+
+config:
+  device:
+    role: CLIENT
+    nodeInfoBroadcastSecs: 259200
+    rebroadcastMode: ALL
+  lora:
+    region: EU_868
+    usePreset: false
+    bandwidth: 62
+    spreadFactor: 7
+    codingRate: 5
+    channelNum: 4
+    hopLimit: 3
+    txPower: 27
+    txEnabled: true
+    sx126xRxBoostedGain: true
+  position:
+    positionBroadcastSmartEnabled: false
+    positionBroadcastSecs: 259200
+    positionFlags: 0
+  security:
+    serialEnabled: true
+
+module_config:
+  telemetry:
+    deviceUpdateInterval: 0
+  mqtt:
+    enabled: false
+    address: "mqtt.desdechipiona.es"
+    username: "meshdev"
+    password: "large4cats"
+    root: "msh"
+    encryptionEnabled: true
+    proxyToClientEnabled: true
+    mapReportingEnabled: false
+
+channels:
+  - index: 0
+    role: PRIMARY
+    settings:
+      name: "SFNarrow"
+      psk: "AQ=="
+      uplinkEnabled: true
+      downlinkEnabled: true
+      moduleSettings:
+        positionPrecision: 15
+  - index: 1
+    role: SECONDARY
+    settings: {}
+  - index: 2
+    role: SECONDARY
+    settings: {}
+  - index: 3
+    role: SECONDARY
+    settings: {}
+  - index: 4
+    role: SECONDARY
+    settings: {}
+  - index: 5
+    role: SECONDARY
+    settings: {}
+  - index: 6
+    role: SECONDARY
+    settings: {}
+  - index: 7
+    role: SECONDARY
+    settings: {}

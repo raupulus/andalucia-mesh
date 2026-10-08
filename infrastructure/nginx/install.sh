@@ -46,12 +46,14 @@ PROJECT_DOMAIN="${PROJECT_DOMAIN:-mesh.example.org}"
 MESHVIEW_DOMAIN="${MESHVIEW_DOMAIN:-meshview.${PROJECT_DOMAIN}}"
 POTATO_DOMAIN="potato.${PROJECT_DOMAIN}"
 MQTT_DOMAIN="mqtt.${PROJECT_DOMAIN}"
+CONFIG_DOMAIN="${CONFIG_DOMAIN:-config.${PROJECT_DOMAIN}}"
 
 echo "[INFO] Dominios configurados:"
-echo "       - Portal:   ${PROJECT_DOMAIN}"
-echo "       - Potato:   ${POTATO_DOMAIN}"
-echo "       - MeshView: ${MESHVIEW_DOMAIN}"
-echo "       - MQTT TLS: ${MQTT_DOMAIN}"
+echo "       - Portal:     ${PROJECT_DOMAIN}"
+echo "       - Potato:     ${POTATO_DOMAIN}"
+echo "       - MeshView:   ${MESHVIEW_DOMAIN}"
+echo "       - MeshConfig: ${CONFIG_DOMAIN}"
+echo "       - MQTT TLS:   ${MQTT_DOMAIN}"
 
 # 3. Verificar e instalar libnginx-mod-stream
 if ! dpkg -s libnginx-mod-stream >/dev/null 2>&1; then
@@ -87,7 +89,7 @@ EOF
 fi
 
 # 6. Crear certificados temporales si no existen (evita error en nginx -t previo a Certbot)
-for domain in "${PROJECT_DOMAIN}" "${POTATO_DOMAIN}" "${MESHVIEW_DOMAIN}" "${MQTT_DOMAIN}"; do
+for domain in "${PROJECT_DOMAIN}" "${POTATO_DOMAIN}" "${MESHVIEW_DOMAIN}" "${MQTT_DOMAIN}" "${CONFIG_DOMAIN}"; do
     CERT_DIR="/etc/letsencrypt/live/${domain}"
     if [[ ! -f "${CERT_DIR}/fullchain.pem" ]] || [[ ! -f "${CERT_DIR}/privkey.pem" ]]; then
         echo "[INFO] Generando certificado autofirmado provisional para ${domain}..."
@@ -123,6 +125,11 @@ ln -sf /etc/nginx/sites-available/snm-potatomesh.conf /etc/nginx/sites-enabled/s
 sed -e "s/meshview\.mesh\.example\.org/${MESHVIEW_DOMAIN}/g" \
     "${SCRIPT_DIR}/sites/snm-meshview.conf" > /etc/nginx/sites-available/snm-meshview.conf
 ln -sf /etc/nginx/sites-available/snm-meshview.conf /etc/nginx/sites-enabled/snm-meshview.conf
+
+# MeshConfig
+sed -e "s/config\.mesh\.example\.org/${CONFIG_DOMAIN}/g" \
+    "${SCRIPT_DIR}/sites/snm-meshconfig.conf" > /etc/nginx/sites-available/snm-meshconfig.conf
+ln -sf /etc/nginx/sites-available/snm-meshconfig.conf /etc/nginx/sites-enabled/snm-meshconfig.conf
 
 # MQTT ACME Challenge (HTTP 80)
 sed -e "s/mqtt\.mesh\.example\.org/${MQTT_DOMAIN}/g" \
