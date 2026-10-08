@@ -13,7 +13,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY vite.config.js ./
+COPY vite.config.js build-configurador.js build-mesh-admin.js ./
 COPY resources resources
 
 RUN npm run build
