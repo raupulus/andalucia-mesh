@@ -1070,21 +1070,22 @@ pre code {
   display: flex;
   flex-direction: row;
   width: 100%;
-  background: var(--color-superficie);
-  border: 1.5px solid #007A33;
+  background-color: var(--color-superficie);
+  border: 2px solid #007A33;
   border-radius: var(--radio-lg);
   overflow: hidden;
   box-shadow: 0 0 0 1.5px #FFFFFF, 0 0 0 3px rgba(0, 122, 51, 0.25), var(--sombra-1);
   text-decoration: none;
   color: inherit;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
   margin-bottom: 1.75rem;
+  position: relative;
 }
 
 .tarjeta-pagina-horizontal:hover {
   transform: translateY(-3px);
-  border-color: #007A33;
-  box-shadow: 0 0 0 1.5px #FFFFFF, 0 0 0 4px #007A33, var(--sombra-2);
+  border-color: #009940;
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4.5px #007A33, 0 12px 28px rgba(0, 122, 51, 0.3);
 }
 
 .tarjeta-pagina-horizontal:focus-within {
@@ -1093,37 +1094,46 @@ pre code {
 }
 
 [data-theme="dark"] .tarjeta-pagina-horizontal {
-  border: 1.5px solid #007A33;
-  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.2), 0 0 0 3px rgba(0, 122, 51, 0.4), var(--sombra-1);
+  background-color: #171824;
+  border: 2px solid #007A33;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.45), 0 0 0 3.5px rgba(0, 122, 51, 0.5), var(--sombra-2);
 }
 
 [data-theme="dark"] .tarjeta-pagina-horizontal:hover {
-  border-color: #007A33;
-  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.4), 0 0 0 4px #007A33, var(--sombra-2);
+  border-color: #2ED573;
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4.5px #007A33, 0 12px 28px rgba(0, 122, 51, 0.45);
 }
 
 .tarjeta-pagina-img-wrapper {
-  width: 280px;
-  min-height: 180px;
+  width: 320px;
+  min-height: 220px;
   flex-shrink: 0;
-  background: #1B1C28;
+  background-color: #12131D;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.tarjeta-pagina-img-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
 }
 
 .tarjeta-pagina-img-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.35s ease;
+  display: block;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tarjeta-pagina-horizontal:hover .tarjeta-pagina-img-wrapper img,
 .tarjeta-pagina-compacta:hover .tarjeta-pagina-img-wrapper img {
-  transform: scale(1.04);
+  transform: scale(1.05);
 }
 
 /* Franja con los colores verde/blanco/verde de la bandera de Andalucía */
@@ -1152,24 +1162,90 @@ pre code {
 
 .tarjeta-pagina-cuerpo {
   flex: 1;
-  padding: 1.5rem 1.75rem;
+  padding: 1.6rem 1.85rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   min-width: 0;
+  gap: 1.25rem;
+}
+
+.tarjeta-pagina-titulo {
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.3;
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.015em;
+}
+
+.tarjeta-pagina-titulo a {
+  color: var(--color-texto-1);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.tarjeta-pagina-titulo a:hover {
+  color: var(--color-acento);
+  text-decoration: none;
+}
+
+.tarjeta-pagina-fecha {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-texto-3);
+  margin-bottom: 0.75rem;
+}
+
+.tarjeta-pagina-desc {
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--color-texto-2);
+  margin-bottom: 0;
 }
 
 .tarjeta-pagina-footer {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--color-borde);
+}
+
+.tarjeta-pagina-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #007A33;
+  text-decoration: none;
+  transition: gap 0.2s ease, color 0.15s ease;
+}
+
+[data-theme="dark"] .tarjeta-pagina-accion {
+  color: #67EA94;
+}
+
+.tarjeta-pagina-horizontal:hover .tarjeta-pagina-accion,
+.tarjeta-pagina-compacta:hover .tarjeta-pagina-accion {
+  gap: 0.65rem;
+  color: var(--color-acento);
 }
 
 .tarjeta-pagina-keywords {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
   gap: 0.4rem;
+  margin-left: auto;
 }
 
 .badge-keyword {
@@ -1179,15 +1255,20 @@ pre code {
   color: #FFFFFF !important;
   font-size: 0.75rem;
   font-weight: 600;
-  padding: 0.2rem 0.65rem;
+  padding: 0.22rem 0.65rem;
   border-radius: 9999px;
   letter-spacing: 0.02em;
   box-shadow: 0 1px 3px rgba(0, 122, 51, 0.25);
   line-height: 1.3;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 0.15s ease, transform 0.1s ease;
 }
 
 .badge-keyword:hover {
-  opacity: 0.92;
+  background-color: #00903c;
+  color: #FFFFFF !important;
+  transform: translateY(-1px);
 }
 
 /* Botón Verde Andalucía */
@@ -1198,13 +1279,13 @@ pre code {
   gap: 0.5rem;
   background-color: #007A33;
   color: #FFFFFF !important;
-  padding: 0.75rem 2rem;
+  padding: 0.85rem 2.2rem;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.05rem;
   border-radius: var(--radio-md);
   text-decoration: none;
-  border: 1px solid #005a26;
-  box-shadow: 0 2px 6px rgba(0, 122, 51, 0.3);
+  border: 1.5px solid #005a26;
+  box-shadow: 0 4px 14px rgba(0, 122, 51, 0.35);
   transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -1212,7 +1293,7 @@ pre code {
   background-color: #006028;
   color: #FFFFFF !important;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 122, 51, 0.4);
+  box-shadow: 0 6px 18px rgba(0, 122, 51, 0.45);
 }
 
 /* Tarjetas compactas para la Portada (2 por fila) */
@@ -1226,49 +1307,96 @@ pre code {
 .tarjeta-pagina-compacta {
   display: flex;
   flex-direction: row;
-  background: var(--color-superficie);
-  border: 1.5px solid #007A33;
+  background-color: var(--color-superficie);
+  border: 2px solid #007A33;
   border-radius: var(--radio-lg);
   overflow: hidden;
   box-shadow: 0 0 0 1.5px #FFFFFF, 0 0 0 3px rgba(0, 122, 51, 0.25), var(--sombra-1);
   text-decoration: none;
   color: inherit;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  position: relative;
 }
 
 [data-theme="dark"] .tarjeta-pagina-compacta {
-  border: 1.5px solid #007A33;
-  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.2), 0 0 0 3px rgba(0, 122, 51, 0.4), var(--sombra-1);
+  background-color: #171824;
+  border: 2px solid #007A33;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.45), 0 0 0 3.5px rgba(0, 122, 51, 0.5), var(--sombra-2);
 }
 
 .tarjeta-pagina-compacta:hover {
   transform: translateY(-2px);
-  border-color: #007A33;
-  box-shadow: 0 0 0 1.5px #FFFFFF, 0 0 0 4px #007A33, var(--sombra-2);
+  border-color: #009940;
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4.5px #007A33, 0 10px 24px rgba(0, 122, 51, 0.3);
 }
 
 [data-theme="dark"] .tarjeta-pagina-compacta:hover {
-  border-color: #007A33;
-  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.4), 0 0 0 4px #007A33, var(--sombra-2);
+  border-color: #2ED573;
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4.5px #007A33, 0 10px 24px rgba(0, 122, 51, 0.45);
 }
 
 .tarjeta-pagina-compacta .tarjeta-pagina-img-wrapper {
-  width: 170px;
-  min-height: 150px;
+  width: 200px;
+  min-height: 170px;
 }
 
 .tarjeta-pagina-compacta .tarjeta-pagina-cuerpo {
-  padding: 1.15rem 1.25rem;
+  padding: 1.25rem 1.35rem;
+  gap: 0.85rem;
+}
+
+.tarjeta-pagina-compacta .tarjeta-pagina-titulo {
+  font-size: 1.15rem;
+  line-height: 1.35;
+  margin-bottom: 0.25rem;
+}
+
+.tarjeta-pagina-compacta .tarjeta-pagina-fecha {
+  font-size: 0.78rem;
+  margin-bottom: 0.5rem;
+}
+
+.tarjeta-pagina-compacta .tarjeta-pagina-desc {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Detalle de Página Interior */
+.pagina-detalle-img-wrapper {
+  width: 100%;
+  border-radius: var(--radio-lg);
+  overflow: hidden;
+  margin-bottom: 2.25rem;
+  border: 2px solid #007A33;
+  box-shadow: 0 0 0 1.5px #FFFFFF, 0 0 0 3px rgba(0, 122, 51, 0.25), var(--sombra-2);
+  background-color: #12131D;
+}
+
+[data-theme="dark"] .pagina-detalle-img-wrapper {
+  border: 2px solid #007A33;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.45), 0 0 0 3.5px rgba(0, 122, 51, 0.5), var(--sombra-2);
+}
+
+.pagina-detalle-img-wrapper img {
+  width: 100%;
+  height: auto;
+  max-height: 440px;
+  object-fit: cover;
+  display: block;
 }
 
 /* Responsive para tarjetas de páginas */
-@media (max-width: 860px) {
+@media (max-width: 920px) {
   .grid-paginas-portada {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 680px) {
+@media (max-width: 720px) {
   .tarjeta-pagina-horizontal,
   .tarjeta-pagina-compacta {
     flex-direction: column !important;
@@ -1276,7 +1404,8 @@ pre code {
 
   .tarjeta-pagina-img-wrapper {
     width: 100% !important;
-    height: 190px !important;
+    height: 200px !important;
+    min-height: 200px !important;
   }
 
   .franja-andalucia-vertical {
