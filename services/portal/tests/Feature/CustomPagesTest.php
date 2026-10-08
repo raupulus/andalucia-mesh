@@ -64,12 +64,27 @@ class CustomPagesTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Guía de Antenas para Malla', false);
         $response->assertSee('Aprende a elegir y colocar tu antena', false);
+        $response->assertSee('tarjeta-pagina-horizontal', false);
         $response->assertSee('franja-andalucia-vertical', false);
+        $response->assertSee('tarjeta-pagina-accion', false);
         $response->assertSee('badge-keyword', false);
         $response->assertSee('Antenas', false);
         $response->assertSee('LoRa', false);
         // La inactiva no debe verse
         $response->assertDontSee('Página Borrador Oculta', false);
+    }
+
+    /**
+     * Comprueba que cover_image_url resuelve correctamente assets locales y fallback animado oficial.
+     */
+    public function test_cover_image_url_resuelve_local_y_fallback(): void
+    {
+        $paginaSinImagen = new CustomPage;
+        $this->assertStringContainsString('img/paginas/default-banner.svg', $paginaSinImagen->cover_image_url);
+
+        $paginaConImagenLocal = new CustomPage(['featured_image' => 'img/servicios/rankings.webp']);
+        $this->assertStringContainsString('/img/servicios/rankings.webp', $paginaConImagenLocal->cover_image_url);
+        $this->assertStringNotContainsString('/storage/', $paginaConImagenLocal->cover_image_url);
     }
 
     /**

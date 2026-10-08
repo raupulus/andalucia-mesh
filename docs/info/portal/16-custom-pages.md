@@ -31,7 +31,7 @@
   - `created_at`, `updated_at`: timestamps estándar de Laravel.
 - **Modelo Eloquent**: `App\Models\CustomPage`:
   - Scopes: `active()` (filtra `is_active = true`), `recent()` (ordena por `created_at desc, id desc`).
-  - Accessors: `cover_image_url` (resuelve Storage público, URLs absolutas o imagen de reserva), `formatted_date` (formato localizado según `app()->getLocale()`).
+  - Accessors: `cover_image_url` (resuelve Storage público, URLs absolutas, rutas públicas locales en `public/` o banner animado vectorial SVG oficial `default-banner.svg` con nodos flotantes en movimiento), `formatted_date` (formato localizado según `app()->getLocale()`).
 
 ## Flujos principales
 1. **Creación / Edición desde Intranet (`/admin/custom-pages`)**:
@@ -41,7 +41,7 @@
    - `PortadaController` recupera las 4 páginas activas más recientes.
    - Se renderizan en `portada.blade.php` en una cuadrícula de 2 columnas con tarjetas compactas y botón verde de acceso general.
 3. **Navegación del Catálogo (`/paginas`)**:
-   - `CustomPageController@index` lista todas las páginas activas ordenadas cronológicamente en tarjetas horizontales con la franja de Andalucía y badges verdes.
+   - `CustomPageController@index` lista todas las páginas activas ordenadas cronológicamente en tarjetas horizontales con la franja vertical de Andalucía (verde/blanca/verde), borde dual verde y blanco y badges verdes.
 4. **Lectura de Artículo (`/paginas/{slug}`)**:
    - `CustomPageController@show` busca por slug activo (devuelve 404 si está inactivo o no existe).
    - Renderiza con metadatos Open Graph, Twitter Card y Schema.org `Article`.
@@ -66,6 +66,7 @@
   - `App\Servicios\ContenidoMarkdown`: Conversión y saneamiento seguro del Markdown.
   - `resources/views/components/layout.blade.php`: Inyección de metadatos SEO dinámicos (`:image`, `:keywords`).
   - `app.css`: Clases `.tarjeta-pagina-horizontal`, `.tarjeta-pagina-compacta`, `.franja-andalucia-vertical`, `.badge-keyword`, `.btn-verde`.
+  - `public/img/paginas/default-banner.svg`: Banner vectorial animado con nodos LoRa en movimiento y ondas de radio como fallback seguro de portada.
 - **Hacia afuera**:
   - `PortadaController`: Consumo de `$ultimasPaginas`.
   - `SitemapController`: Inclusión de URLs en el sitemap XML.
@@ -77,12 +78,14 @@ No requiere variables de entorno adicionales. Utiliza el almacenamiento de Larav
 ## Trampas conocidas
 - **Directiva `@context` de Blade**: En plantillas Blade, escribir `"@context": "https://schema.org"` es interpretado por el compilador como la directiva interna de Laravel `@context`, arrojando `syntax error, unexpected end of file, expecting "elseif" or "else" or "endif"`. Se debe generar el JSON-LD desde un array en PHP con `json_encode($articleSchema)` o escapar el carácter arroba como `@@context`.
 - **Determinismo en `scopeRecent()`**: Al crear múltiples registros secuenciales en tests, los timestamps `created_at` pueden coincidir al mismo segundo; `scopeRecent()` debe incluir `orderByDesc('id')` como orden secundario para garantizar ordenación determinista.
+- **Resolución de imágenes en `cover_image_url`**: No se debe asumir que cualquier ruta relativa debe prefijarse con `/storage/`. Si la ruta existe en `public/` (como `img/servicios/...`), debe resolverse con `asset()` para evitar errores 404 y textos alternativos huérfanos.
 
 ## Tests que lo cubren
 - `services/portal/tests/Feature/CustomPagesTest.php`:
   - `test_listado_paginas_devuelve_200_y_cero_cookies`
   - `test_listado_paginas_muestra_estado_vacio`
   - `test_listado_paginas_muestra_tarjetas_horizontales_con_franja_y_keywords`
+  - `test_cover_image_url_resuelve_local_y_fallback`
   - `test_detalle_pagina_devuelve_200_con_imagen_y_seo`
   - `test_detalle_pagina_inactiva_o_inexistente_devuelve_404`
   - `test_portada_muestra_hasta_4_paginas_con_boton_verde`
