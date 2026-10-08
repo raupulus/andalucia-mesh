@@ -242,4 +242,4 @@ Alto 40 px, radio 8 px. Un solo botón primario por pantalla.
 15. Reducir la separación entre secciones para meter más contenido: si no cabe, sobra contenido.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09
