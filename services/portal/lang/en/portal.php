@@ -666,4 +666,13 @@ return [
         'lead' => 'Real-time monitoring of mesh repeaters and routers: battery telemetry, channel pressure (ChUtil), TX airtime saturation, and health status.',
         'breadcrumb' => 'Routers',
     ],
+
+    'configurator' => [
+        'meta_title' => 'Meshtastic Device Configurator — :name',
+        'title' => 'Meshtastic Device Configurator',
+        'lead' => 'Apply the recommended SFNarrow radio settings and mesh best practices to your node visually, via USB serial cable, Bluetooth, YAML file, or QR code.',
+        'breadcrumb' => 'Configurator',
+        'disconnected' => 'Disconnected',
+        'connected' => 'Connected',
+    ],
 ];

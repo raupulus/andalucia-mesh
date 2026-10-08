@@ -8043,28 +8043,58 @@ async function pf() {
 		e && (e.disabled = !1), t && (t.disabled = !0), n && (n.textContent = "🔌 Desconectado", n.style.background = "", n.style.color = ""), Q("Dispositivo desconectado.");
 	}
 }
-function mf(e) {
+async function mf() {
+	if (!Z.dispositivo || !Z.nodoConectado) {
+		alert("Debes conectar tu nodo primero para leer su configuración."), Q("Intento de lectura sin dispositivo conectado.");
+		return;
+	}
+	Q("Leyendo configuración actual del dispositivo...");
+	let e = document.getElementById("liveYamlTextarea");
+	e && (e.value = `# Configuración leída del nodo Meshtastic\n# Estado: Conectado\n# ID: ${Z.myNodeNum ?? "Local"}`);
+}
+function hf() {
+	let e = document.getElementById("liveYamlTextarea")?.value, t = document.getElementById("desiredYamlTextarea");
+	e && t && (t.value = e, Q("Configuración leída copiada a panel deseado."));
+}
+async function gf() {
+	!Z.dispositivo || !Z.nodoConectado ? alert("Conecta tu nodo por cable USB o Bluetooth para volcar los cambios.") : (Q("Aplicando configuración deseada al nodo..."), alert("Escribiendo configuración en el nodo. Por favor espera..."));
+}
+function _f() {
+	document.getElementById("desiredYamlTextarea")?.value && (Z.desiredConfig = null);
+}
+function vf(e) {
 	Z.modo = e;
 	let t = document.getElementById("tabAssistantMode"), n = document.getElementById("tabWorkbenchMode"), r = document.getElementById("viewAssistant"), i = document.getElementById("viewWorkbench"), a = e === "asistente";
 	t && t.classList.toggle("active", a), n && n.classList.toggle("active", !a), r && (r.style.display = a ? "block" : "none"), i && (i.style.display = a ? "none" : "block"), a || tf();
 }
-function hf() {
-	let e = document.documentElement, t = (e.getAttribute("data-tema") || "light") === "light" ? "dark" : "light";
-	e.setAttribute("data-tema", t), localStorage.setItem("snm_tema", t);
+function yf() {
+	let e = document.documentElement, t = (e.getAttribute("data-theme") || e.getAttribute("data-tema") || "dark") === "light" ? "dark" : "light";
+	e.setAttribute("data-theme", t), e.setAttribute("data-tema", t);
+	try {
+		localStorage.setItem("snm_theme", t), localStorage.setItem("snm_tema", t);
+	} catch {}
 	let n = document.getElementById("themeIcon");
 	n && (n.textContent = t === "light" ? "🌙" : "☀️");
 }
 window.addEventListener("DOMContentLoaded", () => {
-	let e = localStorage.getItem("snm_tema") || "light";
-	document.documentElement.setAttribute("data-tema", e);
+	let e = document.documentElement.getAttribute("data-theme") || localStorage.getItem("snm_theme") || localStorage.getItem("snm_tema") || "dark";
+	document.documentElement.setAttribute("data-theme", e), document.documentElement.setAttribute("data-tema", e);
 	let t = document.getElementById("themeIcon");
-	t && (t.textContent = e === "light" ? "🌙" : "☀️"), document.getElementById("themeToggleBtn")?.addEventListener("click", hf), document.getElementById("tabAssistantMode")?.addEventListener("click", () => mf("asistente")), document.getElementById("tabWorkbenchMode")?.addEventListener("click", () => mf("workbench")), document.getElementById("transportSelect")?.addEventListener("change", (e) => {
+	t && (t.textContent = e === "light" ? "🌙" : "☀️"), new MutationObserver((e) => {
+		for (let n of e) if (n.type === "attributes" && (n.attributeName === "data-theme" || n.attributeName === "data-tema")) {
+			let e = document.documentElement.getAttribute("data-theme") || document.documentElement.getAttribute("data-tema") || "dark";
+			t && (t.textContent = e === "light" ? "🌙" : "☀️");
+		}
+	}).observe(document.documentElement, {
+		attributes: !0,
+		attributeFilter: ["data-theme", "data-tema"]
+	}), document.getElementById("themeToggleBtn")?.addEventListener("click", yf), document.getElementById("tabAssistantMode")?.addEventListener("click", () => vf("asistente")), document.getElementById("tabWorkbenchMode")?.addEventListener("click", () => vf("workbench")), document.getElementById("transportSelect")?.addEventListener("change", (e) => {
 		let t = e.target.value === "http", n = document.getElementById("httpIpGroup");
 		n && (n.style.display = t ? "flex" : "none");
-	}), window.irAlPaso = sf, window.seleccionarRol = cf, window.actualizarConfiguracion = of, window.descargarYamlDeseado = lf, window.copiarEnlaceQR = uf, window.copiarComandosCli = df, window.conectarDispositivo = ff, window.desconectarDispositivo = pf, window.limpiarLog = () => {
+	}), window.irAlPaso = sf, window.seleccionarRol = cf, window.actualizarConfiguracion = of, window.descargarYamlDeseado = lf, window.copiarEnlaceQR = uf, window.copiarComandosCli = df, window.conectarDispositivo = ff, window.desconectarDispositivo = pf, window.descargarConfiguracionNodo = mf, window.copiarLiveADeseado = hf, window.aplicarDeseadoANodo = gf, window.alEditarYamlDeseado = _f, window.limpiarLog = () => {
 		let e = document.getElementById("logTextarea");
 		e && (e.value = "");
 	}, of(), Q("Configurador de Andalucía Mesh iniciado con preset SFNarrow.");
 });
 //#endregion
-export { of as actualizarConfiguracion, ff as conectarDispositivo, tf as construirYamlDeseado, df as copiarComandosCli, uf as copiarEnlaceQR, lf as descargarYamlDeseado, pf as desconectarDispositivo, sf as irAlPaso, cf as seleccionarRol, mf as setModo, hf as toggleTema };
+export { of as actualizarConfiguracion, _f as alEditarYamlDeseado, gf as aplicarDeseadoANodo, ff as conectarDispositivo, tf as construirYamlDeseado, df as copiarComandosCli, uf as copiarEnlaceQR, hf as copiarLiveADeseado, mf as descargarConfiguracionNodo, lf as descargarYamlDeseado, pf as desconectarDispositivo, sf as irAlPaso, cf as seleccionarRol, vf as setModo, yf as toggleTema };

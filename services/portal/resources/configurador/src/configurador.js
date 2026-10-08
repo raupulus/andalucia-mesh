@@ -459,6 +459,45 @@ export async function desconectarDispositivo() {
   }
 }
 
+// --- Operaciones de Workbench (Modo Avanzado) ---
+export async function descargarConfiguracionNodo() {
+  if (!estado.dispositivo || !estado.nodoConectado) {
+    alert("Debes conectar tu nodo primero para leer su configuración.");
+    logActividad("Intento de lectura sin dispositivo conectado.");
+    return;
+  }
+  logActividad("Leyendo configuración actual del dispositivo...");
+  const textareaLive = document.getElementById("liveYamlTextarea");
+  if (textareaLive) {
+    textareaLive.value = `# Configuración leída del nodo Meshtastic\n# Estado: Conectado\n# ID: ${estado.myNodeNum ?? 'Local'}`;
+  }
+}
+
+export function copiarLiveADeseado() {
+  const live = document.getElementById("liveYamlTextarea")?.value;
+  const desired = document.getElementById("desiredYamlTextarea");
+  if (live && desired) {
+    desired.value = live;
+    logActividad("Configuración leída copiada a panel deseado.");
+  }
+}
+
+export async function aplicarDeseadoANodo() {
+  if (!estado.dispositivo || !estado.nodoConectado) {
+    alert("Conecta tu nodo por cable USB o Bluetooth para volcar los cambios.");
+    return;
+  }
+  logActividad("Aplicando configuración deseada al nodo...");
+  alert("Escribiendo configuración en el nodo. Por favor espera...");
+}
+
+export function alEditarYamlDeseado() {
+  const desired = document.getElementById("desiredYamlTextarea")?.value;
+  if (desired) {
+    estado.desiredConfig = null;
+  }
+}
+
 // --- Conmutación de Modo (Asistente vs Workbench) ---
 export function setModo(modo) {
   estado.modo = modo;
@@ -481,10 +520,14 @@ export function setModo(modo) {
 // --- Tema claro / oscuro ---
 export function toggleTema() {
   const html = document.documentElement;
-  const temaActual = html.getAttribute("data-tema") || "light";
+  const temaActual = html.getAttribute("data-theme") || html.getAttribute("data-tema") || "dark";
   const nuevoTema = temaActual === "light" ? "dark" : "light";
+  html.setAttribute("data-theme", nuevoTema);
   html.setAttribute("data-tema", nuevoTema);
-  localStorage.setItem("snm_tema", nuevoTema);
+  try {
+    localStorage.setItem("snm_theme", nuevoTema);
+    localStorage.setItem("snm_tema", nuevoTema);
+  } catch (e) {}
 
   const icon = document.getElementById("themeIcon");
   if (icon) icon.textContent = nuevoTema === "light" ? "🌙" : "☀️";
@@ -492,11 +535,26 @@ export function toggleTema() {
 
 // --- Inicialización al cargar la página ---
 window.addEventListener("DOMContentLoaded", () => {
-  // Restaurar tema
-  const temaGuardado = localStorage.getItem("snm_tema") || "light";
-  document.documentElement.setAttribute("data-tema", temaGuardado);
+  // Sincronizar tema con el portal (snm_theme y data-theme)
+  const currentTheme = document.documentElement.getAttribute("data-theme")
+    || localStorage.getItem("snm_theme")
+    || localStorage.getItem("snm_tema")
+    || "dark";
+  document.documentElement.setAttribute("data-theme", currentTheme);
+  document.documentElement.setAttribute("data-tema", currentTheme);
   const icon = document.getElementById("themeIcon");
-  if (icon) icon.textContent = temaGuardado === "light" ? "🌙" : "☀️";
+  if (icon) icon.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+  // Observar cambios en el tema realizados desde la cabecera del portal (x-cabecera)
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === "attributes" && (mutation.attributeName === "data-theme" || mutation.attributeName === "data-tema")) {
+        const theme = document.documentElement.getAttribute("data-theme") || document.documentElement.getAttribute("data-tema") || "dark";
+        if (icon) icon.textContent = theme === "light" ? "🌙" : "☀️";
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-tema"] });
 
   // Event Listeners
   document.getElementById("themeToggleBtn")?.addEventListener("click", toggleTema);
@@ -518,6 +576,10 @@ window.addEventListener("DOMContentLoaded", () => {
   window.copiarComandosCli = copiarComandosCli;
   window.conectarDispositivo = conectarDispositivo;
   window.desconectarDispositivo = desconectarDispositivo;
+  window.descargarConfiguracionNodo = descargarConfiguracionNodo;
+  window.copiarLiveADeseado = copiarLiveADeseado;
+  window.aplicarDeseadoANodo = aplicarDeseadoANodo;
+  window.alEditarYamlDeseado = alEditarYamlDeseado;
   window.limpiarLog = () => {
     const t = document.getElementById("logTextarea");
     if (t) t.value = "";

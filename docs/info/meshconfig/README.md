@@ -70,6 +70,7 @@
 - `services/portal/tests/Feature/ConfiguradorTest.php`:
   - `test_configurador_responde_200_y_cero_cookies`
   - `test_configurador_contiene_elementos_clave_sfnarrow`
+  - `test_configurador_usa_layout_del_portal_y_modo_oscuro_por_defecto`
   - `test_configurador_entrega_estilos_css`
   - `test_configurador_entrega_modulo_javascript`
   - `test_configurador_entrega_preset_client_mute`
@@ -83,6 +84,7 @@
 - [x] Presets SFNarrow creados y probados con buenas prácticas oficiales.
 - [x] Generador de URL y Código QR dinámico implementado.
 - [x] Integración en el portal y rutas públicas de Laravel probadas (puerto 9000).
+- [x] Integración completa en el layout Blade del portal con modo oscuro por defecto y navegación oficial.
 
 ---
 > Creado: 2026-10-08 · Última revisión: 2026-10-09

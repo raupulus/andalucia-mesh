@@ -665,4 +665,13 @@ return [
         'lead' => 'Supervisão em tempo real dos repetidores e routers da malha: telemetria de bateria, pressão do canal (ChUtil), saturação TX e estado de saúde.',
         'breadcrumb' => 'Routers',
     ],
+
+    'configurator' => [
+        'meta_title' => 'Configurador de Dispositivos Meshtastic — :name',
+        'title' => 'Configurador de Dispositivos Meshtastic',
+        'lead' => 'Aplica as definições recomendadas de rádio SFNarrow e boas práticas de rede ao teu nó de forma visual, por cabo USB, Bluetooth, ficheiro YAML ou código QR.',
+        'breadcrumb' => 'Configurador',
+        'disconnected' => 'Desconectado',
+        'connected' => 'Conectado',
+    ],
 ];

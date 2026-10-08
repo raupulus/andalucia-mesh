@@ -23,39 +23,40 @@
   --transicion-rapida: 0.15s ease-in-out;
   --transicion-suave: 0.25s ease-in-out;
 
-  /* MODO CLARO (Por defecto) */
-  --color-fondo: #FFFFFF;
-  --color-superficie: #FFFFFF;
-  --color-superficie-sutil: #F7F8FA;
-  --color-superficie-elevada: #FFFFFF;
-  --color-borde: #E0E1EB;
-  --color-borde-control: #8D8EA6;
-  --color-texto: #2C2D3C;
-  --color-texto-2: #515267;
-  --color-texto-3: #6E708C;
-  --color-enlace: #15612F;
-  --color-foco: #15612F;
+  /* MODO OSCURO (Por defecto en Andalucía Mesh - DESIGN.md) */
+  --color-fondo: #1F2029;
+  --color-superficie: #2C2D3C;
+  --color-superficie-sutil: #17181F;
+  --color-superficie-elevada: #363748;
+  --color-borde: #3D3E4D;
+  --color-borde-control: #7E819B;
+  --color-texto: #F0F0F5;
+  --color-texto-2: #C7C8D4;
+  --color-texto-3: #9FA0B4;
+  --color-enlace: #67EA94;
+  --color-foco: #67EA94;
   --color-acento: #67EA94;
   --color-sobre-acento: #2C2D3C;
-  --color-acento-suave: #E9FCEF;
+  --color-acento-suave: #1C3A28;
 
   /* Estados */
-  --color-correcto-fondo: #E9FCEF;
-  --color-correcto-texto: #15612F;
-  --color-aviso-fondo: #FEF4E2;
-  --color-aviso-texto: #794700;
-  --color-critico-fondo: #FDECEC;
-  --color-critico-texto: #9B1E15;
-  --color-info-fondo: #EAF2FD;
-  --color-info-texto: #18509B;
+  --color-correcto-fondo: #1C3A28;
+  --color-correcto-texto: #9CF1BA;
+  --color-aviso-fondo: #47360F;
+  --color-aviso-texto: #FFD48A;
+  --color-critico-fondo: #4A2326;
+  --color-critico-texto: #FFB4AE;
+  --color-info-fondo: #1E3150;
+  --color-info-texto: #A9C9FF;
 
   /* Sombras */
-  --sombra-1: 0 1px 3px rgba(44, 45, 60, 0.08), 0 1px 2px rgba(44, 45, 60, 0.04);
-  --sombra-2: 0 4px 12px rgba(44, 45, 60, 0.10), 0 2px 4px rgba(44, 45, 60, 0.06);
-  --sombra-3: 0 12px 28px rgba(44, 45, 60, 0.12), 0 4px 8px rgba(44, 45, 60, 0.08);
+  --sombra-1: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --sombra-2: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --sombra-3: 0 12px 28px rgba(0, 0, 0, 0.60);
 }
 
-/* MODO OSCURO */
+/* Soporte explícito MODO OSCURO */
+[data-theme="dark"],
 [data-tema="dark"] {
   --color-fondo: #1F2029;
   --color-superficie: #2C2D3C;
@@ -86,22 +87,46 @@
   --sombra-3: 0 12px 28px rgba(0, 0, 0, 0.60);
 }
 
-/* Reset y base */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* MODO CLARO */
+[data-theme="light"],
+[data-tema="light"] {
+  --color-fondo: #FFFFFF;
+  --color-superficie: #FFFFFF;
+  --color-superficie-sutil: #F7F8FA;
+  --color-superficie-elevada: #FFFFFF;
+  --color-borde: #E0E1EB;
+  --color-borde-control: #8D8EA6;
+  --color-texto: #2C2D3C;
+  --color-texto-2: #515267;
+  --color-texto-3: #6E708C;
+  --color-enlace: #15612F;
+  --color-foco: #15612F;
+  --color-acento: #67EA94;
+  --color-sobre-acento: #2C2D3C;
+  --color-acento-suave: #E9FCEF;
+
+  --color-correcto-fondo: #E9FCEF;
+  --color-correcto-texto: #15612F;
+  --color-aviso-fondo: #FEF4E2;
+  --color-aviso-texto: #794700;
+  --color-critico-fondo: #FDECEC;
+  --color-critico-texto: #9B1E15;
+  --color-info-fondo: #EAF2FD;
+  --color-info-texto: #18509B;
+
+  --sombra-1: 0 1px 3px rgba(44, 45, 60, 0.08), 0 1px 2px rgba(44, 45, 60, 0.04);
+  --sombra-2: 0 4px 12px rgba(44, 45, 60, 0.10), 0 2px 4px rgba(44, 45, 60, 0.06);
+  --sombra-3: 0 12px 28px rgba(44, 45, 60, 0.12), 0 4px 8px rgba(44, 45, 60, 0.08);
 }
 
-body {
-  font-family: var(--fuente-texto);
-  background-color: var(--color-fondo);
-  color: var(--color-texto);
-  line-height: 1.5;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  -webkit-font-smoothing: antialiased;
+/* Tipografía de títulos */
+.hero-banner h1,
+.card-header h2,
+.card-header h3,
+.role-card-title,
+.btn,
+.mode-tab-btn {
+  font-family: var(--fuente-titulos);
 }
 
 /* Cabecera superior */

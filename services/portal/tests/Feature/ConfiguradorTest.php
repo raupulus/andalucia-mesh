@@ -30,6 +30,18 @@ class ConfiguradorTest extends TestCase
         $response->assertSee('E22P-868M30S');
     }
 
+    public function test_configurador_usa_layout_del_portal_y_modo_oscuro_por_defecto(): void
+    {
+        $response = $this->get('/configurador');
+
+        $response->assertStatus(200);
+        $response->assertSee('data-theme="dark"', false);
+        $response->assertSee('class="cabecera"', false);
+        $response->assertSee('<footer', false);
+        $response->assertSee('btn-tema');
+        $response->assertSee('statusPill');
+    }
+
     public function test_configurador_entrega_estilos_css(): void
     {
         $response = $this->get('/configurador/styles.css');
