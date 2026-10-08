@@ -1,321 +1,1177 @@
 <x-filament-panels::page>
-    @vite(['resources/js/mesh-admin.js'])
+    <script src="/js/mesh-admin.bundle.js"></script>
 
-    <div x-data="meshAdmin()" class="space-y-6">
-        {{-- Tarjeta 1: Conexión con el Nodo Local Físico del Operador --}}
-        <x-filament::section>
-            <x-slot name="heading">
-                <div class="flex items-center justify-between flex-wrap gap-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xl">🔌</span>
-                        <span class="font-bold text-base text-gray-900 dark:text-gray-100">
-                            {{ __('admin.gestion_routers.local_connection_heading') }}
-                        </span>
-                    </div>
+    <div x-data="meshAdmin()" class="fi-router-admin-page">
+        <style>
+            /* ==============================================================================
+               SISTEMA VISUAL DESIGN.MD: CONSOLA DE GESTIÓN REMOTA DE ROUTERS
+               ============================================================================== */
+            .fi-router-admin-page {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 1.75rem;
+                color: #2C2D3C;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            }
+            .dark .fi-router-admin-page {
+                color: #F0F0F5;
+            }
 
-                    {{-- Indicador de estado de conexión --}}
-                    <div class="flex items-center gap-2">
-                        <template x-if="connectionStatus === 'connected'">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                {{ __('admin.gestion_routers.status_connected') }}
-                                <span x-show="localNode.hexId" x-text="`(${localNode.hexId})`" class="font-mono"></span>
-                            </span>
-                        </template>
+            /* Banner superior de contexto operativo */
+            .fi-ra-hero-banner {
+                background: linear-gradient(135deg, rgba(0, 122, 51, 0.08) 0%, rgba(103, 234, 148, 0.03) 100%);
+                border: 1px solid rgba(0, 122, 51, 0.25);
+                border-radius: 1rem;
+                padding: 1.25rem 1.75rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 1.25rem;
+            }
+            .dark .fi-ra-hero-banner {
+                background: linear-gradient(135deg, rgba(28, 58, 40, 0.5) 0%, rgba(44, 45, 60, 0.5) 100%);
+                border-color: rgba(103, 234, 148, 0.25);
+            }
+            .fi-ra-hero-title {
+                font-size: 1.25rem;
+                font-weight: 800;
+                color: #007A33;
+                display: flex;
+                align-items: center;
+                gap: 0.6rem;
+                letter-spacing: -0.01em;
+            }
+            .dark .fi-ra-hero-title {
+                color: #67EA94;
+            }
+            .fi-ra-hero-desc {
+                font-size: 0.85rem;
+                line-height: 1.5;
+                color: #515267;
+                max-width: 55rem;
+                margin-top: 0.25rem;
+            }
+            .dark .fi-ra-hero-desc {
+                color: #C7C8D4;
+            }
 
-                        <template x-if="connectionStatus === 'connecting'">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
-                                <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-                                {{ __('admin.gestion_routers.status_connecting') }}
-                            </span>
-                        </template>
+            /* Tarjetas de superficie elevadas */
+            .fi-ra-card {
+                background-color: #FFFFFF;
+                border: 1px solid #E0E1EB;
+                border-radius: 1rem;
+                padding: 1.75rem 2rem;
+                box-shadow: 0 4px 14px rgba(44, 45, 60, 0.03);
+                display: flex;
+                flex-direction: column;
+                gap: 1.25rem;
+            }
+            .dark .fi-ra-card {
+                background-color: #2C2D3C;
+                border-color: #3D3E4D;
+                box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+            }
 
-                        <template x-if="connectionStatus === 'disconnected'">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-500/15 text-gray-600 dark:text-gray-400 border border-gray-500/30">
-                                <span class="w-2 h-2 rounded-full bg-gray-400"></span>
-                                {{ __('admin.gestion_routers.status_disconnected') }}
-                            </span>
-                        </template>
+            .fi-ra-card-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 1rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #E0E1EB;
+            }
+            .dark .fi-ra-card-header {
+                border-bottom-color: #3D3E4D;
+            }
 
-                        <template x-if="connectionStatus === 'error'">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30">
-                                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-                                {{ __('admin.gestion_routers.status_error') }}
-                            </span>
-                        </template>
-                    </div>
+            .fi-ra-title-flex {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+            .fi-ra-icon-badge {
+                width: 2.5rem;
+                height: 2.5rem;
+                border-radius: 0.625rem;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.25rem;
+                background: linear-gradient(135deg, rgba(0, 122, 51, 0.12) 0%, rgba(103, 234, 148, 0.2) 100%);
+                border: 1px solid rgba(0, 122, 51, 0.2);
+                color: #007A33;
+                flex-shrink: 0;
+            }
+            .dark .fi-ra-icon-badge {
+                background: linear-gradient(135deg, rgba(103, 234, 148, 0.15) 0%, rgba(0, 122, 51, 0.25) 100%);
+                border-color: rgba(103, 234, 148, 0.3);
+                color: #67EA94;
+            }
+            .fi-ra-card-heading {
+                font-size: 1.05rem;
+                font-weight: 700;
+                letter-spacing: -0.01em;
+            }
+            .fi-ra-card-subheading {
+                font-size: 0.8125rem;
+                color: #515267;
+                margin-top: 0.15rem;
+            }
+            .dark .fi-ra-card-subheading {
+                color: #C7C8D4;
+            }
+
+            /* Indicadores de estado de conexión */
+            .fi-ra-status-pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.45rem 1rem;
+                border-radius: 9999px;
+                font-size: 0.8125rem;
+                font-weight: 700;
+                line-height: 1;
+            }
+            .fi-ra-status-connected {
+                background-color: rgba(16, 185, 129, 0.15);
+                color: #007A33;
+                border: 1.5px solid rgba(0, 122, 51, 0.35);
+            }
+            .dark .fi-ra-status-connected {
+                background-color: rgba(103, 234, 148, 0.18);
+                color: #67EA94;
+                border-color: rgba(103, 234, 148, 0.4);
+            }
+            .fi-ra-status-connecting {
+                background-color: rgba(245, 158, 11, 0.15);
+                color: #B45309;
+                border: 1.5px solid rgba(245, 158, 11, 0.35);
+            }
+            .dark .fi-ra-status-connecting {
+                color: #FCD34D;
+            }
+            .fi-ra-status-disconnected {
+                background-color: rgba(148, 163, 184, 0.15);
+                color: #515267;
+                border: 1.5px solid rgba(148, 163, 184, 0.3);
+            }
+            .dark .fi-ra-status-disconnected {
+                color: #9FA0B4;
+                border-color: #3D3E4D;
+            }
+            .fi-ra-status-error {
+                background-color: rgba(244, 63, 94, 0.15);
+                color: #9B1E15;
+                border: 1.5px solid rgba(244, 63, 94, 0.35);
+            }
+            .dark .fi-ra-status-error {
+                color: #FFB4AE;
+            }
+
+            .fi-ra-dot {
+                width: 0.55rem;
+                height: 0.55rem;
+                border-radius: 9999px;
+                display: inline-block;
+            }
+            .fi-ra-dot-connected {
+                background-color: #10B981;
+                box-shadow: 0 0 10px #10B981;
+                animation: fi-ra-pulse 2s infinite ease-in-out;
+            }
+            .dark .fi-ra-dot-connected {
+                background-color: #67EA94;
+                box-shadow: 0 0 10px #67EA94;
+            }
+            .fi-ra-dot-connecting {
+                background-color: #F59E0B;
+                animation: fi-ra-pulse 1s infinite ease-in-out;
+            }
+            .fi-ra-dot-disconnected {
+                background-color: #94A3B8;
+            }
+            .fi-ra-dot-error {
+                background-color: #F43F5E;
+            }
+
+            @keyframes fi-ra-pulse {
+                0%, 100% { opacity: 1; transform: scale(1); }
+                50% { opacity: 0.45; transform: scale(1.25); }
+            }
+
+            /* Rejilla de formulario oxigenada */
+            .fi-ra-form-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+                align-items: end;
+            }
+            @media (min-width: 640px) {
+                .fi-ra-form-grid-2 {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+                .fi-ra-form-grid-3 {
+                    grid-template-columns: 1.5fr 1fr 1.2fr;
+                }
+                .fi-ra-form-grid-4 {
+                    grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+                }
+            }
+
+            .fi-ra-form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.45rem;
+            }
+            .fi-ra-label {
+                font-size: 0.8125rem;
+                font-weight: 700;
+                color: #2C2D3C;
+                letter-spacing: -0.01em;
+            }
+            .dark .fi-ra-label {
+                color: #F0F0F5;
+            }
+
+            .fi-ra-select,
+            .fi-ra-input {
+                width: 100%;
+                padding: 0.65rem 0.95rem;
+                font-size: 0.875rem;
+                border-radius: 0.5rem;
+                border: 1.5px solid #8D8EA6;
+                background-color: #FFFFFF;
+                color: #2C2D3C;
+                transition: border-color 0.15s ease, box-shadow 0.15s ease;
+                outline: none;
+                box-sizing: border-box;
+            }
+            .dark .fi-ra-select,
+            .dark .fi-ra-input {
+                border-color: #7E819B;
+                background-color: #1F2029;
+                color: #F0F0F5;
+            }
+            .fi-ra-select:focus,
+            .fi-ra-input:focus {
+                border-color: #007A33;
+                box-shadow: 0 0 0 3px rgba(0, 122, 51, 0.18);
+            }
+            .dark .fi-ra-select:focus,
+            .dark .fi-ra-input:focus {
+                border-color: #67EA94;
+                box-shadow: 0 0 0 3px rgba(103, 234, 148, 0.25);
+            }
+
+            /* Botones del sistema visual */
+            .fi-ra-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                padding: 0.65rem 1.35rem;
+                font-size: 0.875rem;
+                font-weight: 700;
+                border-radius: 0.5rem;
+                cursor: pointer;
+                transition: all 0.18s ease;
+                border: none;
+                text-decoration: none;
+                box-sizing: border-box;
+                line-height: 1.3;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            }
+            .fi-ra-btn:disabled {
+                opacity: 0.45;
+                cursor: not-allowed;
+                box-shadow: none !important;
+                transform: none !important;
+            }
+
+            .fi-ra-btn-primary {
+                background: linear-gradient(135deg, #007A33 0%, #15612F 100%);
+                color: #FFFFFF;
+            }
+            .fi-ra-btn-primary:hover:not(:disabled) {
+                background: linear-gradient(135deg, #00662A 0%, #0e4c23 100%);
+                box-shadow: 0 4px 14px rgba(0, 122, 51, 0.35);
+                transform: translateY(-1px);
+            }
+            .dark .fi-ra-btn-primary {
+                background: linear-gradient(135deg, #007A33 0%, #15612F 100%);
+                color: #FFFFFF;
+            }
+            .dark .fi-ra-btn-primary:hover:not(:disabled) {
+                box-shadow: 0 4px 16px rgba(103, 234, 148, 0.25);
+                transform: translateY(-1px);
+            }
+
+            .fi-ra-btn-danger {
+                background: linear-gradient(135deg, #E5484D 0%, #9B1E15 100%);
+                color: #FFFFFF;
+            }
+            .fi-ra-btn-danger:hover:not(:disabled) {
+                background: linear-gradient(135deg, #D3363B 0%, #871911 100%);
+                box-shadow: 0 4px 14px rgba(229, 72, 77, 0.35);
+                transform: translateY(-1px);
+            }
+
+            .fi-ra-btn-warning {
+                background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+                color: #FFFFFF;
+            }
+            .fi-ra-btn-warning:hover:not(:disabled) {
+                box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35);
+                transform: translateY(-1px);
+            }
+
+            /* Ficha de nodo conectado */
+            .fi-ra-node-banner {
+                background: linear-gradient(135deg, rgba(0, 122, 51, 0.08) 0%, rgba(103, 234, 148, 0.06) 100%);
+                border: 1.5px solid rgba(0, 122, 51, 0.25);
+                border-radius: 0.75rem;
+                padding: 1.15rem 1.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            .dark .fi-ra-node-banner {
+                background: linear-gradient(135deg, rgba(28, 58, 40, 0.7) 0%, rgba(44, 45, 60, 0.7) 100%);
+                border-color: rgba(103, 234, 148, 0.3);
+            }
+            .fi-ra-node-banner-title {
+                font-weight: 700;
+                font-size: 0.95rem;
+                color: #007A33;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .dark .fi-ra-node-banner-title {
+                color: #67EA94;
+            }
+            .fi-ra-node-banner-meta {
+                font-size: 0.8125rem;
+                color: #515267;
+                margin-top: 0.2rem;
+            }
+            .dark .fi-ra-node-banner-meta {
+                color: #C7C8D4;
+            }
+
+            /* Tarjeta resumen del router objetivo */
+            .fi-ra-router-summary {
+                background: linear-gradient(135deg, rgba(0, 122, 51, 0.06) 0%, rgba(255, 255, 255, 0.5) 100%);
+                border: 1.5px solid rgba(0, 122, 51, 0.22);
+                border-radius: 0.875rem;
+                padding: 1.25rem 1.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 1.25rem;
+            }
+            .dark .fi-ra-router-summary {
+                background: linear-gradient(135deg, rgba(28, 58, 40, 0.5) 0%, rgba(44, 45, 60, 0.5) 100%);
+                border-color: rgba(103, 234, 148, 0.25);
+            }
+            .fi-ra-router-name {
+                font-size: 1.05rem;
+                font-weight: 800;
+                color: #2C2D3C;
+            }
+            .dark .fi-ra-router-name {
+                color: #F0F0F5;
+            }
+            .fi-ra-router-meta-row {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 0.75rem;
+                margin-top: 0.35rem;
+                font-size: 0.8125rem;
+            }
+
+            /* Badges semánticos */
+            .fi-ra-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.35rem;
+                padding: 0.25rem 0.65rem;
+                border-radius: 9999px;
+                font-size: 0.75rem;
+                font-weight: 700;
+                line-height: 1;
+            }
+            .fi-ra-badge-managed {
+                background-color: rgba(16, 185, 129, 0.15);
+                color: #007A33;
+                border: 1px solid rgba(0, 122, 51, 0.3);
+            }
+            .dark .fi-ra-badge-managed {
+                background-color: rgba(103, 234, 148, 0.15);
+                color: #67EA94;
+                border-color: rgba(103, 234, 148, 0.3);
+            }
+            .fi-ra-badge-known {
+                background-color: rgba(59, 130, 246, 0.15);
+                color: #18509B;
+                border: 1px solid rgba(59, 130, 246, 0.3);
+            }
+            .dark .fi-ra-badge-known {
+                color: #A9C9FF;
+            }
+            .fi-ra-badge-new {
+                background-color: rgba(245, 158, 11, 0.15);
+                color: #B45309;
+                border: 1px solid rgba(245, 158, 11, 0.3);
+            }
+            .dark .fi-ra-badge-new {
+                color: #FCD34D;
+            }
+
+            /* Barra de Pestañas elegante y oxigenada */
+            .fi-ra-tabs-nav {
+                display: flex;
+                gap: 0.5rem;
+                border-bottom: 2px solid #E0E1EB;
+                overflow-x: auto;
+                padding: 0.5rem 0.75rem 0;
+                background-color: #F8FAFC;
+                border-top-left-radius: 1rem;
+                border-top-right-radius: 1rem;
+            }
+            .dark .fi-ra-tabs-nav {
+                border-bottom-color: #3D3E4D;
+                background-color: #1F2029;
+            }
+            .fi-ra-tab-button {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.55rem;
+                padding: 0.85rem 1.4rem;
+                font-size: 0.875rem;
+                font-weight: 600;
+                color: #515267;
+                background: transparent;
+                border: none;
+                border-bottom: 3px solid transparent;
+                margin-bottom: -2px;
+                cursor: pointer;
+                transition: all 0.15s ease;
+                white-space: nowrap;
+                border-top-left-radius: 0.6rem;
+                border-top-right-radius: 0.6rem;
+            }
+            .dark .fi-ra-tab-button {
+                color: #C7C8D4;
+            }
+            .fi-ra-tab-button:hover {
+                color: #2C2D3C;
+                background-color: rgba(0, 122, 51, 0.05);
+            }
+            .dark .fi-ra-tab-button:hover {
+                color: #F0F0F5;
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+            .fi-ra-tab-button.active {
+                color: #007A33;
+                font-weight: 800;
+                border-bottom-color: #007A33;
+                background-color: #FFFFFF;
+                box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.03);
+            }
+            .dark .fi-ra-tab-button.active {
+                color: #67EA94;
+                border-bottom-color: #67EA94;
+                background-color: #2C2D3C;
+            }
+
+            .fi-ra-tab-content {
+                padding: 2rem;
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            /* Tarjetas de Selección de Roles */
+            .fi-ra-role-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+            @media (min-width: 640px) {
+                .fi-ra-role-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+            @media (min-width: 1024px) {
+                .fi-ra-role-grid {
+                    grid-template-columns: repeat(4, 1fr);
+                }
+            }
+
+            .fi-ra-role-card {
+                border: 2px solid #E0E1EB;
+                border-radius: 0.875rem;
+                padding: 1.35rem 1.45rem;
+                background-color: #FFFFFF;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                display: flex;
+                flex-direction: column;
+                gap: 0.65rem;
+                position: relative;
+            }
+            .dark .fi-ra-role-card {
+                border-color: #3D3E4D;
+                background-color: #1F2029;
+            }
+            .fi-ra-role-card:hover {
+                border-color: #007A33;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+            }
+            .dark .fi-ra-role-card:hover {
+                border-color: #67EA94;
+            }
+            .fi-ra-role-card.selected {
+                border-color: #007A33;
+                background: linear-gradient(135deg, rgba(0, 122, 51, 0.08) 0%, rgba(103, 234, 148, 0.04) 100%);
+                box-shadow: 0 0 0 1px #007A33, 0 8px 22px rgba(0, 122, 51, 0.18);
+            }
+            .dark .fi-ra-role-card.selected {
+                border-color: #67EA94;
+                background: linear-gradient(135deg, rgba(28, 58, 40, 0.9) 0%, rgba(44, 45, 60, 0.9) 100%);
+                box-shadow: 0 0 0 1px #67EA94, 0 8px 22px rgba(103, 234, 148, 0.22);
+            }
+            .fi-ra-role-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .fi-ra-role-title {
+                font-weight: 800;
+                font-size: 0.95rem;
+                letter-spacing: -0.01em;
+            }
+            .fi-ra-role-desc {
+                font-size: 0.8125rem;
+                line-height: 1.5;
+                color: #515267;
+            }
+            .dark .fi-ra-role-desc {
+                color: #C7C8D4;
+            }
+
+            /* Tarjetas de Acción de Sondeo y Unicast */
+            .fi-ra-action-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+            @media (min-width: 640px) {
+                .fi-ra-action-grid-3 {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+                .fi-ra-action-grid-4 {
+                    grid-template-columns: repeat(4, 1fr);
+                }
+            }
+
+            .fi-ra-action-card {
+                border: 1.5px solid #E0E1EB;
+                border-radius: 0.875rem;
+                padding: 1.5rem;
+                background-color: #FFFFFF;
+                text-align: left;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                display: flex;
+                flex-direction: column;
+                gap: 0.65rem;
+            }
+            .dark .fi-ra-action-card {
+                border-color: #3D3E4D;
+                background-color: #1F2029;
+            }
+            .fi-ra-action-card:hover:not(:disabled) {
+                border-color: #007A33;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 22px rgba(0, 122, 51, 0.12);
+            }
+            .dark .fi-ra-action-card:hover:not(:disabled) {
+                border-color: #67EA94;
+                box-shadow: 0 8px 22px rgba(103, 234, 148, 0.16);
+            }
+            .fi-ra-action-card:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+            .fi-ra-action-icon {
+                font-size: 1.75rem;
+                line-height: 1;
+            }
+            .fi-ra-action-title {
+                font-weight: 700;
+                font-size: 0.875rem;
+                color: inherit;
+            }
+            .fi-ra-action-desc {
+                font-size: 0.775rem;
+                line-height: 1.45;
+                color: #515267;
+            }
+            .dark .fi-ra-action-desc {
+                color: #C7C8D4;
+            }
+
+            /* Consola / Terminal de Actividad */
+            .fi-ra-terminal-card {
+                background-color: #0B0F19;
+                border: 1.5px solid #1E293B;
+                border-radius: 1rem;
+                overflow: hidden;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+                display: flex;
+                flex-direction: column;
+            }
+            .fi-ra-terminal-topbar {
+                background-color: #111827;
+                border-bottom: 1px solid #1E293B;
+                padding: 0.85rem 1.25rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+            .fi-ra-terminal-title {
+                font-size: 0.875rem;
+                font-weight: 700;
+                color: #E2E8F0;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .fi-ra-terminal-body {
+                height: 20rem;
+                overflow-y: auto;
+                padding: 1.25rem 1.5rem;
+                font-family: 'Ubuntu Mono', monospace;
+                font-size: 0.8125rem;
+                line-height: 1.6;
+                color: #E2E8F0;
+                display: flex;
+                flex-direction: column;
+                gap: 0.3rem;
+                background-color: #070B14;
+            }
+            .fi-ra-terminal-line {
+                display: flex;
+                align-items: flex-start;
+                gap: 0.6rem;
+                padding: 0.15rem 0.4rem;
+                border-radius: 0.25rem;
+                transition: background-color 0.1s ease;
+            }
+            .fi-ra-terminal-line:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+            .fi-ra-log-badge {
+                font-size: 0.7rem;
+                font-weight: 800;
+                padding: 0.1rem 0.4rem;
+                border-radius: 0.25rem;
+                line-height: 1.2;
+                white-space: nowrap;
+            }
+            .fi-ra-log-tx { background-color: rgba(59, 130, 246, 0.25); color: #60A5FA; }
+            .fi-ra-log-rx { background-color: rgba(168, 85, 247, 0.25); color: #C084FC; }
+            .fi-ra-log-ack { background-color: rgba(16, 185, 129, 0.25); color: #34D399; }
+            .fi-ra-log-error { background-color: rgba(244, 63, 94, 0.25); color: #FB7185; }
+            .fi-ra-log-info { background-color: rgba(148, 163, 184, 0.2); color: #94A3B8; }
+
+            /* Banner de advertencia de compatibilidad de navegador */
+            .fi-ra-warning-banner {
+                background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(251, 191, 36, 0.05) 100%);
+                border: 1.5px solid rgba(245, 158, 11, 0.45);
+                border-radius: 0.875rem;
+                padding: 1.25rem 1.5rem;
+                display: flex;
+                align-items: flex-start;
+                gap: 1rem;
+                color: #92400E;
+                box-shadow: 0 4px 14px rgba(245, 158, 11, 0.08);
+            }
+            .dark .fi-ra-warning-banner {
+                background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(180, 83, 9, 0.1) 100%);
+                border-color: rgba(245, 158, 11, 0.4);
+                color: #FCD34D;
+            }
+            .fi-ra-warning-icon {
+                font-size: 1.6rem;
+                line-height: 1;
+                flex-shrink: 0;
+            }
+            .fi-ra-warning-title {
+                font-size: 0.95rem;
+                font-weight: 800;
+                margin-bottom: 0.35rem;
+                letter-spacing: -0.01em;
+            }
+            .fi-ra-warning-text {
+                font-size: 0.825rem;
+                line-height: 1.55;
+                color: #78350F;
+            }
+            .dark .fi-ra-warning-text {
+                color: #FDE68A;
+            }
+
+            /* Guía rápida operativa de 3 pasos */
+            .fi-ra-guide-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            @media (min-width: 768px) {
+                .fi-ra-guide-grid {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+            }
+            .fi-ra-guide-step {
+                background-color: #FFFFFF;
+                border: 1px solid #E0E1EB;
+                border-radius: 0.875rem;
+                padding: 1.15rem 1.25rem;
+                display: flex;
+                align-items: flex-start;
+                gap: 0.85rem;
+                box-shadow: 0 2px 8px rgba(44, 45, 60, 0.02);
+            }
+            .dark .fi-ra-guide-step {
+                background-color: #2C2D3C;
+                border-color: #3D3E4D;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            }
+            .fi-ra-step-num {
+                width: 2rem;
+                height: 2rem;
+                border-radius: 9999px;
+                background-color: #007A33;
+                color: #FFFFFF;
+                font-weight: 800;
+                font-size: 0.875rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            .dark .fi-ra-step-num {
+                background-color: #67EA94;
+                color: #111827;
+            }
+            .fi-ra-step-title {
+                font-size: 0.875rem;
+                font-weight: 700;
+                color: #2C2D3C;
+                margin-bottom: 0.25rem;
+            }
+            .dark .fi-ra-step-title {
+                color: #F0F0F5;
+            }
+            .fi-ra-step-desc {
+                font-size: 0.775rem;
+                line-height: 1.45;
+                color: #515267;
+            }
+            .dark .fi-ra-step-desc {
+                color: #C7C8D4;
+            }
+        </style>
+
+        {{-- Aviso destacado de compatibilidad obligatoria de navegador (Google Chrome o Edge) --}}
+        <div class="fi-ra-warning-banner">
+            <div class="fi-ra-warning-icon">⚠️</div>
+            <div class="fi-ra-warning-content">
+                <div class="fi-ra-warning-title">{{ __('admin.gestion_routers.warning_browser_title') }}</div>
+                <div class="fi-ra-warning-text">
+                    {{ __('admin.gestion_routers.warning_browser_desc') }}
                 </div>
-            </x-slot>
+            </div>
+        </div>
 
-            <div class="space-y-4">
-                <p class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ __('admin.gestion_routers.local_connection_desc') }}
-                </p>
+        {{-- 1. Hero Banner Institucional con Verde Andalucía --}}
+        <div class="fi-ra-hero-banner">
+            <div>
+                <div class="fi-ra-hero-title">
+                    <span>📡</span>
+                    <span>{{ __('admin.gestion_routers.title') }}</span>
+                </div>
+                <div class="fi-ra-hero-desc">
+                    {{ __('admin.gestion_routers.subheading') }}
+                </div>
+            </div>
+            <div>
+                <span class="fi-ra-status-pill fi-ra-status-connected" style="font-size: 0.75rem;">
+                    <span>🛡️</span> Modo Operador Oficial
+                </span>
+            </div>
+        </div>
 
-                {{-- Selector de transporte y controles --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+        {{-- Guía Visual Rápida de Operación en 3 Pasos --}}
+        <div class="fi-ra-guide-grid">
+            <div class="fi-ra-guide-step">
+                <div class="fi-ra-step-num">1</div>
+                <div>
+                    <div class="fi-ra-step-title">{{ __('admin.gestion_routers.step1_title') }}</div>
+                    <div class="fi-ra-step-desc">{{ __('admin.gestion_routers.step1_desc') }}</div>
+                </div>
+            </div>
+
+            <div class="fi-ra-guide-step">
+                <div class="fi-ra-step-num">2</div>
+                <div>
+                    <div class="fi-ra-step-title">{{ __('admin.gestion_routers.step2_title') }}</div>
+                    <div class="fi-ra-step-desc">{{ __('admin.gestion_routers.step2_desc') }}</div>
+                </div>
+            </div>
+
+            <div class="fi-ra-guide-step">
+                <div class="fi-ra-step-num">3</div>
+                <div>
+                    <div class="fi-ra-step-title">{{ __('admin.gestion_routers.step3_title') }}</div>
+                    <div class="fi-ra-step-desc">{{ __('admin.gestion_routers.step3_desc') }}</div>
+                </div>
+            </div>
+        </div>
+
+        {{-- 2. Tarjeta: Conexión con el Nodo Local Físico del Operador --}}
+        <div class="fi-ra-card">
+            <div class="fi-ra-card-header">
+                <div class="fi-ra-title-flex">
+                    <div class="fi-ra-icon-badge">🔌</div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            {{ __('admin.gestion_routers.transport_label') }}
-                        </label>
-                        <select x-model="transportType" :disabled="connectionStatus === 'connected' || connectionStatus === 'connecting'" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 py-2 px-3 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                            <option value="serial">🔌 Web Serial (USB / COM)</option>
-                            <option value="bluetooth">📶 Web Bluetooth (BLE)</option>
-                            <option value="http">🌐 WiFi Local (HTTP / IP)</option>
-                        </select>
-                    </div>
-
-                    <div x-show="transportType === 'serial'">
-                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            {{ __('admin.gestion_routers.baud_rate_label') }}
-                        </label>
-                        <select x-model="baudRate" :disabled="connectionStatus === 'connected' || connectionStatus === 'connecting'" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 py-2 px-3 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 font-mono">
-                            <option value="115200">115200 baud</option>
-                            <option value="921600">921600 baud</option>
-                        </select>
-                    </div>
-
-                    <div x-show="transportType === 'http'">
-                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            {{ __('admin.gestion_routers.http_host_label') }}
-                        </label>
-                        <input type="text" x-model="httpHost" :disabled="connectionStatus === 'connected' || connectionStatus === 'connecting'" placeholder="192.168.1.100 o meshtastic.local" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 py-2 px-3 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 font-mono" />
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <button type="button" x-show="connectionStatus !== 'connected'" @click="connectLocalNode()" :disabled="connectionStatus === 'connecting'" class="w-full inline-flex justify-center items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 text-white font-bold text-xs rounded-lg transition-colors shadow-sm">
-                            <span x-show="connectionStatus !== 'connecting'">⚡ {{ __('admin.gestion_routers.btn_connect') }}</span>
-                            <span x-show="connectionStatus === 'connecting'">⏳ {{ __('admin.gestion_routers.status_connecting') }}</span>
-                        </button>
-
-                        <button type="button" x-show="connectionStatus === 'connected'" @click="disconnectLocalNode()" class="w-full inline-flex justify-center items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-bold text-xs rounded-lg transition-colors shadow-sm">
-                            🔌 {{ __('admin.gestion_routers.btn_disconnect') }}
-                        </button>
+                        <div class="fi-ra-card-heading">{{ __('admin.gestion_routers.local_connection_heading') }}</div>
+                        <div class="fi-ra-card-subheading">{{ __('admin.gestion_routers.local_connection_desc') }}</div>
                     </div>
                 </div>
 
-                {{-- Mensaje de error de conexión --}}
-                <div x-show="errorMessage" class="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-lg text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
-                    <span>⚠️</span>
-                    <span x-text="errorMessage"></span>
+                <div>
+                    <template x-if="connectionStatus === 'connected'">
+                        <span class="fi-ra-status-pill fi-ra-status-connected">
+                            <span class="fi-ra-dot fi-ra-dot-connected"></span>
+                            {{ __('admin.gestion_routers.status_connected') }}
+                            <span x-show="localNode.hexId" x-text="`(${localNode.hexId})`" class="font-mono"></span>
+                        </span>
+                    </template>
+
+                    <template x-if="connectionStatus === 'connecting'">
+                        <span class="fi-ra-status-pill fi-ra-status-connecting">
+                            <span class="fi-ra-dot fi-ra-dot-connecting"></span>
+                            {{ __('admin.gestion_routers.status_connecting') }}
+                        </span>
+                    </template>
+
+                    <template x-if="connectionStatus === 'disconnected'">
+                        <span class="fi-ra-status-pill fi-ra-status-disconnected">
+                            <span class="fi-ra-dot fi-ra-dot-disconnected"></span>
+                            {{ __('admin.gestion_routers.status_disconnected') }}
+                        </span>
+                    </template>
+
+                    <template x-if="connectionStatus === 'error'">
+                        <span class="fi-ra-status-pill fi-ra-status-error">
+                            <span class="fi-ra-dot fi-ra-dot-error"></span>
+                            {{ __('admin.gestion_routers.status_error') }}
+                        </span>
+                    </template>
                 </div>
             </div>
-        </x-filament::section>
 
-        {{-- Tarjeta 2: Selector del Router Objetivo de Andalucía --}}
-        <x-filament::section>
-            <x-slot name="heading">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">🎯</span>
-                    <span class="font-bold text-base text-gray-900 dark:text-gray-100">
-                        {{ __('admin.gestion_routers.target_router_heading') }}
-                    </span>
-                </div>
-            </x-slot>
-
-            <div class="space-y-4">
-                <p class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ __('admin.gestion_routers.target_router_desc') }}
-                </p>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            {{ __('admin.gestion_routers.select_router_label') }}
-                        </label>
-                        <select @change="onRouterSelectChange($event)" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 py-2.5 px-3 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                            <option value="">{{ __('admin.gestion_routers.select_placeholder') }}</option>
-                            <option value="manual">⚙️ {{ __('admin.gestion_routers.select_manual_option') }}</option>
-                            <optgroup label="{{ __('admin.gestion_routers.andalucia_optgroup') }}">
-                                @foreach($routers as $r)
-                                    <option value="{{ $r['dec_id'] }}"
-                                            data-hex="{{ $r['node_id'] }}"
-                                            data-name="{{ $r['short_name'] }} · {{ $r['long_name'] }}"
-                                            data-province="{{ $r['province'] }}"
-                                            data-role="{{ $r['role'] }}"
-                                            data-status="{{ $r['status'] }}">
-                                        [{{ $r['province'] }}] {{ $r['short_name'] }} ({{ $r['node_id'] }}) · {{ $r['long_name'] }} [{{ $r['role'] }}]
-                                    </option>
-                                @endforeach
-                            </optgroup>
-                        </select>
-                    </div>
-
-                    <div x-show="selectedTargetMode === 'manual'">
-                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            {{ __('admin.gestion_routers.manual_node_label') }}
-                        </label>
-                        <input type="text" x-model="manualNodeInput" placeholder="!2df0a1b2 o 770744754" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 py-2.5 px-3 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 font-mono" />
-                    </div>
+            {{-- Formulario de conexión al nodo físico --}}
+            <div class="fi-ra-form-grid fi-ra-form-grid-3">
+                <div class="fi-ra-form-group">
+                    <label class="fi-ra-label">{{ __('admin.gestion_routers.transport_label') }}</label>
+                    <select x-model="transportType" :disabled="connectionStatus === 'connected' || connectionStatus === 'connecting'" class="fi-ra-select">
+                        <option value="serial">🔌 Web Serial (USB / COM)</option>
+                        <option value="bluetooth">📶 Web Bluetooth (BLE)</option>
+                        <option value="http">🌐 WiFi Local (HTTP / IP)</option>
+                    </select>
                 </div>
 
-                {{-- Ficha resumen del router seleccionado --}}
-                <div x-show="selectedRouterHex || manualNodeInput" class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center justify-between flex-wrap gap-2 text-xs">
-                    <div class="flex items-center gap-3">
-                        <span class="text-lg">📡</span>
-                        <div>
-                            <div class="font-bold text-gray-900 dark:text-gray-100" x-text="selectedTargetMode === 'manual' ? (manualNodeInput || 'Nodo Manual') : selectedRouterName"></div>
-                            <div class="text-gray-500 dark:text-gray-400 font-mono text-[11px]">
-                                <span class="font-bold text-emerald-700 dark:text-emerald-400" x-text="selectedTargetMode === 'manual' ? manualNodeInput : selectedRouterHex"></span>
-                                <template x-if="selectedRouterProvince">
-                                    <span x-text="` · Prov: ${selectedRouterProvince}`"></span>
-                                </template>
-                                <template x-if="selectedRouterRole">
-                                    <span x-text="` · Rol actual: ${selectedRouterRole}`"></span>
-                                </template>
-                            </div>
-                        </div>
-                    </div>
+                <div class="fi-ra-form-group" x-show="transportType === 'serial'">
+                    <label class="fi-ra-label">{{ __('admin.gestion_routers.baud_rate_label') }}</label>
+                    <select x-model="baudRate" :disabled="connectionStatus === 'connected' || connectionStatus === 'connecting'" class="fi-ra-select font-mono">
+                        <option value="115200">115200 baud</option>
+                        <option value="921600">921600 baud</option>
+                    </select>
+                </div>
 
-                    <div class="flex items-center gap-2">
-                        <template x-if="selectedRouterStatus">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
-                                  :class="{
-                                      'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300': selectedRouterStatus === 'managed',
-                                      'bg-blue-500/20 text-blue-700 dark:text-blue-300': selectedRouterStatus === 'known',
-                                      'bg-amber-500/20 text-amber-700 dark:text-amber-300': selectedRouterStatus === 'new'
-                                  }"
-                                  x-text="selectedRouterStatus">
-                            </span>
+                <div class="fi-ra-form-group" x-show="transportType === 'http'">
+                    <label class="fi-ra-label">{{ __('admin.gestion_routers.http_host_label') }}</label>
+                    <input type="text" x-model="httpHost" :disabled="connectionStatus === 'connected' || connectionStatus === 'connecting'" placeholder="192.168.1.100 o meshtastic.local" class="fi-ra-input font-mono" />
+                </div>
+
+                <div class="fi-ra-form-group">
+                    <button type="button" x-show="connectionStatus !== 'connected'" @click="connectLocalNode()" :disabled="connectionStatus === 'connecting'" class="fi-ra-btn fi-ra-btn-primary" style="width: 100%;">
+                        <span x-show="connectionStatus !== 'connecting'">⚡ {{ __('admin.gestion_routers.btn_connect') }}</span>
+                        <span x-show="connectionStatus === 'connecting'">⏳ {{ __('admin.gestion_routers.status_connecting') }}</span>
+                    </button>
+
+                    <button type="button" x-show="connectionStatus === 'connected'" @click="disconnectLocalNode()" class="fi-ra-btn fi-ra-btn-danger" style="width: 100%;">
+                        🔌 {{ __('admin.gestion_routers.btn_disconnect') }}
+                    </button>
+                </div>
+            </div>
+
+            {{-- Ficha informativa cuando el nodo local está conectado --}}
+            <div x-show="connectionStatus === 'connected'" class="fi-ra-node-banner">
+                <div>
+                    <div class="fi-ra-node-banner-title">
+                        <span>⚡</span>
+                        <span>Nodo Local Operativo en Puesto de Trabajo</span>
+                    </div>
+                    <div class="fi-ra-node-banner-meta">
+                        Identificador: <span class="font-mono font-bold" x-text="localNode.hexId || 'Identificando...'"></span>
+                        · Puerto activo en navegador · Enlace de radiofrecuencia LoRa listo para inyectar paquetes.
+                    </div>
+                </div>
+                <div class="font-mono text-xs" style="color: #007A33; font-weight: 700;">
+                    Estado: ENLACE LORA ACTIVO
+                </div>
+            </div>
+
+            {{-- Alerta de error si falla la conexión física --}}
+            <div x-show="errorMessage" class="p-3 rounded-lg text-xs" style="background-color: rgba(244, 63, 94, 0.12); color: #9B1E15; border: 1px solid rgba(244, 63, 94, 0.3);">
+                <strong>⚠️ Fallo de conexión:</strong> <span x-text="errorMessage"></span>
+            </div>
+        </div>
+
+        {{-- 3. Tarjeta: Selector del Router Objetivo de Andalucía --}}
+        <div class="fi-ra-card">
+            <div class="fi-ra-card-header">
+                <div class="fi-ra-title-flex">
+                    <div class="fi-ra-icon-badge">🎯</div>
+                    <div>
+                        <div class="fi-ra-card-heading">{{ __('admin.gestion_routers.target_router_heading') }}</div>
+                        <div class="fi-ra-card-subheading">{{ __('admin.gestion_routers.target_router_desc') }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fi-ra-form-grid fi-ra-form-grid-2">
+                <div class="fi-ra-form-group">
+                    <label class="fi-ra-label">{{ __('admin.gestion_routers.select_router_label') }}</label>
+                    <select @change="onRouterSelectChange($event)" class="fi-ra-select">
+                        <option value="">{{ __('admin.gestion_routers.select_placeholder') }}</option>
+                        <optgroup label="{{ __('admin.gestion_routers.andalucia_optgroup') }}">
+                            @foreach($routers as $r)
+                                <option value="{{ $r['dec_id'] }}"
+                                        data-hex="{{ $r['node_id'] }}"
+                                        data-name="{{ $r['short_name'] }} · {{ $r['long_name'] }}"
+                                        data-province="{{ $r['province'] }}"
+                                        data-role="{{ $r['role'] }}"
+                                        data-status="{{ $r['status'] }}">
+                                    [{{ $r['province'] }}] {{ $r['short_name'] }} ({{ $r['node_id'] }}) · {{ $r['long_name'] }} [{{ $r['role'] }}]
+                                </option>
+                            @endforeach
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="fi-ra-form-group">
+                    <label class="fi-ra-label">{{ __('admin.gestion_routers.manual_node_label') }}</label>
+                    <input type="text" x-model="manualNodeInput" @input="onManualInputChange()" placeholder="{{ __('admin.gestion_routers.manual_node_placeholder') }}" class="fi-ra-input font-mono" />
+                    <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('admin.gestion_routers.manual_node_hint') }}</span>
+                </div>
+            </div>
+
+            {{-- Ficha destacada del router seleccionado --}}
+            <div x-show="selectedRouterHex || manualNodeInput" class="fi-ra-router-summary">
+                <div>
+                    <div class="fi-ra-router-name" x-text="selectedRouterName || (manualNodeInput ? `Nodo Manual ${manualNodeInput}` : 'Router Seleccionado')"></div>
+                    <div class="fi-ra-router-meta-row">
+                        <span>ID LoRa: <strong class="font-mono text-emerald-700 dark:text-emerald-400" x-text="selectedRouterHex || manualNodeInput"></strong></span>
+                        <template x-if="selectedRouterProvince">
+                            <span x-text="`· Provincia: ${selectedRouterProvince}`"></span>
+                        </template>
+                        <template x-if="selectedRouterRole">
+                            <span x-text="`· Rol actual: ${selectedRouterRole}`"></span>
                         </template>
                     </div>
                 </div>
-            </div>
-        </x-filament::section>
 
-        {{-- Tarjeta 3: Pestañas de Acciones Remotas --}}
-        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm overflow-hidden">
-            {{-- Barra de navegación entre pestañas --}}
-            <div class="flex border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/40 overflow-x-auto">
-                <button type="button" @click="activeTab = 'roles'" :class="activeTab === 'roles' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 bg-white dark:bg-gray-900 font-bold' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'" class="px-4 py-3 border-b-2 text-xs flex items-center gap-2 transition-all whitespace-nowrap">
+                <div>
+                    <template x-if="selectedRouterStatus">
+                        <span class="fi-ra-badge"
+                              :class="{
+                                  'fi-ra-badge-managed': selectedRouterStatus === 'managed',
+                                  'fi-ra-badge-known': selectedRouterStatus === 'known',
+                                  'fi-ra-badge-new': selectedRouterStatus === 'new'
+                              }"
+                              x-text="`Estado: ${selectedRouterStatus.toUpperCase()}`">
+                        </span>
+                    </template>
+                </div>
+            </div>
+
+            {{-- Aviso cuando no hay ningún router seleccionado todavía --}}
+            <div x-show="!selectedRouterHex && !manualNodeInput" class="p-3 rounded-lg text-xs" style="background-color: rgba(148, 163, 184, 0.08); border: 1px dashed rgba(148, 163, 184, 0.3); color: #64748B;">
+                <span>💡 {{ __('admin.gestion_routers.target_none_selected') }}</span>
+            </div>
+        </div>
+
+        {{-- 4. Contenedor de Pestañas de Acciones Operativas --}}
+        <div class="fi-ra-card" style="padding: 0; overflow: hidden;">
+            {{-- Barra de navegación de pestañas --}}
+            <div class="fi-ra-tabs-nav">
+                <button type="button" @click="activeTab = 'roles'" :class="activeTab === 'roles' ? 'active' : ''" class="fi-ra-tab-button">
                     <span>🔀</span>
                     <span>{{ __('admin.gestion_routers.tab_roles') }}</span>
                 </button>
 
-                <button type="button" @click="activeTab = 'favoritos'" :class="activeTab === 'favoritos' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 bg-white dark:bg-gray-900 font-bold' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'" class="px-4 py-3 border-b-2 text-xs flex items-center gap-2 transition-all whitespace-nowrap">
+                <button type="button" @click="activeTab = 'favoritos'" :class="activeTab === 'favoritos' ? 'active' : ''" class="fi-ra-tab-button">
                     <span>⭐</span>
                     <span>{{ __('admin.gestion_routers.tab_favorites') }}</span>
                 </button>
 
-                <button type="button" @click="activeTab = 'sondeo'" :class="activeTab === 'sondeo' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 bg-white dark:bg-gray-900 font-bold' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'" class="px-4 py-3 border-b-2 text-xs flex items-center gap-2 transition-all whitespace-nowrap">
+                <button type="button" @click="activeTab = 'sondeo'" :class="activeTab === 'sondeo' ? 'active' : ''" class="fi-ra-tab-button">
                     <span>📡</span>
                     <span>{{ __('admin.gestion_routers.tab_poll') }}</span>
                 </button>
 
-                <button type="button" @click="activeTab = 'unicast'" :class="activeTab === 'unicast' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 bg-white dark:bg-gray-900 font-bold' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'" class="px-4 py-3 border-b-2 text-xs flex items-center gap-2 transition-all whitespace-nowrap">
+                <button type="button" @click="activeTab = 'unicast'" :class="activeTab === 'unicast' ? 'active' : ''" class="fi-ra-tab-button">
                     <span>🎯</span>
                     <span>{{ __('admin.gestion_routers.tab_unicast') }}</span>
                 </button>
 
-                <button type="button" @click="activeTab = 'mantenimiento'" :class="activeTab === 'mantenimiento' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 bg-white dark:bg-gray-900 font-bold' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'" class="px-4 py-3 border-b-2 text-xs flex items-center gap-2 transition-all whitespace-nowrap">
+                <button type="button" @click="activeTab = 'mantenimiento'" :class="activeTab === 'mantenimiento' ? 'active' : ''" class="fi-ra-tab-button">
                     <span>⚙️</span>
                     <span>{{ __('admin.gestion_routers.tab_maintenance') }}</span>
                 </button>
             </div>
 
-            <div class="p-6">
+            {{-- Contenido de las pestañas --}}
+            <div class="fi-ra-tab-content">
                 {{-- PESTAÑA 1: ROLES --}}
-                <div x-show="activeTab === 'roles'" class="space-y-5">
+                <div x-show="activeTab === 'roles'" class="space-y-6">
                     <div>
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1 flex items-center gap-1.5">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                             <span>🔀</span> {{ __('admin.gestion_routers.roles_title') }}
                         </h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
                             {{ __('admin.gestion_routers.roles_desc') }}
                         </p>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                        <label class="relative flex flex-col p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="selectedRole == 1 ? 'border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 ring-1 ring-emerald-600' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50'">
-                            <input type="radio" name="targetRole" value="1" x-model="selectedRole" class="sr-only">
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="font-bold text-xs text-gray-900 dark:text-gray-100">CLIENT_MUTE</span>
-                                <span class="text-xs">🔇</span>
+                    <div class="fi-ra-role-grid">
+                        <div class="fi-ra-role-card" :class="selectedRole == 1 ? 'selected' : ''" @click="selectedRole = 1">
+                            <div class="fi-ra-role-header">
+                                <span class="fi-ra-role-title">CLIENT_MUTE</span>
+                                <span class="text-lg">🔇</span>
                             </div>
-                            <span class="text-[11px] text-gray-500 dark:text-gray-400">Silencia el nodo. No retransmite paquetes de terceros. Ideal ante spam o bucles.</span>
-                        </label>
+                            <div class="fi-ra-role-desc">
+                                Silencia el nodo. No retransmite paquetes de otros usuarios. Ideal ante spam masivo o saturación temporal en la zona.
+                            </div>
+                        </div>
 
-                        <label class="relative flex flex-col p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="selectedRole == 2 ? 'border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 ring-1 ring-emerald-600' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50'">
-                            <input type="radio" name="targetRole" value="2" x-model="selectedRole" class="sr-only">
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="font-bold text-xs text-gray-900 dark:text-gray-100">ROUTER</span>
-                                <span class="text-xs">⚡</span>
+                        <div class="fi-ra-role-card" :class="selectedRole == 2 ? 'selected' : ''" @click="selectedRole = 2">
+                            <div class="fi-ra-role-header">
+                                <span class="fi-ra-role-title">ROUTER</span>
+                                <span class="text-lg">⚡</span>
                             </div>
-                            <span class="text-[11px] text-gray-500 dark:text-gray-400">Reenvío prioritario inmediato en malla. Solo nodos fijos en ubicaciones estratégicas.</span>
-                        </label>
+                            <div class="fi-ra-role-desc">
+                                Reenvío prioritario inmediato en malla. Reservado para repetidores estratégicos en cotas elevadas aprobados en Andalucía.
+                            </div>
+                        </div>
 
-                        <label class="relative flex flex-col p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="selectedRole == 11 ? 'border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 ring-1 ring-emerald-600' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50'">
-                            <input type="radio" name="targetRole" value="11" x-model="selectedRole" class="sr-only">
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="font-bold text-xs text-gray-900 dark:text-gray-100">ROUTER_LATE</span>
-                                <span class="text-xs">⏱️</span>
+                        <div class="fi-ra-role-card" :class="selectedRole == 11 ? 'selected' : ''" @click="selectedRole = 11">
+                            <div class="fi-ra-role-header">
+                                <span class="fi-ra-role-title">ROUTER_LATE</span>
+                                <span class="text-lg">⏱️</span>
                             </div>
-                            <span class="text-[11px] text-gray-500 dark:text-gray-400">Reenvío retardado para respaldo. Evita colisiones cuando hay otro router principal.</span>
-                        </label>
+                            <div class="fi-ra-role-desc">
+                                Reenvío retardado para respaldo. Proporciona redundancia controlada sin colisionar con el router principal.
+                            </div>
+                        </div>
 
-                        <label class="relative flex flex-col p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="selectedRole == 0 ? 'border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 ring-1 ring-emerald-600' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50'">
-                            <input type="radio" name="targetRole" value="0" x-model="selectedRole" class="sr-only">
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="font-bold text-xs text-gray-900 dark:text-gray-100">CLIENT</span>
-                                <span class="text-xs">📱</span>
+                        <div class="fi-ra-role-card" :class="selectedRole == 0 ? 'selected' : ''" @click="selectedRole = 0">
+                            <div class="fi-ra-role-header">
+                                <span class="fi-ra-role-title">CLIENT</span>
+                                <span class="text-lg">📱</span>
                             </div>
-                            <span class="text-[11px] text-gray-500 dark:text-gray-400">Nodo cliente estándar normal con retransmisión comunitaria equilibrada.</span>
-                        </label>
+                            <div class="fi-ra-role-desc">
+                                Rol cliente normal estándar con retransmisión comunitaria equilibrada.
+                            </div>
+                        </div>
                     </div>
 
                     <div class="pt-2">
-                        <button type="button" @click="applyRemoteRole()" :disabled="roleSending || connectionStatus !== 'connected' || (!selectedRouterNodeNum && !manualNodeInput)" class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 text-white font-bold text-xs rounded-lg transition-colors shadow-sm">
+                        <button type="button" @click="applyRemoteRole()" :disabled="roleSending || connectionStatus !== 'connected' || (!selectedRouterNodeNum && !manualNodeInput)" class="fi-ra-btn fi-ra-btn-primary">
                             <span x-show="!roleSending">🚀 {{ __('admin.gestion_routers.btn_apply_role') }}</span>
                             <span x-show="roleSending">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
                         </button>
+
+                        <div x-show="connectionStatus !== 'connected'" class="text-xs mt-2 flex items-center gap-1.5" style="color: #D97706;">
+                            <span>⚠️</span> <span>{{ __('admin.gestion_routers.connect_prompt_hint') }}</span>
+                        </div>
+                        <div x-show="connectionStatus === 'connected' && !selectedRouterNodeNum && !manualNodeInput" class="text-xs mt-2 flex items-center gap-1.5" style="color: #D97706;">
+                            <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
+                        </div>
                     </div>
                 </div>
 
                 {{-- PESTAÑA 2: FAVORITOS --}}
-                <div x-show="activeTab === 'favoritos'" class="space-y-5">
+                <div x-show="activeTab === 'favoritos'" class="space-y-6">
                     <div>
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1 flex items-center gap-1.5">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                             <span>⭐</span> {{ __('admin.gestion_routers.favorites_title') }}
                         </h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
                             {{ __('admin.gestion_routers.favorites_desc') }}
                         </p>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                {{ __('admin.gestion_routers.favorite_input_label') }}
-                            </label>
-                            <input type="text" x-model="favoriteNodeInput" placeholder="!2df0a1b2 o ID decimal" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 py-2.5 px-3 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 font-mono" />
+                    <div class="fi-ra-form-grid" style="grid-template-columns: 2fr 1fr;">
+                        <div class="fi-ra-form-group">
+                            <label class="fi-ra-label">{{ __('admin.gestion_routers.favorite_input_label') }}</label>
+                            <input type="text" x-model="favoriteNodeInput" placeholder="!2df0a1b2 o ID decimal" class="fi-ra-input font-mono" />
                         </div>
 
-                        <div class="flex items-center gap-2">
-                            <button type="button" @click="applyRemoteFavorite('add')" :disabled="favoriteSending || !favoriteNodeInput || connectionStatus !== 'connected'" class="flex-1 inline-flex justify-center items-center gap-1.5 px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 text-white font-bold text-xs rounded-lg transition-colors shadow-sm whitespace-nowrap">
+                        <div style="display: flex; gap: 0.75rem;">
+                            <button type="button" @click="applyRemoteFavorite('add')" :disabled="favoriteSending || !favoriteNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-primary" style="flex: 1;">
                                 <span>⭐</span> {{ __('admin.gestion_routers.btn_add_favorite') }}
                             </button>
 
-                            <button type="button" @click="applyRemoteFavorite('remove')" :disabled="favoriteSending || !favoriteNodeInput || connectionStatus !== 'connected'" class="flex-1 inline-flex justify-center items-center gap-1.5 px-3 py-2.5 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 disabled:opacity-50 text-white font-bold text-xs rounded-lg transition-colors shadow-sm whitespace-nowrap">
+                            <button type="button" @click="applyRemoteFavorite('remove')" :disabled="favoriteSending || !favoriteNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-danger" style="flex: 1;">
                                 <span>🗑️</span> {{ __('admin.gestion_routers.btn_remove_favorite') }}
                             </button>
                         </div>
                     </div>
 
+                    <div x-show="connectionStatus !== 'connected'" class="text-xs mt-1 flex items-center gap-1.5" style="color: #D97706;">
+                        <span>⚠️</span> <span>{{ __('admin.gestion_routers.connect_prompt_hint') }}</span>
+                    </div>
+                    <div x-show="connectionStatus === 'connected' && !selectedRouterNodeNum && !manualNodeInput" class="text-xs mt-1 flex items-center gap-1.5" style="color: #D97706;">
+                        <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
+                    </div>
+
                     {{-- Lista de favoritos manipulados en la sesión --}}
-                    <div x-show="sessionFavorites.length > 0" class="pt-3 border-t border-gray-100 dark:border-gray-800">
-                        <div class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                            {{ __('admin.gestion_routers.session_favorites_heading') }}
-                        </div>
-                        <div class="flex flex-wrap gap-2">
+                    <div x-show="sessionFavorites.length > 0" style="padding-top: 1rem; border-top: 1px solid #E0E1EB;">
+                        <div class="fi-ra-label" style="margin-bottom: 0.6rem;">{{ __('admin.gestion_routers.session_favorites_heading') }}</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
                             <template x-for="fav in sessionFavorites" :key="fav">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                                <span class="fi-ra-badge fi-ra-badge-managed font-mono" style="padding: 0.4rem 0.75rem;">
                                     <span>⭐</span>
                                     <span x-text="fav"></span>
-                                    <button type="button" @click="favoriteNodeInput = fav; applyRemoteFavorite('remove')" class="text-rose-500 hover:text-rose-700 ml-1 font-bold">×</button>
+                                    <button type="button" @click="favoriteNodeInput = fav; applyRemoteFavorite('remove')" style="margin-left: 0.5rem; background: none; border: none; cursor: pointer; color: #E5484D; font-weight: bold;">×</button>
                                 </span>
                             </template>
                         </div>
@@ -323,198 +1179,200 @@
                 </div>
 
                 {{-- PESTAÑA 3: SONDEO DE MALLA (BROADCAST) --}}
-                <div x-show="activeTab === 'sondeo'" class="space-y-5">
+                <div x-show="activeTab === 'sondeo'" class="space-y-6">
                     <div>
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1 flex items-center gap-1.5">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                             <span>📡</span> {{ __('admin.gestion_routers.poll_title') }}
                         </h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
                             {{ __('admin.gestion_routers.poll_desc') }}
                         </p>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <button type="button" @click="sendMeshPoll('nodeinfo')" :disabled="pollSending || connectionStatus !== 'connected'" class="p-4 border border-gray-200 dark:border-gray-800 rounded-xl hover:border-emerald-500 hover:bg-emerald-50/20 dark:hover:bg-emerald-950/20 transition-all text-left group">
-                            <div class="text-2xl mb-2">📡</div>
-                            <div class="font-bold text-xs text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors">
-                                {{ __('admin.gestion_routers.btn_poll_nodeinfo') }}
-                            </div>
-                            <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
-                                Solicita a todos los nodos en cobertura que emitan su nombre, modelo y datos básicos.
+                    <div class="fi-ra-action-grid fi-ra-action-grid-3">
+                        <button type="button" @click="sendMeshPoll('nodeinfo')" :disabled="pollSending || connectionStatus !== 'connected'" class="fi-ra-action-card">
+                            <div class="fi-ra-action-icon">📡</div>
+                            <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_poll_nodeinfo') }}</div>
+                            <div class="fi-ra-action-desc">
+                                Solicita a todos los nodos en cobertura que emitan su nombre, modelo y datos básicos de identificación.
                             </div>
                         </button>
 
-                        <button type="button" @click="sendMeshPoll('position')" :disabled="pollSending || connectionStatus !== 'connected'" class="p-4 border border-gray-200 dark:border-gray-800 rounded-xl hover:border-emerald-500 hover:bg-emerald-50/20 dark:hover:bg-emerald-950/20 transition-all text-left group">
-                            <div class="text-2xl mb-2">📍</div>
-                            <div class="font-bold text-xs text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors">
-                                {{ __('admin.gestion_routers.btn_poll_position') }}
-                            </div>
-                            <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
-                                Pide a los nodos con GPS o posición fija que transmitan sus coordenadas.
+                        <button type="button" @click="sendMeshPoll('position')" :disabled="pollSending || connectionStatus !== 'connected'" class="fi-ra-action-card">
+                            <div class="fi-ra-action-icon">📍</div>
+                            <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_poll_position') }}</div>
+                            <div class="fi-ra-action-desc">
+                                Pide a los nodos con GPS o posición fija configurada que transmitan sus coordenadas actuales.
                             </div>
                         </button>
 
-                        <button type="button" @click="sendMeshPoll('telemetry')" :disabled="pollSending || connectionStatus !== 'connected'" class="p-4 border border-gray-200 dark:border-gray-800 rounded-xl hover:border-emerald-500 hover:bg-emerald-50/20 dark:hover:bg-emerald-950/20 transition-all text-left group">
-                            <div class="text-2xl mb-2">🔋</div>
-                            <div class="font-bold text-xs text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors">
-                                {{ __('admin.gestion_routers.btn_poll_telemetry') }}
-                            </div>
-                            <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
-                                Solicita datos de batería, voltaje y porcentaje de utilización de canal (ChUtil).
+                        <button type="button" @click="sendMeshPoll('telemetry')" :disabled="pollSending || connectionStatus !== 'connected'" class="fi-ra-action-card">
+                            <div class="fi-ra-action-icon">🔋</div>
+                            <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_poll_telemetry') }}</div>
+                            <div class="fi-ra-action-desc">
+                                Solicita datos energéticos (batería, voltaje) y porcentaje de saturación de canal (ChUtil / AirUtil).
                             </div>
                         </button>
+                    </div>
+
+                    <div x-show="connectionStatus !== 'connected'" class="text-xs mt-1 flex items-center gap-1.5" style="color: #D97706;">
+                        <span>⚠️</span> <span>{{ __('admin.gestion_routers.connect_prompt_hint') }}</span>
                     </div>
                 </div>
 
                 {{-- PESTAÑA 4: PETICIÓN A UN NODO (UNICAST) --}}
-                <div x-show="activeTab === 'unicast'" class="space-y-5">
+                <div x-show="activeTab === 'unicast'" class="space-y-6">
                     <div>
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1 flex items-center gap-1.5">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                             <span>🎯</span> {{ __('admin.gestion_routers.unicast_title') }}
                         </h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
                             {{ __('admin.gestion_routers.unicast_desc') }}
                         </p>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            {{ __('admin.gestion_routers.unicast_target_label') }}
-                        </label>
-                        <input type="text" x-model="unicastTargetInput" :placeholder="selectedRouterHex ? `Por defecto router actual: ${selectedRouterHex}` : 'Introduce !hex o decimal'" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 py-2.5 px-3 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 font-mono" />
+                    <div class="fi-ra-form-group">
+                        <label class="fi-ra-label">{{ __('admin.gestion_routers.unicast_target_label') }}</label>
+                        <input type="text" x-model="unicastTargetInput" :placeholder="selectedRouterHex ? `Por defecto router actual: ${selectedRouterHex}` : 'Introduce !hex o decimal'" class="fi-ra-input font-mono" />
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                        <button type="button" @click="sendUnicastRequest('nodeinfo')" :disabled="unicastSending || connectionStatus !== 'connected'" class="p-3 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-emerald-500 hover:bg-emerald-50/20 text-left transition-all">
-                            <div class="font-bold text-xs text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
-                                <span>ℹ️</span> {{ __('admin.gestion_routers.btn_req_nodeinfo') }}
-                            </div>
-                            <div class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Identidad y hardware</div>
+                    <div class="fi-ra-action-grid fi-ra-action-grid-4">
+                        <button type="button" @click="sendUnicastRequest('nodeinfo')" :disabled="unicastSending || connectionStatus !== 'connected'" class="fi-ra-action-card">
+                            <div class="fi-ra-action-icon">ℹ️</div>
+                            <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_req_nodeinfo') }}</div>
+                            <div class="fi-ra-action-desc">Identidad, modelo de hardware y roles.</div>
                         </button>
 
-                        <button type="button" @click="sendUnicastRequest('position')" :disabled="unicastSending || connectionStatus !== 'connected'" class="p-3 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-emerald-500 hover:bg-emerald-50/20 text-left transition-all">
-                            <div class="font-bold text-xs text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
-                                <span>📍</span> {{ __('admin.gestion_routers.btn_req_position') }}
-                            </div>
-                            <div class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Ubicación GPS</div>
+                        <button type="button" @click="sendUnicastRequest('position')" :disabled="unicastSending || connectionStatus !== 'connected'" class="fi-ra-action-card">
+                            <div class="fi-ra-action-icon">📍</div>
+                            <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_req_position') }}</div>
+                            <div class="fi-ra-action-desc">Coordenadas y altitud GPS directa.</div>
                         </button>
 
-                        <button type="button" @click="sendUnicastRequest('telemetry')" :disabled="unicastSending || connectionStatus !== 'connected'" class="p-3 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-emerald-500 hover:bg-emerald-50/20 text-left transition-all">
-                            <div class="font-bold text-xs text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
-                                <span>🔋</span> {{ __('admin.gestion_routers.btn_req_telemetry') }}
-                            </div>
-                            <div class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Métricas y batería</div>
+                        <button type="button" @click="sendUnicastRequest('telemetry')" :disabled="unicastSending || connectionStatus !== 'connected'" class="fi-ra-action-card">
+                            <div class="fi-ra-action-icon">🔋</div>
+                            <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_req_telemetry') }}</div>
+                            <div class="fi-ra-action-desc">Métricas de batería y uso de radio.</div>
                         </button>
 
-                        <button type="button" @click="sendUnicastRequest('traceroute')" :disabled="unicastSending || connectionStatus !== 'connected'" class="p-3 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-emerald-500 hover:bg-emerald-50/20 text-left transition-all">
-                            <div class="font-bold text-xs text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
-                                <span>🔄</span> {{ __('admin.gestion_routers.btn_req_traceroute') }}
-                            </div>
-                            <div class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Rastreo de saltos / ruta</div>
+                        <button type="button" @click="sendUnicastRequest('traceroute')" :disabled="unicastSending || connectionStatus !== 'connected'" class="fi-ra-action-card">
+                            <div class="fi-ra-action-icon">🔄</div>
+                            <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_req_traceroute') }}</div>
+                            <div class="fi-ra-action-desc">Rastreo de saltos / ruta de retorno.</div>
                         </button>
+                    </div>
+
+                    <div x-show="connectionStatus !== 'connected'" class="text-xs mt-1 flex items-center gap-1.5" style="color: #D97706;">
+                        <span>⚠️</span> <span>{{ __('admin.gestion_routers.connect_prompt_hint') }}</span>
+                    </div>
+                    <div x-show="connectionStatus === 'connected' && !unicastTargetInput && !selectedRouterHex && !manualNodeInput" class="text-xs mt-1 flex items-center gap-1.5" style="color: #D97706;">
+                        <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
                     </div>
                 </div>
 
                 {{-- PESTAÑA 5: MANTENIMIENTO --}}
-                <div x-show="activeTab === 'mantenimiento'" class="space-y-5">
+                <div x-show="activeTab === 'mantenimiento'" class="space-y-6">
                     <div>
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1 flex items-center gap-1.5">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                             <span>⚙️</span> {{ __('admin.gestion_routers.maintenance_title') }}
                         </h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
                             {{ __('admin.gestion_routers.maintenance_desc') }}
                         </p>
                     </div>
 
-                    <div class="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl space-y-4">
-                        <div class="flex items-center gap-2 text-xs font-bold text-amber-800 dark:text-amber-300">
+                    <div class="p-6 rounded-xl" style="background-color: rgba(245, 158, 11, 0.08); border: 1.5px solid rgba(245, 158, 11, 0.3); display: flex; flex-direction: column; gap: 1rem;">
+                        <div class="font-bold text-sm text-amber-800 dark:text-amber-300 flex items-center gap-2">
                             <span>⚠️</span> {{ __('admin.gestion_routers.reboot_heading') }}
                         </div>
-                        <p class="text-xs text-amber-700 dark:text-amber-400">
+                        <p class="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
                             {{ __('admin.gestion_routers.reboot_desc') }}
                         </p>
 
-                        <div class="flex items-center gap-3">
-                            <label class="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                {{ __('admin.gestion_routers.delay_secs_label') }}:
-                            </label>
-                            <input type="number" min="1" max="600" x-model="rebootSeconds" class="w-24 text-xs rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 py-1.5 px-3 shadow-sm font-mono" />
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <label class="fi-ra-label" style="margin: 0;">{{ __('admin.gestion_routers.delay_secs_label') }}:</label>
+                            <input type="number" min="1" max="600" x-model="rebootSeconds" class="fi-ra-input font-mono" style="width: 6rem; padding: 0.4rem 0.6rem;" />
                             <span class="text-xs text-gray-500 dark:text-gray-400">segundos</span>
                         </div>
 
-                        <button type="button" @click="applyRemoteReboot()" :disabled="rebootSending || connectionStatus !== 'connected' || (!selectedRouterNodeNum && !manualNodeInput)" class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 disabled:opacity-50 text-white font-bold text-xs rounded-lg transition-colors shadow-sm">
-                            <span x-show="!rebootSending">⚠️ {{ __('admin.gestion_routers.btn_apply_reboot') }}</span>
-                            <span x-show="rebootSending">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
-                        </button>
+                        <div style="padding-top: 0.5rem;">
+                            <button type="button" @click="applyRemoteReboot()" :disabled="rebootSending || connectionStatus !== 'connected' || (!selectedRouterNodeNum && !manualNodeInput)" class="fi-ra-btn fi-ra-btn-warning">
+                                <span x-show="!rebootSending">⚠️ {{ __('admin.gestion_routers.btn_apply_reboot') }}</span>
+                                <span x-show="rebootSending">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
+                            </button>
+
+                            <div x-show="connectionStatus !== 'connected'" class="text-xs mt-2 flex items-center gap-1.5" style="color: #D97706;">
+                                <span>⚠️</span> <span>{{ __('admin.gestion_routers.connect_prompt_hint') }}</span>
+                            </div>
+                            <div x-show="connectionStatus === 'connected' && !selectedRouterNodeNum && !manualNodeInput" class="text-xs mt-2 flex items-center gap-1.5" style="color: #D97706;">
+                                <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Tarjeta 4: Consola / Terminal de Actividad en Tiempo Real --}}
-        <x-filament::section>
-            <x-slot name="heading">
-                <div class="flex items-center justify-between flex-wrap gap-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xl">📟</span>
-                        <span class="font-bold text-base text-gray-900 dark:text-gray-100">
-                            {{ __('admin.gestion_routers.terminal_heading') }}
-                        </span>
-                        <span class="text-xs font-mono text-gray-400" x-text="`(${logs.length} eventos)`"></span>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        {{-- Filtro de log --}}
-                        <select x-model="logFilter" class="text-[11px] rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 py-1 px-2">
-                            <option value="all">Todos</option>
-                            <option value="tx">Solo TX (Transmitidos)</option>
-                            <option value="rx">Solo RX (Recibidos)</option>
-                            <option value="ack">Solo ACKs</option>
-                            <option value="error">Solo Errores</option>
-                        </select>
-
-                        <button type="button" @click="copyLogs()" class="px-2.5 py-1 text-xs rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
-                            📋 Copiar
-                        </button>
-
-                        <button type="button" @click="clearLogs()" class="px-2.5 py-1 text-xs rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
-                            🗑️ Limpiar
-                        </button>
-                    </div>
+        {{-- 5. Tarjeta: Consola / Terminal de Actividad en Tiempo Real --}}
+        <div class="fi-ra-terminal-card">
+            <div class="fi-ra-terminal-topbar">
+                <div class="fi-ra-terminal-title">
+                    <span>📟</span>
+                    <span>{{ __('admin.gestion_routers.terminal_heading') }}</span>
+                    <span style="font-size: 0.75rem; color: #94A3B8; font-weight: normal;" x-text="`(${logs.length} eventos registrados)`"></span>
                 </div>
-            </x-slot>
 
-            <div id="meshAdminConsole" class="h-64 overflow-y-auto bg-slate-950 text-slate-100 font-mono text-[11px] p-3 rounded-lg border border-slate-800 space-y-1 select-text">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    {{-- Filtro de eventos --}}
+                    <select x-model="logFilter" class="fi-ra-select" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; width: auto; background-color: #1E293B; color: #F1F5F9; border-color: #334155;">
+                        <option value="all">Todos los eventos</option>
+                        <option value="tx">Solo TX (Transmitidos)</option>
+                        <option value="rx">Solo RX (Recibidos)</option>
+                        <option value="ack">Solo ACKs</option>
+                        <option value="error">Solo Errores</option>
+                    </select>
+
+                    <button type="button" @click="copyLogs()" class="fi-ra-btn" style="background-color: #1E293B; color: #F1F5F9; border: 1px solid #334155; padding: 0.35rem 0.75rem; font-size: 0.75rem;">
+                        📋 Copiar
+                    </button>
+
+                    <button type="button" @click="clearLogs()" class="fi-ra-btn" style="background-color: #1E293B; color: #F1F5F9; border: 1px solid #334155; padding: 0.35rem 0.75rem; font-size: 0.75rem;">
+                        🗑️ Limpiar
+                    </button>
+                </div>
+            </div>
+
+            <div id="meshAdminConsole" class="fi-ra-terminal-body">
                 <template x-if="filteredLogs.length === 0">
-                    <div class="text-slate-500 italic py-4 text-center">
+                    <div style="color: #64748B; font-style: italic; text-align: center; padding: 3rem 1rem;">
                         {{ __('admin.gestion_routers.terminal_empty') }}
                     </div>
                 </template>
 
                 <template x-for="(l, idx) in filteredLogs" :key="idx">
-                    <div class="leading-relaxed flex items-start gap-2 hover:bg-slate-900/60 px-1 rounded transition-colors">
-                        <span class="text-slate-500 select-none" x-text="`[${l.time}]`"></span>
+                    <div class="fi-ra-terminal-line">
+                        <span style="color: #64748B; user-select: none;" x-text="`[${l.time}]`"></span>
                         
                         <template x-if="l.type === 'tx'">
-                            <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400">TX ➡️</span>
+                            <span class="fi-ra-log-badge fi-ra-log-tx">TX ➡️</span>
                         </template>
                         <template x-if="l.type === 'rx'">
-                            <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400">RX ⬅️</span>
+                            <span class="fi-ra-log-badge fi-ra-log-rx">RX ⬅️</span>
                         </template>
                         <template x-if="l.type === 'ack'">
-                            <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400">ACK ✅</span>
+                            <span class="fi-ra-log-badge fi-ra-log-ack">ACK ✅</span>
                         </template>
                         <template x-if="l.type === 'error'">
-                            <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400">ERR ❌</span>
+                            <span class="fi-ra-log-badge fi-ra-log-error">ERR ❌</span>
                         </template>
                         <template x-if="l.type === 'info'">
-                            <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-slate-500/20 text-slate-400">INFO</span>
+                            <span class="fi-ra-log-badge fi-ra-log-info">INFO</span>
                         </template>
 
-                        <span class="flex-1 text-slate-200 break-all" x-text="l.text"></span>
+                        <span style="flex: 1; word-break: break-all;" x-text="l.text"></span>
                     </div>
                 </template>
             </div>
-        </x-filament::section>
+        </div>
     </div>
 </x-filament-panels::page>

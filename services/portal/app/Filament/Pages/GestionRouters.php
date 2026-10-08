@@ -7,6 +7,7 @@ namespace App\Filament\Pages;
 use App\Models\CoordinatedRouter;
 use BackedEnum;
 use Filament\Pages\Page;
+use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
@@ -24,6 +25,11 @@ class GestionRouters extends Page
     protected static ?int $navigationSort = 2;
 
     protected string $view = 'filament.pages.gestion-routers';
+
+    public function getMaxContentWidth(): Width|string|null
+    {
+        return Width::Full;
+    }
 
     public static function getNavigationGroup(): ?string
     {

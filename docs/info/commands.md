@@ -30,6 +30,8 @@ Catálogo de comandos, scripts de compilación, ejecución, pruebas y tareas ope
 | `php artisan portal:vistas` | Verifica la existencia y tipos de las vistas contrato `api_*` en `snm_ingest` | PHP 8.5, Laravel, `services/portal/` |
 | `php artisan operador:crear {email} {nombre}` | Da de alta un operador en el panel `/admin` solicitando contraseña de 12+ chars | PHP 8.5, Laravel, `services/portal/` |
 | `php artisan operador:desactivar {email}` | Revoca el acceso y desactiva a un operador técnico en `/admin` | PHP 8.5, Laravel, `services/portal/` |
+| `npm run build:mesh-admin` | Compila el bundle IIFE autónomo `mesh-admin.bundle.js` para la consola de gestión de routers en Filament | Node.js, Vite, `services/portal/` |
+| `npm run build:configurador` | Empaqueta el bundle autónomo de `configurador.js` para el portal y MeshConfig | Node.js, Vite, `services/portal/` |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

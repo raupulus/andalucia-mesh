@@ -329,46 +329,81 @@ export function meshAdminComponent() {
          * Obtiene el número uint32 del router objetivo actual.
          */
         resolveTargetNodeNum() {
-            if (this.selectedTargetMode === 'manual') {
-                const parsed = parseNodeNum(this.manualNodeInput);
-                if (!parsed) {
-                    throw new Error('Introduce un Node ID manual válido en hexadecimal (!XXXXXXXX) o decimal.');
-                }
-                return parsed;
+            // Prioridad al input manual si el usuario ha escrito o pegado un ID
+            const manual = (this.manualNodeInput || '').trim();
+            if (manual) {
+                const parsed = parseNodeNum(manual);
+                if (parsed > 0) return parsed;
             }
 
-            const parsed = parseNodeNum(this.selectedRouterNodeNum);
-            if (!parsed) {
-                throw new Error('Selecciona un router de Andalucía de la lista.');
+            const fromSelect = parseNodeNum(this.selectedRouterNodeNum);
+            if (fromSelect > 0) {
+                return fromSelect;
             }
-            return parsed;
+
+            throw new Error('Selecciona un router de Andalucía de la lista o introduce un Node ID manual válido (!XXXXXXXX o decimal).');
         },
 
         /**
-         * Actualiza los datos del router remoto al cambiar el selector.
+         * Actualiza los datos del router remoto al cambiar el selector de la lista.
          */
         onRouterSelectChange(event) {
-            const val = event.target.value;
-            if (!val || val === 'manual') {
-                this.selectedTargetMode = val === 'manual' ? 'manual' : 'preset';
-                this.selectedRouterNodeNum = '';
-                this.selectedRouterHex = '';
-                this.selectedRouterName = '';
-                this.selectedRouterProvince = '';
-                this.selectedRouterRole = '';
-                this.selectedRouterStatus = '';
+            const val = event.target ? event.target.value : event;
+            if (!val) {
+                if (!this.manualNodeInput.trim()) {
+                    this.selectedRouterHex = '';
+                    this.selectedRouterNodeNum = '';
+                    this.selectedRouterName = '';
+                }
+                return;
+            }
+
+            if (val === 'manual') {
+                this.selectedTargetMode = 'manual';
                 return;
             }
 
             this.selectedTargetMode = 'preset';
             this.selectedRouterNodeNum = val;
-            const opt = event.target.selectedOptions[0];
+            const opt = event.target && event.target.selectedOptions ? event.target.selectedOptions[0] : null;
             if (opt) {
                 this.selectedRouterHex = opt.getAttribute('data-hex') || numToHex(Number(val));
                 this.selectedRouterName = opt.getAttribute('data-name') || '';
                 this.selectedRouterProvince = opt.getAttribute('data-province') || '';
                 this.selectedRouterRole = opt.getAttribute('data-role') || '';
                 this.selectedRouterStatus = opt.getAttribute('data-status') || '';
+            } else {
+                this.selectedRouterHex = numToHex(Number(val));
+            }
+
+            // Sincronizar el input manual y el destino unicast
+            this.manualNodeInput = this.selectedRouterHex;
+            this.unicastTargetInput = this.selectedRouterHex;
+            this.log('info', `Router seleccionado: ${this.selectedRouterName || this.selectedRouterHex}`);
+        },
+
+        /**
+         * Maneja cambios cuando el operador escribe o pega directamente un ID manual.
+         */
+        onManualInputChange() {
+            const clean = (this.manualNodeInput || '').trim();
+            if (!clean) {
+                if (!this.selectedRouterNodeNum) {
+                    this.selectedRouterHex = '';
+                    this.selectedRouterName = '';
+                }
+                return;
+            }
+            const num = parseNodeNum(clean);
+            if (num > 0) {
+                this.selectedTargetMode = 'manual';
+                this.selectedRouterNodeNum = String(num);
+                this.selectedRouterHex = numToHex(num);
+                this.selectedRouterName = `Nodo Manual ${this.selectedRouterHex}`;
+                this.selectedRouterProvince = '';
+                this.selectedRouterRole = '';
+                this.selectedRouterStatus = '';
+                this.unicastTargetInput = this.selectedRouterHex;
             }
         },
 
@@ -653,14 +688,19 @@ export function meshAdminComponent() {
     };
 }
 
-// Registro global en Alpine.js
-function registerMeshAdmin() {
+// Exposición global en window y registro en Alpine.js
+if (typeof window !== 'undefined') {
+    window.meshAdmin = meshAdminComponent;
+    window.numToHex = numToHex;
+    window.parseNodeNum = parseNodeNum;
+
     if (window.Alpine) {
         window.Alpine.data('meshAdmin', meshAdminComponent);
-    } else {
-        document.addEventListener('alpine:init', () => {
-            window.Alpine.data('meshAdmin', meshAdminComponent);
-        });
     }
+    document.addEventListener('alpine:init', () => {
+        if (window.Alpine) {
+            window.Alpine.data('meshAdmin', meshAdminComponent);
+        }
+    });
 }
-registerMeshAdmin();
+

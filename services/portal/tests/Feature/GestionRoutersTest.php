@@ -39,6 +39,8 @@ class GestionRoutersTest extends TestCase
 
         $response->assertSuccessful();
         $response->assertSee(__('admin.gestion_routers.title'));
+        $response->assertSee(__('admin.gestion_routers.warning_browser_title'));
+        $response->assertSee('/js/mesh-admin.bundle.js');
         $response->assertSee(__('admin.gestion_routers.local_connection_heading'));
         $response->assertSee(__('admin.gestion_routers.target_router_heading'));
     }

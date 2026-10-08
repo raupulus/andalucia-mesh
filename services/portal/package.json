@@ -3,8 +3,9 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build && npm run build:configurador",
+        "build": "vite build && npm run build:configurador && npm run build:mesh-admin",
         "build:configurador": "node build-configurador.js",
+        "build:mesh-admin": "node build-mesh-admin.js",
         "dev": "vite"
     },
     "devDependencies": {
