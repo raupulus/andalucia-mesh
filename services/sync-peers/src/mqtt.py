@@ -84,7 +84,48 @@ class MqttPublisher:
                 return False
 
         topic = f"snm/v1/peer/{peer_id}/{event_type}"
+
+        if isinstance(data, list):
+            if not data:
+                return True
+            chunk_size = 10
+            for i in range(0, len(data), chunk_size):
+                chunk = data[i : i + chunk_size]
+                payload_bytes = json.dumps(chunk, ensure_ascii=False).encode("utf-8")
+                if len(payload_bytes) > 12288:
+                    # Si incluso 10 elementos superan 12 KB, publicar uno a uno
+                    for single_item in chunk:
+                        single_bytes = json.dumps([single_item], ensure_ascii=False).encode("utf-8")
+                        if len(single_bytes) > 14000:
+                            logger.warning(
+                                "Elemento individual en %s supera 14 KB (%d B), omitido",
+                                topic,
+                                len(single_bytes),
+                            )
+                            continue
+                        try:
+                            await self._client.publish(topic, payload=single_bytes, qos=0, retain=False)
+                        except Exception as exc:
+                            logger.warning("Error publicando en MQTT (%s): %s", topic, exc)
+                            self._connected = False
+                            return False
+                else:
+                    try:
+                        await self._client.publish(topic, payload=payload_bytes, qos=0, retain=False)
+                    except Exception as exc:
+                        logger.warning("Error publicando en MQTT (%s): %s", topic, exc)
+                        self._connected = False
+                        return False
+            return True
+
         payload_bytes = json.dumps(data, ensure_ascii=False).encode("utf-8")
+        if len(payload_bytes) > 14000:
+            logger.warning(
+                "Payload MQTT para %s excede límite de 14 KB (%d B), omitido",
+                topic,
+                len(payload_bytes),
+            )
+            return False
 
         try:
             await self._client.publish(topic, payload=payload_bytes, qos=0, retain=False)

@@ -28,7 +28,8 @@ No es la federación nativa de PotatoMesh (desactivada): nunca se escribe ni se 
 - Filtro: solo canales de `ALLOWED_CHANNELS`; `PRIMARY_CHANNEL` → índice 0 y el resto con el mismo índice estable que el adaptador (posición en la lista). Mensajes directos nunca.
 - **Envío doble:**
   1. A nuestra API de PotatoMesh con `POST` y el token propio (para actualizar el visor local).
-  2. Publicación MQTT en `snm/v1/peer/<peer_id>/<tipo>` (`messages`, `nodes`, `traces`) en `mosquitto:1884` con usuario `svc-potato` para que el servicio de `ingesta` aplique el filtro anti-duplicados (15 min) y alimente TimescaleDB y las alertas.
+  2. Publicación MQTT en `snm/v1/peer/<peer_id>/<tipo>` (`messages`, `nodes`, `traces`) en `mosquitto:1884` con usuario `svc-potato` para que el servicio de `ingesta` aplique el filtro anti-duplicados (15 min) y alimente TimescaleDB y las alertas. La publicación se fragmenta en bloques de máximo 10 elementos (o < 12 KB) para no exceder el límite `max_packet_size` (16 KB) de Mosquitto.
+- Compatibilidad de claves en `peers.json`: admite tanto claves en español (`nombre`, `activo`, `mensajes`, `trazas`, `nodos`, `intervalo_nodos_s`) como alias heredados en inglés (`name`, `enabled`, `sync_messages`, `sync_traces`, `sync_nodes`, `nodes_interval_seconds`).
 - El cursor se actualiza **en una transacción solo después** de confirmar el envío del lote: un corte reenvía como mucho el último lote, que PotatoMesh e ingesta absorben sin duplicar.
 - Marca de origen: si la versión fijada de PotatoMesh admite un campo de procedencia, se rellena con el `id` del peer; si no, no se marca (limitación anotada).
 
@@ -101,4 +102,4 @@ Migraciones versionadas al arrancar. Sin datos personales. Copia: la del Postgre
 6. **Dado** un peer que responde 12 MiB, **cuando** se lee, **entonces** se corta, cuenta como fallo y no afecta a los demás.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

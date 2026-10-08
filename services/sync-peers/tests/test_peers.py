@@ -30,6 +30,29 @@ def test_peer_config_from_dict_valid() -> None:
     assert peer.intervalo_nodos_s == 120
 
 
+def test_peer_config_from_dict_english_aliases() -> None:
+    """Verifica la compatibilidad con claves heredadas en inglés."""
+    raw = {
+        "id": "malla-vecina-1",
+        "name": "Malla Vecina 1",
+        "url": "https://potato.ejemplo.org",
+        "enabled": True,
+        "sync_messages": True,
+        "sync_traces": True,
+        "sync_nodes": True,
+        "nodes_interval_seconds": 240,
+    }
+    peer = PeerConfig.from_dict(raw)
+    assert peer is not None
+    assert peer.id == "malla-vecina-1"
+    assert peer.nombre == "Malla Vecina 1"
+    assert peer.activo is True
+    assert peer.mensajes is True
+    assert peer.trazas is True
+    assert peer.nodos is True
+    assert peer.intervalo_nodos_s == 240
+
+
 def test_peer_config_invalid_id() -> None:
     """Verifica que IDs con caracteres inválidos sean rechazados."""
     assert PeerConfig.from_dict({"id": "malla cadiz!", "url": "https://test.es"}) is None

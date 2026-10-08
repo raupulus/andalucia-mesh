@@ -50,14 +50,19 @@ class PeerConfig:
             logger.warning("URL de peer inválida (debe empezar por http/https): '%s'", raw_url)
             return None
 
-        nombre = str(data.get("nombre", raw_id)).strip()
-        activo = bool(data.get("activo", True))
-        mensajes = bool(data.get("mensajes", True))
-        trazas = bool(data.get("trazas", True))
-        nodos = bool(data.get("nodos", True))
+        nombre = str(data.get("nombre") or data.get("name") or raw_id).strip()
+        activo = bool(data.get("activo", data.get("enabled", True)))
+        mensajes = bool(data.get("mensajes", data.get("sync_messages", True)))
+        trazas = bool(data.get("trazas", data.get("sync_traces", True)))
+        nodos = bool(data.get("nodos", data.get("sync_nodes", True)))
 
+        raw_interval = (
+            data.get("intervalo_nodos_s")
+            if "intervalo_nodos_s" in data
+            else data.get("nodes_interval_seconds", 180)
+        )
         try:
-            intervalo_nodos = int(data.get("intervalo_nodos_s", 180))
+            intervalo_nodos = int(raw_interval)  # type: ignore[arg-type]
             if intervalo_nodos < 10:
                 intervalo_nodos = 10
         except (ValueError, TypeError):
