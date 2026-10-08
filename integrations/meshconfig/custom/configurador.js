@@ -7826,6 +7826,10 @@ function tf() {
 			name: "Iberia"
 		},
 		{
+			id: "chkAndalucia",
+			name: "Andalucia"
+		},
+		{
 			id: "chkTest",
 			name: "Test"
 		},
@@ -7956,35 +7960,42 @@ function rf(e = 62, t = 7, n = 5, r = 4, i = 4, a = 27) {
 }
 function af(e) {
 	let t = [];
-	t.push(...nf("SFNarrow", [1], !0, e.config.device.role !== "CLIENT_MUTE"));
-	let n = document.getElementById("provinciaSelect")?.value || "";
-	n && t.push(...nf(n, [1], !0, !0));
-	let r = e.config.lora;
-	t.push(...rf(r.bandwidth, r.spreadFactor, r.codingRate, r.channelNum, r.hopLimit, r.txPower));
-	let i = new Uint8Array(t), a = "";
-	for (let e = 0; e < i.byteLength; e++) a += String.fromCharCode(i[e]);
-	return `https://meshtastic.org/e/#${btoa(a).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "")}`;
+	if (Array.isArray(e.channels)) {
+		for (let n of e.channels) if (n.settings && n.settings.name) {
+			let r = n.role === "PRIMARY" ? e.config.device.role !== "CLIENT_MUTE" : n.settings.downlinkEnabled ?? !0, i = n.settings.uplinkEnabled ?? !0;
+			t.push(...nf(n.settings.name, [1], i, r));
+		}
+	}
+	let n = e.config.lora;
+	t.push(...rf(n.bandwidth, n.spreadFactor, n.codingRate, n.channelNum, n.hopLimit, n.txPower));
+	let r = new Uint8Array(t), i = "";
+	for (let e = 0; e < r.byteLength; e++) i += String.fromCharCode(r[e]);
+	return `https://meshtastic.org/e/#${btoa(i).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "")}`;
 }
 function of() {
 	let { configDoc: e } = tf(), t = e.owner, n = e.owner_short, r = document.getElementById("previewAvatar"), i = document.getElementById("previewLongName"), a = document.getElementById("previewShortName");
 	r && (r.textContent = t.charAt(0).toUpperCase()), i && (i.textContent = t), a && (a.textContent = n);
-	let o = af(e), s = document.getElementById("qrShareUrl");
-	s && (s.value = o);
-	let c = document.getElementById("qrCanvasContainer");
-	c && window.QRCode && (c.innerHTML = "", new window.QRCode(c, {
-		text: o,
-		width: 220,
-		height: 220,
-		colorDark: "#2C2D3C",
-		colorLight: "#FFFFFF",
-		correctLevel: window.QRCode.CorrectLevel.M
-	}));
+	try {
+		let t = af(e), n = document.getElementById("qrShareUrl");
+		n && (n.value = t);
+		let r = document.getElementById("qrCanvasContainer");
+		r && typeof window.QRCode == "function" && (r.innerHTML = "", new window.QRCode(r, {
+			text: t,
+			width: 220,
+			height: 220,
+			colorDark: "#2C2D3C",
+			colorLight: "#FFFFFF",
+			correctLevel: window.QRCode.CorrectLevel.M
+		}));
+	} catch (e) {
+		console.error("Error al generar URL o código QR:", e);
+	}
 }
 function sf(e) {
 	Z.pasoActual = e;
 	for (let t = 1; t <= 4; t++) {
 		let n = document.getElementById(`stepIndicator${t}`), r = document.getElementById(`stepPanel${t}`);
-		n && (n.classList.toggle("active", t === e), n.classList.toggle("done", t < e)), r && r.classList.toggle("active", t === e);
+		n && (n.classList.toggle("active", t === e), n.classList.toggle("done", t < e)), r && (r.classList.toggle("active", t === e), r.style.display = t === e ? "block" : "none");
 	}
 	e === 4 && of(), window.scrollTo({
 		top: 0,
@@ -8076,7 +8087,16 @@ function yf() {
 	let n = document.getElementById("themeIcon");
 	n && (n.textContent = t === "light" ? "🌙" : "☀️");
 }
-window.addEventListener("DOMContentLoaded", () => {
+window.irAlPaso = sf, window.seleccionarRol = cf, window.actualizarConfiguracion = of, window.descargarYamlDeseado = lf, window.copiarEnlaceQR = uf, window.copiarComandosCli = df, window.conectarDispositivo = ff, window.desconectarDispositivo = pf, window.descargarConfiguracionNodo = mf, window.copiarLiveADeseado = hf, window.aplicarDeseadoANodo = gf, window.alEditarYamlDeseado = _f, window.setModo = vf, window.toggleTema = yf, window.limpiarLog = () => {
+	let e = document.getElementById("logTextarea");
+	e && (e.value = "");
+}, document.addEventListener("click", (e) => {
+	let t = e.target;
+	if (!t) return;
+	let n = t.closest("#tabAssistantMode, #tabWorkbenchMode");
+	n && (n.id === "tabAssistantMode" && vf("asistente"), n.id === "tabWorkbenchMode" && vf("workbench"));
+});
+function bf() {
 	let e = document.documentElement.getAttribute("data-theme") || localStorage.getItem("snm_theme") || localStorage.getItem("snm_tema") || "dark";
 	document.documentElement.setAttribute("data-theme", e), document.documentElement.setAttribute("data-tema", e);
 	let t = document.getElementById("themeIcon");
@@ -8091,10 +8111,8 @@ window.addEventListener("DOMContentLoaded", () => {
 	}), document.getElementById("themeToggleBtn")?.addEventListener("click", yf), document.getElementById("tabAssistantMode")?.addEventListener("click", () => vf("asistente")), document.getElementById("tabWorkbenchMode")?.addEventListener("click", () => vf("workbench")), document.getElementById("transportSelect")?.addEventListener("change", (e) => {
 		let t = e.target.value === "http", n = document.getElementById("httpIpGroup");
 		n && (n.style.display = t ? "flex" : "none");
-	}), window.irAlPaso = sf, window.seleccionarRol = cf, window.actualizarConfiguracion = of, window.descargarYamlDeseado = lf, window.copiarEnlaceQR = uf, window.copiarComandosCli = df, window.conectarDispositivo = ff, window.desconectarDispositivo = pf, window.descargarConfiguracionNodo = mf, window.copiarLiveADeseado = hf, window.aplicarDeseadoANodo = gf, window.alEditarYamlDeseado = _f, window.limpiarLog = () => {
-		let e = document.getElementById("logTextarea");
-		e && (e.value = "");
-	}, of(), Q("Configurador de Andalucía Mesh iniciado con preset SFNarrow.");
-});
+	}), of(), Q("Configurador de Andalucía Mesh iniciado con preset SFNarrow.");
+}
+document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", bf) : bf();
 //#endregion
 export { of as actualizarConfiguracion, _f as alEditarYamlDeseado, gf as aplicarDeseadoANodo, ff as conectarDispositivo, tf as construirYamlDeseado, df as copiarComandosCli, uf as copiarEnlaceQR, hf as copiarLiveADeseado, mf as descargarConfiguracionNodo, lf as descargarYamlDeseado, pf as desconectarDispositivo, sf as irAlPaso, cf as seleccionarRol, vf as setModo, yf as toggleTema };

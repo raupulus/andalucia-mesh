@@ -124,6 +124,7 @@ export function construirYamlDeseado() {
 
   const opcionales = [
     { id: "chkIberia", name: "Iberia" },
+    { id: "chkAndalucia", name: "Andalucia" },
     { id: "chkTest", name: "Test" },
     { id: "chkBots", name: "Bots" },
     { id: "chkSos", name: "sos" }
@@ -254,13 +255,16 @@ function encodeLoraConfigProto(bw = 62, sf = 7, cr = 5, channelNum = 4, hopLimit
 
 function generarMeshtasticUrl(doc) {
   const bytes = [];
-  // Canal 0: SFNarrow
-  bytes.push(...encodeChannelSettingsProto("SFNarrow", [1], true, doc.config.device.role !== "CLIENT_MUTE"));
-
-  // Canal 1 si hay provincia
-  const prov = document.getElementById("provinciaSelect")?.value || "";
-  if (prov) {
-    bytes.push(...encodeChannelSettingsProto(prov, [1], true, true));
+  // Canales configurados (Canal 0 SFNarrow y secundarios seleccionados)
+  if (Array.isArray(doc.channels)) {
+    for (const ch of doc.channels) {
+      if (ch.settings && ch.settings.name) {
+        const isPrimary = ch.role === "PRIMARY";
+        const downlink = isPrimary ? (doc.config.device.role !== "CLIENT_MUTE") : (ch.settings.downlinkEnabled ?? true);
+        const uplink = ch.settings.uplinkEnabled ?? true;
+        bytes.push(...encodeChannelSettingsProto(ch.settings.name, [1], uplink, downlink));
+      }
+    }
   }
 
   // LoRa config
@@ -292,21 +296,25 @@ export function actualizarConfiguracion() {
   if (shortEl) shortEl.textContent = shortName;
 
   // Generar URL y renderizar código QR
-  const shareUrl = generarMeshtasticUrl(configDoc);
-  const inputUrl = document.getElementById("qrShareUrl");
-  if (inputUrl) inputUrl.value = shareUrl;
+  try {
+    const shareUrl = generarMeshtasticUrl(configDoc);
+    const inputUrl = document.getElementById("qrShareUrl");
+    if (inputUrl) inputUrl.value = shareUrl;
 
-  const qrContainer = document.getElementById("qrCanvasContainer");
-  if (qrContainer && window.QRCode) {
-    qrContainer.innerHTML = "";
-    new window.QRCode(qrContainer, {
-      text: shareUrl,
-      width: 220,
-      height: 220,
-      colorDark: "#2C2D3C",
-      colorLight: "#FFFFFF",
-      correctLevel: window.QRCode.CorrectLevel.M
-    });
+    const qrContainer = document.getElementById("qrCanvasContainer");
+    if (qrContainer && typeof window.QRCode === "function") {
+      qrContainer.innerHTML = "";
+      new window.QRCode(qrContainer, {
+        text: shareUrl,
+        width: 220,
+        height: 220,
+        colorDark: "#2C2D3C",
+        colorLight: "#FFFFFF",
+        correctLevel: window.QRCode.CorrectLevel.M
+      });
+    }
+  } catch (err) {
+    console.error("Error al generar URL o código QR:", err);
   }
 }
 
@@ -322,6 +330,7 @@ export function irAlPaso(numPaso) {
     }
     if (panel) {
       panel.classList.toggle("active", i === numPaso);
+      panel.style.display = (i === numPaso) ? "block" : "none";
     }
   }
   if (numPaso === 4) {
@@ -533,8 +542,40 @@ export function toggleTema() {
   if (icon) icon.textContent = nuevoTema === "light" ? "🌙" : "☀️";
 }
 
-// --- Inicialización al cargar la página ---
-window.addEventListener("DOMContentLoaded", () => {
+// --- Exposición inmediata de funciones globales en window (para onclicks inline) ---
+window.irAlPaso = irAlPaso;
+window.seleccionarRol = seleccionarRol;
+window.actualizarConfiguracion = actualizarConfiguracion;
+window.descargarYamlDeseado = descargarYamlDeseado;
+window.copiarEnlaceQR = copiarEnlaceQR;
+window.copiarComandosCli = copiarComandosCli;
+window.conectarDispositivo = conectarDispositivo;
+window.desconectarDispositivo = desconectarDispositivo;
+window.descargarConfiguracionNodo = descargarConfiguracionNodo;
+window.copiarLiveADeseado = copiarLiveADeseado;
+window.aplicarDeseadoANodo = aplicarDeseadoANodo;
+window.alEditarYamlDeseado = alEditarYamlDeseado;
+window.setModo = setModo;
+window.toggleTema = toggleTema;
+window.limpiarLog = () => {
+  const t = document.getElementById("logTextarea");
+  if (t) t.value = "";
+};
+
+// Delegación global de clics para robustez total de pestañas y botones
+document.addEventListener("click", (e) => {
+  const target = e.target;
+  if (!target) return;
+
+  const btnModo = target.closest("#tabAssistantMode, #tabWorkbenchMode");
+  if (btnModo) {
+    if (btnModo.id === "tabAssistantMode") setModo("asistente");
+    if (btnModo.id === "tabWorkbenchMode") setModo("workbench");
+  }
+});
+
+// --- Inicialización del configurador ---
+function iniciarConfigurador() {
   // Sincronizar tema con el portal (snm_theme y data-theme)
   const currentTheme = document.documentElement.getAttribute("data-theme")
     || localStorage.getItem("snm_theme")
@@ -556,7 +597,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-tema"] });
 
-  // Event Listeners
+  // Event Listeners directos
   document.getElementById("themeToggleBtn")?.addEventListener("click", toggleTema);
   document.getElementById("tabAssistantMode")?.addEventListener("click", () => setModo("asistente"));
   document.getElementById("tabWorkbenchMode")?.addEventListener("click", () => setModo("workbench"));
@@ -567,25 +608,13 @@ window.addEventListener("DOMContentLoaded", () => {
     if (httpGroup) httpGroup.style.display = isHttp ? "flex" : "none";
   });
 
-  // Exportar funciones globales para onclick en el HTML
-  window.irAlPaso = irAlPaso;
-  window.seleccionarRol = seleccionarRol;
-  window.actualizarConfiguracion = actualizarConfiguracion;
-  window.descargarYamlDeseado = descargarYamlDeseado;
-  window.copiarEnlaceQR = copiarEnlaceQR;
-  window.copiarComandosCli = copiarComandosCli;
-  window.conectarDispositivo = conectarDispositivo;
-  window.desconectarDispositivo = desconectarDispositivo;
-  window.descargarConfiguracionNodo = descargarConfiguracionNodo;
-  window.copiarLiveADeseado = copiarLiveADeseado;
-  window.aplicarDeseadoANodo = aplicarDeseadoANodo;
-  window.alEditarYamlDeseado = alEditarYamlDeseado;
-  window.limpiarLog = () => {
-    const t = document.getElementById("logTextarea");
-    if (t) t.value = "";
-  };
-
   // Inicializar configuración y QR
   actualizarConfiguracion();
   logActividad("Configurador de Andalucía Mesh iniciado con preset SFNarrow.");
-});
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", iniciarConfigurador);
+} else {
+  iniciarConfigurador();
+}

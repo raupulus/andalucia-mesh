@@ -20,8 +20,8 @@
 
             <!-- Selector de Modo -->
             <div class="mode-tabs">
-                <button id="tabAssistantMode" type="button" class="mode-tab-btn active">✨ Modo Asistente (Recomendado)</button>
-                <button id="tabWorkbenchMode" type="button" class="mode-tab-btn">🛠️ Modo Avanzado (Workbench)</button>
+                <button id="tabAssistantMode" type="button" class="mode-tab-btn active" onclick="setModo('asistente')">✨ Modo Asistente (Recomendado)</button>
+                <button id="tabWorkbenchMode" type="button" class="mode-tab-btn" onclick="setModo('workbench')">🛠️ Modo Avanzado (Workbench)</button>
             </div>
 
             <!-- ===================================================================
@@ -111,6 +111,10 @@
                                 <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; cursor: pointer;">
                                     <input type="checkbox" id="chkIberia" onchange="actualizarConfiguracion()" />
                                     <span>Iberia</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; cursor: pointer;">
+                                    <input type="checkbox" id="chkAndalucia" onchange="actualizarConfiguracion()" />
+                                    <span>Andalucía (Andalucia)</span>
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; cursor: pointer;">
                                     <input type="checkbox" id="chkTest" onchange="actualizarConfiguracion()" />
@@ -393,7 +397,12 @@
     </div>
 
     <x-slot:scripts>
-        <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+        <script src="/js/qrcode.min.js"></script>
+        <script>
+            if (typeof QRCode === 'undefined') {
+                document.write('<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"><\/script>');
+            }
+        </script>
         <script type="module" src="/configurador/configurador.js"></script>
     </x-slot:scripts>
 </x-layout>

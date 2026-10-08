@@ -28,6 +28,8 @@ class ConfiguradorTest extends TestCase
         $response->assertSee('CLIENT');
         $response->assertSee('pdxlocations/meshconfig');
         $response->assertSee('E22P-868M30S');
+        $response->assertSee('chkIberia');
+        $response->assertSee('chkAndalucia');
     }
 
     public function test_configurador_usa_layout_del_portal_y_modo_oscuro_por_defecto(): void
