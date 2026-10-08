@@ -42,15 +42,15 @@ class StatsApiController extends Controller
      */
     public function provinces(Request $request): JsonResponse
     {
-        $ventana = $request->query('window', '7d');
-        if (! in_array($ventana, ['24h', '7d', '30d'], true)) {
+        $ventana = $request->query('window', '30m');
+        if (! in_array($ventana, ['30m', '1h', '6h', '12h', '1d', '24h', '7d', '30d'], true)) {
             return response()->json([
                 'error' => [
                     'status' => 400,
                     'code' => 'invalid_parameter',
-                    'message' => 'Valor no admitido en window: usa 24h, 7d o 30d.',
+                    'message' => 'Valor no admitido en window: usa 30m, 1h, 6h, 12h, 1d, 7d o 30d.',
                     'parameters' => [
-                        'window' => ['Valor no admitido: usa 24h, 7d o 30d.'],
+                        'window' => ['Valor no admitido: usa 30m, 1h, 6h, 12h, 1d, 7d o 30d.'],
                     ],
                 ],
             ], 400, ['Cache-Control' => 'no-store']);

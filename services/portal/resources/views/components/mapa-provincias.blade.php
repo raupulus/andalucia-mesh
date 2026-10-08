@@ -4,7 +4,7 @@
 --}}
 @props([
     'datos' => null, // Array o colección con estadísticas por provincia
-    'ventana' => '7d',
+    'ventana' => '30m',
 ])
 
 @php
@@ -23,6 +23,15 @@
     $saturacionAndalucia = $datos['andalucia_avg'] ?? null;
     $fueraAndalucia = $datos['outside_andalucia'] ?? 0;
     $actualizado = !empty($datos['generated_at']) ? \Carbon\Carbon::parse($datos['generated_at'])->diffForHumans() : 'recientemente';
+
+    $etiquetaVentanaActual = match($ventana) {
+        '1h' => __('portal.map.window_1h'),
+        '6h' => __('portal.map.window_6h'),
+        '12h' => __('portal.map.window_12h'),
+        '1d', '24h' => __('portal.map.window_1d'),
+        '7d' => __('portal.map.window_7d'),
+        default => __('portal.map.window_30m'),
+    };
 @endphp
 
 <div class="mapa-contenedor-completo" id="contenedor-mapa-andalucia">
@@ -40,6 +49,11 @@
             'estimation' => __('portal.map.estimation'),
             'status_nodata' => __('portal.map.status_nodata'),
             'no_telemetry_12h' => __('portal.map.no_telemetry_12h'),
+            'window_30m' => __('portal.map.window_30m'),
+            'window_1h' => __('portal.map.window_1h'),
+            'window_6h' => __('portal.map.window_6h'),
+            'window_12h' => __('portal.map.window_12h'),
+            'window_1d' => __('portal.map.window_1d'),
             'window_24h' => __('portal.map.window_24h'),
             'window_7d' => __('portal.map.window_7d'),
             'updated' => __('portal.map.updated'),
@@ -61,24 +75,34 @@
                 {{ __('portal.map.active_nodes') }}
             </div>
             <div style="font-size: 0.85rem; color: var(--color-texto-3); margin-top: 0.25rem;" id="mapa-actualizado-texto">
-                <span id="mapa-ventana-label">{{ $ventana === '24h' ? __('portal.map.window_24h') : __('portal.map.window_7d') }}</span> · {{ __('portal.map.updated', ['time' => $actualizado]) }}
+                <span id="mapa-ventana-label">{{ $etiquetaVentanaActual }}</span> · {{ __('portal.map.updated', ['time' => $actualizado]) }}
             </div>
         </div>
 
-        <!-- Selector accesible de ventana temporal -->
-        <div class="selector-ventana" role="group" aria-label="{{ __('portal.map.aria_time_window') }}" style="display: flex; background: var(--color-superficie-sutil); padding: 4px; border-radius: var(--radio-sm); border: 1px solid var(--color-borde);">
-            <button type="button" 
-                    class="btn-ventana {{ $ventana === '7d' ? 'activo' : '' }}" 
-                    data-ventana="7d"
-                    aria-pressed="{{ $ventana === '7d' ? 'true' : 'false' }}">
-                {{ __('portal.map.btn_7d') }}
-            </button>
-            <button type="button" 
-                    class="btn-ventana {{ $ventana === '24h' ? 'activo' : '' }}" 
-                    data-ventana="24h"
-                    aria-pressed="{{ $ventana === '24h' ? 'true' : 'false' }}">
-                {{ __('portal.map.btn_24h') }}
-            </button>
+        <!-- Selector accesible de ventana temporal (30m por defecto, 1h, 6h, 12h, 1d, 7d) -->
+        <div class="selector-ventana" role="group" aria-label="{{ __('portal.map.aria_time_window') }}" style="display: flex; flex-wrap: wrap; background: var(--color-superficie-sutil); padding: 4px; border-radius: var(--radio-sm); border: 1px solid var(--color-borde); gap: 2px;">
+            @php
+                $opcionesVentana = [
+                    '30m' => __('portal.map.btn_30m'),
+                    '1h' => __('portal.map.btn_1h'),
+                    '6h' => __('portal.map.btn_6h'),
+                    '12h' => __('portal.map.btn_12h'),
+                    '1d' => __('portal.map.btn_1d'),
+                    '7d' => __('portal.map.btn_7d'),
+                ];
+                $ventanaActivaNorm = ($ventana === '24h') ? '1d' : $ventana;
+                if (!array_key_exists($ventanaActivaNorm, $opcionesVentana)) {
+                    $ventanaActivaNorm = '30m';
+                }
+            @endphp
+            @foreach($opcionesVentana as $clave => $etiqueta)
+                <button type="button" 
+                        class="btn-ventana {{ $ventanaActivaNorm === $clave ? 'activo' : '' }}" 
+                        data-ventana="{{ $clave }}"
+                        aria-pressed="{{ $ventanaActivaNorm === $clave ? 'true' : 'false' }}">
+                    {{ $etiqueta }}
+                </button>
+            @endforeach
         </div>
     </div>
 

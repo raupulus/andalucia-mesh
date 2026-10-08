@@ -51,7 +51,7 @@ SELECT
 FROM node n
 WHERE n.province IS NOT NULL
   AND n.province != 'FUERA'
-  AND n.metrics_at >= (now() - INTERVAL '12 hours')
+  AND n.metrics_at >= (now() - INTERVAL '30 days')
   AND n.channel_utilization IS NOT NULL
   AND (n.role IN ({{INFRA_ROLES}}) OR n.role IN ('CLIENT', 'CLIENT_BASE'));
 

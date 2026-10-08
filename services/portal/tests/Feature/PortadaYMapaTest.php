@@ -60,28 +60,40 @@ class PortadaYMapaTest extends TestCase
     }
 
     /**
-     * Comprueba que la tabla accesible y el selector de ventana existen.
+     * Comprueba que la tabla accesible y el selector de ventana existen con las 6 opciones.
      */
     public function test_tabla_accesible_y_selector_ventana_presentes(): void
     {
         $response = $this->get('/');
 
         $response->assertSee('Tabla de nodos y carga por provincia', false);
+        $response->assertSee('data-ventana="30m"', false);
+        $response->assertSee('data-ventana="1h"', false);
+        $response->assertSee('data-ventana="6h"', false);
+        $response->assertSee('data-ventana="12h"', false);
+        $response->assertSee('data-ventana="1d"', false);
         $response->assertSee('data-ventana="7d"', false);
-        $response->assertSee('data-ventana="24h"', false);
+        $response->assertSee('Últimos 30 minutos', false);
         $response->assertSee('NO es un servicio de emergencias', false);
         $response->assertSee(config('autoria.nick'));
     }
 
     /**
-     * Comprueba el soporte de la query string de ventana temporal (?ventana=24h).
+     * Comprueba el soporte de la query string de ventana temporal (?ventana=24h y ?ventana=1h).
      */
-    public function test_ventana_24h_modifica_label_y_selector(): void
+    public function test_ventana_modifica_label_y_selector(): void
     {
-        $response = $this->get('/?ventana=24h');
+        $response24h = $this->get('/?ventana=24h');
+        $response24h->assertStatus(200);
+        $response24h->assertSee('Últimas 24 horas', false);
 
-        $response->assertStatus(200);
-        $response->assertSee('Últimas 24 horas', false);
+        $response1h = $this->get('/?ventana=1h');
+        $response1h->assertStatus(200);
+        $response1h->assertSee('Última hora', false);
+
+        $response7d = $this->get('/?ventana=7d');
+        $response7d->assertStatus(200);
+        $response7d->assertSee('Últimos 7 días', false);
     }
 
     /**

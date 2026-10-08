@@ -55,11 +55,11 @@ Encima del mapa:
 
 > **{total_andalucia}**
 > nodos en Andalucía
-> Últimos 7 días · actualizado a las {hora}
+> Últimos 30 minutos · actualizado a las {hora}
 
-Con la ventana de 24 h, la segunda línea pasa a "Últimas 24 horas · actualizado a las {hora}".
+Con otras ventanas, la segunda línea se adapta dinámicamente ("Última hora", "Últimas 6 horas", "Últimas 12 horas", "Últimas 24 horas", "Últimos 7 días").
 
-Selector (etiqueta accesible "Ventana del recuento de nodos"): **7 días** · **24 horas**. Por defecto, 7 días.
+Selector (etiqueta accesible "Ventana del recuento de nodos"): **30m** · **1h** · **6h** · **12h** · **1d** · **7d**. Por defecto, **30m** para reflejar la presión real en el momento.
 
 Texto accesible del mapa: "Mapa de Andalucía con el número de nodos y la carga del canal de cada provincia. Los mismos datos están en la tabla de abajo."
 
@@ -185,7 +185,7 @@ Desarrollador web full stack especializado en backend · @raupulus
 
 | Dato | Origen |
 |---|---|
-| Total, nodos por provincia, carga (`avg`, `max`, `routers`, `level`), `outside_andalucia`, `generated_at`, `stale` | `GET /api/v1/stats/provinces?window=7d` (por defecto) o `?window=24h`. Refresco cada 5 min mientras la página esté visible |
+| Total, nodos por provincia, carga (`avg`, `max`, `routers`, `level`), `outside_andalucia`, `generated_at`, `stale` | `GET /api/v1/stats/provinces?window=30m` (por defecto) u opciones `?window=1h|6h|12h|1d|7d`. Refresco cada 5 min mientras la página esté visible |
 | Cortes de la leyenda `{green_max}` y `{red_min}` | `load_levels` de la misma respuesta (configurables) |
 | `{porcentaje}` del panel | Calculado en la página: `nodes / total_andalucia` |
 | `{nivel}` y estado de la tabla | `level`: `green` → holgado, `orange` → cargado, `red` → saturado, `nodata` → sin datos |

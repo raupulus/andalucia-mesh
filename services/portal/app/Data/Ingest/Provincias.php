@@ -17,10 +17,10 @@ class Provincias
     /**
      * Obtiene los nodos y saturación provincial según la ventana de tiempo.
      *
-     * @param  string  $ventana  '24h', '7d' o '30d'
+     * @param  string  $ventana  '30m', '1h', '6h', '12h', '1d', '24h', '7d' o '30d'
      * @return array<string, mixed>
      */
-    public function obtener(string $ventana = '7d'): array
+    public function obtener(string $ventana = '30m'): array
     {
         $res = $this->obtenerResultado($ventana);
 
@@ -30,15 +30,20 @@ class Provincias
     /**
      * Obtiene el Resultado completo con metadatos de caché.
      */
-    public function obtenerResultado(string $ventana = '7d'): Resultado
+    public function obtenerResultado(string $ventana = '30m'): Resultado
     {
         $intervalo = match ($ventana) {
-            '24h' => '24 hours',
+            '30m' => '30 minutes',
+            '1h' => '1 hour',
+            '6h' => '6 hours',
+            '12h' => '12 hours',
+            '1d', '24h' => '24 hours',
+            '7d' => '7 days',
             '30d' => '30 days',
-            default => '7 days',
+            default => '30 minutes',
         };
 
-        return Fuente::recordar('stats_provincias', ['ventana' => $ventana], 60, function () use ($intervalo) {
+        return Fuente::recordar('stats_provincias', ['ventana' => $ventana], 60, function () use ($ventana, $intervalo) {
             // 1. Obtener recuento de nodos con posición en la ventana
             $conteos = DB::connection('ingesta')
                 ->table('api_nodes')
@@ -53,8 +58,8 @@ class Provincias
                 ->get()
                 ->keyBy('province');
 
-            // 2. Obtener saturación calculada
-            $resCarga = $this->cargaProvincias->obtener();
+            // 2. Obtener saturación calculada para la ventana especificada
+            $resCarga = $this->cargaProvincias->obtener($ventana);
             $datosCarga = (array) $resCarga->datos;
             $provinciasCarga = $datosCarga['provinces'] ?? [];
 
@@ -102,6 +107,8 @@ class Provincias
             $outsideAndalucia = $filaFuera ? (int) $filaFuera->nodes : 0;
 
             return [
+                'window' => $ventana,
+                'load_window' => $ventana,
                 'total_andalucia' => $totalAndalucia,
                 'andalucia_avg' => $datosCarga['andalucia_avg'] ?? null,
                 'outside_andalucia' => $outsideAndalucia,

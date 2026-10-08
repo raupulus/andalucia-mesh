@@ -38,20 +38,24 @@ class ApiPublicaTest extends TestCase
             'generado_en' => '2026-10-07T12:00:00Z',
         ], 60);
 
-        // Sembrar caché fresca para stats_provincias
-        $paramsProv = ['ventana' => '7d'];
-        ksort($paramsProv);
-        $hashProv = sha1(json_encode($paramsProv) ?: '');
-        Cache::put("api1:stats_provincias:{$hashProv}:fresco", [
-            'datos' => [
-                'total_andalucia' => 120,
-                'andalucia_avg' => 18.5,
-                'outside_andalucia' => 3,
-                'provinces' => [],
-                'notes' => ['Prueba'],
-            ],
-            'generado_en' => '2026-10-07T12:00:00Z',
-        ], 60);
+        // Sembrar caché fresca para stats_provincias (30m por defecto y 7d)
+        foreach (['30m', '7d'] as $v) {
+            $paramsProv = ['ventana' => $v];
+            ksort($paramsProv);
+            $hashProv = sha1(json_encode($paramsProv) ?: '');
+            Cache::put("api1:stats_provincias:{$hashProv}:fresco", [
+                'datos' => [
+                    'window' => $v,
+                    'load_window' => $v,
+                    'total_andalucia' => 120,
+                    'andalucia_avg' => 18.5,
+                    'outside_andalucia' => 3,
+                    'provinces' => [],
+                    'notes' => ['Prueba'],
+                ],
+                'generado_en' => '2026-10-07T12:00:00Z',
+            ], 60);
+        }
     }
 
     /**
@@ -130,6 +134,10 @@ class ApiPublicaTest extends TestCase
      */
     public function test_stats_provinces_valida_parametro_window(): void
     {
+        $responseDefault = $this->get('/api/v1/stats/provinces');
+        $responseDefault->assertStatus(200);
+        $responseDefault->assertJsonPath('window', '30m');
+
         $responseOk = $this->get('/api/v1/stats/provinces?window=7d');
         $responseOk->assertStatus(200);
         $responseOk->assertJsonStructure([

@@ -17,7 +17,7 @@ Ver la malla de Andalucía de un vistazo, sin peticiones a terceros, con una alt
 
 ### Datos
 
-- `GET /api/v1/stats/provinces?window=7d|24h` (`12-stats-api.md`). La API admite también `30d`; el mapa solo ofrece 7 días (por defecto) y 24 horas.
+- `GET /api/v1/stats/provinces?window=30m|1h|6h|12h|1d|7d` (`12-stats-api.md`). La API admite también `30d`; el mapa ofrece las 6 opciones de filtro `30m`, `1h`, `6h`, `12h`, `1d` y `7d`, con `30m` seleccionado por defecto para mostrar la presión y ocupación real de la malla en el momento.
 - Primera pintura con los datos del servidor (`App\Data\Ingest\Provincias`, misma caché), serializados en un bloque `<script type="application/json" id="mapa-datos-iniciales">` para que el tooltip y la interactividad en cliente dispongan de todas las métricas de saturación y recuentos de forma instantánea al entrar sin latencia ni dependencias de peticiones asíncronas iniciales. Si por contingencia no hay datos iniciales válidos en el HTML, el cliente ejecuta un `fetch` inmediato a la API. Refresco cada 5 min con `fetch` mientras la pestaña está visible (`visibilitychange`).
 - Encima: "**{total_andalucia}** nodos en Andalucía", la ventana activa y "actualizado hace X min" (`generated_at`).
 
@@ -28,10 +28,9 @@ Ver la malla de Andalucía de un vistazo, sin peticiones a terceros, con una alt
 | `green` | Verde | ≤ 20 % |
 | `orange` | Naranja | > 20 % y < 40 % |
 | `red` | Rojo | ≥ 40 % |
-| `nodata` | Gris | Ningún router, `CLIENT` ni `CLIENT_BASE` con telemetría en 12 h |
+| `nodata` | Gris | Ningún router, `CLIENT` ni `CLIENT_BASE` con telemetría en la ventana seleccionada |
 
-- La saturación la calcula la API (`12-stats-api.md`, `../integration.md` §13): nodos con posición en la provincia, media de `channel_utilization` por grupo y suma ponderada **routers 60 % + `CLIENT` y `CLIENT_BASE` juntos 40 %**; `CLIENT_MUTE` no cuenta; si falta un grupo, su peso se reparte entre los demás. Último dato de cada nodo en 12 h. El cliente no calcula niveles: usa `level`.
-- No depende del selector de ventana (siempre 12 h).
+- La saturación la calcula la API (`12-stats-api.md`, `../integration.md` §13): nodos con posición en la provincia, media de `channel_utilization` por grupo y suma ponderada **routers 60 % + `CLIENT` y `CLIENT_BASE` juntos 40 %**; `CLIENT_MUTE` no cuenta; si falta un grupo, su peso se reparte entre los demás. Se computa sobre las mediciones en la ventana seleccionada (`30m` por defecto). El cliente no calcula niveles: usa `level`.
 
 ### Interacción
 
@@ -60,14 +59,14 @@ Ver la malla de Andalucía de un vistazo, sin peticiones a terceros, con una alt
 ## Unidades de trabajo
 
 - **UT-06.2.1 — Generación del SVG.** Comando `portal:mapa`: simplificación, proyección, polos de inaccesibilidad. *Aceptación:* SVG < 60 KB; ninguna burbuja fuera de su provincia ni solapada a 360 px.
-- **UT-06.2.2 — Pintado y refresco.** Datos de servidor, `fetch` cada 5 min con pestaña visible, selector 7 d / 24 h con estado en la URL (`?ventana=24h`). *Aceptación:* cambiar de ventana no recarga la página.
+- **UT-06.2.2 — Pintado y refresco.** Datos de servidor, `fetch` cada 5 min con pestaña visible, selector 30m, 1h, 6h, 12h, 1d, 7d con estado en la URL (`?ventana=1h`). *Aceptación:* cambiar de ventana actualiza números, colores y saturación sin recargar la página; 30m no ensucia la URL por ser el valor por defecto.
 - **UT-06.2.3 — Panel y accesibilidad.** Panel, foco, tabla, lectores de pantalla. *Aceptación:* con lector de pantalla se obtiene la misma información que con el color.
 - **UT-06.2.4 — Estados.** *Aceptación:* los cinco estados de la tabla con datos simulados.
 
 ## Escenarios de prueba
 
 1. **Dado** provincias con carga 15, 30 y 45 %, **cuando** se pinta el mapa, **entonces** salen verde, naranja y rojo; una sin datos sale gris con "sin datos de carga" en panel y tabla.
-2. **Dado** la ventana de 24 h, **cuando** se pulsa "7 días", **entonces** cambian los números, no los colores, y la URL refleja la ventana.
+2. **Dado** la ventana por defecto de 30m, **cuando** se pulsa "1h" o "7d", **entonces** cambian los números de nodos y los niveles de carga según la ventana seleccionada, y la URL refleja la ventana (`?ventana=1h`).
 3. **Dado** la API caída sin copia, **cuando** se abre la portada, **entonces** el mapa sale gris con el mensaje y el resto de la portada funciona.
 4. **Dado** un teclado, **cuando** se tabula por el mapa, **entonces** se recorren las 8 provincias y cada una abre su panel con Intro.
 5. **Dado** un `CLIENT_MUTE` con carga 80 % en Huelva, **cuando** se pinta el mapa, **entonces** no afecta al color de Huelva; un `CLIENT_BASE` al 80 % sí entra en la media de clientes junto a los `CLIENT`.

@@ -26,8 +26,8 @@ class Resumen
                 ->table('api_summary')
                 ->first();
 
-            // 2. Obtener saturación de canales
-            $resCarga = $this->cargaProvincias->obtener();
+            // 2. Obtener saturación de canales (ventana canónica de 12 horas en resumen)
+            $resCarga = $this->cargaProvincias->obtener('12h');
             $datosCarga = (array) $resCarga->datos;
 
             $provinciasResumen = [];

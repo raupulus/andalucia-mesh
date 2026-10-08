@@ -36,7 +36,7 @@ Definir con precisión las vistas `api_*` de la base `ingest`: la **única** sup
 | **+** `nodeinfo_at` | timestamptz | |
 | **+** `heard_by` | text[] | Gateways que lo oyeron en 7 días (`agg_reception_day`, sin él mismo) |
 
-Uso en el mapa: nodos con `province` y `last_position_at` dentro de la ventana (`24h`, `7d`, `30d`); `FUERA` da `outside_andalucia`; recuento de `border_uncertain`. No expone coordenadas.
+Uso en el mapa: nodos con `province` y `last_position_at` dentro de la ventana (`30m`, `1h`, `6h`, `12h`, `1d`, `7d`, `30d`); `FUERA` da `outside_andalucia`; recuento de `border_uncertain`. No expone coordenadas.
 
 ### `api_province_load` — nodo con provincia y carga reciente para la saturación
 
@@ -45,7 +45,7 @@ Uso en el mapa: nodos con `province` y `last_position_at` dentro de la ventana (
 | `node_id` | text | Nodo con `role` en `{{INFRA_ROLES}}`, `CLIENT` o `CLIENT_BASE` (`CLIENT_MUTE` y resto de roles fuera; ser gateway no cambia nada) |
 | `province` | text | Solo los 8 códigos ISO (sin `FUERA` ni null) |
 | `channel_utilization` | real | `node.channel_utilization` |
-| `measured_at` | timestamptz | `node.metrics_at`, solo si ≥ `now() − 12 h` |
+| `measured_at` | timestamptz | `node.metrics_at`, solo si ≥ `now() − 30 días` (el portal filtra la ventana solicitada, por defecto `30m`) |
 | `grupo` | text | `router` (rol en `{{INFRA_ROLES}}`) o `cliente` (`CLIENT` y `CLIENT_BASE`, mismo grupo) |
 | **+** `role`, **+** `is_gateway`, **+** `air_util_tx` | | |
 

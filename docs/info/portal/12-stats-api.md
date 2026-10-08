@@ -50,9 +50,9 @@ Sin parámetros. Fuentes: `api_summary` (una fila), `CargaProvincias` y `api_ale
 - `alertas` no disponible y sin copia (p. ej. antes de desplegar el detector): `alerts_open: null` + nota; el resto se sirve. `ingest` no disponible: copia de respaldo o `503` (11).
 - Lo que leen los bots (`../bots-webhooks/README.md` §4.2): `generated_at`, `nodes_active_24h`, `nodes_active_7d`, `routers_active_24h`, `gateways_publishing`, `channel_utilization.andalucia_avg`, `channel_utilization.provinces[].code` y `.avg`, `alerts_open.by_risk`, `alerts_open.by_type`, `stale`. Ninguno puede faltar.
 
-### `GET /stats/provinces?window=24h|7d|30d`
+### `GET /stats/provinces?window=30m|1h|6h|12h|1d|7d|30d`
 
-`window` por defecto `7d`. Un nodo cuenta si su última posición válida está en la ventana; la provincia la asigna `ingest` (sin coordenadas en la API):
+`window` por defecto `30m`. Un nodo cuenta si su última posición válida está en la ventana; la provincia la asigna `ingest` (sin coordenadas en la API). Asimismo, la saturación y niveles de carga (`load`) se calculan con respecto a las métricas recibidas en la misma ventana de tiempo:
 
 ```sql
 SELECT province, count(*) AS nodes, count(*) FILTER (WHERE border_uncertain) AS border_uncertain
@@ -63,7 +63,7 @@ GROUP BY province;
 
 ```json
 {
-  "window": "7d", "load_window": "12h", "generated_at": "…", "stale": false,
+  "window": "30m", "load_window": "30m", "generated_at": "…", "stale": false,
   "total_andalucia": 412, "outside_andalucia": 37, "border_uncertain": 5,
   "load_levels": {"green_max": 20, "red_min": 40},
   "provinces": [
@@ -72,11 +72,11 @@ GROUP BY province;
     {"code": "ES-CO", "name": "Córdoba", "nodes": 19, "load": {"avg": null, "max": null, "level": "nodata",
       "groups": {"routers": {"avg": null, "n": 0}, "clients": {"avg": null, "n": 0}}}}
   ],
-  "notes": ["Solo nodos cuya posición llega con OK to MQTT.", "Saturación estimada: media de routers (60 %) y media conjunta de CLIENT y CLIENT_BASE (40 %), últimas 12 h; CLIENT_MUTE no cuenta."]
+  "notes": ["Solo nodos cuya posición llega con OK to MQTT.", "Saturación estimada: media de routers (60 %) y media conjunta de CLIENT y CLIENT_BASE (40 %) en la ventana seleccionada; CLIENT_MUTE no cuenta."]
 }
 ```
 
-`total_andalucia` = suma de las 8; `outside_andalucia` = fila `FUERA`; `border_uncertain` solo de las 8. La carga no depende de `window`.
+`total_andalucia` = suma de las 8; `outside_andalucia` = fila `FUERA`; `border_uncertain` solo de las 8. La carga provincial refleja la presión real calculada para la ventana solicitada.
 
 ### `GET /stats/rankings`
 
@@ -160,7 +160,7 @@ Las respuestas de esta página (claves y significado), el catálogo de rankings 
 
 - **UT-06.12.1 — Carga por provincia y niveles.** `CargaProvincias` y `NivelCarga`. *Bordes:* 20,0 y 40,0 exactos; provincia sin filas; router sin provincia (no está en la vista). *Aceptación:* escenario 1; 20,0 → `green`, 40,0 → `red`.
 - **UT-06.12.2 — `summary`.** *Bordes:* `alertas` caída o sin desplegar; catálogo con un riesgo nuevo (aparece en `by_risk`). *Aceptación:* prueba de contrato con los campos de los bots; con `alertas` caída, `alerts_open: null` y `200`.
-- **UT-06.12.3 — `provinces`.** *Bordes:* `window=1h` → `400`; provincia con 0 nodos (aparece con `nodes: 0`). *Aceptación:* suma de provincias = `total_andalucia`; coincide con un recuento SQL manual sobre una muestra.
+- **UT-06.12.3 — `provinces`.** *Bordes:* `window=invalido` → `400`; provincia con 0 nodos (aparece con `nodes: 0`). *Aceptación:* `window` por defecto `30m`; opciones `30m, 1h, 6h, 12h, 1d, 7d, 30d` funcionales; suma de provincias = `total_andalucia`; coincide con un recuento SQL manual sobre una muestra.
 - **UT-06.12.4 — Periodos.** `Periodos::rango`. *Bordes:* cambio de hora (25-10-2026), semana que cruza el año (lunes 28-12-2026), `previous` de enero. *Aceptación:* escenario 2 y una tabla de casos fijos con reloj congelado.
 - **UT-06.12.5 — Rankings.** Catálogo, lista blanca, nombres, `share_pct`. *Bordes:* `id` inexistente → `404`; `limit=51` → `400`; nodo del ranking sin fila en `api_nodes`. *Aceptación:* los 11 ids × 4 periodos × 2 `which` responden; un periodo cerrado devuelve el mismo `ETag` en dos peticiones; escenario 3.
 - **UT-06.12.6 — `traffic-mix`.** *Aceptación:* `packets_pct` y `airtime_pct` suman 100 ± 0,1; periodo sin datos → `items: []` y totales 0.
@@ -176,4 +176,4 @@ Las respuestas de esta página (claves y significado), el catálogo de rankings 
 6. **Dado** `period=year`, **cuando** se pide cualquier endpoint con periodos, **entonces** `400` `invalid_parameter` con `parameters.period`.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-08

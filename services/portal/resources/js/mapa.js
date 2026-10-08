@@ -34,6 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
         estimation: 'Estimación con telemetría de las últimas 12 horas',
         status_nodata: 'Sin datos',
         no_telemetry_12h: 'Sin datos de telemetría en las últimas 12 horas',
+        window_30m: 'Últimos 30 minutos',
+        window_1h: 'Última hora',
+        window_6h: 'Últimas 6 horas',
+        window_12h: 'Últimas 12 horas',
+        window_1d: 'Últimas 24 horas',
         window_24h: 'Últimas 24 horas',
         window_7d: 'Últimos 7 días',
         updated: 'actualizado :time',
@@ -53,9 +58,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Estado local en memoria
+    /**
+     * Retorna la etiqueta formateada para una clave de ventana dada
+     */
+    function obtenerVentanaLabel(v) {
+        switch (v) {
+            case '30m': return i18n.window_30m || 'Últimos 30 minutos';
+            case '1h': return i18n.window_1h || 'Última hora';
+            case '6h': return i18n.window_6h || 'Últimas 6 horas';
+            case '12h': return i18n.window_12h || 'Últimas 12 horas';
+            case '1d':
+            case '24h': return i18n.window_1d || i18n.window_24h || 'Últimas 24 horas';
+            case '7d': return i18n.window_7d || 'Últimos 7 días';
+            default: return i18n.window_30m || 'Últimos 30 minutos';
+        }
+    }
+
+    // Estado local en memoria (30m por defecto)
     let datosActuales = null;
-    let ventanaActiva = new URLSearchParams(window.location.search).get('ventana') === '24h' ? '24h' : '7d';
+    const urlVentana = new URLSearchParams(window.location.search).get('ventana');
+    const ventanasValidas = ['30m', '1h', '6h', '12h', '1d', '24h', '7d'];
+    let ventanaActiva = (urlVentana && ventanasValidas.includes(urlVentana)) ? urlVentana : '30m';
+    if (ventanaActiva === '24h') {
+        ventanaActiva = '1d';
+    }
 
     const cajaMapa = document.getElementById('caja-mapa-svg') || (panel && panel.parentElement) || contenedor;
 
@@ -208,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (actualizadoTexto && ventanaLabel) {
-            const vLabel = ventanaActiva === '24h' ? i18n.window_24h : i18n.window_7d;
+            const vLabel = obtenerVentanaLabel(ventanaActiva);
             actualizadoTexto.innerHTML = `<span id="mapa-ventana-label">${vLabel}</span> · ${i18n.updated_recently}`;
         }
 
@@ -319,14 +345,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (ventanaLabel) {
-                ventanaLabel.textContent = v === '24h' ? i18n.window_24h : i18n.window_7d;
+                ventanaLabel.textContent = obtenerVentanaLabel(v);
             }
 
             const url = new URL(window.location.href);
-            if (v === '24h') {
-                url.searchParams.set('ventana', '24h');
-            } else {
+            if (v === '30m') {
                 url.searchParams.delete('ventana');
+            } else {
+                url.searchParams.set('ventana', v);
             }
             window.history.replaceState({}, '', url.toString());
 
