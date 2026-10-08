@@ -487,6 +487,38 @@
   color: var(--color-texto-2);
 }
 
+.badge-tag-aviso {
+  background: var(--color-aviso-fondo);
+  color: var(--color-aviso-texto);
+  border-color: var(--color-aviso-texto);
+}
+
+.banner-aviso-configurador {
+  margin: 1.25rem auto 0 auto;
+  max-width: 780px;
+  background-color: var(--color-aviso-fondo);
+  color: var(--color-aviso-texto);
+  border: 1px solid var(--color-aviso-texto);
+  border-left: 4px solid var(--color-aviso-texto);
+  border-radius: var(--radio-md);
+  padding: 0.85rem 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.banner-aviso-configurador a {
+  color: inherit;
+  text-decoration: underline;
+  font-weight: 700;
+}
+
+.banner-aviso-configurador a:hover {
+  filter: brightness(1.2);
+}
+
 /* Botones principales */
 .btn {
   font-family: var(--fuente-titulos);

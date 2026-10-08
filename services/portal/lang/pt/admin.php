@@ -144,7 +144,9 @@ return [
         'current_password' => 'Palavra-passe atual',
         'current_password_helper' => 'Obrigatória para validar a tua identidade ao alterar a palavra-passe ou o e-mail.',
         'new_password' => 'Nova palavra-passe',
+        'new_password_helper' => 'Deixe em branco para manter a palavra-passe atual.',
         'confirm_password' => 'Confirmar nova palavra-passe',
+        'confirm_password_helper' => 'Digite a nova palavra-passe novamente para confirmá-la.',
         'delete_warning' => 'Esta ação é irreversível e revoga o teu acesso imediato ao painel.',
         'delete_modal_heading' => 'Eliminar a tua conta de operador?',
         'delete_modal_desc' => 'Esta ação é irreversível e eliminará definitivamente o teu utilizador, avatar e todos os acessos à administração. Para confirmar a identidade, introduz a tua palavra-passe atual.',
@@ -523,6 +525,8 @@ return [
         'field_password' => 'Senha',
         'field_password_create_helper' => 'Mínimo de 8 caracteres por segurança.',
         'field_password_edit_helper' => 'Deixe em branco para manter a senha atual.',
+        'field_password_confirmation' => 'Confirmar senha',
+        'field_password_confirmation_helper' => 'Digite a senha novamente para confirmá-la.',
     ],
 
     'custom_pages' => [

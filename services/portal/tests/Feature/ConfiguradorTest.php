@@ -113,4 +113,29 @@ class ConfiguradorTest extends TestCase
         $js->assertStatus(301);
         $js->assertRedirect('/configurador/configurador.js');
     }
+
+    public function test_configurador_muestra_aviso_experimental_y_enlace_a_sugerencias(): void
+    {
+        $response = $this->get('/configurador');
+
+        $response->assertStatus(200);
+        $response->assertSee('Experimental');
+        $response->assertSee('bajo su propio riesgo');
+        $response->assertSee('/sugerencias');
+    }
+
+    public function test_configurador_aviso_experimental_multidioma(): void
+    {
+        $en = $this->get('/configurador?lang=en');
+        $en->assertStatus(200);
+        $en->assertSee('Experimental');
+        $en->assertSee('own risk');
+        $en->assertSee('/sugerencias?lang=en');
+
+        $pt = $this->get('/configurador?lang=pt');
+        $pt->assertStatus(200);
+        $pt->assertSee('Experimental');
+        $pt->assertSee('conta e risco');
+        $pt->assertSee('/sugerencias?lang=pt');
+    }
 }

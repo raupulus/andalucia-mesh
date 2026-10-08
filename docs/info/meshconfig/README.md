@@ -78,6 +78,8 @@
   - `test_configurador_recurso_inexistente_devuelve_404`
   - `test_configurador_html_incluye_base_href_y_rutas_absolutas`
   - `test_redireccion_defensiva_para_recursos_en_raiz`
+  - `test_configurador_muestra_aviso_experimental_y_enlace_a_sugerencias`
+  - `test_configurador_aviso_experimental_multidioma`
 
 ## Pendiente real
 - [x] Contenedor Docker compilado y corriendo en local (puerto 8420).
@@ -85,6 +87,7 @@
 - [x] Generador de URL y Código QR dinámico implementado.
 - [x] Integración en el portal y rutas públicas de Laravel probadas (puerto 9000).
 - [x] Integración completa en el layout Blade del portal con modo oscuro por defecto y navegación oficial.
+- [x] Badge y aviso de herramienta experimental con advertencia de uso bajo su riesgo y enlace directo a sugerencias.
 
 ---
 > Creado: 2026-10-08 · Última revisión: 2026-10-09

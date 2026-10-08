@@ -22,6 +22,7 @@
         </a>
         <div class="header-actions">
           <div id="statusPill" class="badge-tag">🔌 Desconectado</div>
+          <span class="badge-tag badge-tag-aviso">⚠️ Experimental</span>
           <button id="themeToggleBtn" type="button" class="btn-icon" aria-label="Cambiar tema">
             <span id="themeIcon">🌙</span>
           </button>
@@ -34,6 +35,15 @@
       <section class="hero-banner">
         <h1>Configurador de Dispositivos Meshtastic</h1>
         <p>Aplica la configuración recomendada de radio <strong>SFNarrow</strong> y buenas prácticas de red a tu nodo de forma visual, por cable USB, Bluetooth, archivo YAML o código QR.</p>
+
+        <!-- Aviso de advertencia: herramienta experimental y reporte en sugerencias -->
+        <div class="banner-aviso-configurador" role="alert">
+          <span style="font-size: 1.35rem; flex-shrink: 0;" aria-hidden="true">⚠️</span>
+          <div style="font-size: 0.92rem; line-height: 1.45;">
+            <span class="badge-tag badge-tag-aviso" style="margin-right: 0.4rem; font-size: 0.75rem; vertical-align: middle;">▲ Experimental</span>
+            <span>Esta herramienta es experimental y debe utilizarse bajo su propio riesgo. Si detecta algo extraño o inesperado, por favor repórtelo en <a href="/sugerencias">sugerencias</a>.</span>
+          </div>
+        </div>
       </section>
 
       <!-- Selector de Modo -->

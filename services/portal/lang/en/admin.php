@@ -144,7 +144,9 @@ return [
         'current_password' => 'Current password',
         'current_password_helper' => 'Required to confirm your identity when changing your password or email.',
         'new_password' => 'New password',
+        'new_password_helper' => 'Leave blank to keep the current password.',
         'confirm_password' => 'Confirm new password',
+        'confirm_password_helper' => 'Enter the new password again to verify it.',
         'delete_warning' => 'This action is irreversible and revokes your immediate panel access.',
         'delete_modal_heading' => 'Delete your operator account?',
         'delete_modal_desc' => 'This action is irreversible and will permanently delete your user, avatar, and all administration panel access. To confirm your identity, enter your current password.',
@@ -523,6 +525,8 @@ return [
         'field_password' => 'Password',
         'field_password_create_helper' => 'Minimum 8 characters for security.',
         'field_password_edit_helper' => 'Leave blank to keep the current password.',
+        'field_password_confirmation' => 'Confirm password',
+        'field_password_confirmation_helper' => 'Enter the password again to verify it.',
     ],
 
     'custom_pages' => [

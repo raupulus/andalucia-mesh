@@ -1,3 +1,8 @@
+@php
+    $currentLang = app()->getLocale();
+    $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
+@endphp
+
 <x-layout 
     :title="__('portal.configurator.meta_title', ['name' => config('proyecto.nombre')])" 
     :description="__('portal.configurator.lead')"
@@ -9,13 +14,28 @@
 
     <div class="contenedor seccion">
         <div class="main-shell" style="padding-top: 0;">
-            <!-- Encabezado de la herramienta con Status Pill -->
+            <!-- Encabezado de la herramienta con Status Pill y Badge Experimental -->
             <section class="hero-banner">
                 <div style="display: flex; justify-content: center; align-items: center; gap: 0.85rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
                     <h1 style="margin-bottom: 0;">{{ __('portal.configurator.title') }}</h1>
                     <div id="statusPill" class="badge-tag">🔌 {{ __('portal.configurator.disconnected') }}</div>
+                    <span class="badge-tag badge-tag-aviso">⚠️ {{ __('portal.configurator.warning_experimental_badge') }}</span>
                 </div>
                 <p>{{ __('portal.configurator.lead') }}</p>
+
+                <!-- Aviso de advertencia: herramienta experimental y reporte en sugerencias -->
+                <div class="banner-aviso-configurador" role="alert">
+                    <span style="font-size: 1.35rem; flex-shrink: 0;" aria-hidden="true">⚠️</span>
+                    <div style="font-size: 0.92rem; line-height: 1.45;">
+                        <span class="badge-tag badge-tag-aviso" style="margin-right: 0.4rem; font-size: 0.75rem; vertical-align: middle;">
+                            ▲ {{ __('portal.configurator.warning_experimental_badge') }}
+                        </span>
+                        <span>{{ __('portal.configurator.warning_experimental_lead') }}</span>
+                        <span>{!! __('portal.configurator.warning_experimental_report', [
+                            'link' => '<a href="/sugerencias' . $langQuery . '">' . e(__('portal.configurator.warning_experimental_link')) . '</a>'
+                        ]) !!}</span>
+                    </div>
+                </div>
             </section>
 
             <!-- Selector de Modo -->

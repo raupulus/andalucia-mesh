@@ -144,7 +144,9 @@ return [
         'current_password' => 'Contraseña actual',
         'current_password_helper' => 'Obligatoria para validar tu identidad al cambiar la contraseña o el correo.',
         'new_password' => 'Nueva contraseña',
+        'new_password_helper' => 'Dejar en blanco para conservar la contraseña actual.',
         'confirm_password' => 'Confirmar nueva contraseña',
+        'confirm_password_helper' => 'Introduce de nuevo la nueva contraseña para verificarla.',
         'delete_warning' => 'Esta acción es irreversible y revoca tu acceso inmediato al panel.',
         'delete_modal_heading' => '¿Eliminar tu cuenta de operador?',
         'delete_modal_desc' => 'Esta acción es irreversible y eliminará definitivamente tu usuario, tu avatar y todos tus accesos al panel de administración. Para confirmar tu identidad, introduce tu contraseña actual.',
@@ -523,6 +525,8 @@ return [
         'field_password' => 'Contraseña',
         'field_password_create_helper' => 'Mínimo 8 caracteres por seguridad.',
         'field_password_edit_helper' => 'Dejar en blanco si no se desea modificar la contraseña actual.',
+        'field_password_confirmation' => 'Confirmar contraseña',
+        'field_password_confirmation_helper' => 'Introduce de nuevo la contraseña para verificarla.',
     ],
 
     'custom_pages' => [

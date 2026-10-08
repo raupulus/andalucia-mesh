@@ -674,5 +674,9 @@ return [
         'breadcrumb' => 'Configurador',
         'disconnected' => 'Desconectado',
         'connected' => 'Conectado',
+        'warning_experimental_badge' => 'Experimental',
+        'warning_experimental_lead' => 'Esta herramienta es experimental y debe utilizarse bajo su propio riesgo.',
+        'warning_experimental_report' => 'Si detecta algo extraño o inesperado, por favor repórtelo en :link.',
+        'warning_experimental_link' => 'sugerencias',
     ],
 ];
