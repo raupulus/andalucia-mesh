@@ -72,7 +72,7 @@ El sistema cuenta con un seeder maestro (`Database\Seeders\HardwareSeeder`) regi
    - En el menú lateral accede al grupo **Catálogo** → **Categorías Hardware** o **Artículos Hardware**.
    - **Formulario de Categorías (`HardwareCategoryForm`)**:
      - **Bloque de Nombre y Descripción** (ancho completo): cuenta arriba con un selector de idiomas por pestañas (`ES`, `EN`, `PT`) para editar nombre y descripción en cada idioma de forma aislada e intuitiva. Al introducir el nombre en español durante la creación, sugiere automáticamente el slug.
-     - **Bloque de Configuración y Visibilidad** (ancho completo): contiene el slug amigable, el orden de clasificación numérico y el interruptor de publicación activa.
+     - **Bloque de Configuración y Visibilidad** (ancho completo): contiene el slug amigable y el interruptor de publicación activa. La prioridad de ordenación numérica se ha retirado de los formularios de creación y edición, gestionándose exclusivamente arrastrando las filas en la tabla (con autoasignación incremental al crear).
    - **Formulario de Artículos (`HardwareItemForm`)**:
      - **Bloque 1 — Imagen** (arriba del todo, separado y centrado): editor de subida con recorte forzado 1:1 y alineación centrada.
      - **Bloque 2 — Dispositivo** (ancho completo): selector de categoría, slug identificador y selector superior de pestañas multidioma (`ES`, `EN`, `PT`) para redactar el nombre del modelo y las descripciones técnicas por idioma.
@@ -131,6 +131,7 @@ El sistema cuenta con un seeder maestro (`Database\Seeders\HardwareSeeder`) regi
   - `test_menu_lateral_muestra_categorias_con_conteo_de_articulos`
   - `test_formularios_filament_contienen_pestanas_multidioma_y_distribucion_ancho_completo`
   - `test_articulo_hardware_autoasigna_orden_incremental_al_crear`
+  - `test_categoria_hardware_autoasigna_orden_incremental_al_crear`
 
 ## Pendiente real
 

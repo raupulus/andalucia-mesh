@@ -119,4 +119,18 @@ class HardwareCategory extends Model
 
         return is_string($descriptions) ? $descriptions : null;
     }
+
+    /**
+     * Asigna automáticamente el siguiente orden disponible al crear una nueva categoría si no se define.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (HardwareCategory $category): void {
+            if ($category->sort_order === null || $category->sort_order === 0) {
+                $maxOrder = static::query()->max('sort_order');
+                $category->sort_order = $maxOrder !== null ? $maxOrder + 1 : 1;
+            }
+        });
+    }
 }
+

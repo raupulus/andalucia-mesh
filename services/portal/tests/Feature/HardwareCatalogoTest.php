@@ -409,6 +409,8 @@ class HardwareCatalogoTest extends TestCase
         $responseEditCat->assertSee('name.en', false);
         $responseEditCat->assertSee('name.pt', false);
         $responseEditCat->assertSee('Categoria Test ES');
+        // El campo sort_order se ha retirado del formulario de categorías para ordenarse solo desde la tabla
+        $responseEditCat->assertDontSee('data.sort_order', false);
 
         // 2. Acceso a edición de artículo: contiene los campos ES, EN y PT y los 4 bloques
         $responseEditItem = $this->actingAs($operador)->get("/admin/hardware-items/{$item->id}/edit");
@@ -458,4 +460,26 @@ class HardwareCatalogoTest extends TestCase
         $this->assertGreaterThan(0, $item1->sort_order);
         $this->assertGreaterThan($item1->sort_order, $item2->sort_order);
     }
+
+    /**
+     * Comprueba que las categorías de hardware autoasignen orden incremental al crearse si no se define.
+     */
+    public function test_categoria_hardware_autoasigna_orden_incremental_al_crear(): void
+    {
+        $cat1 = HardwareCategory::create([
+            'slug' => 'cat-auto-1',
+            'name' => ['es' => 'Cat Auto 1', 'en' => 'Cat Auto 1'],
+            'is_active' => true,
+        ]);
+
+        $cat2 = HardwareCategory::create([
+            'slug' => 'cat-auto-2',
+            'name' => ['es' => 'Cat Auto 2', 'en' => 'Cat Auto 2'],
+            'is_active' => true,
+        ]);
+
+        $this->assertGreaterThan(0, $cat1->sort_order);
+        $this->assertGreaterThan($cat1->sort_order, $cat2->sort_order);
+    }
 }
+
