@@ -42,9 +42,13 @@
         max-width: 48rem !important;
     }
 
-    /* Centrado visual del avatar de perfil de operador */
-    .fi-simple-page .fi-fo-file-upload-avatar,
-    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) {
+    /* ==============================================================================
+     * Centrado visual y apilado vertical del avatar de perfil de operador
+     * ============================================================================== */
+    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar),
+    .fi-simple-page .fi-operator-avatar-wrapper,
+    [data-field-wrapper]:has(.fi-fo-file-upload-avatar),
+    .fi-operator-avatar-wrapper {
         margin-left: auto !important;
         margin-right: auto !important;
         display: flex !important;
@@ -52,20 +56,100 @@
         align-items: center !important;
         justify-content: center !important;
         text-align: center !important;
-    }
-
-    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) .fi-fo-field-label-col,
-    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) .fi-fo-field-content-col,
-    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) .fi-fo-field-helper-text {
-        text-align: center !important;
-        display: flex !important;
-        justify-content: center !important;
         width: 100% !important;
     }
 
-    .fi-simple-page .fi-fo-file-upload-avatar .fi-fo-file-upload-input-ctn {
+    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) .fi-fo-field-label-col,
+    .fi-simple-page .fi-operator-avatar-wrapper .fi-fo-field-label-col,
+    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) .fi-fo-field-label-ctn,
+    .fi-simple-page .fi-operator-avatar-wrapper .fi-fo-field-label-ctn,
+    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) .fi-fo-field-label,
+    .fi-simple-page .fi-operator-avatar-wrapper .fi-fo-field-label {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
+        width: 100% !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* Columna de contenido: flex-direction column obligatorio para que avatar y helper-text no se coloquen en horizontal */
+    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) .fi-fo-field-content-col,
+    .fi-simple-page .fi-operator-avatar-wrapper .fi-fo-field-content-col {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        width: 100% !important;
         margin-left: auto !important;
         margin-right: auto !important;
+        gap: 0.6rem !important;
+    }
+
+    /* Contenedor del avatar: centrado horizontal independiente */
+    .fi-simple-page .fi-fo-file-upload-avatar,
+    .fi-simple-page .fi-operator-avatar-upload,
+    .fi-operator-avatar-wrapper .fi-fo-file-upload,
+    .fi-operator-avatar-wrapper .fi-fo-file-upload-avatar {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    .fi-simple-page .fi-fo-file-upload-avatar .fi-fo-file-upload-input-ctn,
+    .fi-simple-page .fi-operator-avatar-upload .fi-fo-file-upload-input-ctn,
+    .fi-operator-avatar-wrapper .fi-fo-file-upload-input-ctn {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        width: 8rem !important;
+        height: 8rem !important;
+    }
+
+    .fi-simple-page .fi-fo-file-upload-avatar .filepond--root,
+    .fi-simple-page .fi-operator-avatar-upload .filepond--root,
+    .fi-operator-avatar-wrapper .filepond--root {
+        margin-left: auto !important;
+        margin-right: auto !important;
+        width: 8rem !important;
+        height: 8rem !important;
+    }
+
+    /* Texto auxiliar debajo del circulo: centrado debajo sin invadir el avatar */
+    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) [id$="-helper-text"],
+    .fi-simple-page .fi-operator-avatar-wrapper [id$="-helper-text"],
+    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) .fi-fo-field-helper-text,
+    .fi-simple-page .fi-operator-avatar-wrapper .fi-fo-field-helper-text,
+    [data-field-wrapper]:has(.fi-fo-file-upload-avatar) [id$="-helper-text"],
+    .fi-operator-avatar-wrapper [id$="-helper-text"] {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
+        width: 100% !important;
+        margin-top: 0.5rem !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) [id$="-helper-text"] .fi-sc-component,
+    .fi-simple-page [data-field-wrapper]:has(.fi-fo-file-upload-avatar) [id$="-helper-text"] .fi-sc-text,
+    .fi-simple-page .fi-operator-avatar-wrapper [id$="-helper-text"] .fi-sc-component,
+    .fi-simple-page .fi-operator-avatar-wrapper [id$="-helper-text"] .fi-sc-text,
+    .fi-operator-avatar-wrapper [id$="-helper-text"] * {
+        text-align: center !important;
+        display: inline-block !important;
+        width: 100% !important;
+        font-size: 0.8125rem !important;
+        line-height: 1.4 !important;
+        color: #94a3b8 !important;
     }
 
     /* Cabecera superior con acento institucional verde de Andalucía */

@@ -97,9 +97,11 @@ class EditProfile extends BaseEditProfile
             ->maxSize(2048)
             ->helperText(__('admin.profile.avatar_helper'))
             ->columnSpanFull()
+            ->extraAttributes([
+                'class' => 'fi-operator-avatar-upload',
+            ])
             ->extraFieldWrapperAttributes([
-                'class' => 'flex flex-col items-center justify-center text-center',
-                'style' => 'text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;',
+                'class' => 'fi-operator-avatar-wrapper',
             ]);
     }
 
