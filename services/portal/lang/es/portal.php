@@ -72,6 +72,7 @@ return [
 
     'home' => [
         'meta_title' => ':name — Red Regional Comunitaria LoRa Meshtastic en Andalucía',
+        'meta_description' => 'Red comunitaria de radioenlaces LoRa Meshtastic en Andalucía: comunicación libre y descentralizada sin internet, telemetría y estado de la red en tiempo real.',
         'hero_lead' => 'Red regional comunitaria de radioenlaces de largo alcance LoRa Meshtastic en Andalucía. Comunicación abierta, descentralizada y libre entre comarcas sin dependencia de internet ni operadoras.',
         'services_aria' => 'Servicios principales de la red',
         'mesh_in_andalusia' => 'Malla en Andalucía',
@@ -188,7 +189,7 @@ return [
 
     'rankings' => [
         'meta_title' => 'Rankings y Estadísticas de Tráfico',
-        'meta_description' => 'Estadísticas de ocupación de canal, consumo de espectro y rankings de nodos en Andalucía Mesh.',
+        'meta_description' => 'Estadísticas de ocupación de canal, consumo de espectro y rankings de nodos más activos en la red comunitaria LoRa Meshtastic de Andalucía en tiempo real.',
         'heading' => 'Rankings y Actividad de la Red',
         'lead' => 'Monitorización del consumo de espectro, distribución del tráfico y rendimiento de enlaces directos.',
         'period_today' => 'Hoy',
@@ -229,7 +230,7 @@ return [
 
     'alerts' => [
         'meta_title' => 'Alertas y Estado de Incidencias',
-        'meta_description' => 'Registro automático de incidencias y anomalías detectadas en la red de Andalucía Mesh.',
+        'meta_description' => 'Monitorización de incidentes y salud de la red en Andalucía: avisos de batería baja, reinicios en bucle, pasarelas caídas y anomalías en tiempo real.',
         'heading' => 'Alertas de la Malla',
         'lead' => 'Monitorización en tiempo real de anomalías de radio, bucles de reinicio, saturación de canal y caídas de infraestructura.',
         'filter_all' => 'Todas',
@@ -283,7 +284,7 @@ return [
 
     'node_check' => [
         'meta_title' => 'Revisa tu nodo',
-        'meta_description' => 'Audita la configuración de radio, saltos, telemetría y batería de tu nodo Meshtastic.',
+        'meta_description' => 'Auditoría y diagnóstico de nodos Meshtastic: evalúa tu configuración de radio SFNarrow, cadencia de telemetría, batería y saltos en la red de Andalucía.',
         'heading' => 'Revisa tu nodo',
         'lead' => 'Comprueba en 5 segundos si los parámetros de tu nodo se ajustan a las buenas prácticas de la malla y protegen el espectro de radio.',
         'search_label' => 'Introduce el ID o nombre del nodo',
@@ -351,7 +352,7 @@ return [
 
     'suggestions' => [
         'meta_title' => 'Buzón de sugerencias',
-        'meta_description' => 'Envía tus propuestas, mejoras o ideas para los servicios e infraestructura de la red Andalucía Mesh.',
+        'meta_description' => 'Buzón de sugerencias comunitario: envía tus propuestas técnicas, mejoras o ideas para la infraestructura y servicios de la red Andalucía Mesh.',
         'back_to_home' => '← Volver al inicio',
         'heading' => 'Buzón de sugerencias',
         'lead' => '¿Tienes una idea para la red, una función para el bot o una mejora para la web? Tu opinión nos ayuda a hacer crecer la malla comunitaria.',
@@ -584,7 +585,7 @@ return [
 
     'faq' => [
         'meta_title' => 'Preguntas Frecuentes (FAQ)',
-        'meta_description' => 'Respuestas claras y directas a las dudas y problemas más habituales sobre la red Meshtastic Andalucía Mesh.',
+        'meta_description' => 'Respuestas a las preguntas frecuentes sobre la red Meshtastic en Andalucía: frecuencias 868 MHz, cobertura, canales comunitarios y pasarelas MQTT.',
         'badge' => 'Centro de Ayuda',
         'heading' => 'Preguntas Frecuentes',
         'lead' => 'Respuestas directas y claras a las consultas más habituales sobre la red, cobertura, configuración de nodos y resolución de incidencias.',
@@ -609,7 +610,7 @@ return [
 
     'hardware' => [
         'meta_title' => 'Catálogo de Hardware Recomendado',
-        'meta_description' => 'Dispositivos probados, antenas y componentes recomendados por la comunidad para la red Meshtastic en Andalucía.',
+        'meta_description' => 'Dispositivos LoRa probados y componentes recomendados para la red Meshtastic en Andalucía: placas Heltec, T-Beam, antenas 868 MHz y sistemas solares.',
         'heading' => 'Catálogo de Hardware Recomendado',
         'lead' => 'Selección de placas, dispositivos autónomos, antenas y componentes contrastados por la comunidad técnica para desplegar nodos fiables en la malla.',
         'back_to_home' => 'Volver al inicio',
@@ -638,6 +639,7 @@ return [
         'nav_title' => 'Páginas',
         'index_title' => 'Páginas y Artículos',
         'index_subtitle' => 'Guías, artículos divulgativos y novedades sobre la red mallada comunitaria en Andalucía.',
+        'meta_description' => 'Biblioteca de guías técnicas, tutoriales de configuración y recursos comunitarios sobre radioenlaces LoRa y despliegues Meshtastic en Andalucía.',
         'home_title' => 'Páginas y Divulgación',
         'home_subtitle' => 'Artículos, guías técnicas y novedades sobre la red comunitaria.',
         'btn_view_all' => 'Ver todas las páginas',

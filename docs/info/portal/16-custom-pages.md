@@ -44,9 +44,9 @@
    - `CustomPageController@index` lista todas las páginas activas ordenadas cronológicamente en tarjetas horizontales con la franja separadora con degradado verde-blanco-verde y badges verdes.
 4. **Lectura de Artículo (`/paginas/{slug}`)**:
    - `CustomPageController@show` busca por slug activo (devuelve 404 si está inactivo o no existe).
-   - Renderiza con metadatos Open Graph, Twitter Card y Schema.org `Article`.
+   - Renderiza con metadatos Open Graph, Twitter Card y Schema.org `TechArticle`.
 5. **Rastreo por Motores de Búsqueda (`/sitemap.xml`)**:
-   - `SitemapController@buildSitemap` incluye `/paginas` y los slugs dinámicos activos con su última fecha de modificación.
+   - `SitemapController@buildSitemap` incluye `/paginas` y los slugs dinámicos activos con su última fecha de modificación, enlaces multilingües alternativos `hreflang` e imágenes para Google Image Sitemap.
 
 ## Puntos de entrada
 - **`GET /paginas`**:
@@ -97,4 +97,4 @@ No requiere variables de entorno adicionales. Utiliza el almacenamiento de Larav
 - [x] Módulo implementado y verificado con 100% de tests pasando.
 
 ---
-> Creado: 2026-10-08 · Última revisión: 2026-10-08
+> Creado: 2026-10-08 · Última revisión: 2026-10-09

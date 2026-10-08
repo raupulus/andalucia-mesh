@@ -93,7 +93,36 @@ class RutasEstaticasTest extends TestCase
         $response->assertSee('/legal/privacidad', false);
         $response->assertSee('/hardware', false);
         $response->assertSee('/faq', false);
+        $response->assertSee('/routers', false);
+        $response->assertSee('/api', false);
+        $response->assertDontSee('/styles.css', false);
+        $response->assertDontSee('/configurador.js', false);
+        $response->assertSee('hreflang="es"', false);
+        $response->assertSee('hreflang="en"', false);
+        $response->assertSee('hreflang="pt"', false);
+        $response->assertSee('<image:image>', false);
         $response->assertHeaderMissing('Set-Cookie');
+    }
+
+    public function test_canonical_sanea_parametros_de_rastreo(): void
+    {
+        $response = $this->get('/rankings?utm_source=telegram&gclid=prueba123&page=2');
+
+        $response->assertStatus(200);
+        $response->assertSee('<link rel="canonical" href="http://localhost/rankings">', false);
+        $response->assertSee('<meta property="og:url" content="http://localhost/rankings">', false);
+        $response->assertDontSee('<link rel="canonical" href="http://localhost/rankings?utm_source', false);
+        $response->assertDontSee('<meta property="og:url" content="http://localhost/rankings?utm_source', false);
+    }
+
+    public function test_marcado_estructurado_schema_incluye_breadcrumbs_en_paginas_interiores(): void
+    {
+        $response = $this->get('/routers');
+
+        $response->assertStatus(200);
+        $response->assertSee('"@type":"BreadcrumbList"', false);
+        $response->assertSee('"@type":"ListItem"', false);
+        $response->assertSee('http://localhost/routers', false);
     }
 
     public function test_sitemap_esta_programado_para_regeneracion_nocturna(): void

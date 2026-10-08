@@ -22,12 +22,46 @@ class SitemapController extends Controller
         'admin*',
         'filament*',
         'livewire*',
-        'api*',
+        'api/*',
+        'api/v*',
         'health*',
         'storage*',
         'up',
         'sitemap*',
         'robots*',
+        'styles.css',
+        'configurador.js',
+        '*.css',
+        '*.js',
+    ];
+
+    /**
+     * Catálogo canónico de imágenes Open Graph asignadas por ruta pública.
+     *
+     * @var array<string, string>
+     */
+    protected const ROUTE_IMAGES = [
+        '' => 'img/og/og-portada.webp',
+        'proyecto' => 'img/og/og-proyecto.webp',
+        'quien-lo-impulsa' => 'img/og/og-quien-lo-impulsa.webp',
+        'como-se-gestiona' => 'img/og/og-como-se-gestiona.webp',
+        'configura-tu-nodo' => 'img/og/og-configura-nodo.webp',
+        'conecta-tu-gateway' => 'img/og/og-conecta-gateway.webp',
+        'bots' => 'img/og/og-bots.webp',
+        'firmware' => 'img/og/og-firmware.webp',
+        'api' => 'img/og/og-api.webp',
+        'rankings' => 'img/og/og-rankings.webp',
+        'routers' => 'img/og/og-routers.webp',
+        'alertas' => 'img/og/og-alertas.webp',
+        'revisa-tu-nodo' => 'img/og/og-revisa-nodo.webp',
+        'configurador' => 'img/og/og-configurador.webp',
+        'hardware' => 'img/og/og-hardware.webp',
+        'faq' => 'img/og/og-faq.webp',
+        'paginas' => 'img/og/og-paginas.webp',
+        'sugerencias' => 'img/og/og-sugerencias.webp',
+        'legal/aviso-legal' => 'img/og/og-aviso-legal.webp',
+        'legal/privacidad' => 'img/og/og-privacidad.webp',
+        'legal/cookies' => 'img/og/og-cookies.webp',
     ];
 
     /**
@@ -99,6 +133,7 @@ class SitemapController extends Controller
             }
 
             $uri = $route->uri();
+            $clean = trim($uri, '/');
             $path = ($uri === '/' || $uri === '') ? '' : '/'.ltrim($uri, '/');
             $fullUrl = $baseUrl.$path;
 
@@ -113,6 +148,17 @@ class SitemapController extends Controller
                 ->setPriority($meta['priority'])
                 ->setChangeFrequency($meta['frequency'])
                 ->setLastModificationDate(now());
+
+            // Añadir enlaces multilingües alternativos (hreflang)
+            $tag->addAlternate($fullUrl, 'es')
+                ->addAlternate($fullUrl.'?lang=en', 'en')
+                ->addAlternate($fullUrl.'?lang=pt', 'pt');
+
+            // Asociar imagen para Google Image Sitemap si existe en el catálogo canónico
+            $relImg = self::ROUTE_IMAGES[$clean] ?? null;
+            if ($relImg && file_exists(public_path($relImg))) {
+                $tag->addImage($baseUrl.'/'.ltrim($relImg, '/'));
+            }
 
             $sitemap->add($tag);
         }
@@ -132,6 +178,20 @@ class SitemapController extends Controller
                     ->setPriority(0.7)
                     ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
                     ->setLastModificationDate($pagina->updated_at ?? now());
+
+                $tag->addAlternate($pageUrl, 'es')
+                    ->addAlternate($pageUrl.'?lang=en', 'en')
+                    ->addAlternate($pageUrl.'?lang=pt', 'pt');
+
+                $coverImg = $pagina->cover_image_url;
+                if ($coverImg) {
+                    $coverFull = (str_starts_with($coverImg, 'http://') || str_starts_with($coverImg, 'https://'))
+                        ? $coverImg
+                        : $baseUrl.'/'.ltrim($coverImg, '/');
+                    $tag->addImage($coverFull, $pagina->title);
+                } else {
+                    $tag->addImage($baseUrl.'/img/og/og-paginas.webp', $pagina->title);
+                }
 
                 $sitemap->add($tag);
             }
@@ -181,15 +241,15 @@ class SitemapController extends Controller
             return ['priority' => 1.0, 'frequency' => Url::CHANGE_FREQUENCY_HOURLY];
         }
 
-        if (in_array($clean, ['rankings', 'alertas'], true)) {
+        if (in_array($clean, ['rankings', 'alertas', 'routers'], true)) {
             return ['priority' => 0.8, 'frequency' => Url::CHANGE_FREQUENCY_HOURLY];
         }
 
-        if (in_array($clean, ['configura-tu-nodo', 'conecta-tu-gateway', 'proyecto', 'revisa-tu-nodo', 'paginas', 'hardware'], true)) {
+        if (in_array($clean, ['configura-tu-nodo', 'conecta-tu-gateway', 'configurador', 'proyecto', 'revisa-tu-nodo', 'paginas', 'hardware'], true)) {
             return ['priority' => 0.8, 'frequency' => Url::CHANGE_FREQUENCY_WEEKLY];
         }
 
-        if (in_array($clean, ['bots', 'firmware', 'quien-lo-impulsa', 'como-se-gestiona'], true)) {
+        if (in_array($clean, ['bots', 'firmware', 'faq', 'quien-lo-impulsa', 'como-se-gestiona'], true)) {
             return ['priority' => 0.7, 'frequency' => Url::CHANGE_FREQUENCY_WEEKLY];
         }
 

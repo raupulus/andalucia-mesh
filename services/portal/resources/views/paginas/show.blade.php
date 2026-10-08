@@ -4,6 +4,41 @@
 @endphp
 
 <x-layout :title="$pagina->title" :description="$pagina->description" :image="$pagina->cover_image_url ?: asset('img/og/og-paginas.webp')" :keywords="$pagina->keywords">
+    @php
+        $coverFullUrl = $pagina->cover_image_url 
+            ? (str_starts_with($pagina->cover_image_url, 'http') ? $pagina->cover_image_url : asset(ltrim($pagina->cover_image_url, '/')))
+            : asset('img/og/og-paginas.webp');
+        $articleSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'TechArticle',
+            'headline' => $pagina->title,
+            'description' => $pagina->description,
+            'image' => $coverFullUrl,
+            'datePublished' => $pagina->created_at?->toIso8601String(),
+            'dateModified' => $pagina->updated_at?->toIso8601String(),
+            'inLanguage' => $currentLang,
+            'author' => [
+                '@type' => 'Organization',
+                'name' => config('proyecto.nombre'),
+                'url' => url('/'),
+            ],
+            'publisher' => [
+                '@type' => 'Organization',
+                'name' => config('proyecto.nombre'),
+                'logo' => [
+                    '@type' => 'ImageObject',
+                    'url' => asset('img/logo-512.png'),
+                ],
+            ],
+            'mainEntityOfPage' => [
+                '@type' => 'WebPage',
+                '@id' => url()->current(),
+            ],
+        ];
+    @endphp
+    <script type="application/ld+json">
+    {!! json_encode($articleSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
     <div class="contenedor seccion">
         <article class="pagina-detalle" style="max-width: 860px; margin: 0 auto;">
             <!-- Migas de pan / Volver -->

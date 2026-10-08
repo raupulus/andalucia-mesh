@@ -5,7 +5,7 @@
 ## SEO
 
 - **Título:** `Firmware & Apps · {PROJECT_NAME}`
-- **Descripción:** `Web client, iOS and Android apps, official firmware downloads, and release guidelines.`
+- **Descripción:** `Official Meshtastic firmware downloads, flasher tools, web clients, and mobile apps for iOS and Android with release channel recommendations.`
 
 ## Borrador del texto
 

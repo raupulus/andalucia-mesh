@@ -3,7 +3,7 @@
     $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
 @endphp
 
-<x-layout :title="config('proyecto.nombre') . ' — ' . __('portal.home.meta_title', ['name' => config('proyecto.nombre')])" :description="__('portal.home.hero_lead')" :image="asset('img/og/og-portada.webp')">
+<x-layout :title="__('portal.home.meta_title', ['name' => config('proyecto.nombre')])" :description="__('portal.home.meta_description') ?? __('portal.home.hero_lead')" :image="asset('img/og/og-portada.webp')">
     <div class="contenedor">
         <!-- 1. Presentación institucional -->
         <header class="seccion portada-hero">

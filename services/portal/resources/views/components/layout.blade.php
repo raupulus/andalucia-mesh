@@ -26,8 +26,11 @@
             'svg' => 'image/svg+xml',
             default => 'image/png',
         };
-        $canonicalUrl = request()->fullUrl();
         $baseUrl = url()->current();
+        $cleanParams = (request()->has('lang') && request()->query('lang') !== 'es') ? ['lang' => request()->query('lang')] : [];
+        $canonicalUrl = !empty($canonical)
+            ? $canonical
+            : (empty($cleanParams) ? $baseUrl : $baseUrl . '?' . http_build_query($cleanParams));
     @endphp
 
     <title>{{ $pageTitle }}</title>
@@ -39,9 +42,9 @@
     <link rel="canonical" href="{{ $canonicalUrl }}">
 
     <!-- Etiquetas multilingües hreflang (SEO internacional) -->
-    <link rel="alternate" hreflang="es" href="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}">
-    <link rel="alternate" hreflang="en" href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}">
-    <link rel="alternate" hreflang="pt" href="{{ request()->fullUrlWithQuery(['lang' => 'pt']) }}">
+    <link rel="alternate" hreflang="es" href="{{ $baseUrl }}">
+    <link rel="alternate" hreflang="en" href="{{ $baseUrl }}?lang=en">
+    <link rel="alternate" hreflang="pt" href="{{ $baseUrl }}?lang=pt">
     <link rel="alternate" hreflang="x-default" href="{{ $baseUrl }}">
 
     <!-- Open Graph & Metadatos Sociales -->
@@ -101,6 +104,36 @@
                 ],
             ],
         ];
+
+        // Añadir BreadcrumbList si no es la portada principal
+        $pathSegments = array_values(array_filter(explode('/', trim(request()->path(), '/'))));
+        if (!empty($pathSegments)) {
+            $breadcrumbElements = [
+                [
+                    '@type' => 'ListItem',
+                    'position' => 1,
+                    'name' => __('portal.nav.home'),
+                    'item' => url('/'),
+                ]
+            ];
+            $currentAcc = '';
+            foreach ($pathSegments as $idx => $segment) {
+                $currentAcc .= '/' . $segment;
+                $isLast = ($idx === count($pathSegments) - 1);
+                $name = $isLast ? ($title ?? ucfirst($segment)) : ucfirst($segment);
+                $breadcrumbElements[] = [
+                    '@type' => 'ListItem',
+                    'position' => $idx + 2,
+                    'name' => $name,
+                    'item' => url($currentAcc),
+                ];
+            }
+            $siteSchema['@graph'][] = [
+                '@type' => 'BreadcrumbList',
+                '@id' => url()->current() . '/#breadcrumb',
+                'itemListElement' => $breadcrumbElements,
+            ];
+        }
     @endphp
     <script type="application/ld+json">
     {!! json_encode($siteSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}

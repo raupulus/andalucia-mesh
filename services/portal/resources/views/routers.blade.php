@@ -29,7 +29,7 @@
     };
 @endphp
 
-<x-layout :title="config('proyecto.nombre') . ' — ' . __('portal.routers.title')" :description="__('portal.routers.lead')" :image="asset('img/og/og-routers.webp')">
+<x-layout :title="__('portal.routers.title')" :description="__('portal.routers.lead')" :image="asset('img/og/og-routers.webp')">
     <div class="contenedor" style="padding-top: 2rem; padding-bottom: 4rem;">
 
         <!-- 1. Encabezado y Breadcrumbs -->

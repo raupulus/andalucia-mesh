@@ -190,4 +190,3 @@ class ConfiguradorTest extends TestCase
         $response->assertSee('Conexión Directa con el Nodo');
     }
 }
-

@@ -72,6 +72,7 @@ return [
 
     'home' => [
         'meta_title' => ':name — Regional Community LoRa Meshtastic Mesh Network in Andalusia',
+        'meta_description' => 'Community LoRa Meshtastic mesh network in Andalusia: decentralized communication without internet, real-time telemetry, repeater health, and setup guides.',
         'hero_lead' => 'Regional community long-range LoRa Meshtastic mesh network in Andalusia. Open, decentralized and free inter-county communication without reliance on the internet or telecom operators.',
         'services_aria' => 'Main network services',
         'mesh_in_andalusia' => 'Mesh in Andalusia',
@@ -188,7 +189,7 @@ return [
 
     'rankings' => [
         'meta_title' => 'Traffic Rankings & Statistics',
-        'meta_description' => 'Channel occupancy statistics, spectrum consumption, and node rankings in Andalucía Mesh.',
+        'meta_description' => 'Channel occupancy statistics, airtime consumption, and real-time rankings of the most active nodes across the Andalusia Mesh community network.',
         'heading' => 'Network Rankings & Activity',
         'lead' => 'Spectrum consumption monitoring, traffic mix distribution, and direct link benchmarks.',
         'period_today' => 'Today',
@@ -229,7 +230,7 @@ return [
 
     'alerts' => [
         'meta_title' => 'Alerts & Incident Status',
-        'meta_description' => 'Automatic log of incidents and network anomalies detected across the Andalucía Mesh network.',
+        'meta_description' => 'Real-time incident monitoring and network health in Andalusia: low battery warnings, boot loop detection, offline gateways, and channel anomalies.',
         'heading' => 'Mesh Alerts',
         'lead' => 'Real-time monitoring of radio anomalies, boot loops, channel saturation, and infrastructure downtime.',
         'filter_all' => 'All',
@@ -283,7 +284,7 @@ return [
 
     'node_check' => [
         'meta_title' => 'Check your node',
-        'meta_description' => 'Audit radio settings, hop count, telemetry cadence, and battery of your Meshtastic node.',
+        'meta_description' => 'Meshtastic node audit and diagnostic tool: evaluate your SFNarrow radio settings, telemetry cadence, battery health, and hop limits across Andalusia.',
         'heading' => 'Check your node',
         'lead' => 'Check in 5 seconds whether your node settings adhere to community best practices and protect the radio spectrum.',
         'search_label' => 'Enter node ID or name',
@@ -351,7 +352,7 @@ return [
 
     'suggestions' => [
         'meta_title' => 'Suggestions Box',
-        'meta_description' => 'Send your ideas, proposals, or enhancements for Andalucía Mesh services and infrastructure.',
+        'meta_description' => 'Community suggestions box: share your technical proposals, feature requests, and ideas to improve Andalusia Mesh infrastructure and services.',
         'back_to_home' => '← Back to home',
         'heading' => 'Suggestions Box',
         'lead' => 'Got an idea for the mesh, a bot feature, or a website improvement? Your feedback helps grow the community network.',
@@ -584,7 +585,7 @@ return [
 
     'faq' => [
         'meta_title' => 'Frequently Asked Questions (FAQ)',
-        'meta_description' => 'Clear and direct answers to common questions and troubleshooting on Andalucía Mesh Meshtastic network.',
+        'meta_description' => 'Frequently asked questions about the Andalusia Mesh Meshtastic network: 868 MHz frequencies, coverage, community channels, and MQTT gateways.',
         'badge' => 'Help Center',
         'heading' => 'Frequently Asked Questions',
         'lead' => 'Quick and clear answers to common questions regarding network coverage, node setup, and troubleshooting.',
@@ -609,7 +610,7 @@ return [
 
     'hardware' => [
         'meta_title' => 'Recommended Hardware Catalog',
-        'meta_description' => 'Tested devices, antennas, and components recommended by the community for the Meshtastic network in Andalusia.',
+        'meta_description' => 'Tested LoRa devices and hardware components for the Meshtastic network in Andalusia: Heltec boards, LilyGO T-Beam, 868 MHz antennas, and solar nodes.',
         'heading' => 'Recommended Hardware Catalog',
         'lead' => 'Selection of boards, standalone nodes, antennas, and components thoroughly verified by the technical community for deploying reliable mesh nodes.',
         'back_to_home' => 'Back to home',
@@ -638,6 +639,7 @@ return [
         'nav_title' => 'Pages',
         'index_title' => 'Pages and Articles',
         'index_subtitle' => 'Guides, educational articles and updates about the community mesh network in Andalusia.',
+        'meta_description' => 'Technical guides, configuration tutorials, and community documentation on LoRa radio links and Meshtastic deployments across Andalusia.',
         'home_title' => 'Pages & Articles',
         'home_subtitle' => 'Articles, technical guides and updates on the community network.',
         'btn_view_all' => 'View all pages',
