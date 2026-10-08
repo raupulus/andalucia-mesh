@@ -508,12 +508,93 @@ class GestorComandos:
             "Usa /settings para ver la configuración o /pause para pausarlas de nuevo."
         )
 
+    async def ejecutar_enable_exterior(self, plataforma_id: int, es_admin: bool) -> str:
+        """Activa la recepción de alertas de nodos de fuera de Andalucía (/enableExterior)."""
+        if not es_admin:
+            return "Solo los administradores pueden cambiar los filtros."
+
+        async with self.gestor_base.conexion() as conn, conn.transaction(), conn.cursor() as cur:
+            await cur.execute(
+                """
+                UPDATE destino
+                SET incluir_exterior = true, actualizado_en = now()
+                WHERE plataforma_id = %s
+                RETURNING id
+                """,
+                (plataforma_id,),
+            )
+            fila = await cur.fetchone()
+            if not fila:
+                return "Este chat no recibe alertas."
+
+        return (
+            "🌍 Nodos de fuera de Andalucía: ✅ ACTIVADOS en este chat.\n"
+            "Se enviarán alertas tanto de nodos de Andalucía como de fuera de la comunidad."
+        )
+
+    async def ejecutar_disable_exterior(self, plataforma_id: int, es_admin: bool) -> str:
+        """Desactiva la recepción de alertas de nodos de fuera de Andalucía (/disableExterior)."""
+        if not es_admin:
+            return "Solo los administradores pueden cambiar los filtros."
+
+        async with self.gestor_base.conexion() as conn, conn.transaction(), conn.cursor() as cur:
+            await cur.execute(
+                """
+                UPDATE destino
+                SET incluir_exterior = false, actualizado_en = now()
+                WHERE plataforma_id = %s
+                RETURNING id
+                """,
+                (plataforma_id,),
+            )
+            fila = await cur.fetchone()
+            if not fila:
+                return "Este chat no recibe alertas."
+
+        return (
+            "🌍 Nodos de fuera de Andalucía: ❌ DESACTIVADOS en este chat.\n"
+            "Solo se enviarán alertas de nodos ubicados en Andalucía."
+        )
+
+    async def ejecutar_exterior(self, plataforma_id: int, es_admin: bool, opcion: str | None = None) -> str:
+        """Consulta o cambia el filtro de nodos de fuera de Andalucía (/exterior [on|off])."""
+        if opcion:
+            opc = opcion.strip().lower()
+            if opc in ("on", "si", "sí", "activar", "enable", "permitir", "true", "1"):
+                return await self.ejecutar_enable_exterior(plataforma_id, es_admin)
+            elif opc in ("off", "no", "desactivar", "disable", "bloquear", "false", "0"):
+                return await self.ejecutar_disable_exterior(plataforma_id, es_admin)
+            else:
+                return "Opción no válida. Usa /disableExterior para solo Andalucía o /enableExterior para incluir nodos de fuera."
+
+        # Sin argumentos: consultar estado actual
+        async with self.gestor_base.conexion() as conn, conn.cursor() as cur:
+            await cur.execute("SELECT incluir_exterior FROM destino WHERE plataforma_id = %s", (plataforma_id,))
+            dest = await cur.fetchone()
+            if not dest:
+                return "Este chat no recibe alertas."
+            incluir_exterior = dest[0]
+
+        if incluir_exterior is not None:
+            estado_txt = "✅ Activados (se reciben avisos de fuera)" if incluir_exterior else "❌ Desactivados (solo Andalucía)"
+        else:
+            def_txt = "✅ Activados (por defecto)" if self.config.bot_exterior_defecto else "❌ Desactivados: solo Andalucía (por defecto)"
+            estado_txt = def_txt
+
+        return (
+            f"🌍 Filtro de nodos de fuera de Andalucía en este chat:\n"
+            f"Estado: {estado_txt}\n\n"
+            "Comandos para administradores:\n"
+            "• /disableExterior — solo recibir alertas de Andalucía\n"
+            "• /enableExterior — recibir también alertas de fuera de Andalucía"
+        )
+
     async def ejecutar_settings(self, plataforma_id: int) -> str:
         """Devuelve la configuración y estadísticas del chat (/settings)."""
         async with self.gestor_base.conexion() as conn, conn.cursor() as cur:
             await cur.execute(
                 """
-                    SELECT id, activo, motivo_baja, alta_en, baja_en, riesgos, tipos
+                    SELECT id, activo, motivo_baja, alta_en, baja_en, riesgos, tipos, incluir_exterior
                     FROM destino
                     WHERE plataforma_id = %s
                     """,
@@ -524,7 +605,7 @@ class GestorComandos:
             if not dest:
                 return "Este chat no recibe alertas."
 
-            dest_id, activo, motivo_baja, alta_en, baja_en, riesgos, tipos = dest
+            dest_id, activo, motivo_baja, alta_en, baja_en, riesgos, tipos, incluir_exterior = dest
 
             if not activo:
                 if motivo_baja == "pausado_usuario":
@@ -559,6 +640,12 @@ class GestorComandos:
         tipos_txt = (
             ", ".join(tipos) if tipos else f"{', '.join(self.config.lista_tipos_defecto)} (por defecto)"
         )
+        if incluir_exterior is not None:
+            exterior_txt = "✅ Permitidos (Andalucía y exterior)" if incluir_exterior else "❌ Solo Andalucía"
+        else:
+            def_ext = "✅ Permitidos (por defecto)" if self.config.bot_exterior_defecto else "❌ Solo Andalucía (por defecto)"
+            exterior_txt = def_ext
+
         alta_txt = alta_en.strftime("%d/%m/%Y") if alta_en else "desconocida"
 
         if ultimo_enviado_at:
@@ -570,12 +657,15 @@ class GestorComandos:
             "⚙️ Configuración de este chat\n"
             f"Riesgos: {riesgos_txt} (opciones: bajo, medio, alto, todos)\n"
             f"Tipos: {tipos_txt} (opciones: infraestructura, clientes, todos)\n"
+            f"Nodos exterior: {exterior_txt}\n"
             "Estado: ✅ Activo (recibiendo alertas)\n"
             f"Activo desde el {alta_txt}\n"
             f"Avisos enviados aquí: {total_enviados} (último: {ult_txt})\n\n"
             "Comandos de control:\n"
             "• /levels — ver u opciones de riesgo\n"
             "• /types — ver u opciones de tipo\n"
+            "• /disableExterior — silenciar nodos de fuera de Andalucía\n"
+            "• /enableExterior — permitir nodos de fuera de Andalucía\n"
             "• /pause — silenciar/pausar alertas de la malla\n"
             "• /resume — reanudar alertas de la malla"
         )
@@ -591,6 +681,8 @@ class GestorComandos:
             "/routers [provincia] — routers con batería, chutil y tx\n"
             "/levels [riesgos] — ver o cambiar niveles (bajo, medio, alto, todos)\n"
             "/types [tipos] — ver o cambiar tipos (infraestructura, clientes, todos)\n"
+            "/disableExterior — solo alertas de Andalucía (administradores)\n"
+            "/enableExterior — incluir nodos de fuera de Andalucía (administradores)\n"
             "/pause — silenciar o pausar las alertas (administradores)\n"
             "/resume — reanudar las alertas (administradores)\n"
             "/settings — configuración y estado de este chat\n"

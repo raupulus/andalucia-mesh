@@ -19,6 +19,21 @@ PROVINCIAS: dict[str, str] = {
     "FUERA": "Fuera de Andalucía",
 }
 
+PROVINCIAS_ANDALUCIA: frozenset[str] = frozenset(
+    {"ES-AL", "ES-CA", "ES-CO", "ES-GR", "ES-H", "ES-J", "ES-MA", "ES-SE"}
+)
+
+
+def es_nodo_exterior(nodo_id: str, nodo_info: dict[str, Any] | None) -> bool:
+    """Indica si un nodo está ubicado fuera de Andalucía según su provincia asignada."""
+    if nodo_id == "all" or not nodo_info:
+        return False
+    prov = nodo_info.get("provincia")
+    if not prov:
+        return False
+    prov_upper = str(prov).strip().upper()
+    return prov_upper == "FUERA" or prov_upper not in PROVINCIAS_ANDALUCIA
+
 
 @dataclass
 class AvisoNeutro:

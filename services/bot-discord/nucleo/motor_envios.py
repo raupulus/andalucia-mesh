@@ -12,7 +12,7 @@ from psycopg import AsyncConnection
 from nucleo.base import GestorBase
 from nucleo.catalogo import GestorCatalogo
 from nucleo.config import ConfiguracionBots
-from nucleo.formato import AvisoNeutro, formatear_aviso_neutro, formatear_resumen_neutro
+from nucleo.formato import AvisoNeutro, es_nodo_exterior, formatear_aviso_neutro, formatear_resumen_neutro
 
 logger = logging.getLogger("nucleo.motor_envios")
 
@@ -126,24 +126,31 @@ class MotorEnvios:
         tipo = str(alerta.get("tipo", "infraestructura")).lower()
         nodo = str(alerta.get("nodo", ""))
         nodo_info = alerta.get("nodo_info") or {}
+        es_exterior = es_nodo_exterior(nodo, nodo_info)
         etiqueta = str(nodo_info.get("corto") or nodo)
 
         # Consultar destinos activos
         async with conn.cursor() as cur:
             await cur.execute(
                 """
-                SELECT id, plataforma_id, clase, riesgos, tipos
+                SELECT id, plataforma_id, clase, riesgos, tipos, incluir_exterior
                 FROM destino
                 WHERE activo = true
                 """
             )
             destinos = await cur.fetchall()
 
-        for dest_id, plat_id, _clase, filtros_riesgos, filtros_tipos in destinos:
+        for dest_id, plat_id, _clase, filtros_riesgos, filtros_tipos, dest_exterior in destinos:
             riesgos_activos = filtros_riesgos or self.config.lista_riesgos_defecto
             tipos_activos = filtros_tipos or self.config.lista_tipos_defecto
+            permite_exterior = (
+                dest_exterior
+                if dest_exterior is not None
+                else self.config.bot_exterior_defecto
+            )
 
-            pasa_filtros = (riesgo in riesgos_activos) and (tipo in tipos_activos)
+            pasa_exterior = (not es_exterior) or permite_exterior
+            pasa_filtros = (riesgo in riesgos_activos) and (tipo in tipos_activos) and pasa_exterior
 
             # Consultar si ya existe hilo para esta alerta en este destino
             async with conn.cursor() as cur:

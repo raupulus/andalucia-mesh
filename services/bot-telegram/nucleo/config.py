@@ -40,6 +40,7 @@ class ConfiguracionBots(ConfiguracionBase):
     portal_api_url: str = "https://mesh.desdechipiona.es/api/v1"
     bot_riesgos_defecto: str = "alto"
     bot_tipos_defecto: str = "infraestructura"
+    bot_exterior_defecto: bool = False
     bot_max_mensajes_minuto: int = 10
     bot_max_mensajes_segundo: int = 25
     bot_agrupar_umbral: int = 5

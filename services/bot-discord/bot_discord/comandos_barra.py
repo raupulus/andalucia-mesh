@@ -298,3 +298,41 @@ def registrar_comandos_barra(
         es_admin = verificar_admin_interaccion(interaction)
         resp = await comandos.ejecutar_resume(interaction.channel_id, es_admin=es_admin)
         await interaction.response.send_message(resp, ephemeral=not es_admin)
+
+    # 12. /disable_exterior
+    @tree.command(name="disable_exterior", description="Recibir solo alertas de nodos de Andalucía")
+    async def cmd_disable_exterior(interaction: discord.Interaction) -> None:
+        if not interaction.channel_id:
+            return
+        es_admin = verificar_admin_interaccion(interaction)
+        resp = await comandos.ejecutar_disable_exterior(interaction.channel_id, es_admin=es_admin)
+        await interaction.response.send_message(resp, ephemeral=not es_admin)
+
+    # 13. /enable_exterior
+    @tree.command(name="enable_exterior", description="Incluir alertas de nodos de fuera de Andalucía")
+    async def cmd_enable_exterior(interaction: discord.Interaction) -> None:
+        if not interaction.channel_id:
+            return
+        es_admin = verificar_admin_interaccion(interaction)
+        resp = await comandos.ejecutar_enable_exterior(interaction.channel_id, es_admin=es_admin)
+        await interaction.response.send_message(resp, ephemeral=not es_admin)
+
+    # 14. /exterior
+    @tree.command(name="exterior", description="Consultar o cambiar el filtro de nodos de fuera de Andalucía")
+    @app_commands.describe(accion="Activar o desactivar alertas de fuera de Andalucía")
+    @app_commands.choices(
+        accion=[
+            app_commands.Choice(name="Activar (permitir fuera de Andalucía)", value="activar"),
+            app_commands.Choice(name="Desactivar (solo Andalucía)", value="desactivar"),
+        ]
+    )
+    async def cmd_exterior(
+        interaction: discord.Interaction,
+        accion: app_commands.Choice[str] | None = None,
+    ) -> None:
+        if not interaction.channel_id:
+            return
+        es_admin = verificar_admin_interaccion(interaction)
+        valor_accion = accion.value if accion else None
+        resp = await comandos.ejecutar_exterior(interaction.channel_id, es_admin=es_admin, opcion=valor_accion)
+        await interaction.response.send_message(resp, ephemeral=not es_admin)

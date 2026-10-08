@@ -34,6 +34,9 @@ async def configurar_cliente_telegram(bot: Bot, config: ConfiguracionBotTelegram
         BotCommand(command="types", description="Ver o cambiar los tipos (administradores)"),
         BotCommand(command="pause", description="Silenciar o pausar alertas (administradores)"),
         BotCommand(command="resume", description="Reanudar alertas (administradores)"),
+        BotCommand(command="disableexterior", description="Solo nodos de Andalucía (administradores)"),
+        BotCommand(command="enableexterior", description="Incluir nodos de fuera de Andalucía (administradores)"),
+        BotCommand(command="exterior", description="Estado del filtro exterior (administradores)"),
         BotCommand(command="settings", description="Configuración de este chat"),
         BotCommand(command="help", description="Ayuda y enlace a la web"),
     ]

@@ -40,6 +40,12 @@ COMANDOS_VALIDOS = {
     "mute",
     "unmute",
     "stop",
+    "disableexterior",
+    "enableexterior",
+    "exterior",
+    "soloandalucia",
+    "ocultarexterior",
+    "mostrarexterior",
 }
 
 
@@ -246,6 +252,12 @@ class ManejadoresTelegram:
             "mute",
             "unmute",
             "stop",
+            "disableexterior",
+            "enableexterior",
+            "exterior",
+            "soloandalucia",
+            "ocultarexterior",
+            "mostrarexterior",
         )
         if es_privado and comando_raw in comandos_solo_destino:
             await message.reply("Este comando solo funciona en grupos y canales.")
@@ -276,6 +288,13 @@ class ManejadoresTelegram:
             respuesta = await self.comandos.ejecutar_pause(chat_id, es_admin)
         elif comando_raw in ("resume", "activar", "unmute"):
             respuesta = await self.comandos.ejecutar_resume(chat_id, es_admin)
+        elif comando_raw in ("disableexterior", "soloandalucia", "ocultarexterior"):
+            respuesta = await self.comandos.ejecutar_disable_exterior(chat_id, es_admin)
+        elif comando_raw in ("enableexterior", "mostrarexterior"):
+            respuesta = await self.comandos.ejecutar_enable_exterior(chat_id, es_admin)
+        elif comando_raw == "exterior":
+            opc = argumentos[0] if argumentos else None
+            respuesta = await self.comandos.ejecutar_exterior(chat_id, es_admin, opc)
         elif comando_raw == "settings":
             respuesta = await self.comandos.ejecutar_settings(chat_id)
         elif comando_raw == "help":

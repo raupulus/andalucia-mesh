@@ -75,6 +75,9 @@ Los anuncios se publican en el canal de anuncios, pero no se difunden (*crosspos
 | `/types` | `tipos` (texto opcional) | Igual que `/levels` | Pública |
 | `/pause` | — | Gestionar canales | Efímera si error/sin permiso; pública si pausa |
 | `/resume` | — | Gestionar canales | Efímera si error/sin permiso; pública si reanuda |
+| `/disable_exterior` | — | Gestionar canales | Efímera si error/sin permiso; pública si cambia |
+| `/enable_exterior` | — | Gestionar canales | Efímera si error/sin permiso; pública si cambia |
+| `/exterior` | `accion` (opcional: activar, desactivar) | Ver: cualquiera. Cambiar: Gestionar canales | Efímera si error/sin permiso; pública si consulta o cambia |
 | `/settings` | — | Cualquiera | Pública |
 | `/help` | — | Cualquiera | Efímera |
 | `/subscribe`, `/unsubscribe` | — | Gestionar canales | Pública |
