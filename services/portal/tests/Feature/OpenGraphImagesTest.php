@@ -17,6 +17,7 @@ use Tests\TestCase;
 class OpenGraphImagesTest extends TestCase
 {
     use RefreshDatabase;
+
     /**
      * Proveedor de rutas públicas y sus respectivas imágenes Open Graph asignadas.
      *
@@ -101,7 +102,7 @@ class OpenGraphImagesTest extends TestCase
         $this->assertDirectoryExists($directorio);
 
         foreach (self::rutasEImagenesProvider() as $caso => [$ruta, $fichero]) {
-            $rutaFichero = $directorio . '/' . $fichero;
+            $rutaFichero = $directorio.'/'.$fichero;
             $this->assertFileExists(
                 $rutaFichero,
                 "El archivo físico de imagen {$fichero} no existe en public/img/og/"
