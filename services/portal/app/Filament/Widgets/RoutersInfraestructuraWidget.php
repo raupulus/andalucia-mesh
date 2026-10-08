@@ -107,11 +107,11 @@ class RoutersInfraestructuraWidget extends Widget
                     'air_tx' => $airTx,
                     'tx_color' => $txColor,
                     'esta_online' => $estaOnline,
-                    'hace' => $lastSeenDt ? $lastSeenDt->diffForHumans() : 'Sin conexión',
+                    'hace' => $lastSeenDt ? $lastSeenDt->diffForHumans() : __('admin.widgets.routers.no_connection'),
                 ];
             }
         } catch (Throwable $e) {
-            $errorFuente = 'Telemetría de repetidores no disponible en este momento.';
+            $errorFuente = __('admin.widgets.routers.error_source');
         }
 
         return [

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -29,13 +29,13 @@
     <meta name="theme-color" content="#2C2D3C" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 
-    <!-- Evitar parpadeo de modo oscuro antes de la primera pintura (FOUC) -->
+    <!-- Evitar parpadeo de modo oscuro antes de la primera pintura (FOUC) - Por defecto oscuro salvo light forzado -->
     <script>
         (function() {
             try {
                 var theme = localStorage.getItem('snm_theme');
                 if (!theme) {
-                    theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                    theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
                 }
                 document.documentElement.setAttribute('data-theme', theme);
             } catch (e) {}

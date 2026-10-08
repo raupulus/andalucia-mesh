@@ -66,21 +66,21 @@ class MallaStatsOverviewWidget extends BaseWidget
             $chUtilVal = round((float) $chUtilAvg, 1).'%';
             if ($chUtilAvg < 20.0) {
                 $chColor = 'success';
-                $chDesc = 'Holgado (≤ 20%)';
+                $chDesc = __('admin.widgets.stats.chutil_light');
             } elseif ($chUtilAvg < 40.0) {
                 $chColor = 'warning';
-                $chDesc = 'Cargado (20–40%)';
+                $chDesc = __('admin.widgets.stats.chutil_moderate');
             } else {
                 $chColor = 'danger';
-                $chDesc = 'Saturado (≥ 40%)';
+                $chDesc = __('admin.widgets.stats.chutil_heavy');
             }
             if ($picoProvincia && $picoMax > 0) {
-                $chDesc .= " · Pico {$picoMax}% en {$picoProvincia}";
+                $chDesc .= __('admin.widgets.stats.chutil_peak', ['peak' => $picoMax, 'province' => $picoProvincia]);
             }
         } else {
-            $chUtilVal = 'Sin datos';
+            $chUtilVal = __('admin.widgets.stats.no_data');
             $chColor = 'gray';
-            $chDesc = 'Telemetría de canal en espera';
+            $chDesc = __('admin.widgets.stats.chutil_waiting');
         }
 
         $chartChUtil = ! empty($provincias)
@@ -97,18 +97,18 @@ class MallaStatsOverviewWidget extends BaseWidget
             $txVal = "{$avgTx}% TX";
             if ($avgTx < 3.0) {
                 $txColor = 'success';
-                $txDesc = 'Emisión óptima · Duty-cycle < 10%';
+                $txDesc = __('admin.widgets.stats.tx_optimal');
             } elseif ($avgTx < 8.0) {
                 $txColor = 'warning';
-                $txDesc = 'Emisión moderada · Tráfico alto';
+                $txDesc = __('admin.widgets.stats.tx_moderate');
             } else {
                 $txColor = 'danger';
-                $txDesc = 'Emisión elevada · Riesgo colisión';
+                $txDesc = __('admin.widgets.stats.tx_high');
             }
         } else {
-            $txVal = 'Sin datos';
+            $txVal = __('admin.widgets.stats.no_data');
             $txColor = 'gray';
-            $txDesc = 'Ocupación TX de repetidores';
+            $txDesc = __('admin.widgets.stats.tx_desc_none');
         }
 
         $chartTx = ! empty($txList) ? array_values(array_map('floatval', $txList)) : [1.0, 1.5, 1.2, 2.0, 1.4, 1.1];
@@ -134,20 +134,20 @@ class MallaStatsOverviewWidget extends BaseWidget
             }
         }
 
-        $routersVal = $totalRouters > 0 ? "{$totalRouters} routers" : '0 routers';
+        $routersVal = trans_choice('admin.widgets.stats.routers_count', $totalRouters, ['count' => $totalRouters]);
         if ($criticos > 0) {
             $batColor = 'danger';
-            $batDesc = "{$criticos} en batería crítica (< 20%)";
+            $batDesc = __('admin.widgets.stats.battery_critical', ['count' => $criticos]);
         } elseif ($enBateria > 0) {
             $batMin = ! empty($bateriasValidas) ? min($bateriasValidas) : 100;
             $batColor = $batMin < 40 ? 'warning' : 'success';
-            $batDesc = "{$enRed} en red ⚡ · {$enBateria} batería (mín {$batMin}%)";
+            $batDesc = __('admin.widgets.stats.battery_mixed', ['grid' => $enRed, 'battery' => $enBateria, 'min' => $batMin]);
         } elseif ($totalRouters > 0) {
             $batColor = 'success';
-            $batDesc = 'Todos conectados a red/solar ⚡';
+            $batDesc = __('admin.widgets.stats.battery_all_grid');
         } else {
             $batColor = 'gray';
-            $batDesc = 'Sin telemetría de repetidores';
+            $batDesc = __('admin.widgets.stats.battery_none');
         }
 
         // --- TARJETA 4: Tráfico y Pasarelas (24h) ---
@@ -155,29 +155,29 @@ class MallaStatsOverviewWidget extends BaseWidget
         $gateways = (int) ($resumenData['gateways_publishing'] ?? 0);
         $nodos24h = (int) ($resumenData['nodes_active_24h'] ?? 0);
 
-        $traficoVal = number_format($paquetesHora, 0, ',', '.').' paq/h';
-        $traficoDesc = "{$gateways} gateways activos · {$nodos24h} nodos 24h";
+        $traficoVal = number_format($paquetesHora, 0, ',', '.').' '.__('admin.widgets.stats.packets_per_hour');
+        $traficoDesc = __('admin.widgets.stats.traffic_desc', ['gateways' => $gateways, 'nodes' => $nodos24h]);
         $traficoColor = $gateways > 0 ? 'info' : 'gray';
 
         return [
-            Stat::make('Presión del Aire (ChUtil)', $chUtilVal)
+            Stat::make(__('admin.widgets.stats.channel_pressure'), $chUtilVal)
                 ->description($chDesc)
                 ->descriptionIcon('heroicon-m-signal')
                 ->color($chColor)
                 ->chart($chartChUtil),
 
-            Stat::make('Saturación TX Repetidores', $txVal)
+            Stat::make(__('admin.widgets.stats.tx_saturation'), $txVal)
                 ->description($txDesc)
                 ->descriptionIcon('heroicon-m-arrow-up-circle')
                 ->color($txColor)
                 ->chart($chartTx),
 
-            Stat::make('Infraestructura y Energía', $routersVal)
+            Stat::make(__('admin.widgets.stats.infrastructure_energy'), $routersVal)
                 ->description($batDesc)
                 ->descriptionIcon('heroicon-m-bolt')
                 ->color($batColor),
 
-            Stat::make('Tráfico y Pasarelas', $traficoVal)
+            Stat::make(__('admin.widgets.stats.traffic_gateways'), $traficoVal)
                 ->description($traficoDesc)
                 ->descriptionIcon('heroicon-m-globe-americas')
                 ->color($traficoColor),
