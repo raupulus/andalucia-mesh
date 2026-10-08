@@ -24,7 +24,7 @@ Navegación principal: Inicio · Configura tu nodo · MQTT (`/conecta-tu-gateway
 ### Portada (orden fijo)
 
 1. Cabecera común con logotipo, selector de idioma, navegación y desplegable de Extras.
-2. Presentación: `PROJECT_NAME` (H1) y una frase.
+2. Presentación institucional: `.portada-hero` con disposición horizontal (texto a la izquierda, logotipo de 130px a la derecha) en escritorio, y disposición vertical equilibrada (`flex-direction: column-reverse`, logotipo centrado arriba, título H1 centrado con escala fluida `clamp(1.85rem, 6vw, 2.35rem)` y texto lead centrado) en pantallas móviles (<= 768px).
 3. **Tres tarjetas** en este orden: MeshView (`https://meshview.${PROJECT_DOMAIN}`), PotatoMesh (`https://potato.${PROJECT_DOMAIN}`), Consumo y nodos en peligro (`/rankings`). Cada una: imagen 16:9, nombre, descripción de 2 líneas como máximo, toda la tarjeta es el enlace, misma pestaña. Fila de tres en escritorio, columna en móvil.
 4. Mapa de Andalucía (`02-province-map.md`) con selector temporal (24h / 7d) y tabla accesible de nodos y saturación.
 5. **Tarjeta horizontal comunitaria: ¡Envía tu Sugerencia!**, con ilustración corporativa en formato 1:1 a la izquierda, descripción de ideas y botón verde del diseño centrado enlazando a `/sugerencias`.
@@ -81,6 +81,7 @@ Bots, alertas y API no llevan tarjeta: van en navegación y pie.
 3. **Dado** MeshView caído según `estado_servicio`, **cuando** se pinta la portada, **entonces** su tarjeta muestra el punto rojo con texto oculto "servicio no disponible" y sigue enlazando.
 4. **Dado** el enlace de la portada pegado en Telegram, **cuando** se genera la vista previa, **entonces** muestra título, descripción e imagen propias.
 5. **Dado** la portada, **cuando** se inspeccionan las peticiones, **entonces** ninguna sale a otro dominio y no hay `Set-Cookie`.
+6. **Dado** un móvil <= 768 px, **cuando** se visualiza el hero, **entonces** se presenta centrado con el logotipo arriba y sin desalineaciones.
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-08

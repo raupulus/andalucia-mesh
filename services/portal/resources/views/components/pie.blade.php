@@ -80,7 +80,7 @@
         </div>
 
         <!-- Barra inferior de autoría y contacto -->
-        <div style="border-top: 1px solid var(--color-borde); padding-top: 1.5rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--color-texto-2);">
+        <div class="pie-barra-inferior" style="border-top: 1px solid var(--color-borde); padding-top: 1.5rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--color-texto-2);">
             <div>
                 {{ __('portal.footer.powered_by') }} <strong><a href="https://raupulus.dev" target="_blank" rel="noopener noreferrer" style="color: var(--color-texto-1); text-decoration: underline;">{{ config('autoria.nombre') }}</a></strong> (<code><a href="https://raupulus.dev" target="_blank" rel="noopener noreferrer">{{ config('autoria.nick') }}</a></code>) · {{ __('portal.footer.public_contact') }} <a href="mailto:{{ config('autoria.email') }}">{{ config('autoria.email') }}</a>
             </div>

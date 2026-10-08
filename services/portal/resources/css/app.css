@@ -927,4 +927,124 @@ pre code {
     justify-content: center;
     width: 100%;
   }
+  .tarjeta-quien-detras {
+    padding: 2rem 1.25rem !important;
+  }
+  .pie-barra-inferior {
+    justify-content: center !important;
+    text-align: center;
+  }
 }
+
+/* ==============================================================================
+ * Hero de Portada (portada.blade.php) — Responsive y centrado armonioso en móvil
+ * ============================================================================== */
+.portada-hero {
+  padding-top: 3rem;
+  padding-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2.5rem;
+}
+
+.portada-hero-texto {
+  flex: 1;
+  min-width: 280px;
+}
+
+.portada-hero-titulo {
+  font-size: clamp(2.1rem, 4vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 1rem;
+  color: var(--color-texto-1);
+  line-height: 1.15;
+}
+
+.portada-hero-lead {
+  max-width: 760px;
+  font-size: 1.25rem;
+  color: var(--color-texto-2);
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+.portada-hero-logo {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portada-hero-logo img {
+  width: 130px;
+  height: 130px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.15));
+}
+
+@media (max-width: 768px) {
+  .portada-hero {
+    padding-top: 2rem;
+    padding-bottom: 1.75rem;
+    flex-direction: column-reverse;
+    text-align: center;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .portada-hero-texto {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .portada-hero-titulo {
+    font-size: clamp(1.85rem, 6vw, 2.35rem);
+    margin-bottom: 0.75rem;
+  }
+
+  .portada-hero-lead {
+    font-size: 1.1rem;
+    line-height: 1.55;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .portada-hero-logo img {
+    width: 105px;
+    height: 105px;
+  }
+}
+
+/* ==============================================================================
+ * Formularios de Búsqueda Adaptables y Accesibles (Móvil)
+ * ============================================================================== */
+.form-busqueda-responsive {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.input-buscador-faq:focus {
+  border-color: var(--color-foco) !important;
+  box-shadow: 0 0 0 3px var(--color-acento-suave) !important;
+  outline: none !important;
+}
+
+@media (max-width: 560px) {
+  .form-busqueda-responsive {
+    flex-direction: column;
+  }
+  .form-busqueda-responsive input,
+  .form-busqueda-responsive button {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .tarjeta-destacada-badge-wrapper {
+    align-items: flex-start !important;
+  }
+}
+

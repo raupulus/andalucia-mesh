@@ -50,7 +50,7 @@
                 @if(!empty($alerta['nodo_id']))
                     <div style="background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-md); padding: 1rem; margin-bottom: 1.5rem;">
                         <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.25rem;">{{ __('portal.alerts.affected_node') }}</h3>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                             <code>{{ $alerta['nodo_id'] }}</code>
                             <a href="/revisa-tu-nodo/{{ $alerta['nodo_id'] }}{{ $langQuery }}" class="btn btn-secundario" style="padding: 0.25rem 0.6rem; font-size: 0.85rem;">
                                 {{ __('portal.alerts.audit_node') }}

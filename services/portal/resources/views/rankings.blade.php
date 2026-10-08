@@ -172,7 +172,7 @@
             <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 1rem;">
                 {{ __('portal.rankings.catalog_title') }}
             </h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1.25rem;">
                 @foreach($catalogo as $cat)
                     <div class="tarjeta" style="padding: 1.25rem; background: var(--color-superficie-sutil);">
                         <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--color-texto-1);">

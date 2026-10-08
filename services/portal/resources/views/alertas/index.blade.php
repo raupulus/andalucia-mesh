@@ -117,7 +117,7 @@
             <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 1rem;">
                 {{ __('portal.alerts.catalog_title') }}
             </h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1.25rem;">
                 @foreach($reglas as $regla)
                     @php
                         $riesgoKey = strtolower((string) $regla['risk']);

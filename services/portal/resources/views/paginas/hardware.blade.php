@@ -154,7 +154,7 @@
                 width: 100%;
                 box-sizing: border-box;
                 padding: 0.7rem 1rem 0.7rem 2.5rem;
-                font-size: 0.95rem;
+                font-size: 1rem;
                 border: 1px solid var(--color-borde-control);
                 border-radius: var(--radio-md);
                 background: var(--color-superficie);

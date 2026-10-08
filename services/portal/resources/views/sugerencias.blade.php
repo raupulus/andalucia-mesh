@@ -65,7 +65,7 @@
                         <select id="campo-category" 
                                 name="category" 
                                 required 
-                                style="width: 100%; padding: 0.75rem 1rem; font-size: 0.95rem; border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); background: var(--color-superficie); color: var(--color-texto);">
+                                style="width: 100%; padding: 0.75rem 1rem; font-size: 1rem; border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); background: var(--color-superficie); color: var(--color-texto);">
                             <option value="" disabled {{ empty($old['category']) ? 'selected' : '' }}>{{ __('portal.suggestions.select_category') }}</option>
                             <option value="bot_telegram" {{ ($old['category'] ?? '') === 'bot_telegram' ? 'selected' : '' }}>{{ __('portal.suggestions.categories.bot_telegram') }}</option>
                             <option value="web" {{ ($old['category'] ?? '') === 'web' ? 'selected' : '' }}>{{ __('portal.suggestions.categories.web') }}</option>
@@ -88,7 +88,7 @@
                                   maxlength="3000" 
                                   required 
                                   placeholder="{{ __('portal.suggestions.placeholder_content') }}" 
-                                  style="width: 100%; box-sizing: border-box; padding: 0.85rem 1rem; font-size: 0.95rem; border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); background: var(--color-superficie); color: var(--color-texto); font-family: inherit; line-height: 1.5; resize: vertical;">{{ $old['content'] ?? '' }}</textarea>
+                                  style="width: 100%; box-sizing: border-box; padding: 0.85rem 1rem; font-size: 1rem; border: 1px solid var(--color-borde-control); border-radius: var(--radio-md); background: var(--color-superficie); color: var(--color-texto); font-family: inherit; line-height: 1.5; resize: vertical;">{{ $old['content'] ?? '' }}</textarea>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.35rem; font-size: 0.8rem; color: var(--color-texto-3);">
                             <span>{{ __('portal.suggestions.char_hint') }}</span>
                             <span id="contador-caracteres">0 / 3000</span>

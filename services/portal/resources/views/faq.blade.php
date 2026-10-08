@@ -50,10 +50,11 @@
                 <input 
                     type="search" 
                     id="buscador-faq" 
+                    class="input-buscador-faq"
                     placeholder="{{ __('portal.faq.search_placeholder') }}" 
                     aria-label="{{ __('portal.faq.search_placeholder') }}"
                     autocomplete="off"
-                    style="width: 100%; box-sizing: border-box; padding: 1rem 3rem 1rem 3rem; font-size: 1.05rem; background: var(--color-superficie); border: 1.5px solid var(--color-borde-control); border-radius: var(--radio-md); color: var(--color-texto); box-shadow: var(--sombra-1); outline: none; transition: border-color 0.2s, box-shadow 0.2s;"
+                    style="width: 100%; box-sizing: border-box; padding: 1rem 3rem 1rem 3rem; font-size: 1.05rem; background: var(--color-superficie); border: 1.5px solid var(--color-borde-control); border-radius: var(--radio-md); color: var(--color-texto); box-shadow: var(--sombra-1); transition: border-color 0.2s, box-shadow 0.2s;"
                 >
 
                 <button 

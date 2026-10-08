@@ -21,7 +21,7 @@
                 {{ __('portal.gateway_mqtt_details.subtitle') }}
             </p>
         </div>
-        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem;">
+        <div class="tarjeta-destacada-badge-wrapper" style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem;">
             <span class="chip chip-correcto" style="font-size: 0.85rem; font-weight: 700; padding: 0.35rem 0.75rem;">
                 {{ __('portal.gateway_mqtt_details.badge_tls') }}
             </span>

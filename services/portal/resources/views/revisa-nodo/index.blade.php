@@ -23,7 +23,7 @@
                 <label for="campo-buscar-nodo" class="sr-only">
                     {{ __('portal.node_check.search_label') }}
                 </label>
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <div class="form-busqueda-responsive">
                     <input type="search" 
                            id="campo-buscar-nodo"
                            name="buscar" 
@@ -53,7 +53,7 @@
                     @else
                         <div style="flex-direction: column; display: flex; gap: 0.75rem;">
                             @foreach($resultados as $nodo)
-                                <a href="/revisa-tu-nodo/{{ $nodo->id }}{{ $langQuery }}" class="tarjeta tarjeta-hover" style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem; text-decoration: none; color: inherit;">
+                                <a href="/revisa-tu-nodo/{{ $nodo->id }}{{ $langQuery }}" class="tarjeta tarjeta-hover" style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem; text-decoration: none; color: inherit; flex-wrap: wrap; gap: 0.75rem;">
                                     <div>
                                         <div style="font-size: 1.1rem; font-weight: 700; color: var(--color-texto-1);">
                                             {{ $nodo->short_name ?? $nodo->id }}
@@ -80,7 +80,7 @@
                 <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem; color: var(--color-texto-1);">
                     {{ __('portal.node_check.what_we_analyze') }}
                 </h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; font-size: 0.92rem; line-height: 1.55; color: var(--color-texto-2);">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1.5rem; font-size: 0.92rem; line-height: 1.55; color: var(--color-texto-2);">
                     <div>
                         <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 0.25rem;">{{ __('portal.node_check.check_1_title') }}</h3>
                         <p style="margin: 0;">{{ __('portal.node_check.check_1_desc') }}</p>
