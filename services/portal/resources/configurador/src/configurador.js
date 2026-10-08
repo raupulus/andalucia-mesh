@@ -61,6 +61,7 @@ const estado = {
   myNodeInfo: null,
   ownerName: "",
   ownerShort: "",
+  isUnmessagable: false,
   sessionPasskey: null,
   configSections: {},
   moduleConfigSections: {},
@@ -70,6 +71,58 @@ const estado = {
   qrInstance: null,
   pendingAdminResponses: []
 };
+
+// Mapa de nodos registrados recibidos por NodeInfo (para indexar la identidad de cada nodo por su número)
+const nodeInfoMap = new Map();
+
+/**
+ * Normaliza los enums numéricos de Protobuf a sus representaciones textuales canónicas
+ * para que la comparación (diff) entre la configuración leída del nodo y la deseada
+ * sea 100% precisa y no arroje falsos positivos.
+ */
+function normalizarConfigParaYaml(rawConfig, rawModuleConfig, rawChannels) {
+  const config = JSON.parse(JSON.stringify(rawConfig || {}));
+  const moduleConfig = JSON.parse(JSON.stringify(rawModuleConfig || {}));
+
+  // Enums en sección device
+  if (config.device) {
+    if (typeof config.device.role === "number" && Protobuf.Config.Config_DeviceConfig_Role[config.device.role]) {
+      config.device.role = Protobuf.Config.Config_DeviceConfig_Role[config.device.role];
+    }
+    if (typeof config.device.rebroadcastMode === "number" && Protobuf.Config.Config_DeviceConfig_RebroadcastMode[config.device.rebroadcastMode]) {
+      config.device.rebroadcastMode = Protobuf.Config.Config_DeviceConfig_RebroadcastMode[config.device.rebroadcastMode];
+    }
+  }
+
+  // Enums en sección lora
+  if (config.lora) {
+    if (typeof config.lora.region === "number" && Protobuf.Config.Config_LoRaConfig_RegionCode[config.lora.region]) {
+      config.lora.region = Protobuf.Config.Config_LoRaConfig_RegionCode[config.lora.region];
+    }
+    if (typeof config.lora.modemPreset === "number" && Protobuf.Config.Config_LoRaConfig_ModemPreset[config.lora.modemPreset]) {
+      config.lora.modemPreset = Protobuf.Config.Config_LoRaConfig_ModemPreset[config.lora.modemPreset];
+    }
+  }
+
+  // Normalizar lista de canales
+  let channels = undefined;
+  if (Array.isArray(rawChannels) && rawChannels.length > 0) {
+    channels = rawChannels.map((ch) => {
+      const chCopy = JSON.parse(JSON.stringify(ch || {}));
+      let roleName = chCopy.role;
+      if (typeof roleName === "number" && Protobuf.Channel.Channel_Role[roleName]) {
+        roleName = Protobuf.Channel.Channel_Role[roleName];
+      }
+      return {
+        index: chCopy.index ?? 0,
+        role: roleName ?? "DISABLED",
+        settings: chCopy.settings || {}
+      };
+    });
+  }
+
+  return { config, moduleConfig, channels };
+}
 
 // --- Registro en consola interna ---
 function logActividad(mensaje) {
@@ -473,12 +526,24 @@ function actualizarUiEstadoConexion(conectado) {
 function regenerarYamlLive() {
   const channelsList = Array.from(estado.channelMap.values()).sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
 
+  const user = (estado.myNodeNum !== null) ? nodeInfoMap.get(estado.myNodeNum) : null;
+  const ownerName = estado.ownerName || user?.longName || "Nodo Meshtastic";
+  const ownerShort = estado.ownerShort || user?.shortName || "MESH";
+  const isUnmessagable = estado.isUnmessagable !== undefined ? estado.isUnmessagable : Boolean(user?.isUnmessagable);
+
+  const { config, moduleConfig, channels } = normalizarConfigParaYaml(
+    estado.configSections,
+    estado.moduleConfigSections,
+    channelsList
+  );
+
   const liveDoc = {
-    owner: estado.ownerName || estado.myNodeInfo?.user?.longName || "Nodo Meshtastic",
-    owner_short: estado.ownerShort || estado.myNodeInfo?.user?.shortName || "MESH",
-    config: estado.configSections,
-    module_config: estado.moduleConfigSections,
-    channels: channelsList.length > 0 ? channelsList : undefined
+    owner: ownerName,
+    owner_short: ownerShort,
+    is_unmessagable: isUnmessagable,
+    config: config,
+    module_config: moduleConfig,
+    channels: channels
   };
 
   estado.liveConfig = liveDoc;
@@ -597,7 +662,13 @@ export async function conectarDispositivo(origen = "assistant") {
     estado.dispositivo = device;
     estado.nodoConectado = true;
 
-    // Limpiar caché de secciones previas
+    // Limpiar caché de secciones previas y mapa de nodos
+    nodeInfoMap.clear();
+    estado.myNodeNum = null;
+    estado.myNodeInfo = null;
+    estado.ownerName = "";
+    estado.ownerShort = "";
+    estado.isUnmessagable = false;
     estado.configSections = {};
     estado.moduleConfigSections = {};
     estado.channelMap.clear();
@@ -612,20 +683,51 @@ export async function conectarDispositivo(origen = "assistant") {
 
     device.events.onMyNodeInfo.subscribe((info) => {
       if (info) {
-        estado.myNodeNum = info.myNodeNum;
+        estado.myNodeNum = info.myNodeNum >>> 0;
         estado.myNodeInfo = info;
-        const hex = (info.myNodeNum >>> 0).toString(16).padStart(8, "0");
+        const hex = estado.myNodeNum.toString(16).padStart(8, "0");
         logActividad(`Nodo local identificado: !${hex}`);
+
+        // Si ya habíamos recibido el nodeInfo correspondiente a este nodo propio
+        if (nodeInfoMap.has(estado.myNodeNum)) {
+          const u = nodeInfoMap.get(estado.myNodeNum);
+          if (u?.longName) estado.ownerName = u.longName;
+          if (u?.shortName) estado.ownerShort = u.shortName;
+          if (u?.isUnmessagable !== undefined) estado.isUnmessagable = Boolean(u.isUnmessagable);
+        }
         actualizarUiEstadoConexion(true);
+        regenerarYamlLive();
+      }
+    });
+
+    device.events.onNodeInfoPacket.subscribe((nodeInfo) => {
+      if (!nodeInfo) return;
+      const num = nodeInfo.num !== undefined ? (nodeInfo.num >>> 0) : null;
+      if (num !== null && nodeInfo.user) {
+        nodeInfoMap.set(num, nodeInfo.user);
+        // Solo actualizar identidad si coincide exactamente con el nodo propio conectado
+        if (estado.myNodeNum !== null && num === estado.myNodeNum) {
+          if (nodeInfo.user.longName) estado.ownerName = nodeInfo.user.longName;
+          if (nodeInfo.user.shortName) estado.ownerShort = nodeInfo.user.shortName;
+          if (nodeInfo.user.isUnmessagable !== undefined) estado.isUnmessagable = Boolean(nodeInfo.user.isUnmessagable);
+          logActividad(`Identidad del nodo propio confirmada: ${estado.ownerName} (${estado.ownerShort})`);
+          regenerarYamlLive();
+        }
       }
     });
 
     device.events.onUserPacket.subscribe((packet) => {
-      if (packet?.data) {
-        if (packet.data.longName) estado.ownerName = packet.data.longName;
-        if (packet.data.shortName) estado.ownerShort = packet.data.shortName;
-        regenerarYamlLive();
+      if (!packet?.data) return;
+      const fromNum = packet.from !== undefined ? (packet.from >>> 0) : null;
+      // Descartar paquetes de otros nodos de la malla o del volcado de la NodeDB
+      const esPropio = (fromNum === 0) || (estado.myNodeNum !== null && fromNum === estado.myNodeNum);
+      if (!esPropio && (fromNum !== null || estado.myNodeNum !== null)) {
+        return;
       }
+      if (packet.data.longName) estado.ownerName = packet.data.longName;
+      if (packet.data.shortName) estado.ownerShort = packet.data.shortName;
+      if (packet.data.isUnmessagable !== undefined) estado.isUnmessagable = Boolean(packet.data.isUnmessagable);
+      regenerarYamlLive();
     });
 
     device.events.onConfigPacket.subscribe((config) => {
@@ -733,6 +835,12 @@ export async function descargarConfiguracionNodo() {
     await estado.dispositivo.getOwner();
     for (let i = 0; i < 8; i++) {
       await estado.dispositivo.getChannel(i);
+    }
+    if (estado.myNodeNum !== null && nodeInfoMap.has(estado.myNodeNum)) {
+      const u = nodeInfoMap.get(estado.myNodeNum);
+      if (u?.longName) estado.ownerName = u.longName;
+      if (u?.shortName) estado.ownerShort = u.shortName;
+      if (u?.isUnmessagable !== undefined) estado.isUnmessagable = Boolean(u.isUnmessagable);
     }
     regenerarYamlLive();
     logActividad("Configuración leída y volcada en el panel actual.");

@@ -66,6 +66,7 @@
 - **Amplificadores de potencia (PA):** En módulos con amplificador externo o integrado como el Ebyte E22P-868M30S, configurar 27 dBm de potencia en el firmware satura el amplificador y supera con creces el límite legal europeo (ERP 27 dBm). Debe seleccionarse siempre 8 dBm para estos módulos.
 - **Resolución de assets relativos en `/configurador` (`TR-16`):** Al embeber la herramienta bajo `/configurador` sin barra final, los enlaces `./styles.css` resuelven contra `/` en el cliente. El portal inyecta `<base href="/configurador/">` y reescribe las rutas a absolutas (`/configurador/...`), con redirecciones defensivas en rutas de raíz.
 - **Shims de Node en bundles de cliente (`TR-17`):** Librerías internas de `@meshtastic/core` como el formateador de logs invocan `process?.version` o `process.cwd()`. En entornos de navegador sin Node, esto lanza `ReferenceError: process is not defined` abortando el módulo. Requiere `nodeShimsPlugin`, `define` en Vite, banner de inicialización y declaración en el HTML.
+- **Suplantación de identidad por volcado NodeDB (`TR-18`):** Al invocar `device.configure()`, el firmware Meshtastic envía la lista completa de nodos vecinos por serie (`nodeInfo`), disparando `onUserPacket` para cada uno. Si el cliente no filtra por `myNodeNum`, el nombre del nodo conectado (`owner`/`owner_short`) se sobreescribe con el último vecino volcado. Solución: indexar `nodeInfoMap` por `node.num >>> 0` y rechazar en `onUserPacket` paquetes con `packet.from !== estado.myNodeNum && packet.from !== 0`. Asimismo, los enums numéricos Protobuf en Live YAML se normalizan a cadenas canónicas para evitar falsos positivos en el diff.
 
 ## Tests que lo cubren
 - `services/portal/tests/Feature/ConfiguradorTest.php`:
@@ -95,6 +96,7 @@
 - [x] Check opcional de colaboración MQTT con exclusión por defecto de parámetros de pasarela si no se activa.
 - [x] Opciones ampliadas de cadencia (12h, 24h, 48h y 72h) en telemetría de dispositivo y posición GPS.
 - [x] Tarjeta de conexión directa dedicada en Modo Avanzado (Workbench) para Web Serial, Bluetooth y HTTP con sincronización de estado, lectura en vivo, comparador Diff y volcado.
+- [x] Aislamiento de identidad del nodo local propio frente a volcados de `NodeDB` (`TR-18`) y normalización canónica de enums Protobuf para diff exacto.
 
 ---
 > Creado: 2026-10-08 · Última revisión: 2026-10-09
