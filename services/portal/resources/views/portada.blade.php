@@ -193,8 +193,8 @@
                         <article class="tarjeta-pagina-compacta">
                             <!-- Imagen a la izquierda -->
                             <div class="tarjeta-pagina-img-wrapper">
-                                <a href="{{ route('paginas.show', ['slug' => $pag->slug]) }}{{ $langQuery }}" tabindex="-1" aria-hidden="true" style="display: block; width: 100%; height: 100%;">
-                                    <img src="{{ $pag->cover_image_url }}" alt="{{ $pag->title }}" loading="lazy" width="170" height="150">
+                                <a href="{{ route('paginas.show', ['slug' => $pag->slug]) }}{{ $langQuery }}" class="tarjeta-pagina-img-link" tabindex="-1" aria-hidden="true">
+                                    <img src="{{ $pag->cover_image_url }}" alt="" loading="lazy" width="200" height="170">
                                 </a>
                             </div>
 
@@ -207,21 +207,29 @@
 
                             <!-- Cuerpo de la tarjeta compacta -->
                             <div class="tarjeta-pagina-cuerpo">
-                                <div>
-                                    <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.25rem; line-height: 1.35;">
-                                        <a href="{{ route('paginas.show', ['slug' => $pag->slug]) }}{{ $langQuery }}" style="color: inherit; text-decoration: none;">
+                                <div class="tarjeta-pagina-cabecera">
+                                    <h3 class="tarjeta-pagina-titulo">
+                                        <a href="{{ route('paginas.show', ['slug' => $pag->slug]) }}{{ $langQuery }}">
                                             {{ $pag->title }}
                                         </a>
                                     </h3>
-                                    <time datetime="{{ $pag->created_at->toIso8601String() }}" style="display: block; color: var(--color-texto-3); font-size: 0.8rem; margin-bottom: 0.5rem;">
+                                    <time datetime="{{ $pag->created_at->toIso8601String() }}" class="tarjeta-pagina-fecha">
                                         {{ $pag->formatted_date }}
                                     </time>
-                                    <p style="color: var(--color-texto-2); font-size: 0.9rem; line-height: 1.5; margin-bottom: 0.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    <p class="tarjeta-pagina-desc">
                                         {{ $pag->description }}
                                     </p>
                                 </div>
 
                                 <div class="tarjeta-pagina-footer">
+                                    <a href="{{ route('paginas.show', ['slug' => $pag->slug]) }}{{ $langQuery }}" class="tarjeta-pagina-accion">
+                                        <span>{{ __('portal.pages.read_article') }}</span>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                            <polyline points="12 5 19 12 12 19"></polyline>
+                                        </svg>
+                                    </a>
+
                                     <div class="tarjeta-pagina-keywords" aria-label="{{ __('portal.pages.keywords_label') }}">
                                         @if(!empty($pag->keywords))
                                             @foreach(array_slice($pag->keywords, 0, 3) as $kw)
@@ -235,9 +243,13 @@
                     @endforeach
                 </div>
 
-                <div style="display: flex; justify-content: center; margin-top: 1rem;">
+                <div style="display: flex; justify-content: center; margin-top: 2rem;">
                     <a href="{{ route('paginas.index') }}{{ $langQuery }}" class="btn-verde">
-                        {{ __('portal.pages.btn_view_all') }}
+                        <span>{{ __('portal.pages.btn_view_all') }}</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
                     </a>
                 </div>
             </section>

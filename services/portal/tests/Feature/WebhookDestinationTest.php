@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\WebhookDestination;
 use App\Servicios\WebhooksClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -291,7 +292,7 @@ class WebhookDestinationTest extends TestCase
         Http::fake([
             'http://webhooks:8080/internal/destinos' => Http::response(['ok' => true, 'destinos' => []], 200),
             'http://webhooks:8080/internal/destinos/malaga-hook/probar' => function () {
-                throw new \Illuminate\Http\Client\ConnectionException('cURL error 6: Could not resolve host: webhooks');
+                throw new ConnectionException('cURL error 6: Could not resolve host: webhooks');
             },
         ]);
 

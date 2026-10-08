@@ -174,7 +174,7 @@ class WebhookDestinationsTable
                             Notification::make()
                                 ->warning()
                                 ->title('Aviso de baja en microservicio')
-                                ->body('El destino se retiró localmente, pero el microservicio no respondió: ' . $e->getMessage())
+                                ->body('El destino se retiró localmente, pero el microservicio no respondió: '.$e->getMessage())
                                 ->send();
                         }
                     }),

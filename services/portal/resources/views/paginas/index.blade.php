@@ -50,8 +50,8 @@
                     <article class="tarjeta-pagina-horizontal">
                         <!-- Imagen a la izquierda -->
                         <div class="tarjeta-pagina-img-wrapper">
-                            <a href="{{ route('paginas.show', ['slug' => $pagina->slug]) }}{{ $langQuery }}" tabindex="-1" aria-hidden="true" style="display: block; width: 100%; height: 100%;">
-                                <img src="{{ $pagina->cover_image_url }}" alt="{{ $pagina->title }}" loading="lazy" width="280" height="190">
+                            <a href="{{ route('paginas.show', ['slug' => $pagina->slug]) }}{{ $langQuery }}" class="tarjeta-pagina-img-link" tabindex="-1" aria-hidden="true">
+                                <img src="{{ $pagina->cover_image_url }}" alt="" loading="lazy" width="320" height="220">
                             </a>
                         </div>
 
@@ -64,22 +64,30 @@
 
                         <!-- Bloque de contenido -->
                         <div class="tarjeta-pagina-cuerpo">
-                            <div>
-                                <h2 style="font-size: 1.45rem; font-weight: 700; margin-bottom: 0.35rem; line-height: 1.3;">
-                                    <a href="{{ route('paginas.show', ['slug' => $pagina->slug]) }}{{ $langQuery }}" style="color: inherit; text-decoration: none;">
+                            <div class="tarjeta-pagina-cabecera">
+                                <h2 class="tarjeta-pagina-titulo">
+                                    <a href="{{ route('paginas.show', ['slug' => $pagina->slug]) }}{{ $langQuery }}">
                                         {{ $pagina->title }}
                                     </a>
                                 </h2>
-                                <time datetime="{{ $pagina->created_at->toIso8601String() }}" style="display: block; color: var(--color-texto-3); font-size: 0.85rem; margin-bottom: 0.75rem;">
+                                <time datetime="{{ $pagina->created_at->toIso8601String() }}" class="tarjeta-pagina-fecha">
                                     {{ $pagina->formatted_date }}
                                 </time>
-                                <p style="color: var(--color-texto-2); font-size: 0.98rem; line-height: 1.6; margin-bottom: 0.75rem;">
+                                <p class="tarjeta-pagina-desc">
                                     {{ $pagina->description }}
                                 </p>
                             </div>
 
-                            <!-- Keywords como badges verdes alineadas abajo a la derecha -->
+                            <!-- Pie de tarjeta: Enlace a la izquierda y badges verdes a la derecha -->
                             <div class="tarjeta-pagina-footer">
+                                <a href="{{ route('paginas.show', ['slug' => $pagina->slug]) }}{{ $langQuery }}" class="tarjeta-pagina-accion">
+                                    <span>{{ __('portal.pages.read_article') }}</span>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        <polyline points="12 5 19 12 12 19"></polyline>
+                                    </svg>
+                                </a>
+
                                 <div class="tarjeta-pagina-keywords" aria-label="{{ __('portal.pages.keywords_label') }}">
                                     @if(!empty($pagina->keywords))
                                         @foreach($pagina->keywords as $kw)
