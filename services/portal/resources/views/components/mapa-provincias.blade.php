@@ -26,6 +26,11 @@
 @endphp
 
 <div class="mapa-contenedor-completo" id="contenedor-mapa-andalucia">
+    {{-- Datos iniciales del servidor serializados para interactividad inmediata sin latencia --}}
+    <script type="application/json" id="mapa-datos-iniciales">
+        {!! json_encode($datos, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}
+    </script>
+
     <!-- Encabezado de estadísticas del mapa -->
     <div class="mapa-cabecera" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; gap: 1rem;">
         <div>

@@ -37,7 +37,7 @@ Servicio web central del proyecto **Andalucía Mesh**, implementado sobre PHP 8.
 | `php artisan portal:mapa` | Regenera el componente SVG vectorial interactivo de Andalucía a partir de GeoJSON. |
 | `php artisan portal:qr` | Genera los códigos QR vectoriales de difusión en `public/qr.svg` y `public/qr.pdf` (formato A6). |
 | `php artisan portal:vistas` | Audita la integridad y estructura de las vistas SQL del contrato de integración. |
-| `php artisan operador:crear {email} {nombre}` | Da de alta una cuenta de operador técnico con validación de clave de al menos 12 caracteres. |
+| `php artisan operador:crear {email} {nombre}` | Da de alta una cuenta de operador técnico con validación de clave de al menos 8 caracteres. |
 
 ---
 

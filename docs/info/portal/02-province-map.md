@@ -18,7 +18,7 @@ Ver la malla de Andalucía de un vistazo, sin peticiones a terceros, con una alt
 ### Datos
 
 - `GET /api/v1/stats/provinces?window=7d|24h` (`12-stats-api.md`). La API admite también `30d`; el mapa solo ofrece 7 días (por defecto) y 24 horas.
-- Primera pintura con los datos del servidor (`App\Datos\Ingesta\Provincias`, misma caché). Refresco cada 5 min con `fetch` mientras la pestaña está visible (`visibilitychange`).
+- Primera pintura con los datos del servidor (`App\Data\Ingest\Provincias`, misma caché), serializados en un bloque `<script type="application/json" id="mapa-datos-iniciales">` para que el tooltip y la interactividad en cliente dispongan de todas las métricas de saturación y recuentos de forma instantánea al entrar sin latencia ni dependencias de peticiones asíncronas iniciales. Si por contingencia no hay datos iniciales válidos en el HTML, el cliente ejecuta un `fetch` inmediato a la API. Refresco cada 5 min con `fetch` mientras la pestaña está visible (`visibilitychange`).
 - Encima: "**{total_andalucia}** nodos en Andalucía", la ventana activa y "actualizado hace X min" (`generated_at`).
 
 ### Color por saturación

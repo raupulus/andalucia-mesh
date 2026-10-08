@@ -15,7 +15,7 @@ class CrearOperador extends Command
      *
      * @var string
      */
-    protected $signature = 'operador:crear {email} {nombre} {--password= : Contraseña inicial (mínimo 12 caracteres)}';
+    protected $signature = 'operador:crear {email} {nombre} {--password= : Contraseña inicial (mínimo 8 caracteres)}';
 
     /**
      * The console command description.
@@ -32,18 +32,20 @@ class CrearOperador extends Command
         $email = trim((string) $this->argument('email'));
         $nombre = trim((string) $this->argument('nombre'));
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->error("El correo '{$email}' no tiene un formato válido.");
+
             return Command::FAILURE;
         }
 
         $password = (string) $this->option('password');
         if (empty($password)) {
-            $password = (string) $this->secret('Introduce la contraseña del operador (mínimo 12 caracteres):');
+            $password = (string) $this->secret('Introduce la contraseña del operador (mínimo 8 caracteres):');
         }
 
-        if (mb_strlen($password) < 12) {
-            $this->error('La contraseña debe tener al menos 12 caracteres por motivos de seguridad.');
+        if (mb_strlen($password) < 8) {
+            $this->error('La contraseña debe tener al menos 8 caracteres por motivos de seguridad.');
+
             return Command::FAILURE;
         }
 

@@ -51,6 +51,9 @@ COPY --from=assets --chown=www-data:www-data /app/public/build public/build
 # Optimizar autoloader final de Composer
 RUN composer dump-autoload --optimize --no-dev
 
+# Publicar assets de Filament (CSS, JS, fuentes) para que siempre existan en la imagen
+RUN php artisan filament:assets
+
 # Estructura de directorios storage y permisos
 USER root
 RUN mkdir -p storage/framework/cache/data \

@@ -102,5 +102,19 @@ class PortadaYMapaTest extends TestCase
         // Los estados textuales posibles en la tabla
         $this->assertMatchesRegularExpression('/(Holgado|Cargado|Saturado|Sin datos)/', $contenido);
     }
+
+    /**
+     * Comprueba que el mapa incluye el bloque JSON con datos iniciales para la interactividad de JS.
+     */
+    public function test_mapa_incluye_script_con_datos_iniciales_json(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('id="mapa-datos-iniciales"', false);
+
+        $contenido = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<script type="application\/json" id="mapa-datos-iniciales">\s*\{.*"provinces".*\}\s*<\/script>/s', $contenido);
+    }
 }
 

@@ -2,7 +2,8 @@
  * resources/js/mapa.js
  *
  * Interactividad ligera y accesible para el mapa provincial de Andalucía:
- * - Foco, navegación por teclado y tooltip de detalles.
+ * - Carga instantánea con datos serializados por el servidor (o fetch de respaldo).
+ * - Foco, navegación por teclado, clic y tooltip de detalles.
  * - Conmutación entre ventana de 7 días y 24 horas vía fetch a /api/v1/stats/provinces.
  * - Refresco automático cada 5 minutos si la pestaña está activa.
  */
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const totalNodosEl = document.getElementById('mapa-total-nodos');
     const ventanaLabel = document.getElementById('mapa-ventana-label');
+    const actualizadoTexto = document.getElementById('mapa-actualizado-texto');
     const botonesVentana = contenedor.querySelectorAll('.btn-ventana');
 
     // Estado local en memoria
@@ -29,40 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const cajaMapa = document.getElementById('caja-mapa-svg') || (panel && panel.parentElement) || contenedor;
 
     /**
-     * Muestra el panel con los datos de una provincia
+     * Posiciona el panel flotante de detalles relativo a la caja del mapa
+     * o en la esquina superior izquierda si se navega por teclado / sin coordenadas.
      */
-    function mostrarPanel(code, evt) {
+    function posicionarPanel(evt) {
         if (!panel) return;
-
-        const pData = datosActuales && datosActuales.provinces
-            ? datosActuales.provinces.find(p => p.code === code)
-            : null;
-
-        const grupo = document.getElementById(`prov-${code}`);
-        const nombre = (pData && pData.name) || (grupo && grupo.dataset.name) || code;
-        const total = (datosActuales && datosActuales.total_andalucia) || 0;
-        const nodos = pData ? pData.nodes : 0;
-        const pct = total > 0 ? ((nodos / total) * 100).toFixed(1) : '0';
-
-        if (panelNombre) panelNombre.textContent = nombre;
-        if (panelRecuento) panelRecuento.textContent = `${nodos} nodos (${pct}% del total)`;
-
-        if (pData && pData.avg !== null && pData.avg !== undefined) {
-            if (panelSaturacion) panelSaturacion.textContent = `${pData.avg}%`;
-            if (panelMax) panelMax.textContent = `${pData.max}%`;
-            
-            const rCount = (pData.groups && pData.groups.routers && pData.groups.routers.n) || 0;
-            const cCount = (pData.groups && pData.groups.clients && pData.groups.clients.n) || 0;
-            if (panelDetalle) {
-                panelDetalle.textContent = `Medida por ${rCount} routers y ${cCount} clientes en 12 h`;
-            }
-        } else {
-            if (panelSaturacion) panelSaturacion.textContent = 'Sin datos';
-            if (panelMax) panelMax.textContent = '—';
-            if (panelDetalle) panelDetalle.textContent = 'Sin datos de telemetría en las últimas 12 horas';
-        }
-
-        // Posicionar panel cerca del ratón o elemento con ajuste de bordes
         panel.style.display = 'block';
         panel.setAttribute('aria-hidden', 'false');
 
@@ -98,6 +71,57 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    /**
+     * Muestra el panel con los datos de una provincia
+     */
+    function mostrarPanel(code, evt) {
+        if (!panel) return;
+
+        const grupo = document.getElementById(`prov-${code}`);
+        const nombrePorDefecto = (grupo && grupo.dataset.name) || code;
+
+        // Si los datos todavía no han llegado o están vacíos
+        if (!datosActuales || !Array.isArray(datosActuales.provinces)) {
+            if (panelNombre) panelNombre.textContent = nombrePorDefecto;
+            if (panelRecuento) panelRecuento.textContent = 'Cargando datos…';
+            if (panelSaturacion) panelSaturacion.textContent = '…';
+            if (panelMax) panelMax.textContent = '—';
+            if (panelDetalle) panelDetalle.textContent = 'Consultando estadísticas en tiempo real…';
+            posicionarPanel(evt);
+            return;
+        }
+
+        const pData = datosActuales.provinces.find(p => p.code === code);
+        const nombre = (pData && pData.name) || nombrePorDefecto;
+        const total = (typeof datosActuales.total_andalucia === 'number') ? datosActuales.total_andalucia : 0;
+        const nodos = pData ? pData.nodes : 0;
+        const pct = total > 0 ? ((nodos / total) * 100).toFixed(1) : '0';
+
+        if (panelNombre) panelNombre.textContent = nombre;
+        if (panelRecuento) panelRecuento.textContent = `${nodos} nodos (${pct}% del total)`;
+
+        if (pData && pData.avg !== null && pData.avg !== undefined) {
+            if (panelSaturacion) panelSaturacion.textContent = `${pData.avg}%`;
+            if (panelMax) panelMax.textContent = `${pData.max}%`;
+
+            const rCount = (pData.groups && pData.groups.routers && pData.groups.routers.n) || 0;
+            const cCount = (pData.groups && pData.groups.clients && pData.groups.clients.n) || 0;
+            if (panelDetalle) {
+                if (rCount > 0 || cCount > 0) {
+                    panelDetalle.textContent = `Medida por ${rCount} routers y ${cCount} clientes en 12 h`;
+                } else {
+                    panelDetalle.textContent = 'Estimación con telemetría de las últimas 12 horas';
+                }
+            }
+        } else {
+            if (panelSaturacion) panelSaturacion.textContent = 'Sin datos';
+            if (panelMax) panelMax.textContent = '—';
+            if (panelDetalle) panelDetalle.textContent = 'Sin datos de telemetría en las últimas 12 horas';
+        }
+
+        posicionarPanel(evt);
+    }
+
     function ocultarPanel() {
         if (!panel) return;
         panel.style.display = 'none';
@@ -113,6 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
         path.addEventListener('mousemove', (e) => mostrarPanel(code, e));
         path.addEventListener('mouseleave', ocultarPanel);
 
+        path.addEventListener('click', (e) => {
+            mostrarPanel(code, e);
+        });
+
         path.addEventListener('focus', (e) => mostrarPanel(code, null));
         path.addEventListener('blur', ocultarPanel);
 
@@ -126,8 +154,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Cerrar panel al hacer clic fuera del contenedor (para dispositivos táctiles)
+    document.addEventListener('click', (e) => {
+        if (!contenedor.contains(e.target)) {
+            ocultarPanel();
+        }
+    });
+
     /**
-     * Actualiza el DOM con los datos recibidos de la API
+     * Actualiza el DOM con los datos recibidos de la API o renderizados inicialmente
      */
     function actualizarMapa(datos) {
         datosActuales = datos;
@@ -135,6 +170,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const total = typeof datos.total_andalucia === 'number' ? datos.total_andalucia : 0;
         if (totalNodosEl && typeof datos.total_andalucia === 'number') {
             totalNodosEl.textContent = new Intl.NumberFormat('es-ES').format(datos.total_andalucia);
+        }
+
+        if (actualizadoTexto && ventanaLabel) {
+            const vLabel = ventanaActiva === '24h' ? 'Últimas 24 horas' : 'Últimos 7 días';
+            actualizadoTexto.innerHTML = `<span id="mapa-ventana-label">${vLabel}</span> · actualizado recientemente`;
         }
 
         if (datos.provinces && Array.isArray(datos.provinces)) {
@@ -192,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Carga los datos de la ventana seleccionada
+     * Carga los datos de la ventana seleccionada vía API
      */
     function cargarDatos(ventana) {
         fetch(`/api/v1/stats/provinces?window=${ventana}`)
@@ -206,6 +246,25 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(() => {
                 // Silencioso ante errores de red; la vista renderizada en el servidor sirve de respaldo
             });
+    }
+
+    // Inicializar datos con el JSON renderizado en el servidor si está presente
+    const datosInicialesEl = document.getElementById('mapa-datos-iniciales');
+    if (datosInicialesEl && datosInicialesEl.textContent) {
+        try {
+            const parsed = JSON.parse(datosInicialesEl.textContent);
+            if (parsed && Array.isArray(parsed.provinces) && parsed.provinces.length > 0) {
+                datosActuales = parsed;
+                actualizarMapa(datosActuales);
+            }
+        } catch (e) {
+            console.error('Error al inicializar datos del mapa:', e);
+        }
+    }
+
+    // Si no vinieron datos iniciales válidos, consultar de inmediato a la API
+    if (!datosActuales || !Array.isArray(datosActuales.provinces) || datosActuales.provinces.length === 0) {
+        cargarDatos(ventanaActiva);
     }
 
     // Conmutador de ventana 7d / 24h

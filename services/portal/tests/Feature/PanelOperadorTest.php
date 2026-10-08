@@ -35,7 +35,7 @@ class PanelOperadorTest extends TestCase
             'nombre' => 'Operador Principal',
             '--password' => 'corta',
         ])
-            ->expectsOutputToContain('al menos 12 caracteres')
+            ->expectsOutputToContain('al menos 8 caracteres')
             ->assertFailed();
 
         $this->assertDatabaseMissing('users', [
@@ -77,7 +77,7 @@ class PanelOperadorTest extends TestCase
             '*' => Http::response(['ok' => true], 200),
         ]);
 
-        $job = new ComprobarServicios();
+        $job = new ComprobarServicios;
         $job->handle();
 
         // 1. Debe existir latido de la tarea
