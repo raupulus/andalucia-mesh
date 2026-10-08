@@ -4,9 +4,9 @@
      Material Design, contraste AAA WCAG 2.1 en modo claro y oscuro.
      ============================================================================== --}}
 
-<div class="tarjeta-sfnarrow-destacada" style="border: 2px solid var(--color-acento); border-radius: var(--radio-lg); background: var(--color-superficie); box-shadow: var(--sombra-3); overflow: hidden; margin: 2rem 0;">
+<div class="tarjeta-sfnarrow-destacada tarjeta-tabla-andalucia" style="padding: 0; margin: 2rem 0; width: 100%;">
     <!-- Encabezado llamativo con contraste de acento -->
-    <div style="background: linear-gradient(135deg, rgba(103, 234, 148, 0.22) 0%, rgba(21, 97, 47, 0.12) 100%); padding: 1.5rem 1.75rem; border-bottom: 1px solid var(--color-borde); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+    <div class="tarjeta-tabla-andalucia-cabecera">
         <div>
             <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
                 <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--color-acento); box-shadow: 0 0 10px var(--color-acento);"></span>
@@ -32,11 +32,11 @@
     </div>
 
     <!-- Rejilla visual de parámetros clave -->
-    <div style="padding: 1.5rem 1.75rem;">
+    <div class="tarjeta-tabla-andalucia-cuerpo">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
             
             <!-- Región -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
+            <div class="param-box-andalucia">
                 <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
                     {{ __('portal.sfnarrow.region_title') }}
                 </div>
@@ -49,7 +49,7 @@
             </div>
 
             <!-- Usar Preset (Predefined) -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-aviso-fondo); border: 1px solid var(--color-aviso-texto);">
+            <div class="param-box-andalucia-aviso">
                 <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-aviso-texto); margin-bottom: 0.25rem;">
                     {{ __('portal.sfnarrow.preset_title') }}
                 </div>
@@ -62,7 +62,7 @@
             </div>
 
             <!-- Bandwidth -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
+            <div class="param-box-andalucia">
                 <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
                     {{ __('portal.sfnarrow.bw_title') }}
                 </div>
@@ -75,7 +75,7 @@
             </div>
 
             <!-- Spreading Factor -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
+            <div class="param-box-andalucia">
                 <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
                     {{ __('portal.sfnarrow.sf_title') }}
                 </div>
@@ -88,7 +88,7 @@
             </div>
 
             <!-- Coding Rate -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
+            <div class="param-box-andalucia">
                 <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
                     {{ __('portal.sfnarrow.cr_title') }}
                 </div>
@@ -101,7 +101,7 @@
             </div>
 
             <!-- Frequency Slot & Override -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-acento-suave); border: 1px solid var(--color-enlace);">
+            <div class="param-box-andalucia-destacado">
                 <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--color-enlace); margin-bottom: 0.25rem;">
                     {{ __('portal.sfnarrow.slot_title') }}
                 </div>
@@ -114,7 +114,7 @@
             </div>
 
             <!-- Canal Principal -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
+            <div class="param-box-andalucia">
                 <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
                     {{ __('portal.sfnarrow.primary_channel_title') }}
                 </div>
@@ -127,7 +127,7 @@
             </div>
 
             <!-- Clave PSK -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
+            <div class="param-box-andalucia">
                 <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
                     {{ __('portal.sfnarrow.psk_title') }}
                 </div>
@@ -140,7 +140,7 @@
             </div>
 
             <!-- Límite de Saltos -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
+            <div class="param-box-andalucia">
                 <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
                     {{ __('portal.sfnarrow.hops_title') }}
                 </div>
@@ -155,7 +155,7 @@
         </div>
 
         <!-- Alerta para administración remota -->
-        <div style="padding: 0.9rem 1.15rem; background: var(--color-superficie-sutil); border-left: 4px solid var(--color-enlace); border-radius: var(--radio-sm); font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.5;">
+        <div style="padding: 0.9rem 1.15rem; background: rgba(0, 122, 51, 0.08); border-left: 4px solid var(--color-enlace); border-radius: var(--radio-sm); font-size: 0.9rem; color: var(--color-texto-2); line-height: 1.5;">
             <strong>💡 {{ __('portal.sfnarrow.remote_advice_title') }}</strong> {{ __('portal.sfnarrow.remote_advice_text') }} 
             <code>{{ __('portal.sfnarrow.remote_advice_order') }}</code>
         </div>

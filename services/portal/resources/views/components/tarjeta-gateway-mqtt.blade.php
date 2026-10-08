@@ -4,9 +4,9 @@
      Credenciales públicas compartidas (meshdev / large4cats) con TLS obligatorio.
      ============================================================================== --}}
 
-<div class="tarjeta-mqtt-destacada" style="border: 2px solid var(--color-enlace); border-radius: var(--radio-lg); background: var(--color-superficie); box-shadow: var(--sombra-3); overflow: hidden; margin: 2rem 0;">
+<div class="tarjeta-mqtt-destacada tarjeta-tabla-andalucia" style="padding: 0; margin: 2rem 0; width: 100%;">
     <!-- Encabezado llamativo -->
-    <div style="background: linear-gradient(135deg, rgba(21, 97, 47, 0.15) 0%, rgba(103, 234, 148, 0.15) 100%); padding: 1.5rem 1.75rem; border-bottom: 1px solid var(--color-borde); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+    <div class="tarjeta-tabla-andalucia-cabecera">
         <div>
             <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
                 <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--color-enlace); box-shadow: 0 0 10px var(--color-enlace);"></span>
@@ -32,11 +32,11 @@
     </div>
 
     <!-- Parámetros clave en cuadrícula -->
-    <div style="padding: 1.5rem 1.75rem;">
+    <div class="tarjeta-tabla-andalucia-cuerpo">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
 
             <!-- Dirección del Servidor -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
+            <div class="param-box-andalucia">
                 <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
                     {{ __('portal.gateway_mqtt_details.server_title') }}
                 </div>
@@ -49,7 +49,7 @@
             </div>
 
             <!-- Usuario -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
+            <div class="param-box-andalucia">
                 <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
                     {{ __('portal.gateway_mqtt_details.user_title') }}
                 </div>
@@ -62,7 +62,7 @@
             </div>
 
             <!-- Contraseña -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
+            <div class="param-box-andalucia">
                 <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
                     {{ __('portal.gateway_mqtt_details.password_title') }}
                 </div>
@@ -75,7 +75,7 @@
             </div>
 
             <!-- Root Topic -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
+            <div class="param-box-andalucia">
                 <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
                     {{ __('portal.gateway_mqtt_details.topic_title') }}
                 </div>
@@ -88,7 +88,7 @@
             </div>
 
             <!-- Uplink / Downlink -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
+            <div class="param-box-andalucia">
                 <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
                     {{ __('portal.gateway_mqtt_details.uplink_downlink_title') }}
                 </div>
@@ -101,7 +101,7 @@
             </div>
 
             <!-- TLS y Cifrado -->
-            <div style="padding: 1rem; border-radius: var(--radio-md); background: var(--color-superficie-sutil); border: 1px solid var(--color-borde);">
+            <div class="param-box-andalucia">
                 <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-texto-3); margin-bottom: 0.25rem;">
                     {{ __('portal.gateway_mqtt_details.security_title') }}
                 </div>

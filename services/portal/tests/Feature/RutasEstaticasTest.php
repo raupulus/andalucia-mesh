@@ -164,4 +164,34 @@ class RutasEstaticasTest extends TestCase
         $this->assertStringContainsString('public@raupulus.dev', $privacidad);
         $this->assertStringContainsString('OK to MQTT', $privacidad);
     }
+
+    /**
+     * Comprueba que la página configura-tu-nodo presenta la tarjeta LoRa SFNarrow con estilo andalucía y ancho completo.
+     */
+    public function test_configura_tu_nodo_muestra_tarjeta_sfnarrow_con_estilo_andalucia(): void
+    {
+        $response = $this->get('/configura-tu-nodo');
+
+        $response->assertStatus(200);
+        $response->assertSee('tarjeta-sfnarrow-destacada', false);
+        $response->assertSee('tarjeta-tabla-andalucia', false);
+        $response->assertSee('tarjeta-tabla-andalucia-cabecera', false);
+        $response->assertSee('param-box-andalucia', false);
+        $response->assertSee('width: 100%', false);
+    }
+
+    /**
+     * Comprueba que la página conecta-tu-gateway presenta la tarjeta MQTT con estilo andalucía y ancho completo.
+     */
+    public function test_conecta_tu_gateway_muestra_tarjeta_mqtt_con_estilo_andalucia(): void
+    {
+        $response = $this->get('/conecta-tu-gateway');
+
+        $response->assertStatus(200);
+        $response->assertSee('tarjeta-mqtt-destacada', false);
+        $response->assertSee('tarjeta-tabla-andalucia', false);
+        $response->assertSee('tarjeta-tabla-andalucia-cabecera', false);
+        $response->assertSee('param-box-andalucia', false);
+        $response->assertSee('width: 100%', false);
+    }
 }

@@ -1,6 +1,6 @@
 <x-layout :title="$titulo" :description="$descripcion">
     <div class="contenedor seccion">
-        <article style="max-width: 820px; margin: 0 auto;">
+        <article style="width: 100%; margin: 0 auto;">
             <!-- Encabezado de la página -->
             <header style="margin-bottom: 2rem; border-bottom: 1px solid var(--color-borde); padding-bottom: 1.5rem;">
                 <h1 style="margin-bottom: 0.75rem;">{{ $h1 }}</h1>
@@ -11,7 +11,7 @@
             <x-tarjeta-gateway-mqtt />
 
             <!-- Contenido detallado procesado desde Markdown -->
-            <div class="prose" style="line-height: 1.7; font-size: 1.05rem; margin-top: 2.5rem;">
+            <div class="prose" style="line-height: 1.7; font-size: 1.05rem; margin-top: 2.5rem; max-width: 860px;">
                 {!! $html !!}
             </div>
 

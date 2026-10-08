@@ -1458,6 +1458,81 @@ pre code {
   }
 }
 
+.tarjeta-tabla-andalucia-cabecera {
+  background: linear-gradient(135deg, rgba(0, 122, 51, 0.08) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(0, 122, 51, 0.05) 100%);
+  padding: 1.5rem 1.75rem;
+  border-bottom: 1px solid rgba(0, 122, 51, 0.15);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+[data-theme="dark"] .tarjeta-tabla-andalucia-cabecera {
+  background: linear-gradient(135deg, rgba(0, 122, 51, 0.22) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(0, 122, 51, 0.12) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tarjeta-tabla-andalucia-cuerpo {
+  padding: 1.5rem 1.75rem;
+}
+
+@media (max-width: 640px) {
+  .tarjeta-tabla-andalucia-cabecera,
+  .tarjeta-tabla-andalucia-cuerpo {
+    padding: 1.25rem 1rem;
+  }
+}
+
+.param-box-andalucia {
+  padding: 1rem;
+  border-radius: var(--radio-md);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(0, 122, 51, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 122, 51, 0.04);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.param-box-andalucia:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 122, 51, 0.35);
+}
+
+[data-theme="dark"] .param-box-andalucia {
+  background: rgba(23, 24, 36, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .param-box-andalucia:hover {
+  border-color: rgba(103, 234, 148, 0.35);
+}
+
+.param-box-andalucia-aviso {
+  padding: 1rem;
+  border-radius: var(--radio-md);
+  background: rgba(255, 243, 205, 0.72);
+  border: 1px solid var(--color-aviso-texto);
+}
+
+[data-theme="dark"] .param-box-andalucia-aviso {
+  background: rgba(71, 54, 15, 0.65);
+  border: 1px solid var(--color-aviso-texto);
+}
+
+.param-box-andalucia-destacado {
+  padding: 1rem;
+  border-radius: var(--radio-md);
+  background: rgba(0, 122, 51, 0.08);
+  border: 1px solid var(--color-enlace);
+}
+
+[data-theme="dark"] .param-box-andalucia-destacado {
+  background: rgba(103, 234, 148, 0.1);
+  border: 1px solid var(--color-enlace);
+}
+
 /* Tarjetas compactas para la Portada (2 por fila) */
 .grid-paginas-portada {
   display: grid;
