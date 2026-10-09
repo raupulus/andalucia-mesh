@@ -65,6 +65,21 @@ class GestorPersistencia:
             self.conectado = False
             logger.info("Pool de PostgreSQL cerrado.")
 
+    async def verificar_conexion(self) -> bool:
+        """Comprueba o restablece la conectividad con el servidor PostgreSQL."""
+        if not self.pool:
+            return await self.conectar()
+        try:
+            async with self.pool.acquire() as conn:
+                await conn.fetchval("SELECT 1")
+            self.conectado = True
+            self.ultimo_error = None
+            return True
+        except Exception as e:
+            self.conectado = False
+            self.ultimo_error = str(e)
+            return False
+
     async def drenar_contingencia(self) -> None:
         """Drena y persiste transiciones acumuladas en la cola de contingencia."""
         if not self.pool or not self.cola_contingencia:
@@ -77,19 +92,34 @@ class GestorPersistencia:
             if exito:
                 self.cola_contingencia.popleft()
             else:
-                logger.warning("Fallo al drenar contingencia; se mantendrán %d pendientes", len(self.cola_contingencia))
-                break
+                if not self.conectado:
+                    logger.warning("Fallo al drenar contingencia por desconexión; se mantendrán %d pendientes", len(self.cola_contingencia))
+                    break
+                # Si la conexión a la base de datos está sana pero este registro falló por datos inválidos, descartar para no bloquear
+                logger.error(
+                    "Descartando transición %s de contingencia por error irrecuperable (%s) para evitar bloqueo de la cola",
+                    t.transicion_id,
+                    self.ultimo_error,
+                )
+                self.cola_contingencia.popleft()
 
     async def guardar_transicion(self, t: TransicionAlerta) -> bool:
         """Guarda atómicamente la transición y actualiza la alerta en base de datos."""
-        if not self.pool or not self.conectado:
+        if not self.pool:
+            self.cola_contingencia.append(t)
+            return False
+
+        if not self.conectado:
+            await self.verificar_conexion()
+
+        if not self.conectado:
             self.cola_contingencia.append(t)
             return False
 
         # Si hay elementos previos en la cola de contingencia, drenar primero para preservar orden
         if self.cola_contingencia:
             await self.drenar_contingencia()
-            if self.cola_contingencia:
+            if self.cola_contingencia and not self.conectado:
                 self.cola_contingencia.append(t)
                 return False
 
@@ -122,6 +152,25 @@ class GestorPersistencia:
             alerta_json = alt.model_dump_json()
 
             async with self.pool.acquire() as conn, conn.transaction():
+                # 0. Si es una alerta abierta, verificar si ya existe una alerta abierta con la misma clave (regla, nodo)
+                # para evitar colisiones con el índice único alerta_clave_abierta
+                alerta_id_final = alt.id
+                if alt.estado == "abierta":
+                    fila_existente = await conn.fetchrow(
+                        "SELECT id FROM alerta WHERE regla = $1 AND nodo = $2 AND estado = 'abierta'",
+                        alt.regla,
+                        alt.nodo,
+                    )
+                    if fila_existente and fila_existente["id"] != alt.id:
+                        alerta_id_final = fila_existente["id"]
+                        logger.warning(
+                            "Alerta abierta preexistente detectada en DB para regla '%s' nodo '%s' (id original: %s, nueva: %s). Reutilizando ID original.",
+                            alt.regla,
+                            alt.nodo,
+                            alerta_id_final,
+                            alt.id,
+                        )
+
                 # 1. Upsert en tabla alerta
                 sql_alerta = """
                     INSERT INTO alerta (
@@ -154,7 +203,7 @@ class GestorPersistencia:
                     """
                 await conn.execute(
                     sql_alerta,
-                    alt.id,
+                    alerta_id_final,
                     alt.regla,
                     alt.nodo,
                     alt.riesgo,
@@ -173,6 +222,13 @@ class GestorPersistencia:
                 )
 
                 # 2. Insert en tabla transicion
+                transicion_alerta_id = alerta_id_final if alerta_id_final != alt.id else t.alerta_id
+                alerta_json_final = alerta_json
+                if alerta_id_final != alt.id:
+                    alt_dict = json.loads(alerta_json)
+                    alt_dict["id"] = alerta_id_final
+                    alerta_json_final = json.dumps(alt_dict)
+
                 sql_transicion = """
                     INSERT INTO transicion (id, alerta_id, transicion, en, alerta)
                     VALUES ($1, $2, $3, $4, $5::jsonb);
@@ -180,15 +236,21 @@ class GestorPersistencia:
                 await conn.execute(
                     sql_transicion,
                     t.transicion_id,
-                    t.alerta_id,
+                    transicion_alerta_id,
                     t.transicion,
                     t.en,
-                    alerta_json,
+                    alerta_json_final,
                 )
 
             self.conectado = True
             return True
+        except asyncpg.PostgresError as e:
+            # Error SQL de datos o restricción: la base de datos sigue accesible
+            self.ultimo_error = str(e)
+            logger.error("Error de datos en PostgreSQL al persistir transición %s: %s", t.transicion_id, e)
+            return False
         except Exception as e:
+            # Error de red o fallo de conexión
             self.conectado = False
             self.ultimo_error = str(e)
             logger.error("Error al persistir transición %s en base de datos: %s", t.transicion_id, e)

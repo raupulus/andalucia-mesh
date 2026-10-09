@@ -11,7 +11,7 @@ Que cualquier consumidor recupere lo que se perdió (24 h) en orden, sin huecos 
 ### Orden de una transición
 
 1. El ciclo de vida (`01-rule-engine.md`) decide la transición y genera `transicion_id` con el generador ULID monótono (estrictamente creciente en el proceso; una sola tarea de motor).
-2. Una transacción: `INSERT … ON CONFLICT (id) DO UPDATE` en `alerta` + `INSERT` en `transicion` con el objeto `alerta` exacto que se emitirá.
+2. Una transacción: si la alerta es abierta, se verifica si ya existe una alerta abierta para `(regla, nodo)` para armonizar su ID; `INSERT … ON CONFLICT (id) DO UPDATE` en `alerta` + `INSERT` en `transicion` con el objeto `alerta` exacto que se emitirá.
 3. Tras el `COMMIT`, el mensaje se reparte a la cola de cada cliente conectado.
 4. PostgreSQL caído: las transiciones esperan en memoria en orden y se reintenta cada 5 s; nada se emite sin estar guardado. Más de 10.000 pendientes → se descartan primero las `actualizada` más antiguas (la siguiente transición lleva el estado completo) y se registra error.
 
@@ -19,7 +19,7 @@ Que cualquier consumidor recupere lo que se perdió (24 h) en orden, sin huecos 
 
 | Paso | Comportamiento |
 |---|---|
-| Arranque | `umask 007`; si `ALERTAS_SOCKET` existe y es un socket, se borra; `asyncio.start_unix_server`; `chmod 0660`; `chown(-1, ALERTAS_SOCKET_GID)`. Se abre después de restaurar el estado y antes de conectar a MQTT |
+| Arranque | `umask 007`; si `ALERTAS_SOCKET` existe y es un socket, se borra; `asyncio.start_unix_server`; `chmod 0660`; `chown(-1, ALERTAS_SOCKET_GID)`. Se restaura el estado y se recargan las alertas abiertas y resueltas recientes en `GestorCicloVida` desde DB; se abre el socket antes de conectar a MQTT |
 | Saludo | Primera línea en ≤ `SALUDO_TIMEOUT_S` (10 s), máx. 4 KiB: `{"cliente": "<^[a-z0-9][a-z0-9-]{0,63}$>", "desde": "<ULID> | null"}`. Inválido, ausente o `desde` con formato no ULID → cierre y log `saludo_invalido` |
 | Registro | Se crea la cola del cliente (`CLIENTE_MAX_PENDIENTES` = 1.000) y se añade al reparto **antes** de consultar el reenvío |
 | Reenvío | `desde = null` → ninguno (solo directo). Si no: `SELECT id, transicion, alerta FROM transicion WHERE id > $desde AND en >= now() - make_interval(hours => $REENVIO_MAX_H) ORDER BY id`, escrito directamente con `drain()`; se recuerda el último id enviado |
@@ -199,4 +199,5 @@ Protocolo del socket (arriba), objeto `alerta` (`README.md` §4.2) y vistas `api
 5. Dado `socat - UNIX-CONNECT:/run/snm/alertas.sock` en un contenedor sin el GID `10500` / Cuando conecta / Entonces `Permission denied`; con el GID y sin saludo en 10 s, el servidor cierra.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-09
+

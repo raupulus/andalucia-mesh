@@ -113,3 +113,45 @@ def test_persistencia_cola_contingencia() -> None:
     assert not exito
     assert len(persistencia.cola_contingencia) == 1
     assert persistencia.cola_contingencia[0].transicion_id == "01JAC0Q4M1K2J3H4G5F6E7D801"
+
+
+async def test_restaurar_ciclo_desde_db() -> None:
+    """Verifica que las alertas abiertas y resueltas de la BD se carguen en el ciclo de vida."""
+    from unittest.mock import AsyncMock
+    from detector.motor.ciclo import GestorCicloVida
+
+    ciclo = GestorCicloVida()
+    mock_conn = AsyncMock()
+
+    t_ahora = datetime.now(UTC)
+    filas_abiertas = [
+        {
+            "id": "01JAC0Q4M1K2J3H4G5F6E7D800",
+            "regla": "hops-high",
+            "nodo": "!2b39ef06",
+            "riesgo": "alto",
+            "tipo": "infraestructura",
+            "mensaje": "herc usa 7 saltos",
+            "nodos": [],
+            "nodo_info": {"corto": "herc", "largo": "Hércules", "rol": "ROUTER", "provincia": "Cádiz"},
+            "datos": {"hop_start": 7},
+            "estado": "abierta",
+            "abierta_en": t_ahora,
+            "actualizada_en": t_ahora,
+            "resuelta_en": None,
+            "reaperturas": 0,
+            "evidencia_en": t_ahora,
+        }
+    ]
+    filas_resueltas = []
+
+    mock_conn.fetch.side_effect = [filas_abiertas, filas_resueltas]
+
+    await GestorInstantaneas.restaurar_ciclo_desde_db(mock_conn, ciclo)
+
+    assert "hops-high:!2b39ef06" in ciclo.alertas_abiertas
+    alerta_cargada = ciclo.alertas_abiertas["hops-high:!2b39ef06"]
+    assert alerta_cargada.id == "01JAC0Q4M1K2J3H4G5F6E7D800"
+    assert alerta_cargada.nodo == "!2b39ef06"
+    assert alerta_cargada.riesgo == "alto"
+

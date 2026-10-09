@@ -150,3 +150,87 @@ class GestorInstantaneas:
         except Exception as e:
             logger.error("Error al deserializar la instantánea de estado: %s", e)
             return None
+
+    @classmethod
+    async def restaurar_ciclo_desde_db(cls, conn: asyncpg.Connection, ciclo: Any) -> None:
+        """Restaura en memoria las alertas abiertas y resueltas recientes en el GestorCicloVida."""
+        from detector.motor.protocolos import AlertaAbierta
+
+        query_abiertas = """
+            SELECT id, regla, nodo, riesgo, tipo, mensaje, nodos, nodo_info,
+                   datos, estado, abierta_en, actualizada_en, resuelta_en,
+                   reaperturas, evidencia_en
+            FROM alerta
+            WHERE estado = 'abierta';
+        """
+        try:
+            filas_abiertas = await conn.fetch(query_abiertas)
+            for r in filas_abiertas:
+                nodo_info = r["nodo_info"]
+                if isinstance(nodo_info, str):
+                    nodo_info = json.loads(nodo_info)
+                datos = r["datos"]
+                if isinstance(datos, str):
+                    datos = json.loads(datos)
+
+                alerta = AlertaAbierta(
+                    id=r["id"],
+                    regla=r["regla"],
+                    nodo=r["nodo"],
+                    riesgo=r["riesgo"],
+                    tipo=r["tipo"],
+                    mensaje=r["mensaje"],
+                    nodos=list(r["nodos"] or []),
+                    nodo_info=nodo_info,
+                    datos=dict(datos or {}),
+                    estado=r["estado"],
+                    abierta_en=r["abierta_en"],
+                    actualizada_en=r["actualizada_en"],
+                    resuelta_en=r["resuelta_en"],
+                    reaperturas=r["reaperturas"],
+                    evidencia_en=r["evidencia_en"],
+                    ultima_transicion_en=r["actualizada_en"],
+                )
+                ciclo.alertas_abiertas[alerta.clave] = alerta
+            logger.info("Restauradas %d alertas abiertas en ciclo de vida desde DB.", len(filas_abiertas))
+
+            query_resueltas = """
+                SELECT id, regla, nodo, riesgo, tipo, mensaje, nodos, nodo_info,
+                       datos, estado, abierta_en, actualizada_en, resuelta_en,
+                       reaperturas, evidencia_en
+                FROM alerta
+                WHERE estado = 'resuelta'
+                  AND resuelta_en >= now() - interval '2 hours';
+            """
+            filas_resueltas = await conn.fetch(query_resueltas)
+            for r in filas_resueltas:
+                nodo_info = r["nodo_info"]
+                if isinstance(nodo_info, str):
+                    nodo_info = json.loads(nodo_info)
+                datos = r["datos"]
+                if isinstance(datos, str):
+                    datos = json.loads(datos)
+
+                alerta = AlertaAbierta(
+                    id=r["id"],
+                    regla=r["regla"],
+                    nodo=r["nodo"],
+                    riesgo=r["riesgo"],
+                    tipo=r["tipo"],
+                    mensaje=r["mensaje"],
+                    nodos=list(r["nodos"] or []),
+                    nodo_info=nodo_info,
+                    datos=dict(datos or {}),
+                    estado=r["estado"],
+                    abierta_en=r["abierta_en"],
+                    actualizada_en=r["actualizada_en"],
+                    resuelta_en=r["resuelta_en"],
+                    reaperturas=r["reaperturas"],
+                    evidencia_en=r["evidencia_en"],
+                    ultima_transicion_en=r["actualizada_en"],
+                )
+                ciclo.historial_resueltas[alerta.clave] = alerta
+            logger.info("Restauradas %d alertas resueltas recientes en ciclo de vida desde DB.", len(filas_resueltas))
+        except Exception as e:
+            logger.error("Error al restaurar alertas en ciclo de vida desde DB: %s", e)
+

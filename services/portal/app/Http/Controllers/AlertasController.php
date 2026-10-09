@@ -398,12 +398,28 @@ class AlertasController extends Controller
      */
     public function show(string $id): View
     {
+        $idLimpio = strtoupper(trim($id));
         $alerta = null;
         try {
             $alerta = DB::connection('alertas')
                 ->table('api_alertas')
-                ->where('id', strtoupper($id))
+                ->where('id', $idLimpio)
                 ->first();
+
+            // Fallback: si el identificador corresponde a una transición histórica, resolver su alerta
+            if (! $alerta) {
+                $transicion = DB::connection('alertas')
+                    ->table('api_alertas_transiciones')
+                    ->where('transicion_id', $idLimpio)
+                    ->first();
+
+                if ($transicion && ! empty($transicion->alerta_id)) {
+                    $alerta = DB::connection('alertas')
+                        ->table('api_alertas')
+                        ->where('id', $transicion->alerta_id)
+                        ->first();
+                }
+            }
         } catch (Throwable) {
             $alerta = null;
         }

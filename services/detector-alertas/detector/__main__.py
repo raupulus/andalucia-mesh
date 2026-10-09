@@ -49,6 +49,7 @@ async def ejecutar_servicio(settings: Settings) -> None:
             if estado_previo:
                 motor.estado = estado_previo
                 logger.info("Estado previo restaurado exitosamente en el motor.")
+            await GestorInstantaneas.restaurar_ciclo_desde_db(conn, motor.ciclo)
 
     # 4. Servidor de Socket UNIX de salida
     socket_alertas = ServidorSocketAlertas(settings, persistencia)

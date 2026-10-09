@@ -50,6 +50,7 @@ Registro de decisiones deliberadas de arquitectura, diseño y convenciones técn
 | DT-42 | Umbral de 5 km en 24 h para detección de repetidor en movimiento (`router-moving`) | Tolera imprecisión de señal, fluctuación de fix y camuflaje voluntario de coordenadas en repetidores fijos sin generar alertas espurias. |
 | DT-43 | Exclusión tajante de nodos `CLIENT_MUTE` en evaluador de asimetría RF (`asymmetric-link`) | La asimetría en nodos mudos o clientes de interior es normal por obstáculos domésticos; solo se evalúan enlaces entre `CLIENT`, `CLIENT_BASE`, `ROUTER` y `REPEATER`. |
 | DT-44 | Gestión manual en `/admin/coordinated-routers` de cambios de versión o revocación de firmware (ej. 2.8 / 2.8.1) | Evita correlaciones automáticas frágiles de claves e identidades en el detector; el operador marca o retira el router coordinado en el panel. |
+| `DT-45` | Restauración obligatoria de alertas activas en ciclo de vida y armonización de ID preexistentes en PostgreSQL | Al reiniciar el detector de alertas, se recuperan las alertas abiertas desde PostgreSQL en `GestorCicloVida` para no generar ULIDs duplicados. En la capa de persistencia SQL, si una alerta abierta ya existe en DB para la misma clave `(regla, nodo)`, se reutiliza su ID original antes del `INSERT` para no violar el índice único parcial `alerta_clave_abierta` ni provocar bloqueo en la cola de contingencia. |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-09
