@@ -12,7 +12,7 @@ import time
 from typing import Any
 
 import aiomqtt
-from meshtastic.protobuf import mesh_pb2, mqtt_pb2, telemetry_pb2
+from meshtastic.protobuf import config_pb2, mesh_pb2, mqtt_pb2, telemetry_pb2
 
 from .config import Config
 from .crypto import decrypt_packet, expand_key
@@ -235,18 +235,19 @@ class MqttProcessor:
                     if user.hw_model
                     else None
                 )
-                role_name = (
-                    mesh_pb2.Config.DeviceConfig.Role.Name(user.role)
-                    if user.role
-                    else None
-                )
+                try:
+                    role_name = config_pb2.Config.DeviceConfig.Role.Name(user.role)
+                except (ValueError, TypeError):
+                    role_name = "CLIENT"
 
                 cached_metrics = self.sender.get_cached_node_metrics(node_id_str)
 
                 node_data: dict[str, Any] = {
+                    "num": from_node,
                     "user": {
-                        "shortName": user.short_name,
-                        "longName": user.long_name,
+                        "id": node_id_str,
+                        "shortName": user.short_name or None,
+                        "longName": user.long_name or None,
                         "hwModel": hw_name,
                         "role": role_name,
                     },
@@ -280,6 +281,9 @@ class MqttProcessor:
                 if lat is not None and lon is not None:
                     pos_payload = {
                         "id": packet.id,
+                        "node_id": node_id_str,
+                        "node_num": from_node,
+                        "from_id": node_id_str,
                         "from": node_id_str,
                         "latitude": lat,
                         "longitude": lon,
@@ -298,6 +302,9 @@ class MqttProcessor:
                 tel.ParseFromString(data.payload)
                 tel_payload: dict[str, Any] = {
                     "id": packet.id,
+                    "node_id": node_id_str,
+                    "node_num": from_node,
+                    "from_id": node_id_str,
                     "from": node_id_str,
                     "rx_time": rx_time,
                     "channel": channel_index,
@@ -306,7 +313,7 @@ class MqttProcessor:
 
                 if tel.HasField("device_metrics"):
                     dm = tel.device_metrics
-                    metrics: dict[str, Any] = {
+                    metrics_camel: dict[str, Any] = {
                         "batteryLevel": (
                             dm.battery_level if dm.battery_level != 0 else None
                         ),
@@ -317,9 +324,23 @@ class MqttProcessor:
                             dm.uptime_seconds if dm.uptime_seconds != 0 else None
                         ),
                     }
-                    cleaned_metrics = {k: v for k, v in metrics.items() if v is not None}
-                    tel_payload["telemetry"]["deviceMetrics"] = cleaned_metrics
-                    self.sender.update_node_metrics(node_id_str, cleaned_metrics)
+                    metrics_snake: dict[str, Any] = {
+                        "battery_level": (
+                            dm.battery_level if dm.battery_level != 0 else None
+                        ),
+                        "voltage": dm.voltage if dm.voltage != 0.0 else None,
+                        "channel_utilization": dm.channel_utilization,
+                        "air_util_tx": dm.air_util_tx,
+                        "uptime_seconds": (
+                            dm.uptime_seconds if dm.uptime_seconds != 0 else None
+                        ),
+                    }
+                    cleaned_camel = {k: v for k, v in metrics_camel.items() if v is not None}
+                    cleaned_snake = {k: v for k, v in metrics_snake.items() if v is not None}
+
+                    tel_payload["telemetry"]["deviceMetrics"] = cleaned_camel
+                    tel_payload["device_metrics"] = cleaned_snake
+                    self.sender.update_node_metrics(node_id_str, cleaned_camel)
 
                 if tel.HasField("environment_metrics"):
                     em = tel.environment_metrics
@@ -399,6 +420,7 @@ class MqttProcessor:
                 ]
                 neighbor_payload = {
                     "node_id": node_id_str,
+                    "node_num": from_node,
                     "rx_time": rx_time,
                     "neighbors": neighbors,
                 }
@@ -424,23 +446,26 @@ class MqttProcessor:
             except Exception as exc:
                 logger.debug("Error deserializando Waypoint: %s", exc)
 
-        # 8. MAP_REPORT_APP (72)
-        elif portnum == 72:
-            mr = mesh_pb2.MapReport()
+        # 8. MAP_REPORT_APP (73)
+        elif portnum == 73:
+            mr = mqtt_pb2.MapReport()
             try:
                 mr.ParseFromString(data.payload)
                 lat = mr.latitude_i / 1e7 if mr.latitude_i else None
                 lon = mr.longitude_i / 1e7 if mr.longitude_i else None
 
+                try:
+                    role_name = config_pb2.Config.DeviceConfig.Role.Name(mr.role)
+                except (ValueError, TypeError):
+                    role_name = "CLIENT"
+
                 node_entry = {
+                    "num": from_node,
                     "user": {
-                        "shortName": mr.short_name,
-                        "longName": mr.long_name,
-                        "role": (
-                            mesh_pb2.Config.DeviceConfig.Role.Name(mr.role)
-                            if mr.role
-                            else None
-                        ),
+                        "id": node_id_str,
+                        "shortName": mr.short_name or None,
+                        "longName": mr.long_name or None,
+                        "role": role_name,
                     },
                     "lastHeard": rx_time,
                 }

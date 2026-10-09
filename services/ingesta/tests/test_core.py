@@ -15,7 +15,7 @@ import base64
 from datetime import datetime, timezone
 import pytest
 
-from meshtastic.protobuf import mesh_pb2, portnums_pb2, telemetry_pb2
+from meshtastic.protobuf import config_pb2, mesh_pb2, portnums_pb2, telemetry_pb2
 
 from src.validator import (
     TopicValidator,
@@ -231,6 +231,36 @@ def test_decoder_ok_to_mqtt_and_text() -> None:
     # Paquete propio del gateway sin bitfield -> siempre permitido
     res_gw = decode_data_payload("!99998888", "!99998888", data_no_consent)
     assert res_gw.is_valid_consent
+
+
+def test_decoder_nodeinfo_roles() -> None:
+    """Verifica que el decodificador de NODEINFO maneja correctamente CLIENT, ROUTER y CLIENT_HIDDEN."""
+    roles = [
+        (config_pb2.Config.DeviceConfig.Role.CLIENT, "CLIENT"),
+        (config_pb2.Config.DeviceConfig.Role.ROUTER, "ROUTER"),
+        (config_pb2.Config.DeviceConfig.Role.CLIENT_HIDDEN, "CLIENT_HIDDEN"),
+        (config_pb2.Config.DeviceConfig.Role.REPEATER, "REPEATER"),
+    ]
+
+    for role_enum, expected_role in roles:
+        user = mesh_pb2.User(
+            id="!5f3a3a29",
+            short_name="Rau0",
+            long_name="Raupulus Base",
+            hw_model=mesh_pb2.HardwareModel.RPI_PICO2,
+            role=role_enum,
+        )
+        data = mesh_pb2.Data(
+            portnum=portnums_pb2.PortNum.NODEINFO_APP,
+            payload=user.SerializeToString(),
+            bitfield=1,
+        )
+        res = decode_data_payload("!5f3a3a29", "!gateway1", data)
+        assert res.portnum_name == "nodeinfo"
+        assert res.payload_dict["role"] == expected_role
+        assert res.payload_dict["short_name"] == "Rau0"
+        assert res.payload_dict["long_name"] == "Raupulus Base"
+        assert res.payload_dict["hw_model"] == "RPI_PICO2"
 
 
 @pytest.mark.asyncio

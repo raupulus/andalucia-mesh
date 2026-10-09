@@ -177,4 +177,4 @@ Contadores: `paquetes_unicos`, `duplicados`, `recepcion_repetida`, `recepciones_
 - **Dado** un map report, **cuando** se procesa, **entonces** `airtime_ms = 0`, no hay fila de `reception` y el nodo actualiza firmware y posición.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from meshtastic.protobuf import (
+    config_pb2,
     mesh_pb2,
     portnums_pb2,
     telemetry_pb2,
@@ -133,7 +134,10 @@ def decode_data_payload(
                 fp = hashlib.sha256(user.public_key).hexdigest()[:16]
 
             hw_name = mesh_pb2.HardwareModel.Name(user.hw_model) if user.hw_model else None
-            role_name = mesh_pb2.Config.DeviceConfig.Role.Name(user.role) if user.role else "CLIENT"
+            try:
+                role_name = config_pb2.Config.DeviceConfig.Role.Name(user.role)
+            except (ValueError, TypeError):
+                role_name = "CLIENT"
 
             res = {
                 "id": from_id,  # Manda from_id conforme a 05.2

@@ -41,17 +41,17 @@ Clave (`from`, `id`), ventana de 15 min en memoria (LRU, hasta 200.000 claves). 
 
 | `portnum` | Endpoint PotatoMesh | Notas |
 |---|---|---|
-| `NODEINFO_APP` | `POST /api/nodes` | Nombres, `hwModel`, rol, `lastHeard`; mezcla con la caché de métricas |
-| `POSITION_APP` | `POST /api/positions` | Lat/lon en grados (`latitude_i` × 1e-7), altitud, precisión |
-| `TELEMETRY_APP` | `POST /api/telemetry` | Dispositivo, entorno y energía |
+| `NODEINFO_APP` | `POST /api/nodes` | Nombres, `num`, `hwModel`, rol (`config_pb2.Config.DeviceConfig.Role.Name`), `lastHeard`; mezcla con la caché de métricas |
+| `POSITION_APP` | `POST /api/positions` | Lat/lon en grados (`latitude_i` × 1e-7), altitud, precisión, `node_id`, `node_num` |
+| `TELEMETRY_APP` | `POST /api/telemetry` | Dispositivo, entorno y energía. Emite `telemetry.deviceMetrics` (camelCase) y `device_metrics` (snake_case) para actualizar tanto la tabla `telemetry` como las columnas del nodo en `nodes` |
 | `TEXT_MESSAGE_APP` | `POST /api/messages` | Solo canales (nunca directos) |
 | `TRACEROUTE_APP` | `POST /api/traces` | Origen = `from`, destino = `to`, `route` + `snr_towards`, y si existen `route_back` + `snr_back` |
-| `NEIGHBORINFO_APP` | `POST /api/neighbors` | Vecinos con SNR |
+| `NEIGHBORINFO_APP` | `POST /api/neighbors` | Vecinos con SNR, `node_id`, `node_num` |
 | `WAYPOINT_APP` | `POST /api/waypoints` | |
-| MapReport | `POST /api/nodes` + `POST /api/positions` | Nodos que solo informan por map report |
+| MapReport | `POST /api/nodes` + `POST /api/positions` | Portnum 73 (`mqtt_pb2.MapReport`); nodos que solo informan por map report |
 | No descifrado | `POST /api/messages` como cifrado | Sin texto |
 
-Formato de cada cuerpo: el que envía el ingestor oficial de la versión fijada (campos camelCase desde 0.7.0). Los tests de contrato lo fijan contra `ghcr.io/l5yth/potato-mesh-web-linux-amd64:0.7.5`.
+Formato de cada cuerpo: el que envía el ingestor oficial de la versión fijada (campos camelCase desde 0.7.0 y claves snake_case en métricas para actualización directa del registro del nodo en SQLite). Los tests de contrato lo fijan contra `ghcr.io/l5yth/potato-mesh-web-linux-amd64:0.7.5`.
 
 ### `/health` (puerto 8080, solo red `mesh`)
 
@@ -99,4 +99,4 @@ Sin base de datos: todo el estado es en memoria y se reconstruye solo.
 7. **Dado** un mensaje directo (`to` ≠ difusión), **cuando** llega, **entonces** no se envía nada.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09
