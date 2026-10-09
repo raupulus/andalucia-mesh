@@ -1,5 +1,5 @@
 [Unit]
-Description=Purga de retención a 30 días para PotatoMesh SQLite
+Description=Purga de retención para PotatoMesh SQLite (Nodos 15d, Trazas 5d)
 After=network.target
 
 [Service]

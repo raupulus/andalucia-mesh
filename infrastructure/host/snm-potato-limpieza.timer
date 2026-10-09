@@ -1,9 +1,9 @@
 [Unit]
-Description=Temporizador diario de purga de datos para PotatoMesh
+Description=Temporizador diario de purga de datos para PotatoMesh (03:47 h)
 After=network.target
 
 [Timer]
-OnCalendar=*-*-* 03:30:00
+OnCalendar=*-*-* 03:47:00
 Persistent=true
 
 [Install]

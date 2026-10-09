@@ -20,6 +20,7 @@ Al actualizar la versión de una imagen de terceros (ej. subir de etiqueta de ve
 | `CUST-01` | **MeshView** | `3.0.8` | `integrations/meshview/templates/chat.html`<br>`integrations/meshview/templates/net.html`<br>`integrations/meshview/compose.yaml` | **Horario 24 horas y zona horaria peninsular (`Europe/Madrid`) con fecha europea (`DD/MM/YYYY`)**: upstream viene con `hour12: true` y formato americano `MM/DD/YYYY`. Se montan las plantillas personalizadas como volúmenes de solo lectura (`:ro`) en el contenedor. | Activo |
 | `CUST-02` | **PotatoMesh** | `0.7.5` | `integrations/potatomesh/compose.yaml`<br>`integrations/potatomesh/.env.example` | **Desactivación obligatoria de federación (`FEDERATION=0`)**: PotatoMesh activa por defecto la federación peer-to-peer si no se declara la variable. Se asegura `FEDERATION=0` tanto en el bloque `environment` del `compose.yaml` como en `.env` para garantizar aislamiento absoluto sin anuncios salientes. | Activo |
 | `CUST-03` | **MeshConfig** | `658f461` | `integrations/meshconfig/compose.yaml`<br>`integrations/meshconfig/custom/*`<br>`integrations/meshconfig/configs/*` | **Interfaz visual Material según DESIGN.md, asistente en 4 pasos, estándar SFNarrow y QR oficial**: la imagen base upstream se construye sin alterar a partir del repositorio oficial anclado al commit `658f461`. Las personalizaciones (diseño accesible, selección de provincias andaluzas, generador de QR dinámico y buenas prácticas de red) se montan como volúmenes de solo lectura (`:ro`). | Activo |
+| `CUST-04` | **PotatoMesh** | `0.7.5` | `integrations/potatomesh/views/layouts/app.erb`<br>`integrations/potatomesh/compose.yaml`<br>`integrations/potatomesh/.env.example` | **Indicador visual de retención en la barra de navegación (navbar) y menú móvil**: PotatoMesh no expone de serie el período de retención a los usuarios del mapa. Se monta la plantilla `app.erb` como volumen de solo lectura con un badge configurable (`RETENTION_BADGE`, por defecto `Nodos: 15d · Trazas: 5d`) tanto en el navbar principal de escritorio (`.site-nav`) como en el menú desplegable móvil (`.mobile-nav`), indicando claramente el margen de histórico visible sin alterar la lógica de negocio ni dependencias externas. | Activo |
 
 ---
 
@@ -91,4 +92,22 @@ Al actualizar la versión de una imagen de terceros (ej. subir de etiqueta de ve
 
 ---
 
-> Creado: 2026-10-08 · Última revisión: 2026-10-08
+### CUST-04 — Indicador de Retención en Navbar de PotatoMesh
+
+* **Problema upstream**: PotatoMesh no indica en su interfaz el límite temporal de los datos cargados en el mapa y tablas, lo que genera incertidumbre sobre la frescura de los enlaces o la razón por la que ciertos nodos antiguos ya no aparecen.
+* **Solución aplicada**:
+  1. Extracción de la plantilla de layout oficial `/app/views/layouts/app.erb` de la versión 0.7.5.
+  2. Inserción de la variable configurable `RETENTION_BADGE` (por defecto `"Nodos: 15d · Trazas: 5d"`).
+  3. Renderizado de un badge accesible y no intrusivo dentro de `.site-nav` (escritorio) y en el panel desplegable de `.mobile-nav` (móviles).
+  4. Montaje de la plantilla en `compose.yaml`:
+  ```yaml
+  volumes:
+    - /srv/potatomesh/datos:/app/.local/share/potato-mesh
+    - /srv/potatomesh/config:/app/.config/potato-mesh
+    - ./pages:/app/pages:ro
+    - ./views/layouts/app.erb:/app/views/layouts/app.erb:ro
+  ```
+
+---
+
+> Creado: 2026-10-08 · Última revisión: 2026-10-09

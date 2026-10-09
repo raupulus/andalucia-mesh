@@ -18,6 +18,7 @@ services:
       - /srv/potatomesh/datos:/app/.local/share/potato-mesh
       - /srv/potatomesh/config:/app/.config/potato-mesh
       - ./pages:/app/pages:ro
+      - ./views/layouts/app.erb:/app/views/layouts/app.erb:ro
     environment:
       - FEDERATION=0
     env_file:
