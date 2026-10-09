@@ -74,13 +74,28 @@ class MqttPublisher:
             True si se publicó; False si hubo error.
         """
         if not self._client or not self._connected:
-            # Reintentar conexión si estaba caído
+            # Reintentar conexión si estaba caído recreando la instancia del cliente
             try:
                 if self._client:
-                    await self._client.__aenter__()
-                    self._connected = True
-            except Exception:
+                    try:
+                        await self._client.__aexit__(None, None, None)
+                    except Exception:
+                        pass
+                self._client = aiomqtt.Client(
+                    hostname=self.config.mqtt_host,
+                    port=self.config.mqtt_port,
+                    username=self.config.mqtt_user,
+                    password=self.config.mqtt_password,
+                    identifier="snm-sync-peers",
+                    clean_session=True,
+                    timeout=15.0,
+                )
+                await self._client.__aenter__()
+                self._connected = True
+                logger.info("Publicador MQTT reconectado exitosamente.")
+            except Exception as exc:
                 self._connected = False
+                logger.warning("Fallo reconectando publicador MQTT: %s", exc)
                 return False
 
         topic = f"snm/v1/peer/{peer_id}/{event_type}"

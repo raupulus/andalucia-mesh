@@ -25,6 +25,7 @@ from .config import IngestaConfig, load_config
 from .crypto import PacketDecryptor
 from .decoder import check_ok_to_mqtt, decode_data_payload
 from .dedup import PacketDeduplicator, ReceptionItem, UnifiedPacket
+from .discard_logger import DiscardTracker
 from .geo import GeoEngine, calculate_precision_m
 from .health import HealthReporter, start_health_server
 from .links import evaluate_direct_link
@@ -182,12 +183,26 @@ async def main() -> None:
         storage.db_status,
     )
 
+    # Inicializar rastreador ligero de descartes
+    discard_tracker = DiscardTracker(rate_limit_seconds=30.0, ring_buffer_size=50)
+    reporter.discard_tracker = discard_tracker
+
     # 6. Iniciar servidor HTTP /health
     logger.info("Iniciando servidor de salud en puerto %d...", config.HEALTH_PORT)
     health_runner = await start_health_server(reporter, port=config.HEALTH_PORT)
 
     # 7. Control de señales para apagado ordenado
     stop_event = asyncio.Event()
+
+    async def run_periodic_discard_summary() -> None:
+        """Emite periódicamente un resumen consolidado de paquetes descartados."""
+        while not stop_event.is_set():
+            try:
+                await asyncio.wait_for(stop_event.wait(), timeout=600.0)
+            except asyncio.TimeoutError:
+                discard_tracker.log_periodic_summary("10m")
+
+    discard_summary_task = asyncio.create_task(run_periodic_discard_summary())
 
     def handle_signal() -> None:
         logger.info("Señal de apagado recibida. Deteniendo ingesta...")
@@ -248,7 +263,16 @@ async def main() -> None:
                     # 1. Validar tópico y extraer metadatos
                     t_info = validator.parse_topic(topic_str, len(raw_payload))
                     if t_info.topic_type == "unknown":
-                        reporter.descartado_canal += 1
+                        err_reason = t_info.error_reason or "topic_desconocido"
+                        if err_reason == "tamano_excedido":
+                            reporter.descartado_tamano += 1
+                        else:
+                            reporter.descartado_canal += 1
+                        discard_tracker.record_discard(
+                            reason=err_reason,
+                            topic=topic_str,
+                            detail=f"payload_len={len(raw_payload)}",
+                        )
                         continue
 
                     now = datetime.now(timezone.utc)
@@ -356,6 +380,11 @@ async def main() -> None:
 
                         except Exception as exc:
                             logger.warning("Error procesando evento peer en %s: %s", topic_str, exc)
+                            discard_tracker.record_discard(
+                                reason="peer_invalido",
+                                topic=topic_str,
+                                detail=str(exc)[:120],
+                            )
                         continue
 
                     # 3. Desempaquetar ServiceEnvelope o evento federado
@@ -428,6 +457,12 @@ async def main() -> None:
                                 logger.debug("Error procesando raw MapReport: %s", exc)
 
                         reporter.descartado_protobuf += 1
+                        discard_tracker.record_discard(
+                            reason="protobuf_invalido",
+                            topic=topic_str,
+                            gateway_id=t_info.gateway_id,
+                            detail=f"payload_len={len(raw_payload)}",
+                        )
                         continue
 
                     packet = envelope.packet
@@ -438,6 +473,11 @@ async def main() -> None:
                     to_num = getattr(packet, "to", 0)
 
                     if from_num == 0 or packet_id == 0:
+                        discard_tracker.record_discard(
+                            reason="nodo_invalido",
+                            topic=topic_str,
+                            detail=f"from={from_num} id={packet_id}",
+                        )
                         continue
 
                     from_id = f"!{from_num:08x}"
@@ -448,6 +488,12 @@ async def main() -> None:
                     gateway_id = f"!{gw_raw.lstrip('!'):0>8}".lower()
                     if len(gateway_id) != 9:
                         reporter.descartado_gateway += 1
+                        discard_tracker.record_discard(
+                            reason="gateway_invalido",
+                            topic=topic_str,
+                            from_id=from_id,
+                            gateway_id=gw_raw,
+                        )
                         continue
 
                     # Registrar actividad viva de nodo y gateway
@@ -458,9 +504,24 @@ async def main() -> None:
                     data_obj, decrypt_status = decryptor.decrypt_packet(packet)
                     if decrypt_status == "pki":
                         reporter.pki += 1
+                        discard_tracker.record_discard(
+                            reason="cifrado_pki",
+                            topic=topic_str,
+                            from_id=from_id,
+                            gateway_id=gateway_id,
+                            detail=f"ch={t_info.channel}",
+                        )
                         continue
                     elif decrypt_status == "cifrado_desconocido":
                         reporter.cifrado_desconocido += 1
+                        discard_tracker.record_discard(
+                            reason="cifrado_desconocido",
+                            topic=topic_str,
+                            from_id=from_id,
+                            gateway_id=gateway_id,
+                            detail=f"ch={t_info.channel} enc_len={len(packet.encrypted)}",
+                        )
+                        continue
 
                     if data_obj:
                         decoded_res = decode_data_payload(
@@ -471,6 +532,13 @@ async def main() -> None:
                         )
                         if not decoded_res.is_valid_consent:
                             reporter.sin_ok_mqtt += 1
+                            discard_tracker.record_discard(
+                                reason="sin_ok_mqtt",
+                                topic=topic_str,
+                                from_id=from_id,
+                                gateway_id=gateway_id,
+                                detail="ok_to_mqtt=0",
+                            )
                             continue
                         portnum_name = decoded_res.portnum_name
                         portnum_num = decoded_res.portnum_num
@@ -494,10 +562,10 @@ async def main() -> None:
                         node_rec.metrics_at = now
                         registry.dirty_nodes.add(from_id)
 
-                    elif portnum_name == "position" and payload_dict:
-                        p_lat = payload_dict.get("latitude")
-                        p_lon = payload_dict.get("longitude")
-                        p_prec = payload_dict.get("precision_m", 10.0)
+                    elif portnum_name == "position":
+                        p_lat = payload_dict.get("latitude") if payload_dict else None
+                        p_lon = payload_dict.get("longitude") if payload_dict else None
+                        p_prec = payload_dict.get("precision_m", 10.0) if payload_dict else 10.0
                         if p_lat is not None and p_lon is not None:
                             prov, uncertain = geo_engine.resolve_province(p_lat, p_lon, p_prec)
                             node_rec.latitude = p_lat
@@ -509,25 +577,42 @@ async def main() -> None:
                             node_rec.border_uncertain = uncertain
                             payload_dict["border_uncertain"] = uncertain
                             registry.dirty_nodes.add(from_id)
+                        else:
+                            discard_tracker.record_discard(
+                                reason="posicion_sin_coords",
+                                topic=topic_str,
+                                from_id=from_id,
+                                gateway_id=gateway_id,
+                                detail=f"keys={list(payload_dict.keys()) if payload_dict else []}",
+                            )
 
-                    elif portnum_name == "map_report" and payload_dict:
-                        node_rec.short_name = payload_dict.get("short_name", node_rec.short_name)
-                        node_rec.long_name = payload_dict.get("long_name", node_rec.long_name)
-                        node_rec.role = payload_dict.get("role", node_rec.role)
-                        node_rec.hw_model = payload_dict.get("hw_model", node_rec.hw_model)
-                        p_lat = payload_dict.get("latitude")
-                        p_lon = payload_dict.get("longitude")
-                        p_prec = payload_dict.get("precision_m", 10.0)
-                        if p_lat is not None and p_lon is not None:
-                            prov, uncertain = geo_engine.resolve_province(p_lat, p_lon, p_prec)
-                            node_rec.latitude = p_lat
-                            node_rec.longitude = p_lon
-                            node_rec.position_precision_m = p_prec
-                            node_rec.position_source = "map_report"
-                            node_rec.last_position_at = now
-                            node_rec.province = prov
-                            node_rec.border_uncertain = uncertain
-                            payload_dict["border_uncertain"] = uncertain
+                    elif portnum_name == "map_report":
+                        if payload_dict:
+                            node_rec.short_name = payload_dict.get("short_name", node_rec.short_name)
+                            node_rec.long_name = payload_dict.get("long_name", node_rec.long_name)
+                            node_rec.role = payload_dict.get("role", node_rec.role)
+                            node_rec.hw_model = payload_dict.get("hw_model", node_rec.hw_model)
+                            p_lat = payload_dict.get("latitude")
+                            p_lon = payload_dict.get("longitude")
+                            p_prec = payload_dict.get("precision_m", 10.0)
+                            if p_lat is not None and p_lon is not None:
+                                prov, uncertain = geo_engine.resolve_province(p_lat, p_lon, p_prec)
+                                node_rec.latitude = p_lat
+                                node_rec.longitude = p_lon
+                                node_rec.position_precision_m = p_prec
+                                node_rec.position_source = "map_report"
+                                node_rec.last_position_at = now
+                                node_rec.province = prov
+                                node_rec.border_uncertain = uncertain
+                                payload_dict["border_uncertain"] = uncertain
+                            else:
+                                discard_tracker.record_discard(
+                                    reason="map_report_sin_coords",
+                                    topic=topic_str,
+                                    from_id=from_id,
+                                    gateway_id=gateway_id,
+                                    detail=f"keys={list(payload_dict.keys())}",
+                                )
                         registry.dirty_nodes.add(from_id)
 
                     elif portnum_name == "telemetry" and payload_dict:
@@ -637,6 +722,13 @@ async def main() -> None:
             await asyncio.sleep(1.0)
 
     # 9. Drenaje y apagado ordenado
+    discard_summary_task.cancel()
+    try:
+        await discard_summary_task
+    except asyncio.CancelledError:
+        pass
+    discard_tracker.log_periodic_summary("cierre")
+
     logger.info("Cerrando ventanas abiertas de deduplicación...")
     await dedup.flush_all_open_windows()
 

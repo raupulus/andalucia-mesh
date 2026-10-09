@@ -52,6 +52,7 @@ class TopicParseResult:
     gateway_id: str | None = None  # Id del gateway extraído del topic (en 'envelope')
     peer_id: str | None = None  # Id de la instancia peer (en 'peer')
     event_type: str | None = None  # Tipo de evento peer (en 'peer')
+    error_reason: str | None = None  # Motivo del descarte si topic_type == 'unknown'
 
 
 class TopicValidator:
@@ -105,7 +106,7 @@ class TopicValidator:
         peer_prefix = f"{self.topic_prefix}/v1/peer/"
         if topic.startswith(peer_prefix):
             if payload_len > 16384:
-                return TopicParseResult(topic_type="unknown")
+                return TopicParseResult(topic_type="unknown", error_reason="tamano_excedido")
             remainder = topic[len(peer_prefix) :]
             parts = remainder.split("/")
             if len(parts) == 2:
@@ -115,11 +116,11 @@ class TopicValidator:
                     peer_id=p_id,
                     event_type=ev_type,
                 )
-            return TopicParseResult(topic_type="unknown")
+            return TopicParseResult(topic_type="unknown", error_reason="peer_topic_invalido")
 
         # Descarte preventivo de paquetes de radio LoRa excesivamente grandes (> 1024 B)
         if payload_len > 1024:
-            return TopicParseResult(topic_type="unknown")
+            return TopicParseResult(topic_type="unknown", error_reason="tamano_excedido")
 
         # 2. Tráfico estándar de radio: msh/EU_868/2/e/<canal>/<!gateway>
         envelope_prefix = f"{self.topic_root}/2/e/"
@@ -136,7 +137,11 @@ class TopicValidator:
                         channel=canonical_channel,
                         gateway_id=gw_id,
                     )
-            return TopicParseResult(topic_type="unknown")
+                if not canonical_channel:
+                    return TopicParseResult(topic_type="unknown", error_reason="canal_no_permitido")
+                if not gw_id:
+                    return TopicParseResult(topic_type="unknown", error_reason="gateway_invalido")
+            return TopicParseResult(topic_type="unknown", error_reason="envelope_partes_invalidas")
 
         # 3. Map reports: msh/EU_868/2/map/
         map_prefix = f"{self.topic_root}/2/map/"
@@ -151,4 +156,4 @@ class TopicValidator:
                     break
             return TopicParseResult(topic_type="map", gateway_id=gw_id)
 
-        return TopicParseResult(topic_type="unknown")
+        return TopicParseResult(topic_type="unknown", error_reason="topic_desconocido")

@@ -40,9 +40,10 @@ class HealthReporter:
         self.pki: int = 0
         self.reinicios_detectados: int = 0
 
-        # Enlace con publicador y almacenamiento
+        # Enlace con publicador, almacenamiento y seguimiento de descartes
         self.get_decoded_stats: Any = None
         self.get_storage_stats: Any = None
+        self.discard_tracker: Any = None
 
     def record_incoming_message(self) -> None:
         """Registra la recepción de un nuevo mensaje para cálculo de ritmos."""
@@ -130,6 +131,9 @@ class HealthReporter:
                 "reinicios_detectados": self.reinicios_detectados,
             },
         }
+
+        if self.discard_tracker:
+            data["descartes"] = self.discard_tracker.get_summary()
 
         return data, status_code
 

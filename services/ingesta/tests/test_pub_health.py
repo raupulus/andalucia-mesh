@@ -132,3 +132,51 @@ def test_health_reporter_states() -> None:
     assert code_err == 503
     assert not data_err["ok"]
     assert data_err["base_datos"] == "error"
+
+
+def test_discard_tracker_and_health_integration() -> None:
+    """Verifica el funcionamiento del rastreador ligero de descartes y su integración en /health."""
+    from src.discard_logger import DiscardTracker
+
+    tracker = DiscardTracker(rate_limit_seconds=10.0, ring_buffer_size=5)
+
+    # Registrar varios descartes de distintos motivos
+    tracker.record_discard(
+        reason="cifrado_desconocido",
+        topic="msh/EU_868/2/e/SFNarrow/!1531b526",
+        from_id="!12345678",
+        gateway_id="!1531b526",
+        detail="enc_len=48",
+    )
+    tracker.record_discard(
+        reason="cifrado_desconocido",
+        topic="msh/EU_868/2/e/SFNarrow/!1531b526",
+        from_id="!12345678",
+        gateway_id="!1531b526",
+        detail="enc_len=48",
+    )
+    tracker.record_discard(
+        reason="posicion_sin_coords",
+        topic="msh/EU_868/2/e/SFNarrow/!5f3a3a29",
+        from_id="!8fa78924",
+        gateway_id="!5f3a3a29",
+        detail="keys=['time', 'precision_bits']",
+    )
+
+    summary = tracker.get_summary()
+    assert summary["total_acumulado"] == 3
+    assert summary["por_motivo"]["cifrado_desconocido"] == 2
+    assert summary["por_motivo"]["posicion_sin_coords"] == 1
+    assert len(summary["ultimos_50"]) == 3
+    assert summary["ultimos_50"][0]["reason"] == "posicion_sin_coords"
+
+    # Verificar integración con HealthReporter
+    reporter = HealthReporter()
+    reporter.mqtt_connected = True
+    reporter.discard_tracker = tracker
+
+    data, code = reporter.generate_health_dict()
+    assert code == 200
+    assert "descartes" in data
+    assert data["descartes"]["total_acumulado"] == 3
+    assert data["descartes"]["por_motivo"]["cifrado_desconocido"] == 2

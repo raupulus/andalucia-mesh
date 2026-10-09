@@ -297,6 +297,7 @@ Actualización: nueva etiqueta git → `deploy.sh ingesta`; las migraciones corr
 10. `api_node_intervals` añade `variant` (variante de telemetría): una fila por nodo × tipo × variante.
 11. Agregados por hora con nodo: 30 días; por día: 1 año; registros `node`/`gateway` se borran tras 1 año sin actividad.
 12. Migraciones SQL propias numeradas (sin Alembic); vistas en una migración repetible. Sin `/metrics` Prometheus: contadores en `/health`. Horas con milisegundos en `decoded`.
+13. Trazabilidad de descartes mediante `DiscardTracker`: contadores agregados en memoria por motivo, registro muestreado con limitación de tasa (30 s), búfer circular de 50 eventos recientes y resumen consolidado cada 10 minutos (y al apagar), expuesto en `/health` para monitorización operativa sin sobrecarga de disco.
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-09

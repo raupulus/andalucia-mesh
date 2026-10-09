@@ -118,6 +118,26 @@ Valores de referencia SFNarrow (pruebas):
 - Lectura de batería válida: 1–100, o 0 con `voltage` > 0 (0 con 0 V = sin sensor).
 - `channel_utilization` y `air_util_tx` llegan en `device_metrics` y en `local_stats`; el registro guarda el más reciente.
 
+## Sistema Ligero de Registro y Diagnóstico de Descartes (DiscardTracker)
+
+Para facilitar la monitorización continua y la auditoría a medio plazo (1–2 semanas) de la calidad de la ingesta sin provocar degradación de rendimiento por operaciones de E/S ni crecimiento descontrolado de logs en disco:
+1. **Contadores agregados por motivo:** Mantiene en memoria el acumulado histórico y los incrementos periódicos clasificados por:
+   - `tamano_excedido`: carga útil superior a 1024 B en radio o a 16 KB en tráfico federado.
+   - `canal_no_permitido`: paquete en tópico `msh/EU_868/2/e/<canal>/...` cuyo canal no pertenece a la lista blanca autorizada.
+   - `topic_desconocido`: prefijo o estructura de tópico no reconocido.
+   - `gateway_invalido`: identificador de gateway que no cumple el formato canónico `!hex8`.
+   - `protobuf_invalido`: fallo al deserializar `ServiceEnvelope`, `MapReport` o paquete protobuf interno.
+   - `nodo_invalido`: paquete con emisor (`from`) o identificador de paquete (`packet_id`) en 0.
+   - `cifrado_pki`: paquete cifrado de forma asimétrica directa (punto a punto) sin clave de canal compartida.
+   - `cifrado_desconocido`: paquete cifrado con clave PSK que no coincide con las autorizadas.
+   - `sin_ok_mqtt`: paquete de terceros con bit de consentimiento `ok_to_mqtt=0` (cuando el descarte estricto está habilitado).
+   - `posicion_sin_coords`: paquete de tipo posición recibido sin coordenadas geográficas válidas (ambas coordenadas 0 o ausentes, como balizas de sincronización horaria o precisión).
+   - `peer_invalido`: error en el formateo o estructura JSON recibida de instancias federadas.
+2. **Muestreo y limitación de tasa (rate-limiting):** Se limita la emisión de líneas de log individuales a un máximo de 1 mensaje cada 30 segundos por motivo de descarte bajo el logger `ingesta.descartes`. Esto evita inundaciones de log ante ráfagas de tráfico desconocido o ilegible.
+3. **Búfer circular de diagnóstico rápido:** Mantiene en memoria los últimos 50 eventos de descarte con fecha ISO, motivo, tópico, emisor, gateway y detalles complementarios.
+4. **Resumen periódico consolidado:** Cada 10 minutos (y al detener el servicio), emite una línea de resumen en los logs con el balance de descartes del periodo y el acumulado global.
+5. **Telemetría viva en `/health`:** Expone el desglose en el endpoint HTTP de salud en el bloque `"descartes"` (`total_acumulado`, `por_motivo` y `ultimos_50`), permitiendo a operadores consultar estadísticas en tiempo real sin requerir análisis de ficheros en bruto.
+
 ## Contratos propios
 
 Paquete único (estructura interna que consumen 04 y 06): cabecera de la tabla anterior, `channel`, `portnum` (nombre y número), `variant`, `decrypt_status`, `payload` (dict ya con los nombres de 06), `airtime_ms`, `size_bytes`, `rx_first`, `province` del emisor, `first_gateway`, `reception_count` y lista de recepciones.

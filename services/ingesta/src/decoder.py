@@ -117,8 +117,10 @@ def decode_data_payload(
         elif portnum == portnums_pb2.PortNum.POSITION_APP:
             pos = mesh_pb2.Position()
             pos.ParseFromString(payload_bytes)
-            lat = round(pos.latitude_i * 1e-7, 6) if pos.latitude_i else None
-            lon = round(pos.longitude_i * 1e-7, 6) if pos.longitude_i else None
+            # Solo omitir coordenadas si ambas son 0 (punto nulo en el océano sin fijar)
+            has_coords = bool(pos.latitude_i or pos.longitude_i)
+            lat = round(pos.latitude_i * 1e-7, 6) if has_coords else None
+            lon = round(pos.longitude_i * 1e-7, 6) if has_coords else None
             p_bits = pos.precision_bits if pos.precision_bits else None
             p_meters = calculate_precision_m(p_bits)
 
