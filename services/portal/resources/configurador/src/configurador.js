@@ -180,6 +180,8 @@ export function construirYamlDeseado() {
     });
   }
 
+  const mapActivo = mqttActivo && Boolean(document.getElementById("chkMqttMap")?.checked);
+
   const opcionales = [
     { id: "chkIberia", name: "Iberia" },
     { id: "chkAndalucia", name: "Andalucia" },
@@ -197,7 +199,8 @@ export function construirYamlDeseado() {
           name: opc.name,
           psk: "AQ==",
           uplinkEnabled: true,
-          downlinkEnabled: true
+          downlinkEnabled: true,
+          moduleSettings: { positionPrecision: 15 }
         }
       });
     }
@@ -220,16 +223,27 @@ export function construirYamlDeseado() {
 
   // Solo incluir bloque MQTT con nuestra URL si el usuario marca explícitamente el check de colaborar
   if (mqttActivo) {
-    moduleConfig.mqtt = {
+    const mqttCfg = {
       enabled: true,
       address: "mqtt.desdechipiona.es",
       username: "meshdev",
       password: "large4cats",
-      root: "msh",
+      root: "msh/EU_868",
       encryptionEnabled: true,
+      tlsEnabled: true,
       proxyToClientEnabled: true,
-      mapReportingEnabled: false
+      mapReportingEnabled: mapActivo
     };
+
+    if (mapActivo) {
+      mqttCfg.mapReportSettings = {
+        publishIntervalSecs: 259200,
+        positionPrecision: 14,
+        shouldReportLocation: true
+      };
+    }
+
+    moduleConfig.mqtt = mqttCfg;
   }
 
   const configDoc = {
@@ -240,7 +254,9 @@ export function construirYamlDeseado() {
       device: {
         role: estado.rolSeleccionado,
         nodeInfoBroadcastSecs: nodeInfoSecs,
-        rebroadcastMode: esClientMute ? "CORE_PORTNUMS_ONLY" : "ALL"
+        rebroadcastMode: esClientMute ? "CORE_PORTNUMS_ONLY" : "ALL",
+        disableTripleClick: true,
+        tzdef: "GMT-1GMT,M3.5.0,M10.5.0/3"
       },
       lora: {
         region: "EU_868",
@@ -252,12 +268,15 @@ export function construirYamlDeseado() {
         hopLimit: hopLimit,
         txPower: txPower,
         txEnabled: true,
-        sx126xRxBoostedGain: true
+        sx126xRxBoostedGain: true,
+        ignoreMqtt: mqttActivo ? true : false,
+        configOkToMqtt: mapActivo ? true : false
       },
       position: {
         positionBroadcastSmartEnabled: false,
         positionBroadcastSecs: positionSecs,
-        positionFlags: 0
+        positionFlags: esClientMute ? 0 : 137,
+        fixedPosition: !esClientMute
       },
       security: {
         serialEnabled: true
@@ -346,6 +365,18 @@ function generarMeshtasticUrl(doc) {
 }
 
 export function actualizarConfiguracion() {
+  const chkMqtt = document.getElementById("chkMqtt");
+  const chkMqttMap = document.getElementById("chkMqttMap");
+  const mapWrapper = document.getElementById("mqttMapOptionWrapper");
+  if (chkMqtt && mapWrapper) {
+    if (chkMqtt.checked) {
+      mapWrapper.style.display = "block";
+    } else {
+      mapWrapper.style.display = "none";
+      if (chkMqttMap) chkMqttMap.checked = false;
+    }
+  }
+
   const { configDoc } = construirYamlDeseado();
 
   // Actualizar vista previa de identidad
@@ -448,6 +479,7 @@ export function copiarComandosCli() {
   const lora = configDoc.config.lora;
   const dev = configDoc.config.device;
   const pos = configDoc.config.position;
+  const esClientMute = dev.role === "CLIENT_MUTE";
   const telemetriaSecs = Number(document.getElementById("telemetriaSelect")?.value || 0);
 
   const comandos = [
@@ -456,10 +488,10 @@ export function copiarComandosCli() {
     `meshtastic --set lora.region ${lora.region} --set lora.use_preset false`,
     `meshtastic --set lora.bandwidth ${lora.bandwidth} --set lora.spread_factor ${lora.spreadFactor} --set lora.coding_rate ${lora.codingRate}`,
     `meshtastic --set lora.channel_num ${lora.channelNum} --set lora.hop_limit ${lora.hopLimit} --set lora.tx_power ${lora.txPower}`,
-    `meshtastic --set device.role ${dev.role} --set device.node_info_broadcast_secs ${dev.nodeInfoBroadcastSecs}`,
-    `meshtastic --set position.position_broadcast_smart_enabled false --set position.position_flags 0 --set position.position_broadcast_secs ${pos.positionBroadcastSecs}`,
+    `meshtastic --set device.role ${dev.role} --set device.node_info_broadcast_secs ${dev.nodeInfoBroadcastSecs} --set device.disable_triple_click true --set device.tzdef "${dev.tzdef}"`,
+    `meshtastic --set position.position_broadcast_smart_enabled false --set position.position_broadcast_secs ${pos.positionBroadcastSecs} --set position.fixed_position ${pos.fixedPosition || false}`,
     `meshtastic --set telemetry.device_update_interval ${telemetriaSecs}`,
-    `meshtastic --ch-set name "SFNarrow" --ch-set psk "AQ==" --ch-index 0`
+    `meshtastic --ch-set name "SFNarrow" --ch-set psk "AQ==" --ch-set uplink_enabled true --ch-set downlink_enabled ${!esClientMute} --ch-index 0`
   ];
 
   // Canales secundarios añadidos
@@ -467,7 +499,7 @@ export function copiarComandosCli() {
     for (let i = 1; i < configDoc.channels.length; i++) {
       const ch = configDoc.channels[i];
       if (ch && ch.settings && ch.settings.name) {
-        comandos.push(`meshtastic --ch-set name "${ch.settings.name}" --ch-set psk "${ch.settings.psk || 'AQ=='}" --ch-index ${i}`);
+        comandos.push(`meshtastic --ch-set name "${ch.settings.name}" --ch-set psk "${ch.settings.psk || 'AQ=='}" --ch-set uplink_enabled true --ch-index ${i}`);
       }
     }
   }
@@ -475,7 +507,13 @@ export function copiarComandosCli() {
   // Configuración MQTT comunitaria solo si el usuario ha marcado el check de colaborar
   if (configDoc.module_config?.mqtt?.enabled) {
     const mqtt = configDoc.module_config.mqtt;
-    comandos.push(`meshtastic --set mqtt.enabled true --set mqtt.address "${mqtt.address}" --set mqtt.username "${mqtt.username}" --set mqtt.password "${mqtt.password}" --set mqtt.encryption_enabled true`);
+    comandos.push(`meshtastic --set mqtt.enabled true --set mqtt.address "${mqtt.address}" --set mqtt.username "${mqtt.username}" --set mqtt.password "${mqtt.password}" --set mqtt.root "${mqtt.root}" --set mqtt.encryption_enabled true --set mqtt.tls_enabled true`);
+    comandos.push(`meshtastic --set lora.ignore_mqtt true`);
+
+    if (mqtt.mapReportingEnabled) {
+      comandos.push(`meshtastic --set mqtt.map_reporting_enabled true --set mqtt.map_report_settings.publish_interval_secs 259200 --set mqtt.map_report_settings.position_precision 14 --set mqtt.map_report_settings.should_report_location true`);
+      comandos.push(`meshtastic --set lora.config_ok_to_mqtt true`);
+    }
   }
 
   const textoComandos = comandos.join("\n");
@@ -900,13 +938,15 @@ export async function aplicarDeseadoANodo() {
     if (doc.config?.device) {
       const dev = create(Protobuf.Config.Config_DeviceConfigSchema, {
         role: doc.config.device.role === "CLIENT_MUTE" ? 1 : 0,
-        nodeInfoBroadcastSecs: doc.config.device.nodeInfoBroadcastSecs || 259200
+        nodeInfoBroadcastSecs: doc.config.device.nodeInfoBroadcastSecs || 259200,
+        disableTripleClick: Boolean(doc.config.device.disableTripleClick),
+        tzdef: doc.config.device.tzdef || "GMT-1GMT,M3.5.0,M10.5.0/3"
       });
       const cfg = create(Protobuf.Config.ConfigSchema, {
         payloadVariant: { case: "device", value: dev }
       });
       await estado.dispositivo.setConfig(cfg);
-      logActividad("✓ Parámetros de Dispositivo (Role / NodeInfo) enviados.");
+      logActividad("✓ Parámetros de Dispositivo (Role / NodeInfo / TZ / Botón) enviados.");
     }
 
     if (doc.config?.lora) {
@@ -919,7 +959,10 @@ export async function aplicarDeseadoANodo() {
         channelNum: Number(doc.config.lora.channelNum) || 4,
         hopLimit: Number(doc.config.lora.hopLimit) || 4,
         txPower: Number(doc.config.lora.txPower) || 27,
-        txEnabled: true
+        txEnabled: true,
+        sx126xRxBoostedGain: true,
+        ignoreMqtt: Boolean(doc.config.lora.ignoreMqtt),
+        configOkToMqtt: Boolean(doc.config.lora.configOkToMqtt)
       });
       const cfg = create(Protobuf.Config.ConfigSchema, {
         payloadVariant: { case: "lora", value: lora }
@@ -932,7 +975,8 @@ export async function aplicarDeseadoANodo() {
       const pos = create(Protobuf.Config.Config_PositionConfigSchema, {
         positionBroadcastSmartEnabled: Boolean(doc.config.position.positionBroadcastSmartEnabled),
         positionBroadcastSecs: Number(doc.config.position.positionBroadcastSecs) || 21600,
-        positionFlags: Number(doc.config.position.positionFlags) || 0
+        positionFlags: Number(doc.config.position.positionFlags) || 0,
+        fixedPosition: Boolean(doc.config.position.fixedPosition)
       });
       const cfg = create(Protobuf.Config.ConfigSchema, {
         payloadVariant: { case: "position", value: pos }
@@ -954,19 +998,31 @@ export async function aplicarDeseadoANodo() {
     }
 
     if (doc.module_config?.mqtt) {
-      const mqtt = create(Protobuf.ModuleConfig.ModuleConfig_MQTTConfigSchema, {
+      const mqttData = {
         enabled: Boolean(doc.module_config.mqtt.enabled),
         address: doc.module_config.mqtt.address || "mqtt.desdechipiona.es",
         username: doc.module_config.mqtt.username || "meshdev",
         password: doc.module_config.mqtt.password || "large4cats",
-        root: doc.module_config.mqtt.root || "msh",
-        encryptionEnabled: true
-      });
+        root: doc.module_config.mqtt.root || "msh/EU_868",
+        encryptionEnabled: true,
+        tlsEnabled: true,
+        mapReportingEnabled: Boolean(doc.module_config.mqtt.mapReportingEnabled)
+      };
+
+      if (doc.module_config.mqtt.mapReportSettings) {
+        mqttData.mapReportSettings = create(Protobuf.ModuleConfig.ModuleConfig_MapReportSettingsSchema, {
+          publishIntervalSecs: Number(doc.module_config.mqtt.mapReportSettings.publishIntervalSecs) || 259200,
+          positionPrecision: Number(doc.module_config.mqtt.mapReportSettings.positionPrecision) || 14,
+          shouldReportLocation: Boolean(doc.module_config.mqtt.mapReportSettings.shouldReportLocation)
+        });
+      }
+
+      const mqtt = create(Protobuf.ModuleConfig.ModuleConfig_MQTTConfigSchema, mqttData);
       const mod = create(Protobuf.ModuleConfig.ModuleConfigSchema, {
         payloadVariant: { case: "mqtt", value: mqtt }
       });
       await estado.dispositivo.setModuleConfig(mod);
-      logActividad("✓ Módulo MQTT comunitario enviado.");
+      logActividad("✓ Módulo MQTT comunitario y reporte en mapa enviados.");
     }
 
     // 4. Canales
@@ -980,7 +1036,10 @@ export async function aplicarDeseadoANodo() {
               name: ch.settings.name,
               psk: new Uint8Array([1]),
               uplinkEnabled: ch.settings.uplinkEnabled ?? true,
-              downlinkEnabled: ch.settings.downlinkEnabled ?? true
+              downlinkEnabled: ch.settings.downlinkEnabled ?? true,
+              moduleSettings: ch.settings.moduleSettings ? {
+                positionPrecision: ch.settings.moduleSettings.positionPrecision ?? 15
+              } : undefined
             }
           });
           await estado.dispositivo.setChannel(chObj);
@@ -1115,6 +1174,9 @@ function iniciarConfigurador() {
     const httpGroup = document.getElementById("httpIpGroupWorkbench");
     if (httpGroup) httpGroup.style.display = isHttp ? "flex" : "none";
   });
+
+  document.getElementById("chkMqtt")?.addEventListener("change", actualizarConfiguracion);
+  document.getElementById("chkMqttMap")?.addEventListener("change", actualizarConfiguracion);
 
   // Inicializar configuración y QR
   actualizarConfiguracion();

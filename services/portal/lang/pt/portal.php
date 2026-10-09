@@ -681,5 +681,7 @@ return [
         'warning_experimental_link' => 'sugestões',
         'mqtt_colaborar_label' => 'Queres colaborar enviando para este MQTT?',
         'mqtt_colaborar_desc' => 'Se ativado, será configurado o gateway MQTT comunitário (mqtt.desdechipiona.es) para partilhar telemetria e mensagens com a rede. Se desativado, nenhuma configuração MQTT será incluída.',
+        'mqtt_map_label' => 'Queres aparecer no mapa público de cobertura?',
+        'mqtt_map_desc' => 'Publica periodicamente a tua localização no mapa da Andalucía Mesh (a cada 72h com precisão segura de ~1 km para proteger a privacidade). Ativa o relatório no mapa e a difusão de identidade (config_ok_to_mqtt).',
     ],
 ];

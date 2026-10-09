@@ -242,6 +242,17 @@
                                             <span style="font-size: 0.8rem; color: var(--color-texto-2);">{{ __('portal.configurator.mqtt_colaborar_desc') }}</span>
                                         </span>
                                     </label>
+
+                                    <!-- Opción condicional: Aparecer en mapa público de cobertura (Map Reporting) -->
+                                    <div id="mqttMapOptionWrapper" style="display: none; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed var(--color-borde);">
+                                        <label style="display: flex; align-items: flex-start; gap: 0.6rem; cursor: pointer; font-size: 0.9rem;">
+                                            <input type="checkbox" id="chkMqttMap" onchange="actualizarConfiguracion()" style="margin-top: 0.2rem;" />
+                                            <span>
+                                                <strong>{{ __('portal.configurator.mqtt_map_label') }}</strong><br />
+                                                <span style="font-size: 0.8rem; color: var(--color-texto-2);">{{ __('portal.configurator.mqtt_map_desc') }}</span>
+                                            </span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>

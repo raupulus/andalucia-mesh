@@ -189,4 +189,23 @@ class ConfiguradorTest extends TestCase
         $response->assertSee('id="workbenchStatusPill"', false);
         $response->assertSee('Conexión Directa con el Nodo');
     }
+
+    public function test_configurador_contiene_checkbox_reporte_mapa_mqtt(): void
+    {
+        $response = $this->get('/configurador');
+
+        $response->assertStatus(200);
+        $response->assertSee('id="chkMqttMap"', false);
+        $response->assertSee('id="mqttMapOptionWrapper"', false);
+        $response->assertSee('¿Quieres aparecer en el mapa público de cobertura?');
+
+        $en = $this->get('/configurador?lang=en');
+        $en->assertStatus(200);
+        $en->assertSee('Do you want to appear on the public coverage map?');
+
+        $pt = $this->get('/configurador?lang=pt');
+        $pt->assertStatus(200);
+        $pt->assertSee('Queres aparecer no mapa público de cobertura?');
+    }
 }
+
