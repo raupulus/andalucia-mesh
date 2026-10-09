@@ -298,7 +298,12 @@ async def main() -> None:
                         reporter.cifrado_desconocido += 1
 
                     if data_obj:
-                        decoded_res = decode_data_payload(from_id, gateway_id, data_obj)
+                        decoded_res = decode_data_payload(
+                            from_id,
+                            gateway_id,
+                            data_obj,
+                            ignorar_ok_to_mqtt=config.INGESTA_IGNORAR_OK_TO_MQTT,
+                        )
                         if not decoded_res.is_valid_consent:
                             reporter.sin_ok_mqtt += 1
                             continue

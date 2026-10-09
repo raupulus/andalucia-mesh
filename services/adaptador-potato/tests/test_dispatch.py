@@ -168,3 +168,75 @@ def test_dispatch_map_report_role(processor: tuple[MqttProcessor, FakeSender]) -
     assert node_entry["num"] == 0x11223344
     assert node_entry["user"]["role"] == "ROUTER"
     assert node_entry["user"]["shortName"] == "Rep1"
+
+
+def test_dispatch_direct_message_filtering(processor: tuple[MqttProcessor, FakeSender]) -> None:
+    """Verifica que el chat directo se descarta pero los traceroutes y vecinos directos se admiten."""
+    proc, sender = processor
+
+    # 1. Chat directo (to != 0xFFFFFFFF) -> descartado para proteger privacidad
+    sender.enqueued_items.clear()
+    envelope_direct_chat = mqtt_pb2.ServiceEnvelope(
+        channel_id="SFNarrow",
+        gateway_id="!11223344",
+    )
+    pkt_chat = envelope_direct_chat.packet
+    pkt_chat.id = 501
+    setattr(pkt_chat, "from", 0x11223344)
+    pkt_chat.to = 0x22334455  # Mensaje directo privado
+    pkt_chat.decoded.portnum = 1  # TEXT_MESSAGE_APP
+    pkt_chat.decoded.payload = b"Mensaje secreto entre dos usuarios"
+
+    proc.process_message("msh/EU_868/2/e/SFNarrow/!11223344", envelope_direct_chat.SerializeToString())
+    assert len(sender.enqueued_items) == 0, "Los mensajes de texto directos no deben llegar a PotatoMesh"
+
+    # 2. Chat de difusión (to == 0xFFFFFFFF) -> encolado
+    pkt_chat.id = 502
+    pkt_chat.to = 0xFFFFFFFF
+    pkt_chat.decoded.payload = b"Mensaje publico en canal"
+
+    proc.process_message("msh/EU_868/2/e/SFNarrow/!11223344", envelope_direct_chat.SerializeToString())
+    assert len(sender.enqueued_items) == 1
+    assert sender.enqueued_items[0][0] == "messages"
+
+    # 3. Traceroute directo (to != 0xFFFFFFFF) -> admitido
+    sender.enqueued_items.clear()
+    envelope_trace = mqtt_pb2.ServiceEnvelope(
+        channel_id="SFNarrow",
+        gateway_id="!11223344",
+    )
+    pkt_trace = envelope_trace.packet
+    pkt_trace.id = 601
+    setattr(pkt_trace, "from", 0x11223344)
+    pkt_trace.to = 0x22334455  # Destino específico de la ruta
+    pkt_trace.decoded.portnum = 70  # TRACEROUTE_APP
+    route = mesh_pb2.RouteDiscovery(route=[0x33445566])
+    pkt_trace.decoded.payload = route.SerializeToString()
+
+    proc.process_message("msh/EU_868/2/e/SFNarrow/!11223344", envelope_trace.SerializeToString())
+    assert len(sender.enqueued_items) == 1
+    assert sender.enqueued_items[0][0] == "traces"
+    assert sender.enqueued_items[0][1]["to"] == 0x22334455
+
+    # 4. NeighborInfo con to=1 -> admitido
+    sender.enqueued_items.clear()
+    envelope_neighbor = mqtt_pb2.ServiceEnvelope(
+        channel_id="SFNarrow",
+        gateway_id="!11223344",
+    )
+    pkt_neighbor = envelope_neighbor.packet
+    pkt_neighbor.id = 701
+    setattr(pkt_neighbor, "from", 0x11223344)
+    pkt_neighbor.to = 1  # Destino habitual de NeighborInfo
+    pkt_neighbor.decoded.portnum = 71  # NEIGHBORINFO_APP
+    n_info = mesh_pb2.NeighborInfo()
+    n = n_info.neighbors.add()
+    n.node_id = 0x99887766
+    n.snr = 9.25
+    pkt_neighbor.decoded.payload = n_info.SerializeToString()
+
+    proc.process_message("msh/EU_868/2/e/SFNarrow/!11223344", envelope_neighbor.SerializeToString())
+    assert len(sender.enqueued_items) == 1
+    assert sender.enqueued_items[0][0] == "neighbors"
+    assert sender.enqueued_items[0][1]["neighbors"][0]["node_id"] == "!99887766"
+

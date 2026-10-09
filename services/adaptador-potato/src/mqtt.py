@@ -167,10 +167,6 @@ class MqttProcessor:
         if from_node == 0 or packet.id == 0:
             return
 
-        # Descartar mensajes directos (no son de difusión pública)
-        if packet.to != 0xFFFFFFFF:
-            return
-
         # Deduplicación temporal en memoria
         if self.dedup.is_duplicate(from_node, packet.id):
             return
@@ -192,19 +188,20 @@ class MqttProcessor:
                 packet.encrypted, packet.id, from_node, self.aes_key
             )
             if status != "ok" or data is None:
-                # Paquete con clave desconocida: registrar actividad como mensaje cifrado
-                self.sender.enqueue(
-                    "messages",
-                    {
-                        "id": packet.id,
-                        "from": node_id_str,
-                        "to": "^all",
-                        "channel": channel_index,
-                        "rx_time": rx_time,
-                        "encrypted": True,
-                    },
-                    priority=0,
-                )
+                # Paquete con clave desconocida: solo si es de difusión registrar actividad como mensaje cifrado
+                if packet.to in (0xFFFFFFFF, 0):
+                    self.sender.enqueue(
+                        "messages",
+                        {
+                            "id": packet.id,
+                            "from": node_id_str,
+                            "to": "^all",
+                            "channel": channel_index,
+                            "rx_time": rx_time,
+                            "encrypted": True,
+                        },
+                        priority=0,
+                    )
                 return
         else:
             return
@@ -368,6 +365,9 @@ class MqttProcessor:
 
         # 4. TEXT_MESSAGE_APP (1)
         elif portnum == 1:
+            # Descartar mensajes directos/privados (el chat público de PotatoMesh solo difunde canal)
+            if packet.to not in (0xFFFFFFFF, 0):
+                return
             try:
                 text = data.payload.decode("utf-8", errors="replace")
                 hops = (

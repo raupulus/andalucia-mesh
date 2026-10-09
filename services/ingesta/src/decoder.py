@@ -40,10 +40,12 @@ def check_ok_to_mqtt(
     from_id: str,
     gateway_id: str,
     data: mesh_pb2.Data | None,
+    ignorar_ok_to_mqtt: bool = False,
 ) -> tuple[bool | None, bool]:
     """Valida el bit OK to MQTT conforme al contrato de ingesta (05.2).
 
     Regla:
+    - Si ignorar_ok_to_mqtt es True: siempre permitido (has_consent, True).
     - Si el paquete es propio del gateway (from_id == gateway_id): siempre permitido (True, True).
     - Sin objeto Data (no descifrado o map report): ok_to_mqtt es None, permitido (None, True).
     - Con Data de un tercero: bit 0 de bitfield debe ser 1. Si es 0 o ausente -> descartado.
@@ -59,6 +61,10 @@ def check_ok_to_mqtt(
 
     bitfield = getattr(data, "bitfield", 0)
     has_consent = bool(bitfield & 1)
+
+    if ignorar_ok_to_mqtt:
+        return has_consent, True
+
     return has_consent, has_consent
 
 
@@ -66,6 +72,7 @@ def decode_data_payload(
     from_id: str,
     gateway_id: str,
     data: mesh_pb2.Data,
+    ignorar_ok_to_mqtt: bool = False,
 ) -> DecodedPayload:
     """Decodifica un objeto Data en un DecodedPayload estructurado.
 
@@ -73,11 +80,14 @@ def decode_data_payload(
         from_id: Identificador del nodo emisor en formato '!%08x'.
         gateway_id: Identificador del gateway que capturó el paquete.
         data: Objeto Data de Protobuf.
+        ignorar_ok_to_mqtt: Si es True, no descarta paquetes de terceros con bit ok_to_mqtt=0.
 
     Returns:
         Estructura DecodedPayload con el nombre de portnum, variante y payload JSON.
     """
-    ok_to_mqtt_val, is_valid_consent = check_ok_to_mqtt(from_id, gateway_id, data)
+    ok_to_mqtt_val, is_valid_consent = check_ok_to_mqtt(
+        from_id, gateway_id, data, ignorar_ok_to_mqtt=ignorar_ok_to_mqtt
+    )
     if not is_valid_consent:
         return DecodedPayload(
             portnum_name="other",

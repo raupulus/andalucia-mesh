@@ -62,6 +62,7 @@ class IngestaConfig(BaseSettings):
     INGESTA_MARGEN_MIN_M: float = 500.0
     INGESTA_ENLACE_PRECISION_MAX_M: float = 3000.0
     INGESTA_ENLACE_MAX_KM: float = 300.0
+    INGESTA_IGNORAR_OK_TO_MQTT: bool = False
 
     INGESTA_LOTE_FILAS: int = 500
     INGESTA_LOTE_MS: int = 1000

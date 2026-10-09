@@ -11,7 +11,7 @@ Lee el **tráfico crudo** de MQTT, no el flujo `decoded` de la ingesta: PotatoMe
 ### Recepción
 
 - Suscripción `${MQTT_TOPIC_ROOT}/#` (`msh/EU_868/#`) en `mosquitto:1884` con `svc-potato` (solo lectura), QoS 0, sesión limpia, reconexión con espera exponencial (1 s → 60 s).
-- Topic esperado `msh/EU_868/2/e/<canal>/<!id gateway>`. Se descartan antes de decodificar: otros formatos (`/json/`, `/stat/`, `/c/`), canales fuera de `ALLOWED_CHANNELS` (segunda barrera; el broker ya filtra) y mensajes directos (`to` distinto de `0xffffffff`).
+- Topic esperado `msh/EU_868/2/e/<canal>/<!id gateway>`. Se descartan antes de decodificar: otros formatos (`/json/`, `/stat/`, `/c/`) y canales fuera de `ALLOWED_CHANNELS` (segunda barrera; el broker ya filtra). Para proteger la privacidad, los mensajes de texto directos (`TEXT_MESSAGE_APP` con `to` distinto de `0xffffffff`) se descartan para que no aparezcan en el chat público de PotatoMesh, mientras que el resto de tipos directos (`TRACEROUTE`, `NEIGHBORINFO`, `POSITION`, `NODEINFO`) se admiten para alimentar la topología, rutas y enlaces de la malla.
 - `map` (`msh/EU_868/2/map/`): se admite como MapReport.
 
 ### Descifrado y decodificación
@@ -96,7 +96,7 @@ Sin base de datos: todo el estado es en memoria y se reconstruye solo.
 4. **Dado** la cola en 10.000 con telemetría y mensajes, **cuando** llega un mensaje de texto, **entonces** se descarta una telemetría y el mensaje entra.
 5. **Dado** un token rotado sin redesplegar el adaptador, **cuando** envía, **entonces** `/health` devuelve `503` con `motivo: "token rechazado"`.
 6. **Dado** un paquete de un canal con clave propia, **cuando** no descifra, **entonces** PotatoMesh registra actividad del nodo sin contenido.
-7. **Dado** un mensaje directo (`to` ≠ difusión), **cuando** llega, **entonces** no se envía nada.
+7. **Dado** un mensaje de texto directo (`to` ≠ difusión), **cuando** llega, **entonces** se descarta sin enviar a `/api/messages`. Si es un traceroute o neighborinfo directo, **entonces** se envía a `/api/traces` o `/api/neighbors` para trazar los enlaces de la red.
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-09

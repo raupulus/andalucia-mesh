@@ -45,6 +45,7 @@ Convertir cada paquete nuevo en un **paquete único** con sus campos por tipo, a
 - Con `Data` disponible, si `from` ≠ gateway de la primera recepción y (`bitfield` ausente o bit 0 = 0) → **descartado**: ni se guarda ni se publica (`sin_ok_mqtt`). La entrada de deduplicación queda marcada para ignorar también sus duplicados.
 - Es la misma regla que aplica el firmware de un gateway que sube a un broker en IP pública (nuestro caso); aquí solo atrapa gateways antiguos o modificados. No es un mecanismo de exclusión: respeta lo que pidió el emisor.
 - Los paquetes propios del gateway (`from` = gateway) se aceptan siempre, como en el firmware.
+- **Modo permisivo (`INGESTA_IGNORAR_OK_TO_MQTT=true`):** Permite omitir el descarte en despliegues e instancias donde la comunidad no tiene activado `config_ok_to_mqtt` en sus nodos por defecto, permitiendo procesar y registrar el 100% de los paquetes sin descartes pero preservando el valor en la columna `ok_to_mqtt`. Por defecto es `false` para preservar el estándar de privacidad en repositorios públicos.
 
 ### Deduplicación
 

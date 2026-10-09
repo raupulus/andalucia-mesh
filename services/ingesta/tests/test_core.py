@@ -232,6 +232,14 @@ def test_decoder_ok_to_mqtt_and_text() -> None:
     res_gw = decode_data_payload("!99998888", "!99998888", data_no_consent)
     assert res_gw.is_valid_consent
 
+    # Paquete de tercero sin bitfield pero con ignorar_ok_to_mqtt=True -> permitido
+    res_ignorado = decode_data_payload(
+        "!11112222", "!99998888", data_no_consent, ignorar_ok_to_mqtt=True
+    )
+    assert res_ignorado.is_valid_consent
+    assert res_ignorado.portnum_name == "text"
+    assert res_ignorado.payload_dict["text"] == "Mensaje privado"
+
 
 def test_decoder_nodeinfo_roles() -> None:
     """Verifica que el decodificador de NODEINFO maneja correctamente CLIENT, ROUTER y CLIENT_HIDDEN."""
