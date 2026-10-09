@@ -74,7 +74,7 @@ Variables de los dos servicios propios: en sus módulos.
 
 | Dato | Dónde | Retención |
 |---|---|---|
-| `mesh.db` (nodos, mensajes, posiciones, telemetría, trazas, vecinos) | Bind mount `/srv/potatomesh/datos/` → directorio de datos de la imagen (`$XDG_DATA_HOME/potato-mesh`) | **Trazas y saltos: 5 días**; **Nodos, posiciones, telemetría y vecinos: 15 días**; **Mensajes: 30 días** con limpieza propia diaria a las 03:47 h (UT-04.4); la purga nativa de PotatoMesh (365 días, fija en su código) queda como red de seguridad |
+| `mesh.db` (nodos, mensajes, posiciones, telemetría, trazas, vecinos, waypoints) | Bind mount `/srv/potatomesh/datos/` → directorio de datos de la imagen (`$XDG_DATA_HOME/potato-mesh`) | **Trazas y saltos: 5 días**; **Nodos, chat, waypoints, posiciones, telemetría y vecinos: 15 días** con limpieza propia diaria a las 03:47 h (UT-04.4); la purga nativa de PotatoMesh (365 días, fija en su código) queda como red de seguridad |
 | Clave de instancia (`keyfile`) | `/srv/potatomesh/config/` → `$XDG_CONFIG_HOME/potato-mesh` | Permanente |
 | Páginas | `integrations/potatomesh/pages/` montado en `/app/pages:ro` | En git |
 | Layout con badge de retención | `integrations/potatomesh/views/layouts/app.erb` montado en `/app/views/layouts/app.erb:ro` | En git (CUST-04) |
@@ -91,7 +91,7 @@ Páginas propias (Markdown, `<orden>-<slug>.md`, sin marcas de terceros salvo la
 - **UT-04.1 — Integración PotatoMesh.** `integrations/potatomesh/`: `compose.yaml`, `.env.example` sin valores secretos, `pages/`, `views/layouts/app.erb` con badge de retención en navbar (CUST-04), `README.md` con versión fijada, enlace al repositorio y notas de actualización. *Aceptación:* `docker compose config` válido con `check-compose.sh`.
 - **UT-04.2 — Publicación.** Sitio de Nginx y comprobación de SSE sin búfer (`proxy_buffering off`). *Aceptación:* `curl -sN https://potato.${PROJECT_DOMAIN}/api/events` recibe latidos cada 15 s.
 - **UT-04.3 — Datos para copias.** `POTATOMESH_SQLITE` documentado para que el sistema de copias del operador haga `sqlite3 .backup` en caliente (fuera del proyecto). *Aceptación:* una copia hecha con `.backup` arranca en un contenedor aparte.
-- **UT-04.4 — Limpieza periódica (Nodos 15d, Trazas 5d).** `integrations/potatomesh/limpieza.sql` + `snm-potato-limpieza.timer` en el host (diario 03:47 h): `sqlite3 -cmd '.timeout 30000' "$POTATOMESH_SQLITE" < limpieza.sql` borra trazas de más de 5 días, nodos no oídos en 15 días (con sus posiciones, telemetría y vecinos de más de 15 días) y mensajes de más de 30 días usando marcas de tiempo UNIX enteras con `unixepoch()` (`TR-12`); `PRAGMA wal_checkpoint(TRUNCATE)` al final, sin `VACUUM` (bloquea). Los nombres de tablas y columnas son los del esquema de la versión fijada: se revisan en cada actualización. *Aceptación:* tras la ejecución no hay filas fuera de la ventana y PotatoMesh sigue respondiendo durante la limpieza.
+- **UT-04.4 — Limpieza periódica (Nodos 15d, Trazas 5d).** `integrations/potatomesh/limpieza.sql` + `snm-potato-limpieza.timer` en el host (diario 03:47 h): `sqlite3 -cmd '.timeout 30000' "$POTATOMESH_SQLITE" < limpieza.sql` borra trazas de más de 5 días, y nodos inactivos, chat, waypoints, posiciones, telemetría y vecinos de más de 15 días usando marcas de tiempo UNIX enteras con `unixepoch()` (`TR-12`); `PRAGMA wal_checkpoint(TRUNCATE)` al final, sin `VACUUM` (bloquea). Los nombres de tablas y columnas son los del esquema de la versión fijada: se revisan en cada actualización. *Aceptación:* tras la ejecución no hay filas fuera de la ventana y PotatoMesh sigue respondiendo durante la limpieza.
 - Módulos: UT-04.1.x (adaptador) y UT-04.2.x (sync-peers) en sus archivos.
 
 ## 8. Despliegue
@@ -151,7 +151,7 @@ Copia: diaria con `.backup`, etiqueta `potato`, 7 diarias (`../infrastructure/04
 
 ## Decisiones de detalle
 
-1. Limpieza periódica (nodos 15 días, trazas 5 días, mensajes 30 días) con un timer del host (03:47 h) y SQL versionado junto a la integración (PotatoMesh solo purga a 365 días, saturando el mapa Leaflet en el cliente).
+1. Limpieza periódica (trazas 5 días; nodos, chat, waypoints, telemetría y posiciones 15 días) con un timer del host (03:47 h) y SQL versionado junto a la integración (PotatoMesh solo purga a 365 días, saturando el mapa Leaflet en el cliente).
 2. `POTATOMESH_SQLITE=/srv/potatomesh/datos/mesh.db` (bind mount en lugar de volumen con nombre, para que el host lo copie).
 3. Sin parches directos sobre el código fuente empaquetado de la imagen base; las adaptaciones visuales mínimas se inyectan por bind mount de plantilla (CUST-04).
 4. `/metrics` no se publica en Nginx (`location /metrics { return 404; }`).
