@@ -727,5 +727,11 @@ return [
         'title' => 'Live Coverage & Node Map',
         'lead' => 'Real-time geographic visualization of nodes, gateways, and repeaters across the community LoRa Meshtastic network in Andalusia.',
         'breadcrumb' => 'Map',
+        'legend_title' => 'Node Legend',
+        'legend_minimize' => 'Minimize legend',
+        'legend_expand' => 'Show node legend',
+        'fast_controls' => 'Quick controls',
+        'filter_favs' => 'Filter favorite nodes',
+        'unoptimized_nodes' => 'Unoptimized nodes',
     ],
 ];

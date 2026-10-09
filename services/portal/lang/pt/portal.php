@@ -726,5 +726,11 @@ return [
         'title' => 'Mapa de Cobertura e Nós em Direto',
         'lead' => 'Visualização geográfica em tempo real dos nós, gateways e repetidores da rede comunitária LoRa Meshtastic na Andaluzia.',
         'breadcrumb' => 'Mapa',
+        'legend_title' => 'Legenda de Nós',
+        'legend_minimize' => 'Minimizar legenda',
+        'legend_expand' => 'Mostrar legenda de nós',
+        'fast_controls' => 'Controlos rápidos',
+        'filter_favs' => 'Filtrar nós favoritos',
+        'unoptimized_nodes' => 'Nós não otimizados',
     ],
 ];

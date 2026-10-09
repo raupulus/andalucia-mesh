@@ -32,6 +32,7 @@
     <div class="mapa-pantalla" aria-label="{{ __('portal.mapa.title') }}">
         <!-- Barra Superior Flotante: Métricas de red y controles interactivos -->
         <div class="mapa-topbar">
+            <!-- Fila 1 en móvil / Lado izquierdo en escritorio -->
             <div class="mapa-topbar-left">
                 <div class="mapa-pill-stat" title="Total de nodos con posición geográfica conocida">
                     <span class="val" id="top-total-nodes">{{ $stats['total_nodes'] ?? 0 }}</span>
@@ -45,36 +46,67 @@
                     <span class="val" id="top-gateways">{{ $stats['gateways_count'] ?? 0 }}</span>
                     <span class="lbl">{{ __('portal.map_stats.gateways') ?? 'GATEWAYS' }}</span>
                 </div>
-                <div class="mapa-pill-stat" title="Hora peninsular de la última compilación de la caché">
+                <div class="mapa-pill-stat mapa-desktop-only" title="Hora peninsular de la última compilación de la caché">
                     <span class="lbl" style="font-weight: 500;">act.</span>
                     <span class="val" id="top-updated" style="color: #94a3b8;">{{ $stats['updated_at'] ?? '--:--' }}</span>
                 </div>
             </div>
 
+            <!-- Fila 2 en móvil / Lado derecho en escritorio -->
             <div class="mapa-topbar-right">
-                <!-- Botón No Optimizados -->
+                <!-- Botón No Optimizados (Escritorio) -->
                 <button
                     type="button"
                     id="btn-no-optimizados"
-                    class="mapa-btn-action btn-unoptimized"
+                    class="mapa-btn-action btn-unoptimized mapa-desktop-only"
                     title="Ver catálogo de nodos con problemas de configuración detectados"
                 >
                     <span>⚠️</span>
                     <span>No optimizados (<strong id="top-unoptimized-count">{{ $stats['unoptimized_count'] ?? 0 }}</strong>)</span>
                 </button>
 
-                <!-- Botón Favoritos -->
+                <!-- Botón Favoritos (Escritorio) -->
                 <button
                     type="button"
                     id="btn-toggle-favs"
-                    class="mapa-btn-action btn-fav"
+                    class="mapa-btn-action btn-fav mapa-desktop-only"
                     title="Filtrar y ver únicamente nodos marcados como favoritos en este navegador"
                 >
                     <span>⭐</span>
                     <span>Favoritos</span>
                 </button>
 
-                <!-- Buscador Predictivo -->
+                <!-- Controles de navegación y ubicación (en móvil se sitúan a la izquierda de la fila 2) -->
+                <div class="mapa-topbar-nav-btns">
+                    <!-- Botón Centrar Andalucía -->
+                    <button
+                        type="button"
+                        id="btn-center-andalucia"
+                        class="mapa-btn-action"
+                        title="Centrar vista en Andalucía"
+                        style="padding: 0.45rem 0.65rem;"
+                    >
+                        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 19 21 12 17 5 21 12 2"></polygon>
+                        </svg>
+                    </button>
+
+                    <!-- Botón Mi Ubicación -->
+                    <button
+                        type="button"
+                        id="btn-locate-me"
+                        class="mapa-btn-action"
+                        title="Centrar mapa en mi ubicación geográfica actual"
+                        style="padding: 0.45rem 0.65rem;"
+                    >
+                        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Buscador Predictivo (en móvil ocupa el resto a la derecha de centrar y ubicación) -->
                 <div class="mapa-search-wrapper">
                     <svg class="mapa-search-icon" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
@@ -90,34 +122,33 @@
                     />
                     <div id="mapa-search-results" class="mapa-search-results"></div>
                 </div>
-
-                <!-- Botón Centrar Andalucía -->
-                <button
-                    type="button"
-                    id="btn-center-andalucia"
-                    class="mapa-btn-action"
-                    title="Centrar vista en Andalucía"
-                    style="padding: 0.45rem 0.65rem;"
-                >
-                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="12 2 19 21 12 17 5 21 12 2"></polygon>
-                    </svg>
-                </button>
-
-                <!-- Botón Mi Ubicación -->
-                <button
-                    type="button"
-                    id="btn-locate-me"
-                    class="mapa-btn-action"
-                    title="Centrar mapa en mi ubicación geográfica actual"
-                    style="padding: 0.45rem 0.65rem;"
-                >
-                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                </button>
             </div>
+        </div>
+
+        <!-- Esquina Inferior Izquierda (Solo Móvil): Hora, Favoritos y No optimizados -->
+        <div class="mapa-bottombar-left mapa-mobile-only" aria-label="{{ __('portal.mapa.fast_controls') }}">
+            <div class="mapa-pill-stat mapa-pill-time" title="Hora peninsular de compilación de la caché">
+                <span class="val" id="top-updated-mobile">{{ $stats['updated_at'] ?? '--:--' }}</span>
+            </div>
+            <button
+                type="button"
+                id="btn-toggle-favs-mobile"
+                class="mapa-btn-action btn-fav mapa-btn-icon-only"
+                title="{{ __('portal.mapa.filter_favs') }}"
+                aria-label="{{ __('portal.mapa.filter_favs') }}"
+            >
+                <span>⭐</span>
+            </button>
+            <button
+                type="button"
+                id="btn-no-optimizados-mobile"
+                class="mapa-btn-action btn-unoptimized mapa-btn-icon-only"
+                title="{{ __('portal.mapa.unoptimized_nodes') }}"
+                aria-label="{{ __('portal.mapa.unoptimized_nodes') }}"
+            >
+                <span>⚠️</span>
+                <span class="mapa-mini-badge" id="top-unoptimized-count-mobile">{{ $stats['unoptimized_count'] ?? 0 }}</span>
+            </button>
         </div>
 
         <!-- Lienzo Leaflet -->
@@ -218,9 +249,23 @@
             </div>
         </div>
 
-        <!-- Leyenda Inferior Derecha -->
-        <div class="mapa-legend" aria-label="Leyenda del mapa">
-            <div class="mapa-legend-title">Leyenda de Nodos</div>
+        <!-- Leyenda Inferior Derecha (Colapsable) -->
+        <div id="mapa-legend" class="mapa-legend" aria-label="{{ __('portal.mapa.legend_title') }}">
+            <div class="mapa-legend-header">
+                <div class="mapa-legend-title">{{ __('portal.mapa.legend_title') }}</div>
+                <button
+                    type="button"
+                    id="btn-close-legend"
+                    class="mapa-legend-btn-close"
+                    title="{{ __('portal.mapa.legend_minimize') }}"
+                    aria-label="{{ __('portal.mapa.legend_minimize') }}"
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
             <div class="mapa-legend-item">
                 <div class="mesh-marker-dot active-1h" style="width: 10px; height: 10px;"></div>
                 <span>Activo &lt; 2 h</span>
@@ -246,6 +291,19 @@
                 <span>No optimizado (aviso)</span>
             </div>
         </div>
+
+        <!-- Botón flotante para reabrir la leyenda con flecha de triángulo ancho saltando y brillo verde -->
+        <button
+            type="button"
+            id="btn-open-legend"
+            class="mapa-btn-open-legend"
+            title="{{ __('portal.mapa.legend_expand') }}"
+            aria-label="{{ __('portal.mapa.legend_expand') }}"
+        >
+            <svg class="mapa-arrow-up-triangle" width="16" height="13" viewBox="0 0 20 16" fill="currentColor" aria-hidden="true">
+                <polygon points="10,1 19,15 1,15"></polygon>
+            </svg>
+        </button>
     </div>
 
     <!-- Modal Central de Diagnóstico ("Diagnóstico del nodo") -->

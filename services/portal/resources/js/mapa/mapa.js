@@ -270,15 +270,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Botón Favoritos en Topbar
+    // Botón Favoritos en Topbar (Escritorio) y Bottombar (Móvil)
     const btnTopFavs = document.getElementById('btn-toggle-favs');
-    if (btnTopFavs) {
-        btnTopFavs.addEventListener('click', () => {
-            filtroSoloFavs = !filtroSoloFavs;
-            btnTopFavs.classList.toggle('active', filtroSoloFavs);
-            renderizarNodos();
-        });
+    const btnTopFavsMobile = document.getElementById('btn-toggle-favs-mobile');
+
+    function toggleFiltroFavoritos() {
+        filtroSoloFavs = !filtroSoloFavs;
+        if (btnTopFavs) btnTopFavs.classList.toggle('active', filtroSoloFavs);
+        if (btnTopFavsMobile) btnTopFavsMobile.classList.toggle('active', filtroSoloFavs);
+        renderizarNodos();
     }
+
+    if (btnTopFavs) btnTopFavs.addEventListener('click', toggleFiltroFavoritos);
+    if (btnTopFavsMobile) btnTopFavsMobile.addEventListener('click', toggleFiltroFavoritos);
 
     // 10. Buscador Predictivo
     const inputBuscar = document.getElementById('mapa-search-input');
@@ -456,16 +460,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 12. Modal de Catálogo "No optimizados"
+    // 12. Modal de Catálogo "No optimizados" (Escritorio y Móvil)
     const modalCatalog = document.getElementById('mapa-modal-catalog');
     const btnOpenCatalog = document.getElementById('btn-no-optimizados');
+    const btnOpenCatalogMobile = document.getElementById('btn-no-optimizados-mobile');
     const btnCloseCatalog = document.getElementById('btn-modal-catalog-close');
 
+    const abrirCatalogoHandler = async () => {
+        if (!modalCatalog) return;
+        modalCatalog.classList.add('open');
+        await cargarCatalogoNoOptimizados();
+    };
+
     if (btnOpenCatalog && modalCatalog) {
-        btnOpenCatalog.addEventListener('click', async () => {
-            modalCatalog.classList.add('open');
-            await cargarCatalogoNoOptimizados();
-        });
+        btnOpenCatalog.addEventListener('click', abrirCatalogoHandler);
+    }
+    if (btnOpenCatalogMobile && modalCatalog) {
+        btnOpenCatalogMobile.addEventListener('click', abrirCatalogoHandler);
     }
 
     if (btnCloseCatalog && modalCatalog) {
@@ -558,6 +569,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 14. Carga inicial
+    // 14. Control de apertura/cierre de la Leyenda de Nodos
+    const legendCard = document.getElementById('mapa-legend');
+    const btnCloseLegend = document.getElementById('btn-close-legend');
+    const btnOpenLegend = document.getElementById('btn-open-legend');
+
+    if (legendCard && btnCloseLegend && btnOpenLegend) {
+        btnCloseLegend.addEventListener('click', () => {
+            legendCard.style.display = 'none';
+            btnOpenLegend.style.display = 'flex';
+        });
+
+        btnOpenLegend.addEventListener('click', () => {
+            legendCard.style.display = 'block';
+            btnOpenLegend.style.display = 'none';
+        });
+    }
+
+    // 15. Carga inicial
     cargarNodos();
 });

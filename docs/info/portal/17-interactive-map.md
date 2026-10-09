@@ -97,6 +97,11 @@
    - Al pulsar "Ver diagnóstico completo", se abre el modal central que realiza una llamada a `GET /api/v1/mapa/node/{id}`.
    - Se presenta el desglose porcentual de paquetes en las últimas 24 horas (`api_node_packets_24h`), el estado del Hop Limit y las tarjetas de problemas con su solución exacta en la aplicación.
 
+4. **Experiencia Móvil y Leyenda Colapsable**:
+   - En pantallas móviles (≤ 768px), la cabecera se redistribuye en dos filas: fila 1 (Nodos, Activos 1h, Gateways) y fila 2 (botones de Centrar vista y Ubicación junto al buscador expansivo).
+   - Los elementos secundarios (hora compacta `10:50` sin etiqueta, favoritos y no optimizados con badge) pasan a la esquina inferior izquierda.
+   - La leyenda de nodos es colapsable en móvil y escritorio: al cerrarla se muestra un botón flotante verde en la esquina inferior derecha con flecha animada hacia arriba y brillo pulsante, reabriéndola con un toque. El aviso global de pruebas se ancla centrado en el borde inferior.
+
 ## Puntos de entrada
 
 - **`GET /mapa`**:

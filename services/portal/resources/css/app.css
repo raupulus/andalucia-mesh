@@ -2017,13 +2017,37 @@ article > header h1 {
   box-shadow: 0 6px 18px rgba(245, 158, 11, 0.3);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .aviso-flotante-pruebas {
-    bottom: 1rem;
-    left: 1rem;
-    right: 1rem;
-    width: auto;
-    max-width: none;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    pointer-events: none;
+  }
+
+  .aviso-pruebas-tarjeta {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 520px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none;
+    pointer-events: auto;
+  }
+
+  .aviso-pruebas-pildora {
+    margin: 0 auto 0 auto;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none;
+    box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.4);
+    pointer-events: auto;
   }
 }
 

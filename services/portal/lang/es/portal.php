@@ -727,5 +727,11 @@ return [
         'title' => 'Mapa de Cobertura y Nodos en Directo',
         'lead' => 'Visualización geográfica en tiempo real de los nodos, pasarelas y repetidores de la red ciudadana LoRa Meshtastic en Andalucía.',
         'breadcrumb' => 'Mapa',
+        'legend_title' => 'Leyenda de Nodos',
+        'legend_minimize' => 'Minimizar leyenda',
+        'legend_expand' => 'Mostrar leyenda de nodos',
+        'fast_controls' => 'Controles rápidos',
+        'filter_favs' => 'Filtrar nodos favoritos',
+        'unoptimized_nodes' => 'Nodos no optimizados',
     ],
 ];
