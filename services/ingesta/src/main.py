@@ -253,7 +253,112 @@ async def main() -> None:
 
                     now = datetime.now(timezone.utc)
 
-                    # 2. Desempaquetar ServiceEnvelope o evento federado
+                    # 2. Manejo de eventos federados de peers (JSON de sync-peers)
+                    if t_info.topic_type == "peer":
+                        try:
+                            peer_payload = json.loads(raw_payload.decode("utf-8"))
+                            if t_info.event_type == "nodes":
+                                items = peer_payload if isinstance(peer_payload, list) else [peer_payload]
+                                for item in items:
+                                    if not isinstance(item, dict):
+                                        continue
+                                    node_id_raw = item.get("node_id") or item.get("id")
+                                    if not node_id_raw:
+                                        continue
+                                    node_id = str(node_id_raw).lower()
+                                    if not node_id.startswith("!"):
+                                        node_id = f"!{node_id}"
+
+                                    node_ts = now
+                                    if item.get("last_heard"):
+                                        try:
+                                            node_ts = datetime.fromtimestamp(float(item["last_heard"]), timezone.utc)
+                                        except (ValueError, TypeError, OSError):
+                                            node_ts = now
+
+                                    node_rec = registry.get_or_create_node(node_id, node_ts)
+                                    if item.get("short_name"):
+                                        node_rec.short_name = str(item["short_name"])
+                                    if item.get("long_name"):
+                                        node_rec.long_name = str(item["long_name"])
+                                    if item.get("hw_model"):
+                                        node_rec.hw_model = str(item["hw_model"])
+                                    if item.get("role"):
+                                        node_rec.role = str(item["role"])
+                                    if item.get("firmware"):
+                                        node_rec.firmware = str(item["firmware"])
+                                    if item.get("battery_level") is not None:
+                                        try:
+                                            node_rec.battery_level = int(item["battery_level"])
+                                            node_rec.battery_at = node_ts
+                                        except (ValueError, TypeError):
+                                            pass
+                                    if item.get("voltage") is not None:
+                                        try:
+                                            node_rec.voltage = float(item["voltage"])
+                                            node_rec.battery_at = node_ts
+                                        except (ValueError, TypeError):
+                                            pass
+
+                                    # Coordenadas geográficas y provincia
+                                    lat = item.get("latitude") if item.get("latitude") is not None else item.get("lat")
+                                    lon = item.get("longitude") if item.get("longitude") is not None else item.get("lon")
+                                    if lat is not None and lon is not None:
+                                        try:
+                                            lat_f = float(lat)
+                                            lon_f = float(lon)
+                                            if -90.0 <= lat_f <= 90.0 and -180.0 <= lon_f <= 180.0 and not (lat_f == 0.0 and lon_f == 0.0):
+                                                prec = float(item.get("precision_m", 10.0))
+                                                prov, uncertain = geo_engine.resolve_province(lat_f, lon_f, prec)
+                                                node_rec.latitude = lat_f
+                                                node_rec.longitude = lon_f
+                                                node_rec.position_precision_m = prec
+                                                node_rec.position_source = f"peer:{t_info.peer_id}"
+                                                node_rec.last_position_at = node_ts
+                                                node_rec.province = prov
+                                                node_rec.border_uncertain = uncertain
+
+                                                storage.enqueue_position(
+                                                    at=node_ts,
+                                                    node_id=node_id,
+                                                    lat=lat_f,
+                                                    lon=lon_f,
+                                                    alt=item.get("altitude"),
+                                                    precision_bits=item.get("precision_bits"),
+                                                    precision_m=round(prec, 1),
+                                                    source=f"peer:{t_info.peer_id}",
+                                                    gps_time=node_ts,
+                                                    province=prov,
+                                                    border_uncertain=uncertain,
+                                                )
+                                        except (ValueError, TypeError):
+                                            pass
+
+                                    registry.dirty_nodes.add(node_id)
+                                reporter.paquetes_unicos += len(items)
+                                continue
+
+                            elif t_info.event_type == "messages":
+                                msgs = peer_payload if isinstance(peer_payload, list) else [peer_payload]
+                                for msg in msgs:
+                                    if not isinstance(msg, dict):
+                                        continue
+                                    m_from = msg.get("from")
+                                    if not m_from:
+                                        continue
+                                    from_id = str(m_from).lower()
+                                    if not from_id.startswith("!"):
+                                        from_id = f"!{from_id}"
+                                    node_rec = registry.get_or_create_node(from_id, now)
+                                    registry.dirty_nodes.add(from_id)
+                                reporter.paquetes_unicos += len(msgs)
+                                continue
+
+                        except Exception as exc:
+                            logger.warning("Error procesando evento peer en %s: %s", topic_str, exc)
+                        continue
+
+                    # 3. Desempaquetar ServiceEnvelope o evento federado
                     envelope = mqtt_pb2.ServiceEnvelope()
                     is_service_envelope = False
                     try:

@@ -50,7 +50,7 @@ class SitemapController extends Controller
         'bots' => 'img/og/og-bots.webp',
         'firmware' => 'img/og/og-firmware.webp',
         'api' => 'img/og/og-api.webp',
-        'mapa' => 'img/og/og-portada.webp',
+        'mapa' => 'img/og/og-mapa.webp',
         'rankings' => 'img/og/og-rankings.webp',
         'routers' => 'img/og/og-routers.webp',
         'alertas' => 'img/og/og-alertas.webp',
@@ -242,8 +242,8 @@ class SitemapController extends Controller
             return ['priority' => 1.0, 'frequency' => Url::CHANGE_FREQUENCY_HOURLY];
         }
 
-        if (in_array($clean, ['rankings', 'alertas', 'routers'], true)) {
-            return ['priority' => 0.8, 'frequency' => Url::CHANGE_FREQUENCY_HOURLY];
+        if (in_array($clean, ['mapa', 'rankings', 'alertas', 'routers'], true)) {
+            return ['priority' => 0.9, 'frequency' => Url::CHANGE_FREQUENCY_HOURLY];
         }
 
         if (in_array($clean, ['configura-tu-nodo', 'conecta-tu-gateway', 'configurador', 'proyecto', 'revisa-tu-nodo', 'paginas', 'hardware'], true)) {

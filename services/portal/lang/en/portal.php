@@ -719,4 +719,13 @@ return [
         'mqtt_map_label' => 'Do you want to appear on the public coverage map?',
         'mqtt_map_desc' => 'Periodically publishes your location on the Andalucía Mesh map (every 72h with safe ~1 km precision to protect privacy). Enables map reporting and identity broadcast (config_ok_to_mqtt).',
     ],
+
+    'mapa' => [
+        'meta_title' => 'Live Coverage & Node Map — :name',
+        'meta_description' => 'Real-time interactive map of the community LoRa Meshtastic mesh network in Andalusia. Explore active nodes, MQTT gateways, direct radio links, regional coverage, and technical diagnostics.',
+        'meta_keywords' => ['Meshtastic Map', 'LoRa Coverage', 'Andalusia Mesh', 'LoRa Nodes', 'MQTT Gateways', 'Live Mesh Map', 'Mesh Network', 'Open Telecom'],
+        'title' => 'Live Coverage & Node Map',
+        'lead' => 'Real-time geographic visualization of nodes, gateways, and repeaters across the community LoRa Meshtastic network in Andalusia.',
+        'breadcrumb' => 'Map',
+    ],
 ];

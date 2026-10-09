@@ -41,7 +41,7 @@ class CompilarCacheMapa extends Command
             $this->line("  - Nodos no optimizados con aviso: {$resultado['unoptimized_count']}");
             $this->line("  - Activos 1h: {$resultado['stats']['active_1h']}");
             $this->line("  - Gateways: {$resultado['stats']['gateways_count']}");
-            $this->line("  - Archivos generados en: public/cache/mapa/");
+            $this->line('  - Archivos generados en: public/cache/mapa/');
 
             return Command::SUCCESS;
         } catch (Throwable $e) {

@@ -387,3 +387,21 @@ def test_topic_validator_map() -> None:
     assert res2.topic_type == "map"
     assert res2.gateway_id is None
 
+
+def test_topic_validator_peer_and_payload() -> None:
+    """Verifica que el validador analiza tópicos federados de peers correctamente."""
+    val = TopicValidator(allowed_channels=["SFNarrow", "Iberia"])
+    
+    # 1. Tópico de nodos federados
+    res_nodes = val.parse_topic("snm/v1/peer/albacete/nodes", 150)
+    assert res_nodes.topic_type == "peer"
+    assert res_nodes.peer_id == "albacete"
+    assert res_nodes.event_type == "nodes"
+
+    # 2. Tópico de mensajes federados
+    res_msgs = val.parse_topic("snm/v1/peer/almeria/messages", 80)
+    assert res_msgs.topic_type == "peer"
+    assert res_msgs.peer_id == "almeria"
+    assert res_msgs.event_type == "messages"
+
+

@@ -1,7 +1,9 @@
 <x-layout
     :title="__('portal.nav.map') . ' · ' . config('proyecto.nombre')"
     activa="/mapa"
-    :description="'Mapa interactivo de la red ' . config('proyecto.nombre') . '. Visualización de nodos en directo, diagnóstico de configuraciones y cobertura regional.'"
+    :description="__('portal.mapa.meta_description')"
+    :keywords="__('portal.mapa.meta_keywords')"
+    :image="asset('img/og/og-mapa.webp')"
     :sinPie="true"
 >
     <x-slot:styles>
@@ -9,9 +11,25 @@
     </x-slot:styles>
     <x-slot:scripts>
         @vite(['resources/js/mapa/mapa.js'])
+        @php
+            $mapSchema = [
+                chr(64).'context' => 'https://schema.org',
+                chr(64).'type' => 'WebApplication',
+                'name' => __('portal.mapa.title') . ' — ' . config('proyecto.nombre'),
+                'url' => url('/mapa'),
+                'applicationCategory' => 'GeographicInformationSystem',
+                'operatingSystem' => 'All',
+                'browserRequirements' => 'Requires JavaScript. Requires HTML5 Canvas or WebGL.',
+                'description' => __('portal.mapa.meta_description'),
+                'screenshot' => asset('img/og/og-mapa.webp'),
+            ];
+        @endphp
+        <script type="application/ld+json">
+        {!! json_encode($mapSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+        </script>
     </x-slot:scripts>
 
-    <div class="mapa-pantalla" aria-label="Mapa interactivo de nodos de la red">
+    <div class="mapa-pantalla" aria-label="{{ __('portal.mapa.title') }}">
         <!-- Barra Superior Flotante: Métricas de red y controles interactivos -->
         <div class="mapa-topbar">
             <div class="mapa-topbar-left">

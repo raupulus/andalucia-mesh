@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AlertsApiController;
 use App\Http\Controllers\Api\V1\ApiIndexController;
 use App\Http\Controllers\Api\V1\NodesApiController;
 use App\Http\Controllers\Api\V1\StatsApiController;
+use App\Http\Controllers\MapaController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -46,9 +47,8 @@ Route::get('/alerts/{id}', [AlertsApiController::class, 'show'])->where('id', '[
 
 // Endpoints de datos del Mapa
 Route::prefix('mapa')->group(function () {
-    Route::get('/nodes', [\App\Http\Controllers\MapaController::class, 'nodes']);
-    Route::get('/stats', [\App\Http\Controllers\MapaController::class, 'stats']);
-    Route::get('/unoptimized', [\App\Http\Controllers\MapaController::class, 'unoptimized']);
-    Route::get('/node/{id}', [\App\Http\Controllers\MapaController::class, 'nodeDetail']);
+    Route::get('/nodes', [MapaController::class, 'nodes']);
+    Route::get('/stats', [MapaController::class, 'stats']);
+    Route::get('/unoptimized', [MapaController::class, 'unoptimized']);
+    Route::get('/node/{id}', [MapaController::class, 'nodeDetail']);
 });
-

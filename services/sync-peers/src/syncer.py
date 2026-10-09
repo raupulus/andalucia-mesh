@@ -281,7 +281,7 @@ class PeerSyncer:
         if last_sync and (now - last_sync).total_seconds() < peer.intervalo_nodos_s:
             return
 
-        url = f"{peer.url}/api/nodes?limit=500"
+        url = f"{peer.url}/api/nodes?limit=1000"
         data = await self._fetch_json(session, url, headers)
 
         if not isinstance(data, (dict, list)) or not data:

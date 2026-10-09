@@ -49,4 +49,3 @@ Schedule::command('portal:sitemap')
 Schedule::command('mapa:cache')
     ->everyTwoMinutes()
     ->withoutOverlapping();
-

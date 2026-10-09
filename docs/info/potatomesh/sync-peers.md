@@ -103,4 +103,5 @@ Migraciones versionadas al arrancar. Sin datos personales. Copia: la del Postgre
 6. **Dado** un peer que responde 12 MiB, **cuando** se lee, **entonces** se corta, cuenta como fallo y no afecta a los demás.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09
+

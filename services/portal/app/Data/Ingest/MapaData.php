@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Data\Ingest;
 
 use App\Data\Fuente;
-use App\Data\Resultado;
 use App\Http\Controllers\AlertasController;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
