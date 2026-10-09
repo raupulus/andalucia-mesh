@@ -509,6 +509,7 @@ return [
         'col_last_login' => 'Last Login',
         'role_superadmin' => 'Superadmin',
         'role_admin' => 'Admin',
+        'role_editor' => 'Editor',
         'btn_create' => 'New user',
         'action_edit' => 'Edit',
         'action_delete' => 'Delete',

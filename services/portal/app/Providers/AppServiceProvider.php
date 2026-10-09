@@ -4,8 +4,22 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\CoordinatedRouter;
+use App\Models\CustomPage;
+use App\Models\Faq;
+use App\Models\HardwareCategory;
+use App\Models\HardwareItem;
+use App\Models\Suggestion;
 use App\Models\User;
+use App\Models\WebhookDestination;
+use App\Policies\CoordinatedRouterPolicy;
+use App\Policies\CustomPagePolicy;
+use App\Policies\FaqPolicy;
+use App\Policies\HardwareCategoryPolicy;
+use App\Policies\HardwareItemPolicy;
+use App\Policies\SuggestionPolicy;
 use App\Policies\UserPolicy;
+use App\Policies\WebhookDestinationPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -34,6 +48,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(User::class, UserPolicy::class);
+        Gate::policy(Faq::class, FaqPolicy::class);
+        Gate::policy(Suggestion::class, SuggestionPolicy::class);
+        Gate::policy(CoordinatedRouter::class, CoordinatedRouterPolicy::class);
+        Gate::policy(CustomPage::class, CustomPagePolicy::class);
+        Gate::policy(HardwareCategory::class, HardwareCategoryPolicy::class);
+        Gate::policy(HardwareItem::class, HardwareItemPolicy::class);
+        Gate::policy(WebhookDestination::class, WebhookDestinationPolicy::class);
 
         if ($this->app->environment('production') || str_starts_with((string) config('app.url'), 'https://')) {
             URL::forceScheme('https');

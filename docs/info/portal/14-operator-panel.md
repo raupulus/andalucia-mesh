@@ -180,21 +180,28 @@ Consola de operaciones y control administrativo de routers de la malla (`/admin/
 ### Usuarios y Perfil de Operador
 
 Recurso `UserResource` (`/admin/users`, base `portal`):
-- **Modelo de roles:** Dos niveles de privilegio: `superadmin` (superadministrador) y `admin` (administrador estándar).
+- **Modelo de roles:** Tres niveles de privilegio estrictos: `superadmin` (superadministrador), `admin` (administrador estándar) y `editor` (editor de contenidos).
 - **Superadmin:**
   - Visualización completa en tabla: avatar, nombre, rol (badge destacado), correo electrónico, indicador de cuenta activa y fecha de último acceso.
   - Filtros por rol y estado activo.
   - Creación de nuevos usuarios (`CreateUser`) con nombre, correo, rol, contraseña con doble verificación obligatoria (`password` y `password_confirmation`) y subida de avatar.
-  - Edición de cuentas existentes (`EditUser`) con actualización de datos, cambio de contraseña con doble verificación obligatoria (`password` y `password_confirmation`, conservándose intacta la contraseña existente si se deja vacía) y reasignación de rol.
+  - Edición de cuentas existentes (`EditUser`) de cualquier usuario con actualización de datos, cambio de contraseña con doble verificación obligatoria (`password` y `password_confirmation`, conservándose intacta la contraseña existente si se deja vacía) y reasignación de rol.
   - Eliminación de usuarios con salvaguarda que impide la autoeliminación de la cuenta propia para evitar bloqueos accidentales.
-- **Admin (acceso restringido para operadores estándar):**
-  - Acceso de solo lectura al listado (`ListUsers`) para constancia de operadores existentes.
-  - **Privacidad estricta:** Solo visualiza avatar y nombre. Las columnas de correo electrónico (`email`), rol (`role`), estado (`activo`) y fecha de acceso quedan ocultas.
-  - Sin botones de acción de fila (editar o borrar) y sin botón de cabecera para crear nuevos usuarios. Las filas no son clicables como enlace.
+- **Admin (operador de gestión):**
+  - Acceso al listado (`ListUsers`) con privacidad de datos sensibles: visualiza avatar, nombre, rol y estado activo; las columnas de correo electrónico (`email`) y fecha de acceso quedan ocultas.
+  - Puede editar a otros usuarios con rol `admin` o `editor` y a sí mismo, pero **NUNCA** a un `superadmin`.
+  - Sin permisos de eliminación ni creación de nuevos usuarios (`canCreate` y `canDelete` devuelven `false`).
+- **Editor (redactor de contenidos):**
+  - Acceso de solo lectura al listado con privacidad (sin emails ni último acceso).
+  - Solo puede editar su propia cuenta personal (`canEdit` solo para su propio registro).
+  - No puede crear ni eliminar usuarios.
+- **Políticas de autorización granulares (`Gate::policy`):**
+  - Registradas en `AppServiceProvider`: `UserPolicy`, `CustomPagePolicy`, `FaqPolicy`, `SuggestionPolicy`, `CoordinatedRouterPolicy`, `HardwareCategoryPolicy`, `HardwareItemPolicy` y `WebhookDestinationPolicy`.
+  - El rol `editor` dispone de permisos completos para crear y actualizar contenidos editoriales (`CustomPage`, `Faq`), pero carece de permisos de borrado (`delete` / `deleteAny`), garantizando la integridad de los registros.
 - **Autorización y seguridad en capas:**
   - Control mediante `App\Policies\UserPolicy` registrado en `AppServiceProvider` y métodos de autorización del recurso (`canCreate`, `canEdit`, `canDelete`, `canView`, `canViewAny`).
-  - Cualquier intento de acceso directo por URL a `/admin/users/create` o `/admin/users/{id}/edit` por parte de un usuario con rol `admin` devuelve inmediatamente `403 Forbidden`.
-- **Comando de consola:** `php artisan operador:crear {email} {nombre} {--password=} {--role=admin}` permite dar de alta o actualizar operadores desde el servidor, admitiendo la asignación explícita de `--role=superadmin` o `--role=admin`.
+  - Cualquier intento de acceso directo por URL no autorizado devuelve inmediatamente `403 Forbidden`.
+- **Comando de consola:** `php artisan operador:crear {email} {nombre} {--password=} {--role=admin}` permite dar de alta o actualizar operadores desde el servidor, admitiendo la asignación explícita de `--role=superadmin`, `--role=admin` o `--role=editor`.
 
 La página de edición de perfil personal (`/admin/profile`, `EditProfile`) utiliza un modal amplio para escritorio (`Width::FourExtraLarge`, 56rem / 896px) en lugar del ancho compacto de login, con avatar circular centrado horizontalmente y distribución en dos columnas (`sm: 2`) para optimizar la ergonomía en pantallas grandes. El cambio de contraseña personal incorpora campos visibles simultáneos para la nueva clave y su confirmación idéntica obligatoria, preservando la clave actual si ambos campos se dejan en blanco.
 
@@ -213,7 +220,7 @@ Gestión y publicación de páginas y artículos divulgativos (base `portal`, ta
 
 | Tabla | Columnas clave |
 |---|---|
-| `users` | `id`, `name`, `email` único, `role` (`superadmin` \| `admin`), `password`, `avatar_url` null, `activo` bool, campos de MFA de Filament, `ultimo_acceso` |
+| `users` | `id`, `name`, `email` único, `role` (`superadmin` \| `admin` \| `editor`), `password`, `avatar_url` null, `activo` bool, campos de MFA de Filament, `ultimo_acceso` |
 | `estado_servicio` | `servicio` PK, `ok` bool, `fallos_seguidos` int, `codigo` int null, `latencia_ms` int null, `motivo` text null, `detalle` jsonb null, `comprobado_en` timestamptz |
 | `estado_servicio_cambio` | `id`, `servicio`, `ok`, `motivo`, `en`; purga diaria > 90 días |
 | `tareas_latido` | `tarea` PK, `ultima_ejecucion` |

@@ -45,20 +45,34 @@ class UserForm
                                 ->email()
                                 ->required()
                                 ->maxLength(255)
-                                ->unique(ignoreRecord: true),
+                                ->unique(ignoreRecord: true)
+                                ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false),
 
                             Select::make('role')
                                 ->label(__('admin.users.field_role'))
-                                ->options([
-                                    User::ROLE_SUPERADMIN => __('admin.users.role_superadmin'),
-                                    User::ROLE_ADMIN => __('admin.users.role_admin'),
-                                ])
+                                ->options(function (): array {
+                                    $user = auth()->user();
+                                    if ($user?->isSuperAdmin()) {
+                                        return [
+                                            User::ROLE_SUPERADMIN => __('admin.users.role_superadmin'),
+                                            User::ROLE_ADMIN => __('admin.users.role_admin'),
+                                            User::ROLE_EDITOR => __('admin.users.role_editor'),
+                                        ];
+                                    }
+
+                                    return [
+                                        User::ROLE_ADMIN => __('admin.users.role_admin'),
+                                        User::ROLE_EDITOR => __('admin.users.role_editor'),
+                                    ];
+                                })
+                                ->disabled(fn (): bool => auth()->user()?->isEditor() ?? true)
                                 ->default(User::ROLE_ADMIN)
                                 ->required(),
 
                             Toggle::make('activo')
                                 ->label(__('admin.users.field_active'))
                                 ->helperText(__('admin.users.field_active_helper'))
+                                ->disabled(fn (): bool => auth()->user()?->isEditor() ?? false)
                                 ->default(true),
                         ]),
 

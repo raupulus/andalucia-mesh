@@ -15,7 +15,7 @@ class CrearOperador extends Command
      *
      * @var string
      */
-    protected $signature = 'operador:crear {email} {nombre} {--password= : Contraseña inicial (mínimo 8 caracteres)} {--role=admin : Rol del operador (superadmin o admin)}';
+    protected $signature = 'operador:crear {email} {nombre} {--password= : Contraseña inicial (mínimo 8 caracteres)} {--role=admin : Rol del operador (superadmin, admin o editor)}';
 
     /**
      * The console command description.
@@ -33,8 +33,8 @@ class CrearOperador extends Command
         $nombre = trim((string) $this->argument('nombre'));
         $role = strtolower(trim((string) $this->option('role')));
 
-        if (! in_array($role, [User::ROLE_SUPERADMIN, User::ROLE_ADMIN], true)) {
-            $this->error("El rol '{$role}' no es válido. Debe ser 'superadmin' o 'admin'.");
+        if (! in_array($role, [User::ROLE_SUPERADMIN, User::ROLE_ADMIN, User::ROLE_EDITOR], true)) {
+            $this->error("El rol '{$role}' no es válido. Debe ser 'superadmin', 'admin' o 'editor'.");
 
             return Command::FAILURE;
         }

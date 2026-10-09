@@ -18,7 +18,9 @@ class EditFaq extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make()->label(__('admin.faqs.action_delete')),
+            DeleteAction::make()
+                ->label(__('admin.faqs.action_delete'))
+                ->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
         ];
     }
 

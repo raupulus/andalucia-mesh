@@ -18,7 +18,9 @@ class ListHardwareCategories extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()->label(__('admin.hardware.btn_create_category')),
+            CreateAction::make()
+                ->label(__('admin.hardware.btn_create_category'))
+                ->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
         ];
     }
 }

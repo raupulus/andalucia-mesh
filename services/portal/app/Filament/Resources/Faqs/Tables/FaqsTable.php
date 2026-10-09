@@ -73,12 +73,14 @@ class FaqsTable
             ])
             ->recordActions([
                 EditAction::make()->label(__('admin.faqs.action_edit')),
-                DeleteAction::make()->label(__('admin.faqs.action_delete')),
+                DeleteAction::make()
+                    ->label(__('admin.faqs.action_delete'))
+                    ->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                ]),
+                ])->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
             ]);
     }
 }

@@ -96,7 +96,9 @@ class CustomPageForm
 
                         Toggle::make('is_active')
                             ->label(__('admin.custom_pages.field_is_active'))
-                            ->default(true),
+                            ->default(fn (): bool => ! (auth()->user()?->isEditor() ?? false))
+                            ->disabled(fn (): bool => auth()->user()?->isEditor() ?? false)
+                            ->dehydrated(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
                     ]),
             ]);
     }

@@ -74,17 +74,45 @@ class UserResource extends Resource
 
     public static function canEdit(Model $record): bool
     {
-        return (bool) (auth()->user()?->isSuperAdmin() ?? false);
+        $user = auth()->user();
+        if (! $user || ! $user->activo) {
+            return false;
+        }
+
+        if ($record instanceof User && $record->isSuperAdmin()) {
+            return $user->isSuperAdmin();
+        }
+
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return true;
+        }
+
+        if ($user->isEditor()) {
+            return $user->id === $record->id;
+        }
+
+        return false;
     }
 
     public static function canDelete(Model $record): bool
     {
-        return (bool) (auth()->user()?->isSuperAdmin() ?? false) && auth()->id() !== $record->id;
+        $user = auth()->user();
+
+        return (bool) ($user?->activo && $user->isSuperAdmin() && $user->id !== $record->id);
     }
 
     public static function canView(Model $record): bool
     {
-        return (bool) (auth()->user()?->isSuperAdmin() ?? false);
+        $user = auth()->user();
+        if (! $user || ! $user->activo) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return true;
+        }
+
+        return $user->id === $record->id;
     }
 
     public static function getPages(): array

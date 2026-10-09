@@ -18,7 +18,21 @@ class EditCustomPage extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (auth()->user()?->isEditor()) {
+            $data['is_active'] = $this->record->is_active;
+        }
+
+        return $data;
     }
 }

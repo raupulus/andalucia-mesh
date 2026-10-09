@@ -55,9 +55,9 @@ class UserCrudTest extends TestCase
     }
 
     /**
-     * Un admin puede listar usuarios pero solo ve avatar y nombre; NO ve emails ni roles ni botón de crear.
+     * Un admin puede listar usuarios viendo nombre y rol pero con privacidad estricta: NO ve emails ni último acceso ni botón crear.
      */
-    public function test_admin_puede_listar_usuarios_pero_sin_ver_email_ni_rol(): void
+    public function test_admin_puede_listar_usuarios_con_rol_pero_sin_email_ni_ultimo_acceso(): void
     {
         $admin = User::factory()->admin()->create([
             'name' => 'Operador Observador',
@@ -75,9 +75,9 @@ class UserCrudTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Usuarios');
-        // El admin debe ver los nombres (para saber que existen)
         $response->assertSee('Operador Observador');
         $response->assertSee('Companero Tecnico');
+        $response->assertSee(__('admin.users.role_admin'));
 
         // Pero NO debe ver los emails de los usuarios
         $response->assertDontSee('secreto@andalucia.mesh');
@@ -274,9 +274,49 @@ class UserCrudTest extends TestCase
     }
 
     /**
-     * Un admin no puede acceder a la pantalla de edición de usuarios (devuelve 403 Forbidden).
+     * Un admin no puede acceder a la pantalla de edición de un superadmin (devuelve 403 Forbidden).
      */
-    public function test_admin_no_puede_acceder_a_editar_usuario(): void
+    public function test_admin_no_puede_acceder_a_editar_superadmin(): void
+    {
+        $admin = User::factory()->admin()->create([
+            'email' => 'admin@andalucia.mesh',
+            'activo' => true,
+        ]);
+
+        $superadmin = User::factory()->superadmin()->create([
+            'email' => 'super@andalucia.mesh',
+            'activo' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->get("/admin/users/{$superadmin->id}/edit");
+
+        $response->assertStatus(403);
+    }
+
+    /**
+     * Un editor no puede acceder a la pantalla de edición de otro usuario (devuelve 403 Forbidden).
+     */
+    public function test_editor_no_puede_acceder_a_editar_otro_usuario(): void
+    {
+        $editor = User::factory()->editor()->create([
+            'email' => 'editor@andalucia.mesh',
+            'activo' => true,
+        ]);
+
+        $otroUsuario = User::factory()->admin()->create([
+            'email' => 'otro@andalucia.mesh',
+            'activo' => true,
+        ]);
+
+        $response = $this->actingAs($editor)->get("/admin/users/{$otroUsuario->id}/edit");
+
+        $response->assertStatus(403);
+    }
+
+    /**
+     * Un admin sí puede acceder a editar otros usuarios (admin o editor).
+     */
+    public function test_admin_puede_acceder_a_editar_otro_admin(): void
     {
         $admin = User::factory()->admin()->create([
             'email' => 'admin@andalucia.mesh',
@@ -290,7 +330,7 @@ class UserCrudTest extends TestCase
 
         $response = $this->actingAs($admin)->get("/admin/users/{$otroUsuario->id}/edit");
 
-        $response->assertStatus(403);
+        $response->assertStatus(200);
     }
 
     /**
@@ -336,6 +376,69 @@ class UserCrudTest extends TestCase
 
         $this->assertFalse(UserResource::canDelete($otroUsuario));
         $this->assertFalse(UserResource::canDelete($admin));
+    }
+
+    /**
+     * Un editor puede acceder a editar su propia cuenta en el panel.
+     */
+    public function test_editor_puede_acceder_a_editar_su_propia_cuenta(): void
+    {
+        $editor = User::factory()->editor()->create([
+            'name' => 'Editor Propio',
+            'email' => 'editor-propio@andalucia.mesh',
+            'activo' => true,
+        ]);
+
+        $response = $this->actingAs($editor)->get("/admin/users/{$editor->id}/edit");
+
+        $response->assertStatus(200);
+    }
+
+    /**
+     * Un editor al editarse puede cambiar su nombre pero no puede auto-promocionarse ni desactivarse.
+     */
+    public function test_editor_al_editarse_no_puede_cambiar_su_rol_ni_desactivarse(): void
+    {
+        $editor = User::factory()->editor()->create([
+            'name' => 'Nombre Editor',
+            'email' => 'editor@andalucia.mesh',
+            'role' => User::ROLE_EDITOR,
+            'activo' => true,
+        ]);
+
+        Livewire::actingAs($editor)
+            ->test(EditUser::class, ['record' => $editor->getKey()])
+            ->fillForm([
+                'name' => 'Nombre Editor Renovado',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $editor->refresh();
+        $this->assertEquals('Nombre Editor Renovado', $editor->name);
+        $this->assertEquals(User::ROLE_EDITOR, $editor->role);
+        $this->assertTrue((bool) $editor->activo);
+    }
+
+    /**
+     * Un editor no puede eliminar ningún usuario ni a sí mismo.
+     */
+    public function test_editor_no_puede_eliminar_usuarios(): void
+    {
+        $editor = User::factory()->editor()->create([
+            'email' => 'editor@andalucia.mesh',
+            'activo' => true,
+        ]);
+
+        $otroUsuario = User::factory()->admin()->create([
+            'email' => 'otro@andalucia.mesh',
+            'activo' => true,
+        ]);
+
+        $this->actingAs($editor);
+
+        $this->assertFalse(UserResource::canDelete($otroUsuario));
+        $this->assertFalse(UserResource::canDelete($editor));
     }
 
     /**

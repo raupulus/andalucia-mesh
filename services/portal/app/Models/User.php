@@ -24,9 +24,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public const ROLE_ADMIN = 'admin';
 
+    public const ROLE_EDITOR = 'editor';
+
     public const ROLES = [
         self::ROLE_SUPERADMIN => 'Superadministrador',
         self::ROLE_ADMIN => 'Administrador',
+        self::ROLE_EDITOR => 'Editor',
     ];
 
     /**
@@ -93,6 +96,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
+    }
+
+    /**
+     * Determina si el usuario tiene rol de editor de contenidos.
+     */
+    public function isEditor(): bool
+    {
+        return $this->role === self::ROLE_EDITOR;
     }
 
     /**

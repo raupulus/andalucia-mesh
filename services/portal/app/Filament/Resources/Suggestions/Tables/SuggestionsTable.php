@@ -10,6 +10,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -85,7 +86,7 @@ class SuggestionsTable
                     ->label(__('admin.suggestions.action_approve'))
                     ->icon(Heroicon::OutlinedCheck)
                     ->color('success')
-                    ->visible(fn (Suggestion $record): bool => $record->status !== Suggestion::STATUS_APPROVED)
+                    ->visible(fn (Suggestion $record): bool => ! (auth()->user()?->isEditor() ?? false) && $record->status !== Suggestion::STATUS_APPROVED)
                     ->action(function (Suggestion $record): void {
                         $record->update(['status' => Suggestion::STATUS_APPROVED]);
                         Notification::make()
@@ -98,7 +99,7 @@ class SuggestionsTable
                     ->label(__('admin.suggestions.action_reject'))
                     ->icon(Heroicon::OutlinedXMark)
                     ->color('danger')
-                    ->visible(fn (Suggestion $record): bool => $record->status !== Suggestion::STATUS_REJECTED)
+                    ->visible(fn (Suggestion $record): bool => ! (auth()->user()?->isEditor() ?? false) && $record->status !== Suggestion::STATUS_REJECTED)
                     ->action(function (Suggestion $record): void {
                         $record->update(['status' => Suggestion::STATUS_REJECTED]);
                         Notification::make()
@@ -107,16 +108,20 @@ class SuggestionsTable
                             ->send();
                     }),
 
+                ViewAction::make(),
+
                 EditAction::make()
-                    ->label(__('admin.suggestions.action_edit')),
+                    ->label(__('admin.suggestions.action_edit'))
+                    ->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
 
                 DeleteAction::make()
-                    ->label(__('admin.suggestions.action_delete')),
+                    ->label(__('admin.suggestions.action_delete'))
+                    ->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                ]),
+                ])->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
             ]);
     }
 }

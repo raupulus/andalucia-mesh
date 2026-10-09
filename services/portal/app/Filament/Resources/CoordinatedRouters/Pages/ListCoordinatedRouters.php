@@ -37,6 +37,7 @@ class ListCoordinatedRouters extends ListRecords
                 ->label(__('admin.coordinated_routers.btn_sync'))
                 ->icon('heroicon-o-arrow-path')
                 ->color('info')
+                ->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false))
                 ->requiresConfirmation()
                 ->modalHeading(__('admin.coordinated_routers.btn_sync'))
                 ->modalDescription('Se importarán y actualizarán los routers detectados en las 8 provincias de Andalucía desde la base de ingesta. Los nodos no registrados se darán de alta como «Nuevos», mientras que los ya existentes mantendrán su estado de gestión y notas.')

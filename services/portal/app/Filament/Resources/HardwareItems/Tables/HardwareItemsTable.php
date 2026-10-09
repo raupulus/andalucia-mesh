@@ -84,12 +84,13 @@ class HardwareItemsTable
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                ]),
+                ])->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
             ]);
     }
 }

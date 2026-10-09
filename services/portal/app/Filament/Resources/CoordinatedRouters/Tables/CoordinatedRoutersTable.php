@@ -11,6 +11,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -122,7 +123,7 @@ class CoordinatedRoutersTable
                     ->label(__('admin.coordinated_routers.action_mark_managed'))
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
-                    ->visible(fn (CoordinatedRouter $record): bool => ! $record->isManaged())
+                    ->visible(fn (CoordinatedRouter $record): bool => ! (auth()->user()?->isEditor() ?? false) && ! $record->isManaged())
                     ->action(function (CoordinatedRouter $record): void {
                         $record->update(['status' => CoordinatedRouter::STATUS_MANAGED]);
                         Notification::make()
@@ -135,7 +136,7 @@ class CoordinatedRoutersTable
                     ->label(__('admin.coordinated_routers.action_mark_known'))
                     ->icon('heroicon-o-eye')
                     ->color('warning')
-                    ->visible(fn (CoordinatedRouter $record): bool => ! $record->isKnown())
+                    ->visible(fn (CoordinatedRouter $record): bool => ! (auth()->user()?->isEditor() ?? false) && ! $record->isKnown())
                     ->action(function (CoordinatedRouter $record): void {
                         $record->update(['status' => CoordinatedRouter::STATUS_KNOWN]);
                         Notification::make()
@@ -148,7 +149,7 @@ class CoordinatedRoutersTable
                     ->label(__('admin.coordinated_routers.action_mark_new'))
                     ->icon('heroicon-o-sparkles')
                     ->color('danger')
-                    ->visible(fn (CoordinatedRouter $record): bool => ! $record->isNew())
+                    ->visible(fn (CoordinatedRouter $record): bool => ! (auth()->user()?->isEditor() ?? false) && ! $record->isNew())
                     ->action(function (CoordinatedRouter $record): void {
                         $record->update(['status' => CoordinatedRouter::STATUS_NEW]);
                         Notification::make()
@@ -157,8 +158,13 @@ class CoordinatedRoutersTable
                             ->send();
                     }),
 
-                EditAction::make(),
-                DeleteAction::make(),
+                ViewAction::make(),
+
+                EditAction::make()
+                    ->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
+
+                DeleteAction::make()
+                    ->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -187,7 +193,7 @@ class CoordinatedRoutersTable
                         }),
 
                     DeleteBulkAction::make(),
-                ]),
+                ])->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
             ]);
     }
 }

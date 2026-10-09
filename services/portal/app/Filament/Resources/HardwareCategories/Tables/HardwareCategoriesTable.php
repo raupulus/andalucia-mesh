@@ -8,6 +8,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
@@ -47,18 +48,22 @@ class HardwareCategoriesTable
                     ->sortable(),
 
                 ToggleColumn::make('is_active')
-                    ->label(__('admin.hardware.col_is_active')),
+                    ->label(__('admin.hardware.col_is_active'))
+                    ->disabled(fn (): bool => auth()->user()?->isEditor() ?? false),
             ])
             ->defaultSort('sort_order', 'asc')
-            ->reorderable('sort_order')
+            ->reorderable('sort_order', fn (): bool => ! (auth()->user()?->isEditor() ?? false))
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                ViewAction::make(),
+                EditAction::make()
+                    ->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
+                DeleteAction::make()
+                    ->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                ]),
+                ])->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
             ]);
     }
 }

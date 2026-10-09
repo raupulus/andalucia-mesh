@@ -51,14 +51,17 @@ class UsersTable
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         User::ROLE_SUPERADMIN => 'primary',
+                        User::ROLE_ADMIN => 'warning',
+                        User::ROLE_EDITOR => 'info',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         User::ROLE_SUPERADMIN => __('admin.users.role_superadmin'),
-                        default => __('admin.users.role_admin'),
+                        User::ROLE_ADMIN => __('admin.users.role_admin'),
+                        User::ROLE_EDITOR => __('admin.users.role_editor'),
+                        default => (string) $state,
                     })
-                    ->sortable()
-                    ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false),
+                    ->sortable(),
 
                 TextColumn::make('email')
                     ->label(__('admin.users.col_email'))
@@ -69,8 +72,7 @@ class UsersTable
 
                 IconColumn::make('activo')
                     ->label(__('admin.users.col_active'))
-                    ->boolean()
-                    ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false),
+                    ->boolean(),
 
                 TextColumn::make('ultimo_acceso')
                     ->label(__('admin.users.col_last_login'))
@@ -79,24 +81,52 @@ class UsersTable
                     ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false),
             ])
             ->defaultSort('name', 'asc')
-            ->recordUrl(fn (User $record): ?string => auth()->user()?->isSuperAdmin() ? UserResource::getUrl('edit', ['record' => $record]) : null)
+            ->recordUrl(function (User $record): ?string {
+                $user = auth()->user();
+                if (! $user || ! $user->activo) {
+                    return null;
+                }
+                if ($record->isSuperAdmin() && ! $user->isSuperAdmin()) {
+                    return null;
+                }
+                if ($user->isSuperAdmin() || $user->isAdmin()) {
+                    return UserResource::getUrl('edit', ['record' => $record]);
+                }
+                if ($user->isEditor() && $user->id === $record->id) {
+                    return UserResource::getUrl('edit', ['record' => $record]);
+                }
+
+                return null;
+            })
             ->filters([
                 SelectFilter::make('role')
                     ->label(__('admin.users.col_role'))
                     ->options([
                         User::ROLE_SUPERADMIN => __('admin.users.role_superadmin'),
                         User::ROLE_ADMIN => __('admin.users.role_admin'),
-                    ])
-                    ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false),
+                        User::ROLE_EDITOR => __('admin.users.role_editor'),
+                    ]),
 
                 TernaryFilter::make('activo')
-                    ->label(__('admin.users.col_active'))
-                    ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false),
+                    ->label(__('admin.users.col_active')),
             ])
             ->recordActions([
                 EditAction::make()
                     ->label(__('admin.users.action_edit'))
-                    ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false),
+                    ->visible(function (User $record): bool {
+                        $user = auth()->user();
+                        if (! $user || ! $user->activo) {
+                            return false;
+                        }
+                        if ($record->isSuperAdmin()) {
+                            return $user->isSuperAdmin();
+                        }
+                        if ($user->isSuperAdmin() || $user->isAdmin()) {
+                            return true;
+                        }
+
+                        return $user->isEditor() && $user->id === $record->id;
+                    }),
 
                 DeleteAction::make()
                     ->label(__('admin.users.action_delete'))

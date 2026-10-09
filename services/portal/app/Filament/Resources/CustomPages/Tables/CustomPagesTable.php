@@ -54,7 +54,8 @@ class CustomPagesTable
                     ->separator(','),
 
                 ToggleColumn::make('is_active')
-                    ->label(__('admin.custom_pages.col_is_active')),
+                    ->label(__('admin.custom_pages.col_is_active'))
+                    ->disabled(fn (): bool => auth()->user()?->isEditor() ?? false),
 
                 TextColumn::make('created_at')
                     ->label(__('admin.custom_pages.col_created_at'))
@@ -72,12 +73,13 @@ class CustomPagesTable
                     ->url(fn (CustomPage $record): string => '/paginas/'.$record->slug)
                     ->openUrlInNewTab(),
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                ]),
+                ])->visible(fn (): bool => ! (auth()->user()?->isEditor() ?? false)),
             ]);
     }
 }
