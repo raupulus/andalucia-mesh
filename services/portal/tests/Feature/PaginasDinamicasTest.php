@@ -46,6 +46,12 @@ class PaginasDinamicasTest extends TestCase
         $response->assertHeaderMissing('Set-Cookie');
         $response->assertSee('Alertas de la Malla', false);
         $response->assertSee('Catálogo de Anomalías Monitorizadas', false);
+        $response->assertSee('Repetidor en movimiento físico', false);
+        $response->assertSee('Concentración redundante de routers', false);
+        $response->assertSee('Enlace RF asimétrico severo', false);
+        $response->assertSee('Seguridad y alteración de clave pública', false);
+        $response->assertSee('Pasarela sin tráfico LoRa', false);
+        $response->assertSee('Uso de tiempo de aire excesivo', false);
     }
 
     /**

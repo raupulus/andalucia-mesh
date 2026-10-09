@@ -222,9 +222,19 @@
                             $textoRiesgo = ucfirst($riesgoKey);
                         }
                         $infoLocal = \App\Http\Controllers\AlertasController::infoRegla($regla['rule_id'] ?? '');
+                        $tipoKey = strtolower((string) ($regla['type'] ?? ''));
+                        $textoTipo = __('portal.alerts.types.' . $tipoKey);
+                        if ($textoTipo === 'portal.alerts.types.' . $tipoKey) {
+                            $textoTipo = ucfirst($tipoKey ?: 'malla');
+                        }
                     @endphp
                     <div class="tarjeta" style="padding: 1.25rem; background: var(--color-superficie-sutil); display: flex; flex-direction: column; justify-content: space-between;">
                         <div>
+                            @if(!empty($infoLocal['categoria']))
+                                <div style="font-size: 0.72rem; color: var(--color-texto-3); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 0.4rem;">
+                                    {{ $infoLocal['categoria'] }}
+                                </div>
+                            @endif
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem;">
                                 <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--color-texto-1); margin: 0; display: flex; align-items: center; gap: 0.35rem;">
                                     <span>{{ $infoLocal['icono'] }}</span>
@@ -236,9 +246,9 @@
                                 {{ $regla['description'] ?? $infoLocal['descripcion'] }}
                             </p>
                         </div>
-                        <div style="font-size: 0.8rem; color: var(--color-texto-3); border-top: 1px solid var(--color-borde); padding-top: 0.5rem; display: flex; justify-content: space-between;">
-                            <span>{{ __('portal.alerts.type_label') }} <strong>{{ ucfirst($regla['type'] ?? 'malla') }}</strong></span>
-                            <code>{{ $regla['rule_id'] }}</code>
+                        <div style="font-size: 0.8rem; color: var(--color-texto-3); border-top: 1px solid var(--color-borde); padding-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                            <span>{{ __('portal.alerts.type_label') }} <strong style="color: var(--color-texto-2);">{{ $textoTipo }}</strong></span>
+                            <code style="font-size: 0.75rem; background: var(--color-superficie); padding: 0.15rem 0.35rem; border-radius: var(--radio-sm); border: 1px solid var(--color-borde);">{{ $regla['rule_id'] }}</code>
                         </div>
                     </div>
                 @endforeach

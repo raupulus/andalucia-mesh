@@ -98,6 +98,16 @@ No es una acusación. Las alertas son automáticas y orientativas, y a veces se 
 
 Solo vemos lo que suben los gateways desde nodos con OK to MQTT activado, así que puede haber problemas que no aparezcan aquí.
 
+**Catálogo de Anomalías Monitorizadas** (H2)
+
+Muestra la totalidad de las 22 reglas automáticas del detector en tarjetas visuales responsivas. Cada tarjeta incluye:
+- Categoría técnica del incidente (`Topología e infraestructura`, `Suministro y energía`, `Conectividad MQTT`, `Uso de canal de radio`, `Radiofrecuencia y enlaces`, `Seguridad e identidad`, etc.).
+- Icono temático identificativo y nombre descriptivo en español.
+- Chip semántico con el nivel de severidad o riesgo (`Alto` en rojo crítico, `Medio` en ámbar de aviso, `Bajo` en azul informativo).
+- Descripción detallada del síntoma y umbrales de activación calibrados para la red de Andalucía.
+- Tipo de incidencia localizado (`Infraestructura`, `Clientes`, `Red / Malla`).
+- Código identificador canónico de la regla (`rule_id`, ej. `hops-high`, `gateway-no-traffic`, `router-cluster`, `key-security`).
+
 **Recibe las alertas** (H2)
 
 En tu grupo o canal, con los [bots de Telegram y Discord](/bots). En tu propio sistema, con los [webhooks](/api#webhooks).
@@ -179,4 +189,4 @@ Si es tu nodo, revisa la guía [Configura tu nodo](/configura-tu-nodo). Si crees
 - `/alertas` y las fichas `/alertas/{id}` son indexables (criterio: todo es público); las fichas no van en `sitemap.xml` por volumen.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

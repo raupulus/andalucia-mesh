@@ -182,6 +182,14 @@ class ApiPublicaTest extends TestCase
             'count',
             'items',
         ]);
+        $this->assertSame(22, $response->json('count'));
+        $ruleIds = collect($response->json('items'))->pluck('rule_id')->all();
+        $this->assertContains('gateway-no-traffic', $ruleIds);
+        $this->assertContains('airtime-high', $ruleIds);
+        $this->assertContains('router-moving', $ruleIds);
+        $this->assertContains('router-cluster', $ruleIds);
+        $this->assertContains('asymmetric-link', $ruleIds);
+        $this->assertContains('key-security', $ruleIds);
     }
 
     /**
