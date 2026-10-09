@@ -940,12 +940,11 @@
         gap: 0.35rem;
     }
 
-    /* Línea 1: Nodos, Activos 1h, Gateways */
+    /* Línea 1: Nodos, Activos 1h, Gateways a la izquierda, y Hora arriba a la derecha */
     .mapa-topbar-left {
         display: flex;
         flex-direction: row;
         align-items: center;
-        justify-content: flex-start;
         gap: 0.3rem;
         width: 100%;
         flex-wrap: nowrap;
@@ -967,6 +966,15 @@
 
     .mapa-topbar-left .mapa-pill-stat .lbl {
         font-size: 0.65rem;
+    }
+
+    .mapa-topbar-left .mapa-pill-time {
+        margin-left: auto;
+        color: #94a3b8;
+    }
+
+    .mapa-topbar-left .mapa-pill-time .val {
+        color: #94a3b8;
     }
 
     /* Línea 2: Iconos centrar y ubicación a la izquierda, Buscar nodo a la derecha */
@@ -1021,7 +1029,7 @@
         max-width: calc(100vw - 1rem);
     }
 
-    /* Esquina Inferior Izquierda: Hora, Favoritos, No optimizados */
+    /* Esquina Inferior Izquierda: Favoritos y No optimizados alineados */
     .mapa-bottombar-left {
         position: absolute;
         bottom: 0.65rem;
@@ -1029,24 +1037,12 @@
         z-index: 20;
         display: flex;
         align-items: center;
-        gap: 0.35rem;
+        gap: 0.4rem;
         pointer-events: auto;
     }
 
-    .mapa-bottombar-left .mapa-pill-time {
-        padding: 0.32rem 0.5rem;
-        font-size: 0.75rem;
-        color: #94a3b8;
-        font-weight: 700;
-        background-color: rgba(13, 17, 23, 0.92);
-    }
-
-    .mapa-bottombar-left .mapa-pill-time .val {
-        color: #94a3b8;
-    }
-
     .mapa-bottombar-left .mapa-btn-action {
-        padding: 0.35rem 0.52rem;
+        padding: 0.38rem 0.55rem;
         font-size: 0.85rem;
     }
 

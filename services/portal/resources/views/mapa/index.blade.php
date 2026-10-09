@@ -46,8 +46,8 @@
                     <span class="val" id="top-gateways">{{ $stats['gateways_count'] ?? 0 }}</span>
                     <span class="lbl">{{ __('portal.map_stats.gateways') ?? 'GATEWAYS' }}</span>
                 </div>
-                <div class="mapa-pill-stat mapa-desktop-only" title="Hora peninsular de la última compilación de la caché">
-                    <span class="lbl" style="font-weight: 500;">act.</span>
+                <div class="mapa-pill-stat mapa-pill-time" title="Hora peninsular de la última compilación de la caché">
+                    <span class="lbl mapa-desktop-only" style="font-weight: 500;">act.</span>
                     <span class="val" id="top-updated" style="color: #94a3b8;">{{ $stats['updated_at'] ?? '--:--' }}</span>
                 </div>
             </div>
@@ -125,11 +125,8 @@
             </div>
         </div>
 
-        <!-- Esquina Inferior Izquierda (Solo Móvil): Hora, Favoritos y No optimizados -->
+        <!-- Esquina Inferior Izquierda (Solo Móvil): Favoritos y No optimizados -->
         <div class="mapa-bottombar-left mapa-mobile-only" aria-label="{{ __('portal.mapa.fast_controls') }}">
-            <div class="mapa-pill-stat mapa-pill-time" title="Hora peninsular de compilación de la caché">
-                <span class="val" id="top-updated-mobile">{{ $stats['updated_at'] ?? '--:--' }}</span>
-            </div>
             <button
                 type="button"
                 id="btn-toggle-favs-mobile"
