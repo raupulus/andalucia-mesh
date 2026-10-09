@@ -11,6 +11,7 @@ use App\Filament\Widgets\EstadoServiciosWidget;
 use App\Filament\Widgets\MallaStatsOverviewWidget;
 use App\Filament\Widgets\RoutersInfraestructuraWidget;
 use App\Http\Middleware\FilamentLocaleMiddleware;
+use App\Http\Middleware\RegistrarUltimoAcceso;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -91,6 +92,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                RegistrarUltimoAcceso::class,
             ]);
     }
 }

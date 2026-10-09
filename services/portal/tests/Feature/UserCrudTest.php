@@ -470,4 +470,61 @@ class UserCrudTest extends TestCase
             ->expectsOutputToContain('no es válido')
             ->assertFailed();
     }
+
+    /**
+     * Un operador que navega por la intranet registra su último acceso automáticamente
+     * y las peticiones sucesivas se amortiguan en una ventana de 5 minutos.
+     */
+    public function test_actividad_intranet_registra_timestamp_ultimo_acceso_y_amortigua_actualizaciones(): void
+    {
+        $operador = User::factory()->admin()->create([
+            'ultimo_acceso' => null,
+            'activo' => true,
+        ]);
+
+        $this->assertNull($operador->ultimo_acceso);
+
+        // 1. Primera petición en la intranet: debe registrar el timestamp
+        $this->travelTo(now());
+        $this->actingAs($operador)->get('/admin');
+
+        $primerAcceso = $operador->fresh()->ultimo_acceso;
+        $this->assertNotNull($primerAcceso);
+
+        // 2. Petición 2 minutos después: no debe disparar actualización de base de datos
+        $this->travel(2)->minutes();
+        $this->actingAs($operador)->get('/admin');
+        $this->assertEquals($primerAcceso->toIso8601String(), $operador->fresh()->ultimo_acceso->toIso8601String());
+
+        // 3. Petición 6 minutos después: debe actualizarse el timestamp
+        $this->travel(4)->minutes(); // 2 + 4 = 6 min
+        $this->actingAs($operador)->get('/admin');
+        $segundoAcceso = $operador->fresh()->ultimo_acceso;
+        $this->assertTrue($segundoAcceso->greaterThan($primerAcceso));
+    }
+
+    /**
+     * El superadmin visualiza la columna último acceso en la tabla de usuarios con formato y zona horaria.
+     */
+    public function test_superadmin_ve_columna_ultimo_acceso_con_formato(): void
+    {
+        $superadmin = User::factory()->superadmin()->create([
+            'name' => 'Super Supervisor',
+            'email' => 'supervisando@andalucia.mesh',
+            'activo' => true,
+        ]);
+
+        $fechaPrueba = now()->setTimezone('Europe/Madrid');
+        $usuarioActivo = User::factory()->admin()->create([
+            'name' => 'Usuario Conectado',
+            'email' => 'conectado@andalucia.mesh',
+            'activo' => true,
+            'ultimo_acceso' => $fechaPrueba,
+        ]);
+
+        $response = $this->actingAs($superadmin)->get('/admin/users');
+        $response->assertStatus(200);
+        $response->assertSee(__('admin.users.col_last_login'));
+        $response->assertSee($fechaPrueba->format('d/m/Y H:i'));
+    }
 }

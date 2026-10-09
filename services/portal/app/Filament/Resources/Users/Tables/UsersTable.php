@@ -77,6 +77,8 @@ class UsersTable
                 TextColumn::make('ultimo_acceso')
                     ->label(__('admin.users.col_last_login'))
                     ->dateTime('d/m/Y H:i')
+                    ->timezone(config('proyecto.zona_horaria', 'Europe/Madrid'))
+                    ->placeholder('—')
                     ->sortable()
                     ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false),
             ])

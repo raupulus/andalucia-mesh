@@ -183,6 +183,7 @@ Recurso `UserResource` (`/admin/users`, base `portal`):
 - **Modelo de roles y mínimo privilegio:** Tres niveles jerárquicos estrictos: `superadmin` (superadministrador del sistema), `admin` (operador de gestión y mantenimiento) y `editor` (redactor de contenidos editoriales y operador de routers).
 - **Superadmin:**
   - Visualización completa en tabla: avatar, nombre, rol (badge destacado), correo electrónico, indicador de cuenta activa y fecha de último acceso.
+  - **Registro de último acceso (`ultimo_acceso`):** Se actualiza automáticamente al iniciar sesión a través del listener `ActualizarUltimoAcceso` (evento `Illuminate\Auth\Events\Login`) y se mantiene actualizado en la intranet mediante el middleware `RegistrarUltimoAcceso` en `AdminPanelProvider` con amortiguación de 5 minutos para evitar consultas redundantes a la base de datos. Se presenta con la zona horaria del proyecto (`Europe/Madrid`, RN-09) y marcador `—` si nunca ha iniciado sesión.
   - Filtros por rol y estado activo.
   - Creación de nuevos usuarios (`CreateUser`) con nombre, correo, rol, contraseña con doble verificación obligatoria (`password` y `password_confirmation`) y subida de avatar.
   - Edición de cuentas existentes (`EditUser`) de cualquier usuario con actualización de datos, cambio de contraseña con doble verificación obligatoria (`password` y `password_confirmation`, conservándose intacta la contraseña existente si se deja vacía) y reasignación de rol.

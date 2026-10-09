@@ -17,15 +17,18 @@ use App\Policies\CustomPagePolicy;
 use App\Policies\FaqPolicy;
 use App\Policies\HardwareCategoryPolicy;
 use App\Policies\HardwareItemPolicy;
+use App\Listeners\ActualizarUltimoAcceso;
 use App\Policies\SuggestionPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\WebhookDestinationPolicy;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Request;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
@@ -55,6 +58,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(HardwareCategory::class, HardwareCategoryPolicy::class);
         Gate::policy(HardwareItem::class, HardwareItemPolicy::class);
         Gate::policy(WebhookDestination::class, WebhookDestinationPolicy::class);
+
+        // Registro de último acceso al iniciar sesión en el portal / intranet
+        Event::listen(Login::class, ActualizarUltimoAcceso::class);
 
         if ($this->app->environment('production') || str_starts_with((string) config('app.url'), 'https://')) {
             URL::forceScheme('https');

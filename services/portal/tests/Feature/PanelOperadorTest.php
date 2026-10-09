@@ -56,6 +56,7 @@ class PanelOperadorTest extends TestCase
             ->assertRedirect(filament()->getUrl());
 
         $this->assertAuthenticatedAs($user);
+        $this->assertNotNull($user->fresh()->ultimo_acceso);
     }
 
     public function test_comando_operador_crear_valida_longitud_password(): void
