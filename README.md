@@ -11,11 +11,11 @@
 [![Estado](https://img.shields.io/badge/estado-en%20producci%C3%B3n-success?style=for-the-badge&logo=statuspage&logoColor=white)](docs/info/README.md)
 [![Despliegue](https://img.shields.io/badge/despliegue-Docker%20%7C%20Debian-2496ED?style=for-the-badge&logo=docker&logoColor=white)](docs/info/infrastructure/README.md)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL%2017-TimescaleDB-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](docs/info/infrastructure/02-postgresql.md)
-[![Laravel](https://img.shields.io/badge/Portal-Laravel%2012%20%2B%20Filament%203-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](docs/info/portal/README.md)
+[![Laravel](https://img.shields.io/badge/Portal-Laravel%2013%20%2B%20Filament%205-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](docs/info/portal/README.md)
 [![Python](https://img.shields.io/badge/Servicios-Python%203.13%20AsyncIO-3776AB?style=for-the-badge&logo=python&logoColor=white)](services/)
 [![MQTT](https://img.shields.io/badge/Broker-Mosquitto%20TLS%208883-660066?style=for-the-badge&logo=eclipsemosquitto&logoColor=white)](docs/info/mosquitto/README.md)
 [![Privacidad](https://img.shields.io/badge/Privacidad-Zero--Cookies%20(100%25%20An%C3%B3nimo)-007A33?style=for-the-badge&logo=shield&logoColor=white)](docs/info/business-rules.md)
-[![i18n](https://img.shields.io/badge/Idiomas-ES%20%7C%20EN%20%7C%20PT-007A33?style=for-the-badge)](docs/info/portal/README.md#21-soporte-multidioma-rn-48)
+[![Idiomas](https://img.shields.io/badge/Idiomas-ES%20%7C%20EN%20%7C%20PT-007A33?style=for-the-badge)](docs/info/portal/README.md#21-soporte-multidioma-rn-48)
 
 </div>
 
@@ -43,8 +43,8 @@ A medida que una red regional crece hasta abarcar cientos de usuarios, repetidor
 |---|---|---|
 | 🗺️ **Visualización en Vivo y Topología** | Mapas interactivos de cobertura, salas de chat público por radio y visor técnico de rutas, saltos de paquetes y niveles de señal (RSSI/SNR). | [PotatoMesh](docs/info/potatomesh/README.md), [MeshView](docs/info/meshview/README.md), SVG Provincial |
 | 📊 **Ingesta Inteligente y Métricas** | Decodificación Protobuf, deduplicación temporal estricta (15 min), geo-clasificación provincial automática, series temporales y cálculo de saturación de canal ponderada. | Python 3.13, PostgreSQL 17 + TimescaleDB |
-| 🚨 **Vigilancia y Alertas Proactivas** | Motor de reglas para detectar caídas de repetidores, bucles de reinicio, spam y baterías bajas (< 15%), con difusión instantánea a Telegram, Discord y Webhooks. | Socket Unix, Python AsyncIO, HMAC SHA-256 |
-| 🛠️ **Autonomía y Facilitación al Usuario** | Configurador Web interactivo con Web Serial (USB) y Web Bluetooth (BLE), importación por QR en la app oficial de Meshtastic, presets YAML oficiales y diagnóstico de nodo instantáneo. | Web Serial API, Web BLE, Laravel 12 + Filament 3 |
+| 🚨 **Vigilancia y Alertas Proactivas** | Motor de reglas para detectar caídas de repetidores, bucles de reinicio, saturación de canal, telemetría agresiva y niveles de batería en riesgo (routers y clientes), con difusión instantánea a Telegram, Discord y Webhooks. | Socket Unix, Python AsyncIO, HMAC SHA-256 |
+| 🛠️ **Autonomía y Facilitación al Usuario** | Configurador Web interactivo con Web Serial (USB) y Web Bluetooth (BLE), importación por QR en la app oficial de Meshtastic, presets YAML oficiales y diagnóstico de nodo instantáneo. | Web Serial API, Web BLE, Laravel 13 + Filament 5 |
 
 ---
 
@@ -154,7 +154,7 @@ sequenceDiagram
 
 ## 🧩 Catálogo de Piezas y Componentes
 
-El proyecto se compone de **9 desarrollos propios** y **5 integraciones de terceros** perfectamente coordinadas:
+El proyecto se compone de **9 desarrollos propios** y **4 integraciones de terceros** perfectamente coordinadas:
 
 ### 1. Infraestructura y Red Base
 - **Servidor y Contenedores:** Servidor Debian 12/13 con Docker y Docker Compose.
@@ -184,23 +184,28 @@ El proyecto se compone de **9 desarrollos propios** y **5 integraciones de terce
 - 📁 Directorios: [`integrations/meshview/`](integrations/meshview/), [`integrations/potatomesh/`](integrations/potatomesh/), [`services/adaptador-potato/`](services/adaptador-potato/), [`services/sync-peers/`](services/sync-peers/)
 
 ### 5. Portal Web Comunitario, API y Configurador
-- **Aplicación Web:** Construida con **Laravel 12** y **Filament 3** en PHP 8.5.
+- **Aplicación Web:** Construida con **Laravel 13** y **Filament 5** en PHP 8.5.
   - **Zero-Cookies (RN-06):** Navegación pública 100% anónima sin cookies de sesión, analíticas invasivas ni avisos molestos.
   - **Soporte Multidioma (RN-48):** Detección automática y conmutador visual en cabecera con soporte completo en Español (bandera andaluza), Inglés y Portugués.
   - **Mapa SVG de Andalucía:** Mapa interactivo por provincias con cálculo de saturación ponderada de canal (`ROUTER` 60%, `CLIENT` 40%) y selector de ventana temporal (**30m** por defecto, 1h, 6h, 12h, 1d, 7d).
+  - **Supervisión de Infraestructura y Routers (`/routers`):** Monitorización pública de repetidores y routers con selector de ámbito territorial (Andalucía, España, Ambos), KPIs de ocupación de canal (ChUtil, TX) y estado energético (batería/red eléctrica) en tiempo real.
+  - **Rankings y Salud de la Red (`/rankings`):** Monitorización de nodos en peligro, consumo de red por tiempo de aire y catálogo de 11 rankings técnicos para supervisión comunitaria (cobertura de gateways, enlaces directos, salud solar nocturna).
+  - **Alertas e Incidencias (`/alertas`, `/alertas/{id}`):** Catálogo público de incidencias detectadas en la malla con filtrado interactivo por severidad, temática y provincia.
+  - **Artículos y Guías Comunitarias (`/paginas`, `/paginas/{slug}`):** Catálogo editorial con tarjetas visuales, metadatos SEO enriquecidos (Article schema) y gestión desde el panel de administración.
   - **Configurador Web (`/configurador`):** Herramienta cliente para configurar nodos vía Web Serial (USB) y Web Bluetooth (BLE), con códigos QR para la app móvil y presets YAML descargables basados en el estándar oficial **SFNarrow**.
   - **Revisa tu nodo (`/revisa-tu-nodo`):** Diagnóstico instantáneo de salud, telemetría y calidad de conexión para cualquier nodo de la red introduciendo su ID.
   - **Catálogo de Hardware (`/hardware`):** Directorio interactivo de dispositivos recomendados (Heltec, RAK Wireless, LilyGO, SenseCAP), antenas y recomendaciones de montaje solar.
   - **API Pública REST v1 (`/api/v1`):** Endpoints JSON cacheados de solo lectura (`/stats`, `/provinces`, `/nodes`, `/alerts`, `/rankings`).
-  - **Panel de Operadores (`/admin`):** Gestión de roles, monitorización de servicios mediante latidos `/health` y terminal interactiva de gestión de routers remotos.
+  - **Panel de Operadores (`/admin`):** Gestión técnica con Filament 5, autenticación obligatoria con segundo factor TOTP (2FA), monitorización reactiva de los 13 servicios y terminal interactiva de gestión de routers remotos.
 - 📁 Directorios: [`services/portal/`](services/portal/), [`integrations/meshconfig/`](integrations/meshconfig/) · 📖 Documentación: [Portal](docs/info/portal/README.md), [MeshConfig](docs/info/meshconfig/README.md)
 
 ### 6. Alertas en Tiempo Real y Notificaciones
 - **`detector-alertas`:** Servicio autónomo en Python 3.13 que evalúa continuamente el flujo `snm/v1/decoded/#` frente a reglas de salud:
   - Bucles de reinicio rápido (nodos inestables).
-  - Nivel crítico de batería (< 15%).
+  - Nivel de riesgo y baterías críticas (diferenciando infraestructura solar vs clientes).
   - Routers troncales caídos o sin respuesta.
-  - Ataques o fallos de spam / tasa de emisión excesiva.
+  - Saturación del canal de radio (ChUtil ponderado).
+  - Emisiones excesivas y sondeos agresivos (spam de mensajes, NodeInfo, posición o paquetes cifrados).
   - Saltos de paquete agotados (mala planificación de topología).
 - **Socket Unix (`/run/snm/alertas.sock`):** Canal de comunicación ultrarrápido y seguro entre el detector y los notificadores.
 - **`bot-telegram` & `bot-discord`:** Bots interactivos que publican alertas inmediatas con filtros provinciales configurables y responden a comandos de consulta (`/status`, `/rankings`, `/nodos`, `/alertas`, `/routers`).
@@ -234,9 +239,9 @@ Para garantizar el máximo alcance geográfico y minimizar las colisiones en el 
 | **Infraestructura** | Debian 12/13, Docker, Docker Compose, Nginx, Let's Encrypt / Certbot |
 | **Bases de Datos** | PostgreSQL 17 nativo, extensión TimescaleDB para series temporales |
 | **Mensajería** | Eclipse Mosquitto MQTT (TLS 8883), WebSocket nativo, Unix Domain Sockets |
-| **Backend Portal** | PHP 8.5, Laravel 12, Filament 3 |
-| **Frontend Portal** | Blade, CSS semántico sin dependencias externas, JavaScript Vanilla / Vite, SVG interactivo |
-| **Servicios Núcleo** | Python 3.13, AsyncIO, aiomqtt, Pydantic, Protobuf de Meshtastic |
+| **Backend Portal** | PHP 8.5, Laravel 13, Filament 5, Spatie Sitemap |
+| **Frontend Portal** | Blade, Tailwind CSS v4, JavaScript Vanilla / Vite, SVG interactivo |
+| **Servicios Núcleo** | Python 3.13, AsyncIO, aiomqtt, uv, Pydantic, Protobuf de Meshtastic |
 | **Herramientas Cliente** | Web Serial API, Web Bluetooth API (BLE), QRCode.js, js-yaml |
 
 ---
@@ -258,7 +263,7 @@ El sistema cuenta con dependencias ordenadas por niveles. El script [`infrastruc
    └── 2. Mosquitto (Broker MQTT, creación de usuarios y ACLs)
        └── 3. MeshView & PotatoMesh (+ adaptador-potato y sync-peers)
            └── 4. Ingesta (Filtro anti-duplicados, decodificación Protobuf)
-               └── 5. Portal Web (Laravel 12 + Filament 3 + MeshConfig)
+               └── 5. Portal Web (Laravel 13 + Filament 5 + MeshConfig)
                    └── 6. Detector de Alertas (Reglas de anomalía y socket Unix)
                        └── 7. Bots & Webhooks (Telegram, Discord, HTTP firmado)
                            └── 8. Chat-WS (WebSocket público de radio en tiempo real)
@@ -304,7 +309,7 @@ La documentación canónica y viva del proyecto se encuentra en [`docs/info/`](d
 │   ├── chat-ws/                 # Servidor WebSocket para chat de radio en tiempo real
 │   ├── detector-alertas/        # Motor de detección de anomalías y socket de alertas
 │   ├── ingesta/                 # Decodificación Protobuf, deduplicación y persistencia
-│   ├── portal/                  # Portal web (Laravel 12, Filament 3, API REST v1)
+│   ├── portal/                  # Portal web (Laravel 13, Filament 5, API REST v1)
 │   ├── sync-peers/              # Sincronización e intercambio con instancias vecinas
 │   └── webhooks/                # Emisión de eventos HTTP firmados con HMAC SHA-256
 └── docs/

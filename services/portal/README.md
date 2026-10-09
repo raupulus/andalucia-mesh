@@ -1,6 +1,6 @@
 # Portal Web, API Pública y Panel de Operador · Andalucía Mesh
 
-Servicio web central del proyecto **Andalucía Mesh**, implementado sobre PHP 8.4 y Laravel 12. Ofrece la interfaz pública para la ciudadanía, la API REST consumida por clientes externos y bots, y el panel privado de administración y monitorización técnica de la red.
+Servicio web central del proyecto **Andalucía Mesh**, implementado sobre PHP 8.5 y Laravel 13 con Filament 5. Ofrece la interfaz pública para la ciudadanía, la API REST consumida por clientes externos y bots, y el panel privado de administración y monitorización técnica de la red.
 
 ---
 
@@ -9,8 +9,8 @@ Servicio web central del proyecto **Andalucía Mesh**, implementado sobre PHP 8.
 1. **Portal Web Institucional y Divulgativo (`portal`):**
    - **Cero cookies:** Las rutas públicas de navegación no emiten cabeceras `Set-Cookie` ni utilizan sesiones HTTP (cumplimiento RGPD por diseño).
    - **Accesibilidad y diseño:** Sistema visual basado en `docs/info/DESIGN.md`, contraste estricto WCAG 2.1 AAA y modo claro/oscuro automático.
-   - **Páginas dinámicas:** Portada con selector 24h/7d y mapa SVG interactivo de las 8 provincias andaluzas, rankings (`/rankings`), catálogo de alertas activas (`/alertas`) y herramienta de comprobación y diagnóstico de nodos (`/revisa-tu-nodo`).
-   - **Contenido estático versionado:** 15 páginas gestionadas mediante Markdown en `resources/contenido/` con compilación optimizada y caché basada en `filemtime`.
+   - **Páginas dinámicas:** Portada con selector de ventana temporal y mapa SVG interactivo de las 8 provincias andaluzas, supervisión de infraestructura y repetidores (`/routers`), rankings y salud de la red (`/rankings`), catálogo de alertas e incidencias activas (`/alertas`), herramienta de comprobación y diagnóstico de nodos (`/revisa-tu-nodo`), catálogo de hardware recomendado (`/hardware`) y catálogo editorial de artículos y páginas (`/paginas`).
+   - **Contenido estático versionado:** Páginas gestionadas mediante Markdown en `resources/contenido/` con compilación optimizada y caché basada en `filemtime`.
 
 2. **API REST Pública (`/api/v1`):**
    - Base canónica bajo `/api/v1` con respuestas en JSON estructurado (claves en inglés).
@@ -36,6 +36,7 @@ Servicio web central del proyecto **Andalucía Mesh**, implementado sobre PHP 8.
 |---|---|
 | `php artisan portal:mapa` | Regenera el componente SVG vectorial interactivo de Andalucía a partir de GeoJSON. |
 | `php artisan portal:qr` | Genera los códigos QR vectoriales de difusión en `public/qr.svg` y `public/qr.pdf` (formato A6). |
+| `php artisan portal:sitemap` | Genera el mapa del sitio `sitemap.xml` dinámico para indexación SEO. |
 | `php artisan portal:vistas` | Audita la integridad y estructura de las vistas SQL del contrato de integración. |
 | `php artisan operador:crear {email} {nombre}` | Da de alta una cuenta de operador técnico con validación de clave de al menos 8 caracteres. |
 
