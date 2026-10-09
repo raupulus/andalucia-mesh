@@ -34,7 +34,7 @@
    - Paso 1: Usuario revisa el preset SFNarrow, selecciona opcionalmente su provincia y la potencia de radio.
    - Paso 2: Usuario selecciona su rol (`CLIENT_MUTE` o `CLIENT`), telemetría y MQTT.
    - Paso 3: Usuario personaliza el nombre largo y corto de su dispositivo.
-   - Paso 4: El usuario escanea el código QR con la app de Meshtastic, descarga el archivo YAML o conecta directamente su nodo por USB/BLE para aplicarlo en 1 clic.
+   - Paso 4: El usuario dispone de código QR generado con Protobuf oficial (`ChannelSetSchema`), resumen visual de todos los canales incluidos, descarga YAML, comandos CLI o conexión directa USB/BLE en 2 etapas: primero conecta e identifica el nodo con su NodeID (`!ffffffff`), y tras confirmación pulsa explícitamente en «🚀 Programar Nodo Ahora» para volcar identidad, radio, rol, canales y MQTT con feedback en vivo de cada etapa, `commitEditSettings` y reinicio automático.
 2. **Flujo Avanzado (Workbench)**:
    - El operador conecta el dispositivo, pulsa "Leer del nodo" (`downloadLiveConfig`), edita el YAML o carga un preset, pulsa "Actualizar Diff" para inspeccionar las diferencias exactas y confirma con "Escribir al nodo" (`uploadDesiredConfig`).
    - El nodo procesa la transacción, escribe en flash LittleFS y se reinicia.
@@ -86,6 +86,7 @@
   - `test_configurador_contiene_checkbox_reporte_mapa_mqtt`
   - `test_configurador_contiene_opciones_ampliadas_telemetria_y_posicion`
   - `test_configurador_modo_avanzado_contiene_panel_conexion_directa`
+  - `test_configurador_paso4_contiene_flujo_programacion_y_resumen_canales`
 
 ## Pendiente real
 - [x] Contenedor Docker compilado y corriendo en local (puerto 8420).
@@ -99,6 +100,7 @@
 - [x] Opciones ampliadas de cadencia (12h, 24h, 48h y 72h) en telemetría de dispositivo y posición GPS.
 - [x] Tarjeta de conexión directa dedicada en Modo Avanzado (Workbench) para Web Serial, Bluetooth y HTTP con sincronización de estado, lectura en vivo, comparador Diff y volcado.
 - [x] Aislamiento de identidad del nodo local propio frente a volcados de `NodeDB` (`TR-18`) y normalización canónica de enums Protobuf para diff exacto.
+- [x] Flujo de conexión en 2 etapas en el Asistente (Paso 4): detección de identidad del nodo, botón explícito «🚀 Programar Nodo Ahora», reporte en vivo de progreso, serialización oficial Protobuf `ChannelSetSchema`, resumen visual de canales y opción de limpieza de canales sobrantes.
 
 ---
 > Creado: 2026-10-08 · Última revisión: 2026-10-09

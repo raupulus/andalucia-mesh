@@ -207,4 +207,21 @@ class ConfiguradorTest extends TestCase
         $pt->assertStatus(200);
         $pt->assertSee('Queres aparecer no mapa público de cobertura?');
     }
+
+    public function test_configurador_paso4_contiene_flujo_programacion_y_resumen_canales(): void
+    {
+        $response = $this->get('/configurador');
+
+        $response->assertStatus(200);
+        $response->assertSee('id="btnConnectDirect"', false);
+        $response->assertSee('id="btnDisconnectDirect"', false);
+        $response->assertSee('id="connectedNodeCard"', false);
+        $response->assertSee('id="connectedNodeName"', false);
+        $response->assertSee('id="connectedNodeId"', false);
+        $response->assertSee('id="btnProgramDirect"', false);
+        $response->assertSee('programarNodoDesdeAsistente()', false);
+        $response->assertSee('id="chkClearUnusedChannels"', false);
+        $response->assertSee('id="channelsSummaryBox"', false);
+        $response->assertSee('id="channelsSummaryList"', false);
+    }
 }

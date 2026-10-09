@@ -24,6 +24,7 @@ Registro de funcionalidades y conceptos que han sido decididos formalmente pero 
 | Sistema de bloqueos y baneo federado (autoban y manual) | Panel de reglas para autoban, bloqueos manuales, listado unificado y sincronización bidireccional por API autenticada (Sanctum) con instancias amigas ([ver detalle](#sistema-de-bloqueos-y-baneo-federado)) |
 | Desbloqueador público de nodos en el frontend | Comprobador y autoservicio de desbloqueo por Node ID para nodos autobaneados (excluyendo bloqueos manuales o federados), con guía de motivos de ban y FAQ ([ver detalle](#desbloqueador-publico-de-nodos-en-el-frontend)) |
 | Estadísticas básicas y anónimas de uso | Métricas agregadas y autoalojadas sin cookies (visitas por página, uso del flasheador/configurador, clics en hardware y diagnósticos) respetando RN-06 ([ver detalle](#estadisticas-basicas-y-anonimas-de-uso)) |
+| Sección o ficha dedicada por provincia | Páginas provinciales con estadísticas exclusivas (nodos, carga del canal, routers) y alertas focalizadas de cada provincia ([ver detalle](#seccion-o-ficha-dedicada-por-provincia)) |
 
 ## Detalle de Ideas
 
@@ -100,6 +101,32 @@ Sistema de analítica agregada, autoalojada y orientada a la privacidad para con
   - Panel o pestaña de métricas en Filament con widgets interactivos (gráficos temporales, rankings y contadores acumulados).
   - Filtros temporales (últimos 7 días, 30 días, meses, histórico anual).
   - Tarea periódica de consolidación y limpieza para mantener un tamaño de datos ultraligero y constante en base de datos.
+
+### Sección o ficha dedicada por provincia
+
+Vistas provinciales independientes (`/provincias/{slug}`) orientadas a proporcionar a las comunidades locales de radioaficionados, grupos de mensajería territoriales (Telegram/Discord) y operadores de comarca una panorámica limpia, exclusiva y compartible de su propia provincia:
+
+- **Motivación y casos de uso:**
+  - Gran parte de la comunidad de Meshtastic se organiza en células o canales provinciales (ej. *Meshtastic Cádiz*, *Meshtastic Sevilla*, *Meshtastic Málaga*).
+  - La portada y `/rankings` ofrecen una visión global de toda Andalucía que diluye los datos comarcales. Una página propia permite seguir la salud, routers e incidencias de la provincia sin ruido del resto de la región.
+- **Rutas y catálogo territorial:**
+  - Rutas amigables: `/provincias/{slug}` (con alias o redirección desde `/provincia/{slug}`): `/provincias/almeria`, `/provincias/cadiz`, `/provincias/cordoba`, `/provincias/granada`, `/provincias/huelva`, `/provincias/jaen`, `/provincias/malaga` y `/provincias/sevilla` (ampliable a `ceuta` y `melilla`).
+  - Selector rápido desplegable o fila de píldoras en cabecera para alternar entre provincias sin regresar a la portada.
+- **Estadísticas y métricas exclusivas de la provincia:**
+  - **Tarjetas KPI locales:** Nodos activos en la ventana seleccionada (`1h`, `6h`, `12h`, `1d`, `7d`), porcentaje de peso sobre el total de Andalucía, saturación de canal media ponderada (routers 60 % + clientes 40 %) y estado semafórico (`Holgado`, `Cargado`, `Saturado`).
+  - **Infraestructura provincial:** Listado y estado (online/offline) de los routers de infraestructura y repetidores ubicados en la provincia, con niveles de batería y ocupación de canal.
+  - **Gateways y tráfico:** Gateways MQTT que dan cobertura a la zona y reparto de tráfico (nodeinfo, posición, telemetría, texto).
+  - **Rankings comarcales:** Top de nodos de la provincia por tiempo de emisión al aire y paquetes transmitidos, fomentando buenas prácticas de ajuste.
+  - **Silueta gráfica SVG:** Contorno visual vectorial de la provincia con su burbuja de nodos y polo de inaccesibilidad.
+- **Alertas y estado de salud comarcal:**
+  - **Alertas activas exclusivas:** Listado filtrado automáticamente donde solo aparecen incidencias abiertas relativas a nodos geolocalizados en la provincia o gateways locales.
+  - **Nodos en riesgo locales:** Identificación de anomalías (saltos excesivos, intervalos de telemetría agresivos, saturación) para que los coordinadores locales puedan intervenir o contactar al propietario.
+  - **Historial provincial:** Alertas resueltas recientemente en el territorio.
+- **Integración, compartibilidad y privacidad:**
+  - Enlace directo desde el mapa SVG de la portada y su tabla accesible (al pulsar sobre la provincia, además del modal de carga rápida, se ofrece un botón a "Ver detalle provincial").
+  - Metadatos Open Graph y Twitter Cards dinámicos por provincia (ej. *"Estado de la red Meshtastic en Cádiz — 42 nodos activos, canal holgado"*), facilitando previsualizaciones enriquecidas al compartir el enlace en canales comunitarios.
+  - Soporte multidioma completo (ES / EN / PT) según `RN-48`.
+  - Cero cookies (`RN-06`) y datos derivados de las vistas de ingesta y alertas existentes sin peticiones a terceros.
 
 ### Edición de contenidos y textos desde el panel (/admin)
 

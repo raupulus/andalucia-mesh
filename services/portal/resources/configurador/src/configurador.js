@@ -296,69 +296,59 @@ export function construirYamlDeseado() {
 }
 
 // --- Generador de URL y Código QR oficial de Meshtastic ---
-// Codifica en Base64Url un protobuf ChannelSet mínimo conforme a apponly.proto
-function encodeVarint(val) {
-  const bytes = [];
-  while (val > 127) {
-    bytes.push((val & 0x7f) | 0x80);
-  }
-  bytes.push(val & 0x7f);
-  return bytes;
-}
-
-function encodeChannelSettingsProto(name, pskBytes = [1], uplink = true, downlink = true) {
-  // ChannelSettings: tag 2 psk (bytes), tag 3 name (string), tag 5 uplink (bool), tag 6 downlink (bool)
-  const nameBytes = new TextEncoder().encode(name);
-  const body = [
-    // psk tag 2 (wire 2 = 0x12)
-    0x12, pskBytes.length, ...pskBytes,
-    // name tag 3 (wire 2 = 0x1a)
-    0x1a, nameBytes.length, ...nameBytes,
-    // uplink_enabled tag 5 (wire 0 = 0x28)
-    0x28, uplink ? 1 : 0,
-    // downlink_enabled tag 6 (wire 0 = 0x30)
-    0x30, downlink ? 1 : 0
-  ];
-  return [0x0a, ...encodeVarint(body.length), ...body];
-}
-
-function encodeLoraConfigProto(bw = 62, sf = 7, cr = 5, channelNum = 4, hopLimit = 4, txPower = 27) {
-  // LoRaConfig: tag 3 bw (62), tag 4 sf (7), tag 5 cr (5), tag 7 region (EU_868=3), tag 8 hop_limit, tag 10 tx_power, tag 11 channel_num
-  const body = [
-    0x18, ...encodeVarint(bw),
-    0x20, ...encodeVarint(sf),
-    0x28, ...encodeVarint(cr),
-    0x38, 3, // region EU_868
-    0x40, ...encodeVarint(hopLimit),
-    0x50, ...encodeVarint(txPower),
-    0x58, ...encodeVarint(channelNum)
-  ];
-  return [0x12, ...encodeVarint(body.length), ...body];
-}
-
-function generarMeshtasticUrl(doc) {
-  const bytes = [];
-  // Canales configurados (Canal 0 SFNarrow y secundarios seleccionados)
+// Codifica en Base64Url un protobuf ChannelSet conforme a apponly.proto
+export function generarMeshtasticUrl(doc) {
+  const channelSettingsList = [];
   if (Array.isArray(doc.channels)) {
     for (const ch of doc.channels) {
       if (ch.settings && ch.settings.name) {
         const isPrimary = ch.role === "PRIMARY";
         const downlink = isPrimary ? (doc.config.device.role !== "CLIENT_MUTE") : (ch.settings.downlinkEnabled ?? true);
         const uplink = ch.settings.uplinkEnabled ?? true;
-        bytes.push(...encodeChannelSettingsProto(ch.settings.name, [1], uplink, downlink));
+
+        let pskBytes = new Uint8Array([1]);
+        if (typeof ch.settings.psk === "string" && ch.settings.psk !== "AQ==" && ch.settings.psk !== "") {
+          try {
+            const raw = atob(ch.settings.psk);
+            pskBytes = new Uint8Array(raw.length);
+            for (let i = 0; i < raw.length; i++) pskBytes[i] = raw.charCodeAt(i);
+          } catch (_) {
+            pskBytes = new Uint8Array([1]);
+          }
+        }
+
+        channelSettingsList.push(create(Protobuf.Channel.ChannelSettingsSchema, {
+          name: ch.settings.name,
+          psk: pskBytes,
+          uplinkEnabled: uplink,
+          downlinkEnabled: downlink,
+          moduleSettings: ch.settings.moduleSettings ? {
+            positionPrecision: ch.settings.moduleSettings.positionPrecision ?? 15
+          } : undefined
+        }));
       }
     }
   }
 
-  // LoRa config
   const lora = doc.config.lora;
-  bytes.push(...encodeLoraConfigProto(lora.bandwidth, lora.spreadFactor, lora.codingRate, lora.channelNum, lora.hopLimit, lora.txPower));
+  const channelSet = create(Protobuf.AppOnly.ChannelSetSchema, {
+    settings: channelSettingsList,
+    loraConfig: {
+      usePreset: false,
+      bandwidth: Number(lora.bandwidth) || 62,
+      spreadFactor: Number(lora.spreadFactor) || 7,
+      codingRate: Number(lora.codingRate) || 5,
+      region: 3, // EU_868
+      hopLimit: Number(lora.hopLimit) || 4,
+      txPower: Number(lora.txPower) || 27,
+      channelNum: Number(lora.channelNum) || 4
+    }
+  });
 
-  // Base64Url sin padding
-  const uint8 = new Uint8Array(bytes);
+  const bin = toBinary(Protobuf.AppOnly.ChannelSetSchema, channelSet);
   let binary = "";
-  for (let i = 0; i < uint8.byteLength; i++) {
-    binary += String.fromCharCode(uint8[i]);
+  for (let i = 0; i < bin.byteLength; i++) {
+    binary += String.fromCharCode(bin[i]);
   }
   const b64 = btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
   return `https://meshtastic.org/e/#${b64}`;
@@ -407,6 +397,26 @@ export function actualizarConfiguracion() {
         colorLight: "#FFFFFF",
         correctLevel: window.QRCode.CorrectLevel.M
       });
+    }
+
+    // Actualizar resumen legible de canales en el paso 4
+    const channelsListEl = document.getElementById("channelsSummaryList");
+    if (channelsListEl && Array.isArray(configDoc.channels)) {
+      const activeChannels = configDoc.channels.filter(ch => ch.settings && ch.settings.name);
+      let html = "";
+      activeChannels.forEach(ch => {
+        const isPrimary = ch.role === "PRIMARY";
+        const tag = isPrimary ? "Canal 0 · Principal" : `Canal ${ch.index} · Secundario`;
+        const badgeBg = isPrimary ? "var(--color-acento)" : "var(--color-superficie)";
+        const badgeColor = isPrimary ? "var(--color-sobre-acento)" : "var(--color-texto-1)";
+        html += `
+          <div style="display: flex; align-items: center; justify-content: space-between; background: ${badgeBg}; color: ${badgeColor}; padding: 0.35rem 0.6rem; border-radius: 4px; border: 1px solid var(--color-borde); font-size: 0.8rem;">
+            <span style="font-weight: 700;">${escapeHtml(ch.settings.name)}</span>
+            <span style="font-size: 0.75rem; opacity: 0.85;">${tag}</span>
+          </div>
+        `;
+      });
+      channelsListEl.innerHTML = html;
     }
   } catch (err) {
     console.error("Error al generar URL o código QR:", err);
@@ -544,8 +554,37 @@ function actualizarUiEstadoConexion(conectado) {
 
   const btnConnectDirect = document.getElementById("btnConnectDirect");
   const btnDisconnectDirect = document.getElementById("btnDisconnectDirect");
-  if (btnConnectDirect) btnConnectDirect.disabled = conectado;
+  const connectedNodeCard = document.getElementById("connectedNodeCard");
+  const btnProgramDirect = document.getElementById("btnProgramDirect");
+  const nodeNameEl = document.getElementById("connectedNodeName");
+  const nodeIdEl = document.getElementById("connectedNodeId");
+  const feedbackEl = document.getElementById("directStatusFeedback");
+
+  if (btnConnectDirect) {
+    btnConnectDirect.disabled = conectado;
+    btnConnectDirect.textContent = conectado ? "✓ Conectado" : "🔌 Conectar al Nodo";
+  }
   if (btnDisconnectDirect) btnDisconnectDirect.disabled = !conectado;
+
+  if (connectedNodeCard) {
+    connectedNodeCard.style.display = conectado ? "flex" : "none";
+  }
+  if (btnProgramDirect) {
+    btnProgramDirect.disabled = !conectado;
+  }
+
+  if (conectado) {
+    const hex = estado.myNodeNum !== null ? "!" + estado.myNodeNum.toString(16).padStart(8, "0") : "!desconocido";
+    if (nodeNameEl) nodeNameEl.textContent = estado.ownerName || "Nodo Meshtastic";
+    if (nodeIdEl) nodeIdEl.textContent = hex;
+    if (feedbackEl && !feedbackEl.dataset.isProgramming) {
+      feedbackEl.innerHTML = `💡 Nodo conectado (<strong>${escapeHtml(estado.ownerName || "Meshtastic")}</strong>). Pulsa en <strong>🚀 Programar Nodo Ahora</strong> para volcar los ajustes de Andalucía Mesh y reiniciar el nodo automáticamente.`;
+    }
+  } else {
+    if (feedbackEl && !feedbackEl.dataset.isProgramming) {
+      feedbackEl.innerHTML = `💡 <em>Conecta tu nodo por cable USB Serial o Bluetooth para volcar los ajustes. Ningún parámetro se alterará en el dispositivo hasta que pulses en <strong>Programar Nodo Ahora</strong>. El nodo se reiniciará automáticamente tras aplicar los cambios.</em>`;
+    }
+  }
 
   const btnConnectWb = document.getElementById("btnConnectWorkbench");
   const btnDisconnectWb = document.getElementById("btnDisconnectWorkbench");
@@ -833,7 +872,8 @@ export async function conectarDispositivo(origen = "assistant") {
       } catch (_) {}
     }
 
-    alert("¡Nodo conectado con éxito! Leyendo parámetros del dispositivo...");
+    actualizarUiEstadoConexion(true);
+    logActividad("✓ Parámetros iniciales leídos. Dispositivo listo para configurar.");
   } catch (e) {
     actualizarUiEstadoConexion(false);
     logActividad(`Error de conexión: ${e.message}`);
@@ -923,6 +963,10 @@ export async function aplicarDeseadoANodo() {
 
   try {
     logActividad("Escribiendo configuración deseada en el nodo...");
+    try {
+      await estado.dispositivo.beginEditSettings();
+    } catch (_) {}
+    await new Promise(r => setTimeout(r, 150));
 
     // 1. Identidad (Owner)
     if (doc.owner || doc.owner_short) {
@@ -932,12 +976,15 @@ export async function aplicarDeseadoANodo() {
       });
       await estado.dispositivo.setOwner(user);
       logActividad("✓ Identidad (Owner) actualizada.");
+      await new Promise(r => setTimeout(r, 200));
     }
 
     // 2. Secciones de configuración (Device, LoRa, Position)
     if (doc.config?.device) {
+      const esMute = doc.config.device.role === "CLIENT_MUTE";
       const dev = create(Protobuf.Config.Config_DeviceConfigSchema, {
-        role: doc.config.device.role === "CLIENT_MUTE" ? 1 : 0,
+        role: esMute ? 1 : 0,
+        rebroadcastMode: esMute ? 5 : 0,
         nodeInfoBroadcastSecs: doc.config.device.nodeInfoBroadcastSecs || 259200,
         disableTripleClick: Boolean(doc.config.device.disableTripleClick),
         tzdef: doc.config.device.tzdef || "GMT-1GMT,M3.5.0,M10.5.0/3"
@@ -947,6 +994,7 @@ export async function aplicarDeseadoANodo() {
       });
       await estado.dispositivo.setConfig(cfg);
       logActividad("✓ Parámetros de Dispositivo (Role / NodeInfo / TZ / Botón) enviados.");
+      await new Promise(r => setTimeout(r, 200));
     }
 
     if (doc.config?.lora) {
@@ -969,6 +1017,7 @@ export async function aplicarDeseadoANodo() {
       });
       await estado.dispositivo.setConfig(cfg);
       logActividad("✓ Parámetros de Radio LoRa (SFNarrow EU_868) enviados.");
+      await new Promise(r => setTimeout(r, 200));
     }
 
     if (doc.config?.position) {
@@ -983,6 +1032,7 @@ export async function aplicarDeseadoANodo() {
       });
       await estado.dispositivo.setConfig(cfg);
       logActividad("✓ Parámetros de Posición enviados.");
+      await new Promise(r => setTimeout(r, 200));
     }
 
     // 3. Módulos (Telemetry, MQTT)
@@ -995,6 +1045,7 @@ export async function aplicarDeseadoANodo() {
       });
       await estado.dispositivo.setModuleConfig(mod);
       logActividad("✓ Módulo de Telemetría enviado.");
+      await new Promise(r => setTimeout(r, 200));
     }
 
     if (doc.module_config?.mqtt) {
@@ -1006,6 +1057,7 @@ export async function aplicarDeseadoANodo() {
         root: doc.module_config.mqtt.root || "msh/EU_868",
         encryptionEnabled: true,
         tlsEnabled: true,
+        proxyToClientEnabled: true,
         mapReportingEnabled: Boolean(doc.module_config.mqtt.mapReportingEnabled)
       };
 
@@ -1023,6 +1075,7 @@ export async function aplicarDeseadoANodo() {
       });
       await estado.dispositivo.setModuleConfig(mod);
       logActividad("✓ Módulo MQTT comunitario y reporte en mapa enviados.");
+      await new Promise(r => setTimeout(r, 200));
     }
 
     // 4. Canales
@@ -1044,17 +1097,253 @@ export async function aplicarDeseadoANodo() {
           });
           await estado.dispositivo.setChannel(chObj);
           logActividad(`✓ Canal ${ch.index} (${ch.settings.name}) actualizado.`);
+          await new Promise(r => setTimeout(r, 150));
         }
       }
     }
 
-    logActividad("¡Configuración escrita con éxito en el nodo!");
+    // 5. Confirmar cambios y reiniciar
+    logActividad("Confirmando cambios en memoria no volátil y reiniciando...");
+    await estado.dispositivo.commitEditSettings();
+    await new Promise(r => setTimeout(r, 300));
+    await estado.dispositivo.reboot(3);
+
+    logActividad("¡Configuración escrita con éxito en el nodo y reinicio enviado!");
     alert("¡Configuración volcada con éxito al dispositivo! El nodo se reiniciará con los nuevos ajustes.");
   } catch (err) {
     logActividad(`Error al escribir configuración: ${err.message}`);
     alert(`Error al escribir en el nodo: ${err.message}`);
   } finally {
     if (btnUpload) btnUpload.disabled = false;
+  }
+}
+
+// --- Programación directa desde el Asistente (Paso 4) ---
+export async function programarNodoDesdeAsistente() {
+  if (!estado.dispositivo || !estado.nodoConectado) {
+    alert("Primero debes conectar tu nodo Meshtastic por cable USB Serial o Bluetooth.");
+    return;
+  }
+
+  const { configDoc } = construirYamlDeseado();
+  const btnProgram = document.getElementById("btnProgramDirect");
+  const feedbackEl = document.getElementById("directStatusFeedback");
+  if (btnProgram) {
+    btnProgram.disabled = true;
+    btnProgram.textContent = "⏳ Programando nodo...";
+  }
+
+  if (feedbackEl) {
+    feedbackEl.dataset.isProgramming = "true";
+  }
+
+  const setProgress = (paso, texto, icono = "⏳") => {
+    logActividad(`[Asistente] ${texto}`);
+    if (feedbackEl) {
+      feedbackEl.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+          <div style="font-weight: 700; color: var(--color-texto-1); display: flex; align-items: center; gap: 0.5rem;">
+            <span>${icono}</span> <span>${paso}</span>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--color-texto-2);">${texto}</div>
+        </div>
+      `;
+    }
+  };
+
+  try {
+    setProgress("Iniciando sesión segura", "Preparando el dispositivo para recibir los parámetros...", "⏳");
+    try {
+      await estado.dispositivo.beginEditSettings();
+    } catch (_) {}
+    await new Promise(r => setTimeout(r, 200));
+
+    // 1. Identidad (Owner)
+    if (configDoc.owner || configDoc.owner_short) {
+      setProgress("Paso 1/6: Identidad", `Aplicando nombre "${configDoc.owner}" y corto "${configDoc.owner_short}"...`, "👤");
+      const user = create(Protobuf.Mesh.UserSchema, {
+        longName: configDoc.owner || "MiNodo-Andalucia",
+        shortName: (configDoc.owner_short || "AND1").slice(0, 4)
+      });
+      await estado.dispositivo.setOwner(user);
+      await new Promise(r => setTimeout(r, 250));
+    }
+
+    // 2. Dispositivo y Rol
+    const esClientMute = configDoc.config.device.role === "CLIENT_MUTE";
+    setProgress("Paso 2/6: Rol del dispositivo", `Configurando rol ${configDoc.config.device.role} y rebroadcast...`, "⚙️");
+    const dev = create(Protobuf.Config.Config_DeviceConfigSchema, {
+      role: esClientMute ? 1 : 0,
+      rebroadcastMode: esClientMute ? 5 : 0,
+      nodeInfoBroadcastSecs: configDoc.config.device.nodeInfoBroadcastSecs || 259200,
+      disableTripleClick: Boolean(configDoc.config.device.disableTripleClick),
+      tzdef: configDoc.config.device.tzdef || "GMT-1GMT,M3.5.0,M10.5.0/3"
+    });
+    await estado.dispositivo.setConfig(create(Protobuf.Config.ConfigSchema, {
+      payloadVariant: { case: "device", value: dev }
+    }));
+    await new Promise(r => setTimeout(r, 250));
+
+    // 3. Radio LoRa (SFNarrow)
+    setProgress("Paso 3/6: Parámetros LoRa", `Configurando SFNarrow (BW ${configDoc.config.lora.bandwidth} / SF${configDoc.config.lora.spreadFactor} / CR 4/${configDoc.config.lora.codingRate} / EU_868)...`, "📻");
+    const lora = create(Protobuf.Config.Config_LoRaConfigSchema, {
+      region: 3, // EU_868
+      usePreset: Boolean(configDoc.config.lora.usePreset),
+      bandwidth: Number(configDoc.config.lora.bandwidth) || 62,
+      spreadFactor: Number(configDoc.config.lora.spreadFactor) || 7,
+      codingRate: Number(configDoc.config.lora.codingRate) || 5,
+      channelNum: Number(configDoc.config.lora.channelNum) || 4,
+      hopLimit: Number(configDoc.config.lora.hopLimit) || 4,
+      txPower: Number(configDoc.config.lora.txPower) || 27,
+      txEnabled: true,
+      sx126xRxBoostedGain: true,
+      ignoreMqtt: Boolean(configDoc.config.lora.ignoreMqtt),
+      configOkToMqtt: Boolean(configDoc.config.lora.configOkToMqtt)
+    });
+    await estado.dispositivo.setConfig(create(Protobuf.Config.ConfigSchema, {
+      payloadVariant: { case: "lora", value: lora }
+    }));
+    await new Promise(r => setTimeout(r, 250));
+
+    // 4. Posición y Telemetría
+    setProgress("Paso 4/6: Posición y telemetría", `Configurando intervalos de emisión y protección de espectro...`, "📡");
+    const pos = create(Protobuf.Config.Config_PositionConfigSchema, {
+      positionBroadcastSmartEnabled: Boolean(configDoc.config.position.positionBroadcastSmartEnabled),
+      positionBroadcastSecs: Number(configDoc.config.position.positionBroadcastSecs) || 21600,
+      positionFlags: Number(configDoc.config.position.positionFlags) || 0,
+      fixedPosition: Boolean(configDoc.config.position.fixedPosition)
+    });
+    await estado.dispositivo.setConfig(create(Protobuf.Config.ConfigSchema, {
+      payloadVariant: { case: "position", value: pos }
+    }));
+    await new Promise(r => setTimeout(r, 250));
+
+    if (configDoc.module_config?.telemetry) {
+      const tel = create(Protobuf.ModuleConfig.ModuleConfig_TelemetryConfigSchema, {
+        deviceUpdateInterval: Number(configDoc.module_config.telemetry.deviceUpdateInterval) || 0
+      });
+      await estado.dispositivo.setModuleConfig(create(Protobuf.ModuleConfig.ModuleConfigSchema, {
+        payloadVariant: { case: "telemetry", value: tel }
+      }));
+      await new Promise(r => setTimeout(r, 250));
+    }
+
+    if (configDoc.module_config?.mqtt?.enabled) {
+      const mqttData = {
+        enabled: true,
+        address: configDoc.module_config.mqtt.address || "mqtt.desdechipiona.es",
+        username: configDoc.module_config.mqtt.username || "meshdev",
+        password: configDoc.module_config.mqtt.password || "large4cats",
+        root: configDoc.module_config.mqtt.root || "msh/EU_868",
+        encryptionEnabled: true,
+        tlsEnabled: true,
+        proxyToClientEnabled: true,
+        mapReportingEnabled: Boolean(configDoc.module_config.mqtt.mapReportingEnabled)
+      };
+      if (configDoc.module_config.mqtt.mapReportSettings) {
+        mqttData.mapReportSettings = create(Protobuf.ModuleConfig.ModuleConfig_MapReportSettingsSchema, {
+          publishIntervalSecs: Number(configDoc.module_config.mqtt.mapReportSettings.publishIntervalSecs) || 259200,
+          positionPrecision: Number(configDoc.module_config.mqtt.mapReportSettings.positionPrecision) || 14,
+          shouldReportLocation: Boolean(configDoc.module_config.mqtt.mapReportSettings.shouldReportLocation)
+        });
+      }
+      const mqtt = create(Protobuf.ModuleConfig.ModuleConfig_MQTTConfigSchema, mqttData);
+      await estado.dispositivo.setModuleConfig(create(Protobuf.ModuleConfig.ModuleConfigSchema, {
+        payloadVariant: { case: "mqtt", value: mqtt }
+      }));
+      await new Promise(r => setTimeout(r, 250));
+    }
+
+    // 5. Canales
+    setProgress("Paso 5/6: Canales comunitarios", "Escribiendo canales configurados...", "📻");
+    const configuredIndices = new Set();
+    if (Array.isArray(configDoc.channels)) {
+      for (const ch of configDoc.channels) {
+        if (ch && ch.settings && ch.settings.name) {
+          configuredIndices.add(ch.index);
+          const chObj = create(Protobuf.Channel.ChannelSchema, {
+            index: ch.index,
+            role: ch.role === "PRIMARY" ? 1 : 2,
+            settings: {
+              name: ch.settings.name,
+              psk: new Uint8Array([1]),
+              uplinkEnabled: ch.settings.uplinkEnabled ?? true,
+              downlinkEnabled: ch.settings.downlinkEnabled ?? true,
+              moduleSettings: ch.settings.moduleSettings ? {
+                positionPrecision: ch.settings.moduleSettings.positionPrecision ?? 15
+              } : undefined
+            }
+          });
+          await estado.dispositivo.setChannel(chObj);
+          logActividad(`✓ Canal ${ch.index} (${ch.settings.name}) programado.`);
+          await new Promise(r => setTimeout(r, 200));
+        }
+      }
+    }
+
+    // Limpiar canales sobrantes si está marcado el checkbox
+    const limpiarSobrantes = Boolean(document.getElementById("chkClearUnusedChannels")?.checked);
+    if (limpiarSobrantes) {
+      for (let i = 0; i < 8; i++) {
+        if (!configuredIndices.has(i)) {
+          if (estado.channelMap.has(i)) {
+            const chActual = estado.channelMap.get(i);
+            if (chActual?.settings?.name || (chActual?.role && chActual.role > 0)) {
+              logActividad(`Limpiando canal sobrante en slot ${i}...`);
+              await estado.dispositivo.clearChannel(i);
+              await new Promise(r => setTimeout(r, 200));
+            }
+          }
+        }
+      }
+    }
+
+    // 6. Confirmar cambios en NVS y reiniciar dispositivo
+    setProgress("Paso 6/6: Guardando cambios", "Confirmando parámetros en memoria no volátil...", "💾");
+    await estado.dispositivo.commitEditSettings();
+    await new Promise(r => setTimeout(r, 300));
+
+    setProgress("Reinicio automático", "Reiniciando nodo en 3 segundos...", "🔄");
+    await estado.dispositivo.reboot(3);
+
+    // Feedback final de éxito
+    if (feedbackEl) {
+      const canalesNombres = configDoc.channels.filter(c => c.settings?.name).map(c => `<code>${escapeHtml(c.settings.name)}</code>`).join(", ");
+      feedbackEl.innerHTML = `
+        <div style="background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.4); border-radius: var(--radio-sm); padding: 0.85rem; color: var(--color-texto-1);">
+          <div style="font-weight: 800; font-size: 0.95rem; color: var(--color-correcto-texto); display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem;">
+            <span>✅</span> <span>¡Nodo programado y reiniciado con éxito!</span>
+          </div>
+          <div style="font-size: 0.82rem; line-height: 1.5; color: var(--color-texto-2);">
+            Identidad: <strong>${escapeHtml(configDoc.owner)}</strong> (${escapeHtml(configDoc.owner_short)})<br/>
+            Rol: <strong>${escapeHtml(configDoc.config.device.role)}</strong> · LoRa: <strong>SFNarrow (EU_868)</strong><br/>
+            Canales activos: ${canalesNombres}<br/>
+            El nodo se está reiniciando con los nuevos parámetros de Andalucía Mesh.
+          </div>
+        </div>
+      `;
+    }
+
+    logActividad(`✓ ¡Nodo programado con éxito y reiniciado en 3 segundos!`);
+  } catch (err) {
+    console.error("Error al programar nodo:", err);
+    logActividad(`Error al programar nodo: ${err.message}`);
+    if (feedbackEl) {
+      feedbackEl.innerHTML = `
+        <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: var(--radio-sm); padding: 0.75rem; color: #ef4444;">
+          <strong>❌ Error al programar nodo:</strong> ${escapeHtml(err.message)}
+        </div>
+      `;
+    }
+    alert(`Ocurrió un error al enviar la configuración al nodo: ${err.message}`);
+  } finally {
+    if (btnProgram) {
+      btnProgram.disabled = false;
+      btnProgram.textContent = "🚀 Programar Nodo Ahora";
+    }
+    if (feedbackEl) {
+      delete feedbackEl.dataset.isProgramming;
+    }
   }
 }
 
@@ -1114,6 +1403,7 @@ window.desconectarDispositivo = desconectarDispositivo;
 window.descargarConfiguracionNodo = descargarConfiguracionNodo;
 window.copiarLiveADeseado = copiarLiveADeseado;
 window.aplicarDeseadoANodo = aplicarDeseadoANodo;
+window.programarNodoDesdeAsistente = programarNodoDesdeAsistente;
 window.alEditarYamlDeseado = alEditarYamlDeseado;
 window.actualizarDiff = actualizarDiff;
 window.setModo = setModo;

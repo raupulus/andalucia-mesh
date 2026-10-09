@@ -333,9 +333,19 @@
                                         <input id="qrShareUrl" type="text" class="form-control" readonly />
                                         <button type="button" class="btn btn-secondary" onclick="copiarEnlaceQR()" title="Copiar enlace">Copiar</button>
                                     </div>
+
+                                    <!-- Resumen claro de canales incluidos en el QR -->
+                                    <div id="channelsSummaryBox" style="margin-top: 1rem; width: 100%; background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-sm); padding: 0.75rem; font-size: 0.82rem; text-align: left;">
+                                        <div style="font-weight: 700; color: var(--color-texto-1); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.35rem;">
+                                            <span>📻</span> <span>Canales incluidos en esta configuración:</span>
+                                        </div>
+                                        <div id="channelsSummaryList" style="display: flex; flex-direction: column; gap: 0.35rem;">
+                                            <!-- Rellenado dinámicamente -->
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem;">
                                     <button type="button" class="btn btn-secondary" onclick="descargarYamlDeseado()">📥 Descargar archivo YAML</button>
                                     <button type="button" class="btn btn-secondary" onclick="copiarComandosCli()">📋 Copiar comandos CLI</button>
                                 </div>
@@ -343,12 +353,12 @@
 
                             <!-- Columna Derecha: Conexión directa por cable o Bluetooth -->
                             <div style="border-left: 1px solid var(--color-borde); padding-left: 1.5rem;">
-                                <h3 style="font-size: 1.15rem; margin-bottom: 0.75rem;">🔌 O Programa directamente tu Nodo</h3>
+                                <h3 style="font-size: 1.15rem; margin-bottom: 0.75rem;">🔌 Conexión Directa y Programación</h3>
                                 <p style="font-size: 0.9rem; color: var(--color-texto-2); margin-bottom: 1.25rem;">
-                                    Si estás en un navegador Chromium (Chrome, Edge o Brave), conecta tu nodo por cable USB o enciende el Bluetooth para volcar los ajustes en 1 clic:
+                                    Si estás en un navegador Chromium (Chrome, Edge o Brave), conecta tu nodo por cable USB o enciende el Bluetooth para volcar los ajustes directamente:
                                 </p>
 
-                                <div style="background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-md); padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
+                                <div style="background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-md); padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.25rem;">
                                     <div class="field-group">
                                         <label for="transportSelect" class="field-label">Método de conexión directa</label>
                                         <select id="transportSelect" class="form-select">
@@ -364,13 +374,35 @@
                                     </div>
 
                                     <div style="display: flex; gap: 0.75rem;">
-                                        <button id="btnConnectDirect" type="button" class="btn btn-primary" style="flex: 1;" onclick="conectarDispositivo()">Conectar y Programar</button>
+                                        <button id="btnConnectDirect" type="button" class="btn btn-primary" style="flex: 1;" onclick="conectarDispositivo('assistant')">🔌 Conectar al Nodo</button>
                                         <button id="btnDisconnectDirect" type="button" class="btn btn-secondary" disabled onclick="desconectarDispositivo()">Desconectar</button>
+                                    </div>
+
+                                    <!-- Tarjeta de estado de nodo conectado y botón de programación -->
+                                    <div id="connectedNodeCard" style="display: none; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: var(--radio-sm); padding: 0.85rem; flex-direction: column; gap: 0.5rem;">
+                                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                                            <span style="font-size: 0.9rem; font-weight: 700; color: var(--color-correcto-texto);">
+                                                🟢 Conectado: <span id="connectedNodeName">Nodo Meshtastic</span>
+                                            </span>
+                                            <span id="connectedNodeId" style="font-family: var(--fuente-mono); font-size: 0.8rem; background: var(--color-superficie); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--color-borde);">!ffffffff</span>
+                                        </div>
+                                        <div id="connectedNodeRole" style="font-size: 0.8rem; color: var(--color-texto-2);">
+                                            Listo para aplicar la configuración deseada de Andalucía Mesh.
+                                        </div>
+
+                                        <label style="font-size: 0.8rem; color: var(--color-texto-2); display: flex; align-items: center; gap: 0.4rem; margin-top: 0.25rem; cursor: pointer;">
+                                            <input type="checkbox" id="chkClearUnusedChannels" checked style="cursor: pointer;" />
+                                            <span>Limpiar canales secundarios sobrantes (dejar solo los seleccionados)</span>
+                                        </label>
+
+                                        <button id="btnProgramDirect" type="button" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem; font-weight: 700; font-size: 1rem; background: var(--color-acento); color: var(--color-sobre-acento); border: none; padding: 0.75rem;" onclick="programarNodoDesdeAsistente()">
+                                            🚀 Programar Nodo Ahora
+                                        </button>
                                     </div>
                                 </div>
 
-                                <div id="directStatusFeedback" style="font-size: 0.85rem; color: var(--color-texto-2); line-height: 1.45;">
-                                    💡 <em>Ninguna configuración se altera hasta que pulses explícitamente en programar. El nodo se reiniciará automáticamente tras aplicar los cambios.</em>
+                                <div id="directStatusFeedback" style="font-size: 0.85rem; color: var(--color-texto-2); line-height: 1.45; background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-radius: var(--radio-sm); padding: 0.75rem;">
+                                    💡 <em>Conecta tu nodo por cable USB Serial o Bluetooth para volcar los ajustes. Ningún parámetro se alterará en el dispositivo hasta que pulses en <strong>Programar Nodo Ahora</strong>. El nodo se reiniciará automáticamente tras aplicar los cambios.</em>
                                 </div>
                             </div>
                         </div>
