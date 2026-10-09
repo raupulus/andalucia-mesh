@@ -143,6 +143,8 @@ return [
         'rankings_desc' => 'Spectrum utilization statistics, nodes at risk, direct link quality, and traffic mix analytics.',
         'open_service' => 'Open service →',
         'view_stats' => 'View statistics →',
+        'status_active' => 'Active',
+        'status_paused' => 'Paused',
     ],
 
     'map' => [

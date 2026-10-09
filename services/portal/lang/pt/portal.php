@@ -143,6 +143,8 @@ return [
         'rankings_desc' => 'Estatísticas de ocupação do espectro, nós em risco, qualidade de ligações diretas e mix de tráfego.',
         'open_service' => 'Abrir serviço →',
         'view_stats' => 'Ver estatísticas →',
+        'status_active' => 'Ativo',
+        'status_paused' => 'Pausado',
     ],
 
     'map' => [

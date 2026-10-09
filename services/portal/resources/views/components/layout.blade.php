@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="ltr" data-theme="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="ltr" data-theme="dark" translate="no">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Evitar auto-traducción invasiva del navegador que sobreescribe la elección manual del usuario -->
+    <meta name="google" content="notranslate">
     @php
         $currentLocale = app()->getLocale();
         $localeMap = [

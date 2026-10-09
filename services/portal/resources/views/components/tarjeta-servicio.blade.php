@@ -58,7 +58,7 @@
         @if($servicioClave)
             <div style="position: absolute; top: 0.75rem; right: 0.75rem; display: flex; align-items: center; gap: 0.35rem; background: var(--color-superficie); padding: 0.2rem 0.5rem; border-radius: var(--radio-full); font-size: 0.75rem; font-weight: 600; box-shadow: var(--sombra-1);">
                 <span style="width: 8px; height: 8px; border-radius: 50%; background-color: {{ $estado === 'ok' ? 'var(--mapa-verde)' : 'var(--color-critico-texto)' }}; display: inline-block;"></span>
-                <span>{{ $estado === 'ok' ? 'Activo' : 'Pausado' }}</span>
+                <span>{{ $estado === 'ok' ? __('portal.services.status_active') : __('portal.services.status_paused') }}</span>
             </div>
         @endif
     </div>

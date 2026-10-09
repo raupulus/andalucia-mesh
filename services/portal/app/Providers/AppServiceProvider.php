@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Listeners\ActualizarUltimoAcceso;
 use App\Models\CoordinatedRouter;
 use App\Models\CustomPage;
 use App\Models\Faq;
@@ -17,7 +18,6 @@ use App\Policies\CustomPagePolicy;
 use App\Policies\FaqPolicy;
 use App\Policies\HardwareCategoryPolicy;
 use App\Policies\HardwareItemPolicy;
-use App\Listeners\ActualizarUltimoAcceso;
 use App\Policies\SuggestionPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\WebhookDestinationPolicy;

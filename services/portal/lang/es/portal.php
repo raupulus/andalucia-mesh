@@ -143,6 +143,8 @@ return [
         'rankings_desc' => 'Estadísticas de consumo del espectro, nodos en riesgo, calidad de enlaces directos y mix de tráfico.',
         'open_service' => 'Abrir servicio →',
         'view_stats' => 'Ver estadísticas →',
+        'status_active' => 'Activo',
+        'status_paused' => 'Pausado',
     ],
 
     'map' => [
