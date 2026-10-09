@@ -162,6 +162,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{ $styles ?? '' }}
+    @stack('head')
 </head>
 <body>
     <a href="#contenido-principal" class="salto-accesible">{{ __('portal.skip_to_content') }}</a>
@@ -172,10 +173,13 @@
         {{ $slot }}
     </main>
 
+    @if(!($sinPie ?? false))
     <x-pie />
+    @endif
 
     <x-aviso-pruebas />
 
     {{ $scripts ?? '' }}
+    @stack('scripts')
 </body>
 </html>

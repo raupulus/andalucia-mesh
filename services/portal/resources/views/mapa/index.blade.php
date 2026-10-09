@@ -2,10 +2,14 @@
     :title="__('portal.nav.map') . ' · ' . config('proyecto.nombre')"
     activa="/mapa"
     :description="'Mapa interactivo de la red ' . config('proyecto.nombre') . '. Visualización de nodos en directo, diagnóstico de configuraciones y cobertura regional.'"
+    :sinPie="true"
 >
-    @push('head')
-        @vite(['resources/css/mapa.css', 'resources/js/mapa/mapa.js'])
-    @endpush
+    <x-slot:styles>
+        @vite(['resources/css/mapa.css'])
+    </x-slot:styles>
+    <x-slot:scripts>
+        @vite(['resources/js/mapa/mapa.js'])
+    </x-slot:scripts>
 
     <div class="mapa-pantalla" aria-label="Mapa interactivo de nodos de la red">
         <!-- Barra Superior Flotante: Métricas de red y controles interactivos -->

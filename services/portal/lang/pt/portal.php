@@ -42,6 +42,16 @@ return [
         ],
     ],
 
+    'map_stats' => [
+        'nodes' => 'Nós',
+        'active_1h' => 'Ativos 1h',
+        'gateways' => 'Gateways',
+        'updated' => 'at.',
+        'unoptimized' => 'Não otimizados',
+        'favorites' => 'Favoritos',
+        'search_placeholder' => 'Procurar nó...',
+    ],
+
     'footer' => [
         'description' => 'Rede regional comunitária de telecomunicações em malha LoRa Meshtastic. Projeto livre, aberto e sem fins lucrativos para Cádis e Andaluzia.',
         'download_qr' => 'Descarregar QR do projeto (.svg)',

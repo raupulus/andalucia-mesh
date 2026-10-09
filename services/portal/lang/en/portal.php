@@ -42,6 +42,16 @@ return [
         ],
     ],
 
+    'map_stats' => [
+        'nodes' => 'Nodes',
+        'active_1h' => 'Active 1h',
+        'gateways' => 'Gateways',
+        'updated' => 'upd.',
+        'unoptimized' => 'Unoptimized',
+        'favorites' => 'Favorites',
+        'search_placeholder' => 'Search node...',
+    ],
+
     'footer' => [
         'description' => 'Regional citizen mesh telecommunications network using LoRa Meshtastic. Free, open-source and non-profit project for Cádiz and Andalusia.',
         'download_qr' => 'Download project QR (.svg)',
