@@ -40,9 +40,9 @@
 
             <!-- Encabezado principal de la incidencia -->
             <article class="tarjeta" style="padding: 2rem; margin-bottom: 1.75rem;">
-                <header style="border-bottom: 1px solid var(--color-borde); padding-bottom: 1.25rem; margin-bottom: 1.5rem;">
+                <header class="encabezado-pagina" style="padding-bottom: 1.25rem; margin-bottom: 1.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.85rem; flex-wrap: wrap;">
-                        <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--color-texto-1); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <h1 class="titulo-pagina-vistoso" style="font-size: 1.85rem; font-weight: 800; color: var(--color-texto-1); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                             <span aria-hidden="true">{{ $alerta['regla_icono'] ?? '⚠️' }}</span>
                             <span>{{ $alerta['regla_nombre'] ?? $alerta['regla'] ?? __('portal.alerts.detected_incident') }}</span>
                         </h1>
@@ -52,7 +52,7 @@
                     </div>
 
                     <!-- Badges y metadatos del estado -->
-                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; font-size: 0.9rem; color: var(--color-texto-2);">
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; font-size: 0.9rem; color: var(--color-texto-2); margin-bottom: 1.25rem;">
                         <div style="display: flex; align-items: center; gap: 0.35rem;">
                             <span>{{ __('portal.alerts.risk_label') }}</span>
                             <x-chip-estado :tipo="$chipTipo" :texto="$textoRiesgo" />
@@ -76,6 +76,7 @@
                             </span>
                         @endif
                     </div>
+                    <x-separador-bandera />
                 </header>
 
                 <!-- Resumen directo del aviso -->

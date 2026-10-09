@@ -106,17 +106,20 @@ Segmentos separados por un hueco de 2 px del color de la superficie. Leyenda sie
 | Rol | Familia | Peso | Tamaño / interlineado (escritorio → móvil) |
 |---|---|---|---|
 | Portada (total de nodos) | Ubuntu | 500 | 40/48 → 32/40 |
-| H1 | Ubuntu | 500 | 32/40 → 28/36 |
-| H2 | Ubuntu | 500 | 24/32 |
-| H3 (títulos de tarjeta) | Ubuntu | 500 | 20/28 |
+| H1 (títulos principales vistosos) | Ubuntu | 800 | 46/54 → 35/42 |
+| H2 (secciones y artículos) | Ubuntu | 700 | 26/34 (con barra lateral verde `#007A33` / `#67EA94`) |
+| H3 (títulos de tarjeta y subsecciones) | Ubuntu | 700 | 20/28 |
 | Texto | Inter | 400 | 16/26 |
+| Listas con viñeta | Inter | 400 | Punto verde corporativo (`ul > li::marker`: `#007A33` claro / `#67EA94` oscuro) |
 | Texto secundario | Inter | 400 | 14/22 |
 | Etiquetas y chips | Inter | 500 | 12/16, mayúsculas solo en chips |
 | Números (burbujas, rankings, tablas) | Inter con cifras tabulares | 600 | Según contexto |
 | Ids de nodo (`!a1b2c3d4`) | Ubuntu Mono | 400 | 14/22 |
 
-- Ubuntu en títulos (redondeada, combina con el trazo del logo); Inter para texto largo por legibilidad.
+- Ubuntu en títulos (redondeada, combina con el trazo del logo, con peso 800 en H1 y barra de acento verde en H2); Inter para texto largo por legibilidad.
 - Fuentes **autoalojadas** en local bajo `public/fonts/` (`ubuntu-500.woff2`, `ubuntu-700.woff2`, `inter-variable.woff2`, `ubuntu-mono-400.woff2`, `ubuntu-mono-700.woff2`), con subconjunto latino, `font-display: swap` y declaradas mediante `@font-face` en `app.css`. Cero peticiones o conexiones a Google Fonts o servicios de terceros.
+- **Puntos de lista (viñetas):** Todos los elementos de listas desordenadas (`ul > li::marker`) adoptan el verde corporativo en toda la web (`#007A33` en modo claro y `#67EA94` en modo oscuro), unificando la identidad visual del portal.
+- **Separadores corporativos:** Los separadores horizontales (`<hr>`, `.separador-bandera` y cabeceras de página con `<x-separador-bandera />`) emplean la bandera de Andalucía tricolor (verde, blanca, verde) de 4,5 px de altura con acabado accesible y resplandor sutil en modo oscuro.
 - Longitud de línea máxima: 68 caracteres. En modo oscuro no se usa peso inferior a 400 (el texto fino se "come" sobre fondo oscuro).
 
 ## 6. Espaciado y rejilla

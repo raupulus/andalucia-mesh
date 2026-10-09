@@ -6,10 +6,10 @@
 <x-layout :title="__('portal.pages.index_title')" :description="__('portal.pages.meta_description') ?? __('portal.pages.index_subtitle')" :image="asset('img/og/og-paginas.webp')">
     <div class="contenedor seccion">
         <!-- Encabezado de la sección -->
-        <header style="margin-bottom: 2.5rem; border-bottom: 1px solid var(--color-borde); padding-bottom: 1.5rem;">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <header class="encabezado-pagina" style="margin-bottom: 2.5rem; padding-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
                 <div>
-                    <h1 style="font-size: 2.25rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em;">
+                    <h1 class="titulo-pagina-vistoso" style="font-size: 2.25rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em;">
                         {{ __('portal.pages.index_title') }}
                     </h1>
                     <p class="lead" style="margin-bottom: 0; color: var(--color-texto-2); font-size: 1.15rem;">
@@ -20,6 +20,7 @@
                     {{ __('portal.hardware.back_to_home') }}
                 </a>
             </div>
+            <x-separador-bandera />
         </header>
 
         <!-- Listado de páginas en tarjetas horizontales ocupando todo el ancho -->

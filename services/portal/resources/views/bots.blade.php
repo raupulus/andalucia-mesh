@@ -7,13 +7,14 @@
     <div class="contenedor seccion">
         <article style="max-width: 960px; margin: 0 auto;">
             <!-- Encabezado de la página -->
-            <header style="margin-bottom: 3rem; border-bottom: 1px solid var(--color-borde); padding-bottom: 2rem;">
+            <header class="encabezado-pagina" style="margin-bottom: 3rem; padding-bottom: 2rem;">
                 <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
                     <span class="chip chip-correcto" style="font-weight: 700;">{{ __('portal.bots.badge') }}</span>
                     <span style="font-size: 0.85rem; color: var(--color-texto-3);">{{ __('portal.bots.subtitle') }}</span>
                 </div>
-                <h1 style="margin-bottom: 1rem; font-size: clamp(2.2rem, 4vw, 2.85rem);">{{ $h1 }}</h1>
-                <p class="lead" style="margin-bottom: 0; line-height: 1.6; max-width: 840px;">{{ $descripcion }}</p>
+                <h1 class="titulo-pagina-vistoso" style="margin-bottom: 1rem; font-size: clamp(2.2rem, 4vw, 2.85rem);">{{ $h1 }}</h1>
+                <p class="lead" style="margin-bottom: 1.5rem; line-height: 1.6; max-width: 840px;">{{ $descripcion }}</p>
+                <x-separador-bandera />
             </header>
 
             <!-- 1. Qué avisan: Riesgos y Tipos -->

@@ -2,9 +2,10 @@
     <div class="contenedor seccion">
         <article style="width: 100%; margin: 0 auto;">
             <!-- Encabezado de la página -->
-            <header style="margin-bottom: 2rem; border-bottom: 1px solid var(--color-borde); padding-bottom: 1.5rem;">
-                <h1 style="margin-bottom: 0.75rem;">{{ $h1 }}</h1>
-                <p class="lead" style="margin-bottom: 0;">{{ $descripcion }}</p>
+            <header class="encabezado-pagina" style="margin-bottom: 2rem; padding-bottom: 1.5rem;">
+                <h1 class="titulo-pagina-vistoso" style="margin-bottom: 0.75rem;">{{ $h1 }}</h1>
+                <p class="lead" style="margin-bottom: 1.5rem;">{{ $descripcion }}</p>
+                <x-separador-bandera />
             </header>
 
             <!-- Tarjeta Visual Destacada: Configuración de Red LoRa SFNarrow -->

@@ -57,8 +57,8 @@
             </div>
 
             <!-- Cabecera de la página: Título, fecha, descripción -->
-            <header style="margin-bottom: 2.5rem; border-bottom: 1px solid var(--color-borde); padding-bottom: 1.75rem;">
-                <h1 style="font-size: 2.35rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.85rem; letter-spacing: -0.02em;">
+            <header class="encabezado-pagina" style="margin-bottom: 2.5rem; padding-bottom: 1.75rem;">
+                <h1 class="titulo-pagina-vistoso" style="font-size: 2.35rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.85rem; letter-spacing: -0.02em;">
                     {{ $pagina->title }}
                 </h1>
 
@@ -82,9 +82,11 @@
                     @endif
                 </div>
 
-                <p class="lead" style="font-size: 1.2rem; color: var(--color-texto-2); line-height: 1.6; margin-bottom: 0;">
+                <p class="lead" style="font-size: 1.2rem; color: var(--color-texto-2); line-height: 1.6; margin-bottom: 1.5rem;">
                     {{ $pagina->description }}
                 </p>
+
+                <x-separador-bandera />
             </header>
 
             <!-- Contenido completo formateado (Markdown procesado de forma segura) -->
@@ -94,16 +96,19 @@
 
             <!-- Footer del artículo con keywords y vuelta al listado -->
             @if(!empty($pagina->keywords))
-                <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--color-borde); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--color-texto-3);">{{ __('portal.pages.keywords_label') }}</span>
-                        @foreach($pagina->keywords as $kw)
-                            <span class="badge-keyword">{{ $kw }}</span>
-                        @endforeach
+                <div style="margin-top: 3rem;">
+                    <x-separador-bandera style="margin-bottom: 1.5rem;" />
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                            <span style="font-size: 0.85rem; font-weight: 600; color: var(--color-texto-3);">{{ __('portal.pages.keywords_label') }}</span>
+                            @foreach($pagina->keywords as $kw)
+                                <span class="badge-keyword">{{ $kw }}</span>
+                            @endforeach
+                        </div>
+                        <a href="{{ route('paginas.index') }}{{ $langQuery }}" class="tarjeta-pagina-accion">
+                            <span>← {{ __('portal.pages.btn_back') }}</span>
+                        </a>
                     </div>
-                    <a href="{{ route('paginas.index') }}{{ $langQuery }}" class="tarjeta-pagina-accion">
-                        <span>← {{ __('portal.pages.btn_back') }}</span>
-                    </a>
                 </div>
             @endif
 

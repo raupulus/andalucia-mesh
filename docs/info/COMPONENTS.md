@@ -83,5 +83,9 @@ Catálogo de componentes reutilizables de interfaz de usuario de Andalucía Mesh
   - Rol ARIA semántico `role="status"` y `aria-live="polite"`.
   - Estilo de advertencia/ámbar según `DESIGN.md` con borde semántico, icono de alerta, botón accesible y soporte nativo para temas claro y oscuro.
 
+### `x-separador-bandera` (`separador-bandera.blade.php`)
+- **Propósito:** Separador horizontal decorativo con la bandera tricolor de Andalucía (verde `#007A33` / blanco `#FFFFFF` / verde `#007A33`) para delimitar secciones, cabeceras de página y bloques temáticos.
+- **Propiedades / Atributos:** Admite paso directo de atributos HTML y clases adicionales mediante `$attributes->merge(...)`. Utiliza la clase de utilidad `.borde-bandera-andalucia`.
+
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09
