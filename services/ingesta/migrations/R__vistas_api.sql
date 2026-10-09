@@ -34,6 +34,47 @@ SELECT
     ) AS heard_by
 FROM node n;
 
+-- 1b. api_map_nodes (catálogo geográfico de nodos para el mapa interactivo de la red /mapa)
+CREATE OR REPLACE VIEW api_map_nodes AS
+SELECT
+    n.id,
+    n.node_num,
+    n.short_name,
+    n.long_name,
+    n.role,
+    n.hw_model,
+    n.firmware,
+    n.latitude,
+    n.longitude,
+    n.position_precision_m,
+    n.position_source,
+    n.last_position_at,
+    n.province,
+    n.border_uncertain,
+    n.hop_start_last,
+    n.hops_min_last,
+    n.is_gateway,
+    (n.role IN ({{INFRA_ROLES}})) AS is_router,
+    n.battery_level,
+    n.voltage,
+    n.channel_utilization,
+    n.air_util_tx,
+    n.first_seen,
+    n.last_seen,
+    ARRAY(
+        SELECT DISTINCT ard.gateway_id
+        FROM agg_reception_day ard
+        WHERE ard.from_id = n.id
+          AND ard.bucket >= (now() - INTERVAL '7 days')
+          AND ard.gateway_id != n.id
+    ) AS heard_by
+FROM node n
+WHERE n.latitude IS NOT NULL
+  AND n.longitude IS NOT NULL
+  AND n.latitude BETWEEN -90.0 AND 90.0
+  AND n.longitude BETWEEN -180.0 AND 180.0
+  AND NOT (n.latitude = 0.0 AND n.longitude = 0.0);
+
 -- 2. api_province_load (carga de canal para mapa de calor provincial)
 CREATE OR REPLACE VIEW api_province_load AS
 SELECT
@@ -681,6 +722,16 @@ SELECT
 FROM agg_telemetry_day
 WHERE bucket >= (now() - INTERVAL '7 days');
 
+-- 8.4 api_node_packets_24h (desglose de paquetes en las últimas 24 horas por nodo y portnum)
+CREATE OR REPLACE VIEW api_node_packets_24h AS
+SELECT
+    p.from_id AS node_id,
+    COALESCE(p.portnum, 'other') AS portnum,
+    count(*)::integer AS packets_24h
+FROM packet p
+WHERE p.rx_first >= (now() - INTERVAL '24 hours')
+GROUP BY 1, 2;
+
 -- ==============================================================================
 -- 9. Asignación de Permisos de Seguridad
 -- portal_lector_ingesta solo puede leer las vistas de contrato api_*
@@ -690,6 +741,7 @@ REVOKE ALL ON ALL TABLES IN SCHEMA public FROM portal_lector_ingesta;
 
 GRANT SELECT ON
     api_nodes,
+    api_map_nodes,
     api_province_load,
     api_routers,
     api_gateways,
@@ -716,5 +768,6 @@ GRANT SELECT ON
     api_rank_reboots,
     api_node_intervals,
     api_node_battery_daily,
-    api_node_reboots_daily
+    api_node_reboots_daily,
+    api_node_packets_24h
 TO portal_lector_ingesta;

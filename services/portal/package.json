@@ -21,6 +21,7 @@
         "@meshtastic/transport-http": "^0.2.5",
         "@meshtastic/transport-web-bluetooth": "^0.1.5",
         "@meshtastic/transport-web-serial": "^0.2.5",
-        "js-yaml": "^5.4.3"
+        "js-yaml": "^5.4.3",
+        "leaflet": "^1.9.4"
     }
 }

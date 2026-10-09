@@ -1,0 +1,754 @@
+/* ==============================================================================
+ * mapa.css (services/portal/resources/css/mapa.css)
+ *
+ * Estilos específicos del servicio interactivo "Mapa" de Andalucía Mesh.
+ * Basado en Leaflet 1.9.4 empaquetado localmente, con tema nocturno adaptativo,
+ * marcadores vectoriales de alto contraste, cajón lateral y modal de diagnóstico.
+ * ============================================================================== */
+
+@import 'leaflet/dist/leaflet.css';
+
+/* Contenedor principal de pantalla completa bajo el navbar */
+.mapa-pantalla {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 4.5rem);
+    min-height: 500px;
+    background-color: var(--color-fondo, #0b0f14);
+    overflow: hidden;
+}
+
+#mapa-lienzo {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background-color: #090d12;
+}
+
+/* --------------------------------------------------------------------------
+ * Barra Superior Flotante de Estadísticas y Acciones
+ * -------------------------------------------------------------------------- */
+.mapa-topbar {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    pointer-events: none;
+}
+
+.mapa-topbar-left,
+.mapa-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    pointer-events: auto;
+    flex-wrap: wrap;
+}
+
+.mapa-pill-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.75rem;
+    background-color: rgba(13, 17, 23, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
+    font-family: var(--fuente-mono, monospace);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-texto, #f0f6fc);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    white-space: nowrap;
+}
+
+.mapa-pill-stat .val {
+    color: var(--color-acento, #00c853);
+}
+
+.mapa-pill-stat .lbl {
+    font-family: var(--fuente-texto, sans-serif);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-texto-2, #8b949e);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.mapa-btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.85rem;
+    background-color: rgba(13, 17, 23, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+    font-family: var(--fuente-texto, sans-serif);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-texto, #f0f6fc);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    white-space: nowrap;
+}
+
+.mapa-btn-action:hover {
+    background-color: rgba(22, 27, 34, 0.95);
+    border-color: var(--color-acento, #00c853);
+    color: var(--color-texto, #ffffff);
+    transform: translateY(-1px);
+}
+
+.mapa-btn-action.btn-unoptimized {
+    background-color: rgba(217, 119, 6, 0.15);
+    border-color: rgba(217, 119, 6, 0.5);
+    color: #fbbf24;
+}
+
+.mapa-btn-action.btn-unoptimized:hover {
+    background-color: rgba(217, 119, 6, 0.25);
+    border-color: #f59e0b;
+}
+
+.mapa-btn-action.btn-live {
+    background-color: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #f87171;
+}
+
+.mapa-btn-action.btn-live.active {
+    background-color: #dc2626;
+    border-color: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+}
+
+.mapa-btn-action.btn-fav.active {
+    background-color: rgba(234, 179, 8, 0.2);
+    border-color: #eab308;
+    color: #fde047;
+}
+
+/* Buscador predictivo en cabecera */
+.mapa-search-wrapper {
+    position: relative;
+    pointer-events: auto;
+}
+
+.mapa-search-input {
+    width: 210px;
+    padding: 0.42rem 0.85rem 0.42rem 2.2rem;
+    background-color: rgba(13, 17, 23, 0.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 9999px;
+    font-family: var(--fuente-texto, sans-serif);
+    font-size: 0.82rem;
+    color: var(--color-texto, #f0f6fc);
+    outline: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.mapa-search-input:focus {
+    width: 270px;
+    border-color: var(--color-acento, #00c853);
+    background-color: rgba(13, 17, 23, 0.98);
+}
+
+.mapa-search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-texto-2, #8b949e);
+    pointer-events: none;
+}
+
+.mapa-search-results {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    right: 0;
+    width: 320px;
+    max-height: 380px;
+    overflow-y: auto;
+    background-color: var(--color-superficie, #161b22);
+    border: 1px solid var(--color-borde, #30363d);
+    border-radius: 0.75rem;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    display: none;
+}
+
+.mapa-search-results.open {
+    display: block;
+}
+
+.mapa-search-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.mapa-search-item:last-child {
+    border-bottom: none;
+}
+
+.mapa-search-item:hover {
+    background-color: var(--color-superficie-2, #21262d);
+}
+
+/* --------------------------------------------------------------------------
+ * Marcadores SVG Personalizados en Leaflet
+ * -------------------------------------------------------------------------- */
+.mesh-marker-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.mesh-marker-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+    transition: transform 0.15s ease;
+}
+
+.mesh-marker-wrap:hover .mesh-marker-dot {
+    transform: scale(1.3);
+}
+
+.mesh-marker-dot.active-1h {
+    background-color: #00c853; /* Verde Andalucía Mesh */
+}
+
+.mesh-marker-dot.active-24h {
+    background-color: #06b6d4; /* Cian activo 24h */
+}
+
+.mesh-marker-dot.inactive {
+    background-color: #64748b; /* Gris inactivo */
+    opacity: 0.75;
+}
+
+.mesh-marker-triangle {
+    width: 0;
+    height: 0;
+    border-left: 9px solid transparent;
+    border-right: 9px solid transparent;
+    border-bottom: 16px solid #38bdf8; /* Azul claro para routers */
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+    transition: transform 0.15s ease;
+}
+
+.mesh-marker-wrap:hover .mesh-marker-triangle {
+    transform: scale(1.3);
+}
+
+.mesh-marker-gw {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #eab308; /* Amarillo para Gateways MQTT */
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 10px rgba(234, 179, 8, 0.7);
+}
+
+.mesh-marker-gw::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 1.5px dashed #eab308;
+    border-radius: 50%;
+    animation: spinSlow 8s linear infinite;
+}
+
+@keyframes spinSlow {
+    100% { transform: rotate(360deg); }
+}
+
+/* Insignia de advertencia / no optimizado (▲) */
+.mesh-marker-warn-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 14px;
+    height: 14px;
+    background-color: #f59e0b;
+    color: #000000;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    border: 1px solid #ffffff;
+    animation: warnPulse 2s infinite ease-in-out;
+}
+
+.mesh-marker-warn-badge.critico {
+    background-color: #ef4444;
+    color: #ffffff;
+}
+
+@keyframes warnPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+}
+
+/* Tooltip oscuro minimalista de Leaflet */
+.leaflet-popup-content-wrapper {
+    background-color: rgba(13, 17, 23, 0.95) !important;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 0.75rem !important;
+    color: #f0f6fc !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6) !important;
+    padding: 0 !important;
+}
+
+.leaflet-popup-content {
+    margin: 0.75rem 1rem !important;
+    font-family: var(--fuente-texto, sans-serif) !important;
+    line-height: 1.4 !important;
+}
+
+.leaflet-popup-tip {
+    background-color: rgba(13, 17, 23, 0.95) !important;
+}
+
+/* --------------------------------------------------------------------------
+ * Cajón Lateral de Detalle de Nodo (Bottom-Left Drawer)
+ * -------------------------------------------------------------------------- */
+.mapa-drawer {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    width: 320px;
+    max-width: calc(100vw - 3rem);
+    background-color: rgba(13, 17, 23, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 1rem;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+    z-index: 30;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mapa-drawer.open {
+    display: flex;
+}
+
+.mapa-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mapa-drawer-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    overflow: hidden;
+}
+
+.mapa-drawer-title {
+    font-family: var(--fuente-titulos, sans-serif);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mapa-btn-fav {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.15rem;
+    color: #64748b;
+    padding: 0;
+    transition: color 0.15s ease;
+}
+
+.mapa-btn-fav.active {
+    color: #eab308;
+}
+
+.mapa-drawer-close {
+    background: none;
+    border: none;
+    color: #8b949e;
+    cursor: pointer;
+    padding: 0.2rem;
+    border-radius: 0.25rem;
+    transition: color 0.15s ease;
+}
+
+.mapa-drawer-close:hover {
+    color: #ffffff;
+}
+
+.mapa-drawer-body {
+    padding: 0.85rem 1rem;
+    max-height: 380px;
+    overflow-y: auto;
+}
+
+/* Alerta de no optimizado dentro del cajón */
+.mapa-drawer-warning-box {
+    padding: 0.65rem 0.85rem;
+    background-color: rgba(217, 119, 6, 0.15);
+    border: 1px solid rgba(217, 119, 6, 0.4);
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.mapa-drawer-warning-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #fbbf24;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.3rem;
+}
+
+.mapa-drawer-warning-list {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: 0.72rem;
+    color: #fde68a;
+    line-height: 1.4;
+}
+
+/* Tabla de propiedades */
+.mapa-props-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    margin-bottom: 0.75rem;
+}
+
+.mapa-props-table td {
+    padding: 0.3rem 0;
+    vertical-align: top;
+}
+
+.mapa-props-table td.prop-lbl {
+    color: #8b949e;
+    font-weight: 600;
+    width: 42%;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+    letter-spacing: 0.03em;
+}
+
+.mapa-props-table td.prop-val {
+    color: #f0f6fc;
+    font-family: var(--fuente-mono, monospace);
+    word-break: break-all;
+}
+
+.mapa-drawer-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mapa-btn-diag {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem;
+    background: linear-gradient(135deg, #007A33 0%, #00953B 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.mapa-btn-diag:hover {
+    opacity: 0.92;
+}
+
+/* --------------------------------------------------------------------------
+ * Modal Central de Diagnóstico ("Diagnóstico del nodo")
+ * -------------------------------------------------------------------------- */
+.mapa-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.mapa-modal-backdrop.open {
+    display: flex;
+}
+
+.mapa-modal-card {
+    background-color: #12171f;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 1rem;
+    width: 680px;
+    max-width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+}
+
+.mapa-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mapa-modal-header h3 {
+    margin: 0;
+    font-family: var(--fuente-titulos, sans-serif);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.mapa-modal-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.mapa-modal-node-sub {
+    font-family: var(--fuente-mono, monospace);
+    font-size: 0.85rem;
+    color: #8b949e;
+    margin-top: -0.8rem;
+}
+
+.mapa-hop-box {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.mapa-hop-box.recomendado {
+    background-color: rgba(0, 122, 51, 0.15);
+    border: 1px solid rgba(0, 122, 51, 0.4);
+    color: #4ade80;
+}
+
+.mapa-hop-box.aviso {
+    background-color: rgba(217, 119, 6, 0.15);
+    border: 1px solid rgba(217, 119, 6, 0.4);
+    color: #fbbf24;
+}
+
+.mapa-hop-box.critico {
+    background-color: rgba(220, 38, 38, 0.15);
+    border: 1px solid rgba(220, 38, 38, 0.4);
+    color: #f87171;
+}
+
+/* Tarjetas de problemas detectados */
+.mapa-problem-card {
+    background-color: #1a202c;
+    border-radius: 0.65rem;
+    padding: 1rem;
+    border-left: 4px solid #f59e0b;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.mapa-problem-card.critico {
+    border-left-color: #ef4444;
+}
+
+.mapa-problem-card-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.mapa-problem-card-desc {
+    font-size: 0.82rem;
+    color: #cbd5e1;
+    line-height: 1.45;
+}
+
+.mapa-problem-card-solution {
+    margin-top: 0.3rem;
+    padding: 0.5rem 0.75rem;
+    background-color: rgba(0, 0, 0, 0.35);
+    border-radius: 0.4rem;
+    font-size: 0.8rem;
+    color: #93c5fd;
+    font-family: var(--fuente-mono, monospace);
+}
+
+.mapa-problem-card-solution strong {
+    color: #ffffff;
+    font-family: var(--fuente-texto, sans-serif);
+}
+
+/* Desglose de paquetes en 24h */
+.mapa-breakdown-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.82rem;
+    margin-bottom: 0.4rem;
+}
+
+.mapa-breakdown-label {
+    width: 110px;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.mapa-breakdown-bar-wrap {
+    flex: 1;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.mapa-breakdown-bar-fill {
+    height: 100%;
+    background-color: var(--color-acento, #00c853);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.mapa-breakdown-value {
+    width: 80px;
+    text-align: right;
+    font-family: var(--fuente-mono, monospace);
+    font-size: 0.78rem;
+    color: #e2e8f0;
+}
+
+/* --------------------------------------------------------------------------
+ * Modal de Catálogo "No optimizados"
+ * -------------------------------------------------------------------------- */
+.mapa-catalog-tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+}
+
+.mapa-catalog-tab-btn {
+    background: none;
+    border: none;
+    padding: 0.6rem 1rem;
+    font-family: var(--fuente-texto, sans-serif);
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+}
+
+.mapa-catalog-tab-btn.active {
+    color: #00c853;
+    border-bottom-color: #00c853;
+}
+
+/* Leyenda inferior derecha */
+.mapa-legend {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background-color: rgba(13, 17, 23, 0.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    z-index: 20;
+    font-size: 0.75rem;
+    color: #f0f6fc;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+}
+
+.mapa-legend-title {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+    color: #8b949e;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+}
+
+.mapa-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+}
+
+.mapa-legend-item:last-child {
+    margin-bottom: 0;
+}

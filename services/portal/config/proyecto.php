@@ -119,6 +119,7 @@ return [
     // Navegación principal y pie
     'navegacion' => [
         ['titulo' => 'Inicio', 'url' => '/'],
+        ['titulo' => 'Mapa', 'url' => '/mapa'],
         ['titulo' => 'Configura tu nodo', 'url' => '/configura-tu-nodo'],
         ['titulo' => 'MQTT', 'url' => '/conecta-tu-gateway'],
         ['titulo' => 'Rankings', 'url' => '/rankings'],

@@ -243,5 +243,9 @@ identity-conflict:
   activa: false
   ventana_h: 24
 
+client-base-fw:
+  activa: true
+  version_minima: "2.7.17"
+
 # Silencios temporales de reglas o nodos
 silencios: []

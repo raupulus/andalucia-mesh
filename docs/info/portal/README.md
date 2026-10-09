@@ -30,6 +30,7 @@
 | 06.14 | [`14-operator-panel.md`](14-operator-panel.md) | `/admin`: estado de servicios, recursos de solo lectura, operadores | Media |
 | 06.15 | [`15-hardware-catalog.md`](15-hardware-catalog.md) | Catálogo de hardware recomendado: front interactivo `/hardware`, recorte 1:1 y gestión en `/admin` | Media |
 | 06.16 | [`16-custom-pages.md`](16-custom-pages.md) | Páginas y artículos dinámicos: catálogo `/paginas`, tarjetas horizontales, SEO Article y gestión en `/admin` | Media |
+| 06.17 | [`17-interactive-map.md`](17-interactive-map.md) | Mapa interactivo de nodos y problemas de malla en `/mapa`: Leaflet local, marcadores, modales de diagnóstico, favoritos, búsqueda y caché Nginx/Gzip | Alta |
 | — | [`pages/`](pages/README.md) | Contenido y borrador del texto de cada página pública | — |
 | — | [`DESIGN.md`](../DESIGN.md) | Sistema visual | — |
 
@@ -67,6 +68,7 @@ El portal es la **única pieza** del proyecto con internacionalización y traduc
 | `/configura-tu-nodo`, `/conecta-tu-gateway` | Público | 03, 04 |
 | `/bots`, `/firmware` | Público | 06, 07 |
 | `/rankings`, `/routers`, `/alertas`, `/alertas/{id}` | Público | 08 |
+| `/mapa` | Público | 17 |
 | `/revisa-tu-nodo`, `/revisa-tu-nodo/{id}` | Público | 09 |
 | `/sugerencias`, `/faq` | Público | 01, 14 |
 | `/legal/aviso-legal`, `/legal/privacidad`, `/legal/cookies` | Público | 10 |

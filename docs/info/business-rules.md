@@ -21,7 +21,7 @@
 | RN-02 | Acceso a gateways simplificado con credenciales compartidas públicas (`meshdev` / `large4cats`) de solo subida sin lectura en los canales de `ALLOWED_CHANNELS` y map reports por TLS 8883; canal 0 `SFNarrow` | [mosquitto](mosquitto/README.md) |
 | RN-03 | Solo se trata lo que el nodo permite subir (OK to MQTT). No hay exclusión de nodos ni feed filtrado: quien no quiere aparecer desactiva OK to MQTT | [10-legal-privacy](portal/10-legal-privacy.md) |
 | RN-04 | Nunca se publican mensajes directos (PKI ni texto con destinatario); solo difusión en canales de la lista | [ingesta](ingesta/06-decoded-stream.md), [chat-ws](chat-ws/README.md) |
-| RN-05 | El portal y la API nunca exponen coordenadas: solo provincia y recuentos | [portal](portal/README.md) |
+| RN-05 | El portal público muestra coordenadas en el mapa interactivo de la red (`/mapa`) únicamente para aquellos nodos con ubicación pública transmitida (OK to MQTT, RN-03); en las restantes secciones del portal y en la API general se presentan exclusivamente agrupaciones por provincia y recuentos | [portal](portal/README.md) |
 | RN-06 | Las páginas públicas no usan cookies ni hacen peticiones a terceros | [portal](portal/README.md) |
 | RN-08 | Independencia, centralización y aislamiento: sin bridges MQTT bidireccionales ni federaciones salientes hacia redes de terceros (PotatoMesh `FEDERATION=0` forzado y MeshviewWorld sin enlaces activos); sync-peers solo lee APIs públicas de otras instancias y las canaliza a ingesta (filtro anti-duplicados) y PotatoMesh | [sync-peers](potatomesh/sync-peers.md), [customizations](customizations.md) |
 | RN-09 | Toda fecha y marca temporal debe persistirse en UTC siempre que sea viable (epoch UTC o `TIMESTAMPTZ`); en interfaces de usuario y vistas se muestra en hora local peninsular (`Europe/Madrid`, CET/CEST) en formato 24 horas (`HH:mm:ss`) y fecha estándar europea (`DD/MM/YYYY`) o ISO (`YYYY-MM-DD`) | [integration](integration.md), [customizations](customizations.md) |
@@ -91,6 +91,7 @@
 | 2026-10-08 | RN-48 | Soporte multidioma (ES/EN/PT) exclusivo para el portal (frontend y panel de operadores), con español por defecto y bandera de Andalucía en el selector | Responsable del proyecto |
 | 2026-10-08 | RN-11, RN-32, RN-39 | Reajuste integral de umbrales del detector de alertas (baterías 60/40 y 35/15; reinicios 3/5m y 5/10m; saturación 60% routers / 40% clientes; ráfagas de telemetría y texto; sondeos; 20:00 h solar; traceroute; tráfico privado; posiciones GPS continuas) y nuevo módulo Filament de routers coordinados agrupado por provincias andaluzas con descarte de nodos exteriores | Responsable del proyecto |
 | 2026-10-09 | RN-32, RN-33 | Prohibición estricta de avisos hacia usuarios o nodos (observador pasivo); descarte de cese de GPS y desfase de reloj; ajuste umbrales airtime-high (4/6/8 %); gestión manual de routers coordinados ante cambios de firmware en /admin/coordinated-routers | Responsable del proyecto |
+| 2026-10-09 | RN-05 | Autorización explícita de visualización de coordenadas geográficas en el mapa interactivo (/mapa) para nodos con OK to MQTT (RN-03), manteniendo la agregación por provincia en el resto del portal y API | Responsable del proyecto |
 
 ---
 > Creado: 2026-10-07 · Última revisión: 2026-10-09

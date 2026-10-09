@@ -4,6 +4,7 @@ from detector.reglas.airtime_high import ReglaAirtimeHigh
 from detector.reglas.asymmetric_link import ReglaAsymmetricLink
 from detector.reglas.battery_low import ReglaBatteryLow
 from detector.reglas.chutil_high import ReglaChutilHigh
+from detector.reglas.client_base_fw import ReglaClientBaseFw
 from detector.reglas.flood import ReglaFlood
 from detector.reglas.gateway_no_traffic import ReglaGatewayNoTraffic
 from detector.reglas.gateway_offline import ReglaGatewayOffline
@@ -28,6 +29,7 @@ __all__ = [
     "ReglaAsymmetricLink",
     "ReglaBatteryLow",
     "ReglaChutilHigh",
+    "ReglaClientBaseFw",
     "ReglaFlood",
     "ReglaGatewayNoTraffic",
     "ReglaGatewayOffline",

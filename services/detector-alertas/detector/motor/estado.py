@@ -39,6 +39,7 @@ class EstadoNodo:
     long: str | None = None
     role: str | None = None
     hw: str | None = None
+    firmware: str | None = None
     is_gateway: bool = False
     province: str | None = None
 
@@ -115,6 +116,8 @@ class EstadoNodo:
                 self.role = pkt.from_node.role
             if pkt.from_node.hw:
                 self.hw = pkt.from_node.hw
+            if pkt.from_node.firmware:
+                self.firmware = pkt.from_node.firmware
             if pkt.from_node.is_gateway:
                 self.is_gateway = True
             if pkt.from_node.province:
@@ -132,6 +135,11 @@ class EstadoNodo:
             if self.public_key and self.public_key != key and self.public_key not in self.previous_keys:
                 self.previous_keys.append(self.public_key)
             self.public_key = key
+
+        # Firmware reportado en payload (nodeinfo)
+        fw = payload.get("firmware") or payload.get("app_version")
+        if fw and isinstance(fw, str):
+            self.firmware = fw
 
         # Posiciones GPS para bounding box y movilidad física
         lat_i = payload.get("latitude_i")

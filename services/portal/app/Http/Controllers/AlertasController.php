@@ -30,6 +30,14 @@ class AlertasController extends Controller
                 'por_que' => 'En una red mallada como Meshtastic, cada salto (hop) provoca que los repetidores en cobertura retransmitan el mensaje. Transmitir con 6 o 7 saltos hace que un solo mensaje rebote decenas de veces por toda la comunidad autónoma, saturando el tiempo de emisión de radio (airtime), provocando colisiones de paquetes y bloqueando las transmisiones de otros usuarios o llamadas de socorro.',
                 'como_solucionar' => 'Abre la app Meshtastic en tu móvil o navegador → Ajustes de Radio → Configuración LoRa → cambia "Hop Limit" a 3 (o como máximo 5 si estás en un punto muy aislado sin repetidores cercanos). Guarda los cambios. La alerta se resolverá automáticamente cuando el nodo emita 2 paquetes con la nueva configuración.',
             ],
+            'client-base-fw' => [
+                'nombre' => 'CLIENT_BASE en firmware >= 2.7.17',
+                'icono' => '🟡',
+                'categoria' => 'Configuración de nodo',
+                'descripcion' => 'Nodo emitiendo con rol CLIENT_BASE en versión de firmware 2.7.17 o superior.',
+                'por_que' => 'A partir del firmware 2.7.17, el rol CLIENT_BASE se comporta internamente como ROUTER_LATE: el nodo introduce un retardo artificial antes de reemitir paquetes para ceder el turno a otros repetidores. Si se utiliza en clientes normales o estaciones de usuario, ralentiza innecesariamente la propagación de los mensajes por la malla.',
+                'como_solucionar' => 'Abre la app Meshtastic en tu móvil o navegador → Ajustes de Dispositivo (Device Config) → Rol del Dispositivo (Role): cambia el rol a "CLIENT" (o a "CLIENT_MUTE" si el nodo no necesita retransmitir mensajes). Guarda los cambios en el dispositivo.',
+            ],
             'infra-silent' => [
                 'nombre' => 'Router silente',
                 'icono' => '📡',

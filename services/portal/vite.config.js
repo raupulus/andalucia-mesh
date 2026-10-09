@@ -9,6 +9,8 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/js/mesh-admin.js',
+                'resources/css/mapa.css',
+                'resources/js/mapa/mapa.js',
             ],
             refresh: true,
         }),

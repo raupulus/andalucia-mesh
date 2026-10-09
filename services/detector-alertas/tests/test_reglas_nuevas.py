@@ -8,6 +8,7 @@ from detector.motor.estado import EstadoMotor
 from detector.motor.protocolos import AlertaAbierta, ConfigGeneral, Contexto, Tick
 from detector.reglas.battery_low import ConfigBatteryLow, ReglaBatteryLow
 from detector.reglas.chutil_high import ConfigChutilHigh, ReglaChutilHigh
+from detector.reglas.client_base_fw import ConfigClientBaseFw, ReglaClientBaseFw
 from detector.reglas.poll_abuse import ConfigPollAbuse, ReglaPollAbuse
 from detector.reglas.position_flood import ConfigPositionFlood, ReglaPositionFlood
 from detector.reglas.private_chaff import ConfigPrivateChaff, ReglaPrivateChaff
@@ -512,4 +513,86 @@ def test_position_flood_cadencia() -> None:
     alts = regla.comprobar(ctx)
     assert len(alts) == 1
     assert alts[0].riesgo == "bajo"
+
+
+def test_client_base_fw_alert() -> None:
+    """Verifica detección de rol CLIENT_BASE en firmwares >= 2.7.17."""
+    regla = ReglaClientBaseFw(ConfigClientBaseFw(version_minima="2.7.17"))
+    estado = EstadoMotor()
+    bases = LineasBase()
+    t0 = datetime(2026, 10, 1, 12, 0, 0, tzinfo=UTC)
+
+    # 1. CLIENT_BASE con firmware 2.7.19 -> genera alerta riesgo bajo
+    nodo1 = estado.obtener_o_crear_nodo("!cb1", t0)
+    nodo1.role = "CLIENT_BASE"
+    nodo1.firmware = "2.7.19.56a4d6f"
+    nodo1.short = "CB1"
+
+    ctx1 = Contexto(
+        ahora=t0,
+        evento=Tick(ahora=t0),
+        nodo=nodo1,
+        estado=estado,
+        bases=bases,
+        config=regla.config,
+        general=ConfigGeneral(),
+        es_infraestructura=lambda _: False,
+    )
+    alts1 = regla.comprobar(ctx1)
+    assert len(alts1) == 1
+    assert alts1[0].riesgo == "bajo"
+    assert alts1[0].tipo == "clientes"
+    assert "actúa como ROUTER_LATE" in alts1[0].mensaje
+    assert alts1[0].datos["rol"] == "CLIENT_BASE"
+    assert alts1[0].datos["firmware"] == "2.7.19.56a4d6f"
+
+    # 2. CLIENT_BASE con firmware antiguo (2.7.16) -> no genera alerta
+    nodo2 = estado.obtener_o_crear_nodo("!cb2", t0)
+    nodo2.role = "CLIENT_BASE"
+    nodo2.firmware = "2.7.16"
+
+    ctx2 = Contexto(
+        ahora=t0,
+        evento=Tick(ahora=t0),
+        nodo=nodo2,
+        estado=estado,
+        bases=bases,
+        config=regla.config,
+        general=ConfigGeneral(),
+        es_infraestructura=lambda _: False,
+    )
+    assert len(regla.comprobar(ctx2)) == 0
+
+    # 3. Rol CLIENT normal con 2.7.19 -> no genera alerta
+    nodo3 = estado.obtener_o_crear_nodo("!cli", t0)
+    nodo3.role = "CLIENT"
+    nodo3.firmware = "2.7.19"
+
+    ctx3 = Contexto(
+        ahora=t0,
+        evento=Tick(ahora=t0),
+        nodo=nodo3,
+        estado=estado,
+        bases=bases,
+        config=regla.config,
+        general=ConfigGeneral(),
+        es_infraestructura=lambda _: False,
+    )
+    assert len(regla.comprobar(ctx3)) == 0
+
+    # 4. Sigue activa: mientras siga en CLIENT_BASE y fw >= 2.7.17
+    abierta = AlertaAbierta(
+        id="01JH0000000000000000000001",
+        regla="client-base-fw",
+        nodo="!cb1",
+        riesgo="bajo",
+        tipo="clientes",
+        mensaje="alerta abierta",
+    )
+    assert regla.sigue_activa(ctx1, abierta) is True
+
+    # Si cambia a CLIENT, se resuelve
+    nodo1.role = "CLIENT"
+    assert regla.sigue_activa(ctx1, abierta) is False
+
 

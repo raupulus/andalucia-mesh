@@ -50,6 +50,7 @@ class SitemapController extends Controller
         'bots' => 'img/og/og-bots.webp',
         'firmware' => 'img/og/og-firmware.webp',
         'api' => 'img/og/og-api.webp',
+        'mapa' => 'img/og/og-portada.webp',
         'rankings' => 'img/og/og-rankings.webp',
         'routers' => 'img/og/og-routers.webp',
         'alertas' => 'img/og/og-alertas.webp',

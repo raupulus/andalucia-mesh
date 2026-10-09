@@ -43,3 +43,12 @@ Route::get('/nodes/{id}/diagnosis', [NodesApiController::class, 'diagnosis'])->w
 Route::get('/alerts/catalog', [AlertsApiController::class, 'catalog']);
 Route::get('/alerts', [AlertsApiController::class, 'index']);
 Route::get('/alerts/{id}', [AlertsApiController::class, 'show'])->where('id', '[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{26}');
+
+// Endpoints de datos del Mapa
+Route::prefix('mapa')->group(function () {
+    Route::get('/nodes', [\App\Http\Controllers\MapaController::class, 'nodes']);
+    Route::get('/stats', [\App\Http\Controllers\MapaController::class, 'stats']);
+    Route::get('/unoptimized', [\App\Http\Controllers\MapaController::class, 'unoptimized']);
+    Route::get('/node/{id}', [\App\Http\Controllers\MapaController::class, 'nodeDetail']);
+});
+

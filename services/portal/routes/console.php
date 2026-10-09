@@ -36,3 +36,17 @@ Schedule::job(new ComprobarServicios)
 Schedule::command('portal:sitemap')
     ->dailyAt('04:00')
     ->withoutOverlapping();
+
+/*
+|--------------------------------------------------------------------------
+| Precompilación Periódica de la Caché del Mapa (mapa:cache)
+|--------------------------------------------------------------------------
+|
+| Genera cada 2 minutos los volcados JSON de nodos y estadísticas para entrega
+| ultra-rápida en Nginx/Redis con prevención estricta de solapamiento.
+|
+*/
+Schedule::command('mapa:cache')
+    ->everyTwoMinutes()
+    ->withoutOverlapping();
+

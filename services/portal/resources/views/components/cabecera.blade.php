@@ -3,6 +3,7 @@
 @php
     $navKeyMap = [
         '/' => 'portal.nav.home',
+        '/mapa' => 'portal.nav.map',
         '/configura-tu-nodo' => 'portal.nav.node_setup',
         '/conecta-tu-gateway' => 'portal.nav.gateway',
         '/rankings' => 'portal.nav.rankings',

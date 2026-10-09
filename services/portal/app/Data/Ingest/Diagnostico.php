@@ -176,6 +176,24 @@ class Diagnostico
                 ];
             }
 
+            // E) Rol CLIENT_BASE con firmware >= 2.7.17
+            $rol = strtoupper((string) ($node->role ?? ''));
+            $firmware = (string) ($node->firmware ?? '');
+            if ($rol === 'CLIENT_BASE' && preg_match('/^v?(\d+)\.(\d+)(?:\.(\d+))?/', $firmware, $mFw)) {
+                $fwMayor = (int) $mFw[1];
+                $fwMenor = (int) $mFw[2];
+                $fwParche = isset($mFw[3]) ? (int) $mFw[3] : 0;
+                if ([$fwMayor, $fwMenor, $fwParche] >= [2, 7, 17]) {
+                    $hallazgos[] = [
+                        'clave' => 'client_base_fw',
+                        'severidad' => 'aviso',
+                        'titulo' => 'CLIENT_BASE en firmware ≥ 2.7.17 actúa como ROUTER_LATE',
+                        'descripcion' => 'A partir del firmware 2.7.17, el rol CLIENT_BASE introduce retardos de enrutamiento (comportamiento ROUTER_LATE), ralentizando los mensajes en la red. Se recomienda cambiar a CLIENT o CLIENT_MUTE.',
+                        'solucion' => 'Config → Dispositivo → Rol → cambiar a CLIENT o CLIENT_MUTE si el nodo no necesita enrutar',
+                    ];
+                }
+            }
+
             return [
                 'node' => [
                     'id' => (string) $node->id,

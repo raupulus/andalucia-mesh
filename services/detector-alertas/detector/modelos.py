@@ -15,6 +15,7 @@ class FromNodeInfo(BaseModel):
     long: str | None = None
     role: str | None = None
     hw: str | None = None
+    firmware: str | None = None
     is_gateway: bool = False
     province: str | None = None
 

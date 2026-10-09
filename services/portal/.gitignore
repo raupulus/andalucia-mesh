@@ -17,6 +17,7 @@
 /public/hot
 /public/storage
 /public/sitemap.xml
+/public/cache
 /resources/configurador/dist
 /storage/*.key
 /storage/pail

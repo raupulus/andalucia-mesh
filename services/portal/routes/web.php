@@ -8,6 +8,7 @@ use App\Http\Controllers\CustomPageController;
 use App\Http\Controllers\DiagnosticoController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HardwareController;
+use App\Http\Controllers\MapaController;
 use App\Http\Controllers\PaginaController;
 use App\Http\Controllers\PortadaController;
 use App\Http\Controllers\RankingsController;
@@ -41,6 +42,7 @@ Route::get('/firmware', [PaginaController::class, 'firmware'])->name('pagina.fir
 Route::get('/api', [PaginaController::class, 'apiDocs'])->name('pagina.api');
 
 // Páginas dinámicas y herramientas
+Route::get('/mapa', [MapaController::class, 'index'])->name('mapa');
 Route::get('/rankings', [RankingsController::class, 'index'])->name('rankings');
 Route::get('/routers', [RoutersController::class, 'index'])->name('routers');
 Route::get('/alertas', [AlertasController::class, 'index'])->name('alertas');
