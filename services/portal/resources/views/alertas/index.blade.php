@@ -348,7 +348,21 @@
                                             @endif
                                         </td>
                                         <td style="padding: 0.85rem 0.6rem; color: var(--color-texto-2); font-size: 0.85rem; white-space: nowrap;">
-                                            {{ $a['inicio_at'] ?? '—' }}
+                                            @if(!empty($a['inicio_at']))
+                                                @php
+                                                    $iniDt = null;
+                                                    try { $iniDt = \Carbon\Carbon::parse($a['inicio_at']); } catch (\Throwable) {}
+                                                @endphp
+                                                @if($iniDt)
+                                                    <time class="fecha-local" datetime="{{ $iniDt->toIso8601String() }}">
+                                                        {{ $iniDt->timezone(config('proyecto.zona_horaria', 'Europe/Madrid'))->format('Y-m-d H:i:s') }}
+                                                    </time>
+                                                @else
+                                                    {{ $a['inicio_at'] }}
+                                                @endif
+                                            @else
+                                                —
+                                            @endif
                                         </td>
                                         <td style="padding: 0.85rem 0.6rem;">
                                             <div style="display: inline-flex; align-items: center; gap: 0.35rem;">
@@ -544,6 +558,9 @@
                     const nuevoContenido = doc.getElementById('alertas-app');
                     if (nuevoContenido) {
                         app.innerHTML = nuevoContenido.innerHTML;
+                        if (window.formatearFechasLocales) {
+                            window.formatearFechasLocales(app);
+                        }
                         if (pushState) {
                             window.history.pushState(null, '', url);
                         }

@@ -65,7 +65,26 @@
                         <div>{{ __('portal.node_check.province') }} <strong>{{ $informe['node']['province'] ?? __('portal.node_check.unknown_province') }}</strong></div>
                         <div>{{ __('portal.node_check.role') }} <code>{{ $informe['node']['role'] ?? 'CLIENT' }}</code></div>
                         <div>{{ __('portal.node_check.hw_model') }} <strong>{{ $informe['node']['hw_model'] ?? __('portal.node_check.not_specified') }}</strong></div>
-                        <div>{{ __('portal.node_check.last_seen') }} <strong>{{ $informe['node']['last_seen'] ?? __('portal.node_check.recent_seen') }}</strong></div>
+                        <div>
+                            {{ __('portal.node_check.last_seen') }}
+                            <strong>
+                                @if(!empty($informe['node']['last_seen']))
+                                    @php
+                                        $lsDt = null;
+                                        try { $lsDt = \Carbon\Carbon::parse($informe['node']['last_seen']); } catch (\Throwable) {}
+                                    @endphp
+                                    @if($lsDt)
+                                        <time class="fecha-local" datetime="{{ $lsDt->toIso8601String() }}">
+                                            {{ $lsDt->timezone(config('proyecto.zona_horaria', 'Europe/Madrid'))->format('Y-m-d H:i:s') }}
+                                        </time>
+                                    @else
+                                        {{ $informe['node']['last_seen'] }}
+                                    @endif
+                                @else
+                                    {{ __('portal.node_check.recent_seen') }}
+                                @endif
+                            </strong>
+                        </div>
                     </div>
                 </header>
 

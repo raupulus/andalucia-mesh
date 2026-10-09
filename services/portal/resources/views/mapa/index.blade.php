@@ -48,7 +48,13 @@
                 </div>
                 <div class="mapa-pill-stat mapa-pill-time" title="Hora peninsular de la última compilación de la caché">
                     <span class="lbl mapa-desktop-only" style="font-weight: 500;">act.</span>
-                    <span class="val" id="top-updated" style="color: #94a3b8;">{{ $stats['updated_at'] ?? '--:--' }}</span>
+                    <span class="val" id="top-updated" style="color: #94a3b8;">
+                        @if(!empty($stats['updated_at_iso']))
+                            <time class="fecha-local" data-formato="hora-corta" datetime="{{ $stats['updated_at_iso'] }}">{{ $stats['updated_at'] ?? '--:--' }}</time>
+                        @else
+                            {{ $stats['updated_at'] ?? '--:--' }}
+                        @endif
+                    </span>
                 </div>
             </div>
 

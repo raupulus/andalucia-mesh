@@ -194,4 +194,58 @@ class PaginasDinamicasTest extends TestCase
         $this->assertFalse($normalizada['nodo_es_global']);
         $this->assertSame(6, $normalizada['datos']['hop_start']);
     }
+
+    /**
+     * Comprueba que la vista de detalle de alerta renderiza las marcas temporales con time.fecha-local.
+     */
+    public function test_alerta_show_renderiza_timestamps_con_time_fecha_local(): void
+    {
+        $alerta = [
+            'id' => '01M4DHF92D5PDDQ2HMXX9H5X1T',
+            'regla' => 'infra-silent',
+            'riesgo' => 'alto',
+            'tipo' => 'infraestructura',
+            'mensaje' => 'Nodo repetidor sin actividad',
+            'nodo_codigo' => '!50dd2a87',
+            'nodo_nombre_corto' => 'RPT1',
+            'nodo_nombre_largo' => 'Repetidor 1',
+            'nodo_rol' => 'ROUTER',
+            'nodo_provincia' => 'Cadiz',
+            'nodo_es_global' => false,
+            'regla_nombre' => 'Repetidor silencioso',
+            'regla_icono' => '🔇',
+            'regla_por_que' => 'Explicación del fallo',
+            'regla_como_solucionar' => 'Instrucciones para solucionar',
+            'datos' => [
+                'ultimo_visto' => '2026-10-08T13:20:41.023741+00:00',
+                'minutos_silencio' => 120,
+            ],
+            'estado' => 'resuelta',
+            'abierta_en' => '2026-10-08T11:20:41+00:00',
+            'actualizada_en' => '2026-10-08T12:00:00+00:00',
+            'resuelta_en' => '2026-10-08T13:30:00+00:00',
+            'reaperturas' => 0,
+        ];
+
+        $view = $this->view('alertas.show', [
+            'alerta' => $alerta,
+            'id' => $alerta['id'],
+            'estadoKey' => 'resuelta',
+            'textoEstado' => 'Resuelta',
+            'chipTipo' => 'exito',
+            'esGlobal' => false,
+            'nodoCodigo' => $alerta['nodo_codigo'],
+            'nodoNombre' => $alerta['nodo_nombre_corto'],
+            'nodoLargo' => $alerta['nodo_nombre_largo'],
+            'nodoRol' => $alerta['nodo_rol'],
+            'nodoProvincia' => $alerta['nodo_provincia'],
+            'datos' => $alerta['datos'],
+            'reaperturas' => 0,
+            'langQuery' => '',
+        ]);
+
+        $view->assertSee('class="fecha-local"', false);
+        $view->assertSee('datetime="2026-10-08T13:20:41+00:00"', false);
+        $view->assertSee('datetime="2026-10-08T13:30:00+00:00"', false);
+    }
 }

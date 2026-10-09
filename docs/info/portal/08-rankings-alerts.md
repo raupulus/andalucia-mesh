@@ -58,7 +58,7 @@ Refresco de la lista abierta cada 30 s (solo si el usuario no ha pulsado "Ver m�
 
 ### Comunes
 
-- Fechas en hora de Madrid; provincias por nombre; sin coordenadas en ninguna parte.
+- Fechas en hora de Madrid como base de referencia en SSR; formateadas automáticamente en cliente a la hora local del navegador mediante `<time class="fecha-local">` y JavaScript; provincias por nombre; sin coordenadas en ninguna parte.
 - Ficha del nodo en MeshView: `https://meshview.${PROJECT_DOMAIN}` + ruta de nodo de la versión fijada de MeshView en `config/proyecto.php` → `enlaces.meshview_nodo` (plantilla con `{id}` en el formato que espere MeshView).
 - Severidad siempre con icono y texto, no solo color. Tablas reales (`<table>`), cabeceras con `scope`.
 

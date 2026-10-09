@@ -88,8 +88,19 @@
                         {{ $alerta['mensaje'] ?? ($alerta['regla_descripcion'] ?? __('portal.alerts.no_description')) }}
                     </div>
                     @if($estadoKey === 'resuelta' && !empty($alerta['resuelta_en']))
+                        @php
+                            $resDt = null;
+                            try { $resDt = \Carbon\Carbon::parse($alerta['resuelta_en']); } catch (\Throwable) {}
+                        @endphp
                         <div style="font-size: 0.85rem; color: var(--mapa-verde); margin-top: 0.5rem; font-weight: 600;">
-                            ✓ {{ __('portal.alerts.resolved_at') }} {{ $alerta['resuelta_en'] }}
+                            ✓ {{ __('portal.alerts.resolved_at') }} 
+                            @if($resDt)
+                                <time class="fecha-local" datetime="{{ $resDt->toIso8601String() }}">
+                                    {{ $resDt->timezone(config('proyecto.zona_horaria', 'Europe/Madrid'))->format('Y-m-d H:i:s') }}
+                                </time>
+                            @else
+                                {{ $alerta['resuelta_en'] }}
+                            @endif
                         </div>
                     @endif
                 </div>
@@ -178,7 +189,18 @@
                             @foreach($datos as $clave => $valor)
                                 @php
                                     $label = ucwords(str_replace('_', ' ', (string) $clave));
-                                    $valorStr = is_array($valor) ? json_encode($valor) : (string) $valor;
+                                    $esFecha = false;
+                                    $fechaDt = null;
+                                    if (is_string($valor) && preg_match('/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}/', $valor)) {
+                                        try {
+                                            $fechaDt = \Carbon\Carbon::parse($valor);
+                                            $esFecha = true;
+                                        } catch (\Throwable) {
+                                            $esFecha = false;
+                                        }
+                                    }
+                                    $valorRaw = is_array($valor) ? json_encode($valor) : (string) $valor;
+                                    $valorStr = $valorRaw;
                                     if ($valorStr === 'true') $valorStr = 'Sí';
                                     if ($valorStr === 'false') $valorStr = 'No';
                                 @endphp
@@ -186,8 +208,14 @@
                                     <div style="font-size: 0.74rem; text-transform: uppercase; color: var(--color-texto-3); font-weight: 600; margin-bottom: 0.25rem;">
                                         {{ $label }}
                                     </div>
-                                    <div style="font-family: monospace; font-size: 1rem; font-weight: 700; color: var(--color-texto-1);">
-                                        {{ $valorStr }}
+                                    <div style="font-family: monospace; font-size: 0.95rem; font-weight: 700; color: var(--color-texto-1); word-break: break-word;">
+                                        @if($esFecha && $fechaDt)
+                                            <time class="fecha-local" datetime="{{ $fechaDt->toIso8601String() }}">
+                                                {{ $fechaDt->timezone(config('proyecto.zona_horaria', 'Europe/Madrid'))->format('Y-m-d H:i:s') }}
+                                            </time>
+                                        @else
+                                            {{ $valorStr }}
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach
@@ -205,18 +233,59 @@
                     <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.88rem; color: var(--color-texto-2);">
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                             <span>{{ __('portal.alerts.first_detected') }}:</span>
-                            <strong style="color: var(--color-texto-1); font-family: monospace;">{{ $alerta['inicio_at'] ?? ($alerta['abierta_en'] ?? '—') }}</strong>
+                            @php
+                                $inicioRaw = $alerta['inicio_at'] ?? ($alerta['abierta_en'] ?? null);
+                                $inicioDt = null;
+                                if ($inicioRaw) {
+                                    try { $inicioDt = \Carbon\Carbon::parse($inicioRaw); } catch (\Throwable) {}
+                                }
+                            @endphp
+                            <strong style="color: var(--color-texto-1); font-family: monospace;">
+                                @if($inicioDt)
+                                    <time class="fecha-local" datetime="{{ $inicioDt->toIso8601String() }}">
+                                        {{ $inicioDt->timezone(config('proyecto.zona_horaria', 'Europe/Madrid'))->format('Y-m-d H:i:s') }}
+                                    </time>
+                                @else
+                                    {{ $inicioRaw ?? '—' }}
+                                @endif
+                            </strong>
                         </div>
                         @if(!empty($alerta['actualizada_en']))
+                            @php
+                                $actRaw = $alerta['actualizada_en'];
+                                $actDt = null;
+                                try { $actDt = \Carbon\Carbon::parse($actRaw); } catch (\Throwable) {}
+                            @endphp
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                                 <span>{{ __('portal.alerts.last_update') }}:</span>
-                                <strong style="color: var(--color-texto-1); font-family: monospace;">{{ $alerta['actualizada_en'] }}</strong>
+                                <strong style="color: var(--color-texto-1); font-family: monospace;">
+                                    @if($actDt)
+                                        <time class="fecha-local" datetime="{{ $actDt->toIso8601String() }}">
+                                            {{ $actDt->timezone(config('proyecto.zona_horaria', 'Europe/Madrid'))->format('Y-m-d H:i:s') }}
+                                        </time>
+                                    @else
+                                        {{ $actRaw }}
+                                    @endif
+                                </strong>
                             </div>
                         @endif
                         @if(!empty($alerta['resuelta_en']))
+                            @php
+                                $resRaw = $alerta['resuelta_en'];
+                                $resDt = null;
+                                try { $resDt = \Carbon\Carbon::parse($resRaw); } catch (\Throwable) {}
+                            @endphp
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                                 <span>{{ __('portal.alerts.resolved_at') }}:</span>
-                                <strong style="color: var(--mapa-verde); font-family: monospace;">{{ $alerta['resuelta_en'] }}</strong>
+                                <strong style="color: var(--mapa-verde); font-family: monospace;">
+                                    @if($resDt)
+                                        <time class="fecha-local" datetime="{{ $resDt->toIso8601String() }}">
+                                            {{ $resDt->timezone(config('proyecto.zona_horaria', 'Europe/Madrid'))->format('Y-m-d H:i:s') }}
+                                        </time>
+                                    @else
+                                        {{ $resRaw }}
+                                    @endif
+                                </strong>
                             </div>
                         @endif
                     </div>

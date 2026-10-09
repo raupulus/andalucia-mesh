@@ -399,7 +399,16 @@
 
                                         <!-- Último Reporte -->
                                         <td class="routers-td" style="font-size: 0.85rem;">
-                                            <span style="{{ $r['esta_online'] ? 'opacity: 0.85;' : 'color: #f87171; font-weight: 700;' }}">
+                                            @php
+                                                $lsDt = !empty($r['last_seen']) ? \Carbon\Carbon::parse($r['last_seen']) : null;
+                                            @endphp
+                                            <span
+                                                style="{{ $r['esta_online'] ? 'opacity: 0.85;' : 'color: #f87171; font-weight: 700;' }}"
+                                                @if($lsDt)
+                                                    data-title-fecha-local="{{ $lsDt->toIso8601String() }}"
+                                                    title="{{ $lsDt->timezone(config('proyecto.zona_horaria', 'Europe/Madrid'))->format('Y-m-d H:i:s') }}"
+                                                @endif
+                                            >
                                                 {{ $r['hace'] }}
                                             </span>
                                         </td>

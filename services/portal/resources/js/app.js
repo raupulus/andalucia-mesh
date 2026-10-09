@@ -189,4 +189,78 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnEntendido) btnEntendido.addEventListener('click', minimizar);
         btnExpandir.addEventListener('click', expandir);
     }
+
+    // 6. Formateo de fechas y timestamps a la hora local del navegador
+    const formatearFechasLocales = (contenedor = document) => {
+        const elementos = contenedor.querySelectorAll('time.fecha-local, [data-fecha-local]');
+        elementos.forEach((el) => {
+            const raw = el.getAttribute('datetime') || el.getAttribute('data-fecha-local') || el.textContent.trim();
+            if (!raw || raw === '—' || raw === '-') return;
+
+            let strIso = raw.trim();
+            // Normalizar formatos con espacio como "2026-10-08 21:20:54+02" -> "2026-10-08T21:20:54+02:00"
+            if (strIso.includes(' ') && !strIso.includes('T')) {
+                strIso = strIso.replace(' ', 'T');
+            }
+            if (/[+-]\d{2}$/.test(strIso)) {
+                strIso += ':00';
+            }
+
+            const fecha = new Date(strIso);
+            if (isNaN(fecha.getTime())) return;
+
+            const formato = el.getAttribute('data-formato') || 'completo';
+            const yyyy = fecha.getFullYear();
+            const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+            const dd = String(fecha.getDate()).padStart(2, '0');
+            const hh = String(fecha.getHours()).padStart(2, '0');
+            const min = String(fecha.getMinutes()).padStart(2, '0');
+            const ss = String(fecha.getSeconds()).padStart(2, '0');
+
+            let textoFormateado = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+            if (formato === 'sin-segundos') {
+                textoFormateado = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+            } else if (formato === 'hora-corta') {
+                textoFormateado = `${hh}:${min}`;
+            } else if (formato === 'fecha') {
+                textoFormateado = `${yyyy}-${mm}-${dd}`;
+            } else if (formato === 'hora') {
+                textoFormateado = `${hh}:${min}:${ss}`;
+            }
+
+            if (!el.getAttribute('title')) {
+                el.setAttribute('title', raw);
+            }
+
+            el.textContent = textoFormateado;
+        });
+
+        const elementosTitle = contenedor.querySelectorAll('[data-title-fecha-local]');
+        elementosTitle.forEach((el) => {
+            const raw = el.getAttribute('data-title-fecha-local');
+            if (!raw) return;
+
+            let strIso = raw.trim();
+            if (strIso.includes(' ') && !strIso.includes('T')) {
+                strIso = strIso.replace(' ', 'T');
+            }
+            if (/[+-]\d{2}$/.test(strIso)) {
+                strIso += ':00';
+            }
+
+            const fecha = new Date(strIso);
+            if (isNaN(fecha.getTime())) return;
+
+            const yyyy = fecha.getFullYear();
+            const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+            const dd = String(fecha.getDate()).padStart(2, '0');
+            const hh = String(fecha.getHours()).padStart(2, '0');
+            const min = String(fecha.getMinutes()).padStart(2, '0');
+            const ss = String(fecha.getSeconds()).padStart(2, '0');
+            el.setAttribute('title', `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`);
+        });
+    };
+
+    window.formatearFechasLocales = formatearFechasLocales;
+    formatearFechasLocales();
 });

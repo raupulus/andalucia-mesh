@@ -219,7 +219,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (vistoMin > 1) {
             textoVisto = `hace ${vistoMin}m`;
         }
-        document.getElementById('prop-seen').textContent = textoVisto;
+        const propSeenEl = document.getElementById('prop-seen');
+        propSeenEl.textContent = textoVisto;
+        if (n.ts) {
+            const fechaNodo = new Date(n.ts * 1000);
+            const yyyy = fechaNodo.getFullYear();
+            const mm = String(fechaNodo.getMonth() + 1).padStart(2, '0');
+            const dd = String(fechaNodo.getDate()).padStart(2, '0');
+            const hh = String(fechaNodo.getHours()).padStart(2, '0');
+            const min = String(fechaNodo.getMinutes()).padStart(2, '0');
+            const ss = String(fechaNodo.getSeconds()).padStart(2, '0');
+            propSeenEl.title = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+        }
 
         // Enlace a revisa tu nodo
         const linkRevisa = document.getElementById('btn-drawer-revisa');
