@@ -59,11 +59,21 @@ Sin alertas abiertas: "Ninguna alerta abierta ahora mismo."
 
 **Filtros**
 
-- Estado: **Abiertas** (por defecto) · **Resueltas** · **Todas**
-- Riesgo: **Todos** · **Alto** · **Medio** · **Bajo**
-- Tipo: **Todos** · **Infraestructura** · **Clientes**
-- Provincia: **Todas** · Almería · Cádiz · Córdoba · Granada · Huelva · Jaén · Málaga · Sevilla
-- Enlace "Quitar filtros".
+Panel oxigenado en tarjeta independiente (`DESIGN.md`):
+- Estado: **Abiertas** · **Resueltas** · **Todas**
+- Severidad / Riesgo: **Todos** · **Alto** · **Medio** · **Bajo**
+- Temática del problema (`?problema=`):
+  - 🔘 **Todas las temáticas**
+  - 🪫 **Batería y Energía** (`battery-low`, `sunset-battery`)
+  - 📍 **Posición y GPS** (`position-flood`, `router-moving`)
+  - 📈 **Telemetría y Nodeinfo** (`telemetry-burst`, `poll-abuse`)
+  - 🗺️ **Traceroutes** (`traceroute-flood`)
+  - 💬 **Spam e Inundación** (`text-flood`, `flood`, `rafaga-masiva`, `private-chaff`)
+  - 📊 **Canal y Saltos** (`chutil-high`, `airtime-high`, `hops-high`)
+  - 🌐 **Gateways e Infraestructura** (`gateway-offline`, `gateway-no-traffic`, `infra-silent`, `router-role`, `router-cluster`)
+  - 🔐 **Hardware y Seguridad** (`reboot-loop`, `key-security`, `asymmetric-link`)
+- Barra de filtros activos: si hay filtros aplicados, muestra chips desmontables (`✕`) para cada filtro activo, contador de incidencias coincidentes y enlace rápido "Limpiar filtros".
+- Sincronización del catálogo inferior: filtrar por temática adapta simultáneamente las tarjetas del catálogo de anomalías a las reglas de dicha categoría con opción a restablecer.
 - Si la URL trae un nodo: "Alertas del nodo {short} (`{id}`) · Quitar".
 
 **Lista**

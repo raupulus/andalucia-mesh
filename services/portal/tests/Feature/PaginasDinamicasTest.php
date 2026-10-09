@@ -52,6 +52,55 @@ class PaginasDinamicasTest extends TestCase
         $response->assertSee('Seguridad y alteración de clave pública', false);
         $response->assertSee('Pasarela sin tráfico LoRa', false);
         $response->assertSee('Uso de tiempo de aire excesivo', false);
+        $response->assertSee('Batería y Energía', false);
+        $response->assertSee('Spam e Inundación', false);
+    }
+
+    /**
+     * Comprueba que filtrar por temática de problema devuelve 200, cero cookies y adapta el catálogo.
+     */
+    public function test_pagina_alertas_con_filtro_problema_devuelve_200_y_cero_cookies(): void
+    {
+        $response = $this->get('/alertas?problema=bateria');
+
+        $response->assertStatus(200);
+        $response->assertHeaderMissing('Set-Cookie');
+        $response->assertSee('Batería y Energía', false);
+        $response->assertSee('Filtros activos:', false);
+        $response->assertSee('Limpiar filtros', false);
+        // Reglas de batería visibles
+        $response->assertSee('Batería baja', false);
+        $response->assertSee('Batería insuficiente al anochecer', false);
+        // Reglas de otra temática ocultas en el catálogo filtrado
+        $response->assertDontSee('Inundación de mensajes de texto', false);
+    }
+
+    /**
+     * Comprueba que la combinación de filtros (estado, riesgo y temática) opera y muestra la barra activa.
+     */
+    public function test_pagina_alertas_con_filtros_combinados(): void
+    {
+        $response = $this->get('/alertas?estado=abierta&riesgo=alto&problema=posicion');
+
+        $response->assertStatus(200);
+        $response->assertHeaderMissing('Set-Cookie');
+        $response->assertSee('Filtros activos:', false);
+        $response->assertSee('Alto', false);
+        $response->assertSee('Posición y GPS', false);
+        $response->assertSee('Repetidor en movimiento físico', false);
+        $response->assertDontSee('Batería insuficiente al anochecer', false);
+    }
+
+    /**
+     * Comprueba que un valor de problema no reconocido no rompe la vista ni produce error.
+     */
+    public function test_pagina_alertas_con_problema_desconocido_ignora_filtro(): void
+    {
+        $response = $this->get('/alertas?problema=inexistente_xyz');
+
+        $response->assertStatus(200);
+        $response->assertHeaderMissing('Set-Cookie');
+        $response->assertSee('Alertas de la Malla', false);
     }
 
     /**

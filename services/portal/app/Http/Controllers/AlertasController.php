@@ -263,15 +263,70 @@ class AlertasController extends Controller
     }
 
     /**
+     * Catálogo canónico de temáticas o tipos de problemas para filtrado en la vista pública.
+     *
+     * @return array<string, array{nombre: string, icono: string, reglas: list<string>}>
+     */
+    public static function categoriasProblemas(): array
+    {
+        return [
+            'bateria' => [
+                'nombre' => 'Batería y Energía',
+                'icono' => '🪫',
+                'reglas' => ['battery-low', 'sunset-battery'],
+            ],
+            'posicion' => [
+                'nombre' => 'Posición y GPS',
+                'icono' => '📍',
+                'reglas' => ['position-flood', 'router-moving'],
+            ],
+            'telemetria' => [
+                'nombre' => 'Telemetría y Nodeinfo',
+                'icono' => '📈',
+                'reglas' => ['telemetry-burst', 'poll-abuse'],
+            ],
+            'traceroutes' => [
+                'nombre' => 'Traceroutes',
+                'icono' => '🗺️',
+                'reglas' => ['traceroute-flood'],
+            ],
+            'spam' => [
+                'nombre' => 'Spam e Inundación',
+                'icono' => '💬',
+                'reglas' => ['text-flood', 'flood', 'rafaga-masiva', 'private-chaff'],
+            ],
+            'canal' => [
+                'nombre' => 'Canal y Saltos',
+                'icono' => '📊',
+                'reglas' => ['chutil-high', 'airtime-high', 'hops-high'],
+            ],
+            'infraestructura' => [
+                'nombre' => 'Gateways e Infraestructura',
+                'icono' => '🌐',
+                'reglas' => ['gateway-offline', 'gateway-no-traffic', 'infra-silent', 'router-role', 'router-cluster'],
+            ],
+            'seguridad' => [
+                'nombre' => 'Hardware y Seguridad',
+                'icono' => '🔐',
+                'reglas' => ['reboot-loop', 'key-security', 'asymmetric-link'],
+            ],
+        ];
+    }
+
+    /**
      * Listado público de alertas de la red.
      */
     public function index(Request $request): View
     {
         $estado = $request->query('estado');
         $riesgo = $request->query('riesgo');
+        $problema = $request->query('problema');
 
         $alertas = [];
         $detectorCalibrando = false;
+
+        $categorias = self::categoriasProblemas();
+        $problemaValido = is_string($problema) && isset($categorias[$problema]) ? $problema : null;
 
         try {
             $query = DB::connection('alertas')
@@ -284,6 +339,9 @@ class AlertasController extends Controller
             }
             if ($riesgo) {
                 $query->where('riesgo', $riesgo);
+            }
+            if ($problemaValido) {
+                $query->whereIn('regla', $categorias[$problemaValido]['reglas']);
             }
 
             $filas = $query->get();
@@ -303,6 +361,8 @@ class AlertasController extends Controller
             'reglas' => $reglas,
             'estadoFiltro' => $estado,
             'riesgoFiltro' => $riesgo,
+            'problemaFiltro' => $problemaValido,
+            'categoriasProblemas' => $categorias,
         ]);
     }
 
