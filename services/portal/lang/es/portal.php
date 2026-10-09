@@ -280,6 +280,11 @@ return [
             'abierta' => 'Abierta',
             'resuelta' => 'Resuelta',
         ],
+        'types' => [
+            'infraestructura' => 'Infraestructura',
+            'clientes' => 'Clientes',
+            'red' => 'Red / Malla',
+        ],
     ],
 
     'node_check' => [
