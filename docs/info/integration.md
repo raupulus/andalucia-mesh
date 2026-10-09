@@ -52,7 +52,7 @@ flowchart LR
 | adaptador-potato | Propio (Python) | `potatomesh/adaptador-potato.md` | `services/adaptador-potato/` | `adaptador-potato` | `mesh` | — | — |
 | sync-peers | Propio (Python) | `potatomesh/sync-peers.md` | `services/sync-peers/` | `sync-peers` | `mesh` | — | `peersync` |
 | ingesta | Propio (Python) | `ingesta/` | `services/ingesta/` | `ingesta` | `mesh` | — | `ingest` (TimescaleDB) |
-| Portal (web, API, panel) | Propio (Laravel + Filament) | `portal/` | `services/portal/` | `portal` | `mesh` | `mesh.example.org` | `portal` + lectura de vistas |
+| Portal (web, API, panel) | Propio (Laravel + Filament) | `portal/` | `services/portal/` | `portal`, `portal-tareas` | `mesh` | `mesh.example.org` | `portal` + lectura de vistas |
 | detector-alertas | Propio (Python) | `detector-alertas/` | `services/detector-alertas/` | `detector-alertas` | `mesh` | — | `alertas` |
 | bot-telegram | Propio (Python) | `bots-webhooks/01-bot-telegram.md` | `services/bot-telegram/` | `bot-telegram` | `mesh` | — | `bot_telegram` |
 | bot-discord | Propio (Python) | `bots-webhooks/02-bot-discord.md` | `services/bot-discord/` | `bot-discord` | `mesh` | — | `bot_discord` |
@@ -242,6 +242,7 @@ Roles de solo lectura (únicas lecturas cruzadas permitidas):
 | Vista | Una fila por | Columnas clave | Usada en |
 |---|---|---|---|
 | `api_nodes` | Nodo | `id`, `short_name`, `long_name`, `role`, `hw_model`, `firmware`, `province`, `last_position_at`, `position_precision_m`, `border_uncertain`, `hop_start_last`, `is_gateway`, `first_seen`, `last_seen` | Mapa, búsqueda, diagnóstico |
+| `api_map_nodes` | Nodo con coordenadas válidas | `id`, `node_num`, `short_name`, `long_name`, `role`, `hw_model`, `firmware`, `latitude`, `longitude`, `position_precision_m`, `position_source`, `last_position_at`, `province`, `border_uncertain`, `hop_start_last`, `hops_min_last`, `is_gateway`, `is_router`, `battery_level`, `voltage`, `channel_utilization`, `air_util_tx`, `first_seen`, `last_seen`, `heard_by` | Mapa interactivo de la red (`/mapa`) |
 | `api_province_load` | Nodo con provincia y rol router, `CLIENT` o `CLIENT_BASE` (sin `CLIENT_MUTE`) | `node_id`, `province`, `role`, `grupo` (`router`, `cliente`), `channel_utilization`, `measured_at` (último dato de 12 h) | Saturación del mapa, `summary` |
 | `api_routers` | Router (roles de `INFRA_ROLES`) visto en 7 días | `id`, nombres, `role`, `province`, `battery_level`, `voltage`, `battery_at`, `channel_utilization`, `air_util_tx`, `metrics_at`, `last_seen` | `/routers`, `/battery`, `/status` |
 | `api_gateways` | Gateway | `id`, nombres, `last_message_at`, `typical_interval_s`, `packets_last_hour`, `unique_nodes_24h` | Panel, `summary` |
@@ -251,6 +252,7 @@ Roles de solo lectura (únicas lecturas cruzadas permitidas):
 | `api_node_intervals` | Nodo × tipo × variante (7 días) | `node_id`, `portnum`, `variant` (p. ej. `device_metrics`, `environment_metrics`, `local_stats`), `broadcasts`, `median_interval_s` | Revisa tu nodo |
 | `api_node_battery_daily` | Nodo × día (7 días) | `node_id`, `day`, `min_level`, `avg_level`, `readings`, `readings_below_40` | Revisa tu nodo |
 | `api_node_reboots_daily` | Nodo × día (7 días) | `node_id`, `day`, `reboots` | Revisa tu nodo |
+| `api_node_packets_24h` | Nodo × portnum (24 horas) | `node_id`, `portnum`, `packets_24h` | Modal de diagnóstico en mapa interactivo y Revisa tu nodo |
 
 Retención que deben respetar las vistas (política de privacidad, `portal/10-legal-privacy.md`): datos en bruto 30 días (posiciones y telemetría 90), agregados **por nodo** 1 año, agregados sin nodo indefinidos.
 
@@ -388,4 +390,4 @@ services/             portal/, ingesta/, detector-alertas/, bot-telegram/, bot-d
 - Sin secretos ni `.env` reales en git. Commits sin firmas de atribución de herramientas.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

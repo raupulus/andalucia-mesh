@@ -41,7 +41,7 @@ A medida que una red regional crece hasta abarcar cientos de usuarios, repetidor
 
 | Pilar | Qué aporta al usuario y a la comunidad | Tecnologías clave |
 |---|---|---|
-| 🗺️ **Visualización en Vivo y Topología** | Mapas interactivos de cobertura, salas de chat público por radio y visor técnico de rutas, saltos de paquetes y niveles de señal (RSSI/SNR). | [PotatoMesh](docs/info/potatomesh/README.md), [MeshView](docs/info/meshview/README.md), SVG Provincial |
+| 🗺️ **Visualización en Vivo y Topología** | Mapa interactivo de la red a 60 fps con diagnóstico de optimización y favoritos (`/mapa`), mapa comunitario y chat en tiempo real ([PotatoMesh](docs/info/potatomesh/README.md)), y visor técnico de rutas, saltos y niveles de señal ([MeshView](docs/info/meshview/README.md)). | Leaflet Canvas, PotatoMesh, MeshView, SVG Provincial |
 | 📊 **Ingesta Inteligente y Métricas** | Decodificación Protobuf, deduplicación temporal estricta (15 min), geo-clasificación provincial automática, series temporales y cálculo de saturación de canal ponderada. | Python 3.13, PostgreSQL 17 + TimescaleDB |
 | 🚨 **Vigilancia y Alertas Proactivas** | Motor de reglas para detectar caídas de repetidores, bucles de reinicio, saturación de canal, telemetría agresiva y niveles de batería en riesgo (routers y clientes), con difusión instantánea a Telegram, Discord y Webhooks. | Socket Unix, Python AsyncIO, HMAC SHA-256 |
 | 🛠️ **Autonomía y Facilitación al Usuario** | Configurador Web interactivo con Web Serial (USB) y Web Bluetooth (BLE), importación por QR en la app oficial de Meshtastic, presets YAML oficiales y diagnóstico de nodo instantáneo. | Web Serial API, Web BLE, Laravel 13 + Filament 5 |
@@ -78,7 +78,7 @@ flowchart LR
   DA -- "socket Unix" --> BD("bot-discord")
   DA -- "socket Unix" --> WH("webhooks")
 
-  DBI -- "vistas api_*" --> PO("portal<br/>web · API · /admin")
+  DBI -- "vistas api_*" --> PO("portal<br/>web · API · /admin · mapa")
   DBA -- "vistas api_*" --> PO
   BT -- "GET /api/v1" --> PO
   BD -- "GET /api/v1" --> PO
@@ -188,6 +188,7 @@ El proyecto se compone de **9 desarrollos propios** y **4 integraciones de terce
   - **Zero-Cookies (RN-06):** Navegación pública 100% anónima sin cookies de sesión, analíticas invasivas ni avisos molestos.
   - **Soporte Multidioma (RN-48):** Detección automática y conmutador visual en cabecera con soporte completo en Español (bandera andaluza), Inglés y Portugués.
   - **Mapa SVG de Andalucía:** Mapa interactivo por provincias con cálculo de saturación ponderada de canal (`ROUTER` 60%, `CLIENT` 40%) y selector de ventana temporal (**30m** por defecto, 1h, 6h, 12h, 1d, 7d).
+  - **Mapa Interactivo de la Red (`/mapa`):** Visualizador geográfico en vivo de alto rendimiento (60 fps con Canvas sobre Leaflet autoalojado), diferenciación visual por rol (clientes, routers, gateways), codificación de actividad temporal, insignias de advertencia para nodos desoptimizados (Hop Limit excesivo, firmware desactualizado, spam de telemetría), cajón de ficha técnica, modal de diagnóstico con desglose de paquetes en 24h, buscador predictivo y soporte de favoritos en `localStorage` (RN-06).
   - **Supervisión de Infraestructura y Routers (`/routers`):** Monitorización pública de repetidores y routers con selector de ámbito territorial (Andalucía, España, Ambos), KPIs de ocupación de canal (ChUtil, TX) y estado energético (batería/red eléctrica) en tiempo real.
   - **Rankings y Salud de la Red (`/rankings`):** Monitorización de nodos en peligro, consumo de red por tiempo de aire y catálogo de 11 rankings técnicos para supervisión comunitaria (cobertura de gateways, enlaces directos, salud solar nocturna).
   - **Alertas e Incidencias (`/alertas`, `/alertas/{id}`):** Catálogo público de incidencias detectadas en la malla con filtrado interactivo por severidad, temática y provincia.
@@ -309,7 +310,7 @@ La documentación canónica y viva del proyecto se encuentra en [`docs/info/`](d
 │   ├── chat-ws/                 # Servidor WebSocket para chat de radio en tiempo real
 │   ├── detector-alertas/        # Motor de detección de anomalías y socket de alertas
 │   ├── ingesta/                 # Decodificación Protobuf, deduplicación y persistencia
-│   ├── portal/                  # Portal web (Laravel 13, Filament 5, API REST v1)
+│   ├── portal/                  # Portal web (Laravel 13, Filament 5, API REST v1, mapa interactivo)
 │   ├── sync-peers/              # Sincronización e intercambio con instancias vecinas
 │   └── webhooks/                # Emisión de eventos HTTP firmados con HMAC SHA-256
 └── docs/

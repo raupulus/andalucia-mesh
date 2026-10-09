@@ -11,7 +11,7 @@
   - Aplica por defecto el estándar oficial comunitario **SFNarrow** (EU_868, BW 62.5 kHz, SF 7, CR 5, Slot 4 869.61875 MHz, canal 0 SFNarrow con PSK `AQ==`).
   - Proporciona un selector de canal provincial secundario con nombres normalizados sin tildes (`Cadiz`, `Sevilla`, `Almeria`, etc.) y canales comunitarios opcionales (`Iberia`, `Andalucia`, `Test`, `Bots`, `sos`).
   - Aplica buenas prácticas de red automáticas: `positionBroadcastSmartEnabled: false`, `positionFlags: 0`, NodeInfo cada 72h, posición cada 6h (móvil) o 72h (fijo), saltos 4 (`CLIENT_MUTE`) o 3 (`CLIENT`), telemetría apagada por defecto y MQTT desactivado por defecto.
-  - Mantiene el **downlink desactivado** (`downlinkEnabled: false`) de forma estricta en todos los canales para proteger el espectro de radioeléctrico contra inyecciones de tráfico desde internet, y establece la pasarela comunitaria `mqtt.mesh.<dominio>` (`mqtt.mesh.desdechipiona.es`).
+  - Mantiene el **downlink desactivado** (`downlinkEnabled: false`) de forma estricta en todos los canales para proteger el espectro de radioeléctrico contra inyecciones de tráfico desde internet, y establece la pasarela comunitaria `mqtt.mesh.<dominio>` (`mqtt.mesh.example.org`).
   - Ofrece un selector de potencia TX adaptado a módulos estándar (27 dBm) y amplificados (Ebyte E22P-868M30S a 8 dBm).
   - Incluye un Modo Avanzado (Workbench) con volcado live, editor YAML y comparador visual de diferencias (Diff).
 - **Qué NO hace**:

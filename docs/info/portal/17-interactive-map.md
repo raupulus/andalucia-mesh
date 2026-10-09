@@ -137,7 +137,7 @@
 
 | Variable | Valor por defecto | Efecto |
 | :--- | :--- | :--- |
-| `PROJECT_DOMAIN` | `mesh.desdechipiona.es` | Dominio base para enlaces y URLs canónicas |
+| `PROJECT_DOMAIN` | `mesh.example.org` | Dominio base para enlaces y URLs canónicas |
 | `CACHE_STORE` | `database` / `redis` | Driver de almacenamiento en memoria intermedia |
 | `MAPA_CENTRO_LAT` | `37.4` | Latitud central por defecto para el encuadre |
 | `MAPA_CENTRO_LON` | `-4.5` | Longitud central por defecto |

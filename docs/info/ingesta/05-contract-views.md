@@ -38,6 +38,37 @@ Definir con precisión las vistas `api_*` de la base `ingest`: la **única** sup
 
 Uso en el mapa: nodos con `province` y `last_position_at` dentro de la ventana (`30m`, `1h`, `6h`, `12h`, `1d`, `7d`, `30d`); `FUERA` da `outside_andalucia`; recuento de `border_uncertain`. No expone coordenadas.
 
+### `api_map_nodes` — nodo con coordenadas válidas para el mapa interactivo (`/mapa`)
+
+Filtro en la vista: `latitude IS NOT NULL AND longitude IS NOT NULL AND latitude BETWEEN -90.0 AND 90.0 AND longitude BETWEEN -180.0 AND 180.0 AND NOT (latitude = 0.0 AND longitude = 0.0)`.
+
+| Columna | Tipo | Origen / regla |
+|---|---|---|
+| `id` | text | `node.id` |
+| `node_num` | bigint | `node.node_num` |
+| `short_name`, `long_name` | text | Último nodeinfo o map report |
+| `role` | text | Rol Meshtastic del nodo |
+| `hw_model` | text | Modelo de hardware |
+| `firmware` | text | Versión de firmware |
+| `latitude`, `longitude` | double precision | Coordenadas geográficas validadas |
+| `position_precision_m` | real | Radio de precisión en metros |
+| `position_source` | text | `manual` o `gps` |
+| `last_position_at` | timestamptz | Fecha y hora de la última posición recibida |
+| `province` | text | Código ISO provincial (`ES-CA`, etc.), `FUERA` o null |
+| `border_uncertain` | boolean | Indicador de posición cercana al límite provincial |
+| `hop_start_last` | smallint | Saltos configurados en el último paquete emitido |
+| `hops_min_last` | smallint | Saltos mínimos observados al llegar a un gateway |
+| `is_gateway` | boolean | Si ha actuado como gateway MQTT |
+| `is_router` | boolean | `role` en `{{INFRA_ROLES}}` |
+| `battery_level` | smallint | Último nivel de batería registrado |
+| `voltage` | real | Último voltaje de batería en voltios |
+| `channel_utilization` | real | Última ocupación del canal (%) |
+| `air_util_tx` | real | Último tiempo de transmisión al aire (%) |
+| `first_seen`, `last_seen` | timestamptz | Primera y última vez visto en la red |
+| `heard_by` | text[] | Gateways que lo oyeron en 7 días (`agg_reception_day`, sin él mismo) |
+
+Uso en el mapa interactivo: renderizado de alto rendimiento en Canvas Leaflet con filtrado temporal, badges de diagnóstico y búsqueda.
+
 ### `api_province_load` — nodo con provincia y carga reciente para la saturación
 
 | Columna | Tipo | Origen / regla |
@@ -121,13 +152,15 @@ Columnas comunes: `bucket_start` timestamptz, `granularity` text, `subject_id` t
 
 `api_rank_network_usage` también alimenta "Revisa tu nodo": puesto y desglose de los últimos 7 días (suma de filas `day`).
 
-### Diagnóstico ("Revisa tu nodo")
+### Diagnóstico ("Revisa tu nodo" y modal del mapa)
 
 **`api_node_intervals`** — nodo × tipo × variante, 7 días: `node_id` text, `portnum` text, **+** `variant` text (variante de telemetría; null en otros tipos), `broadcasts` integer, `median_interval_s` real, **+** `last_at` timestamptz. Origen `packet` con `from_id = node_id`, `to_id = '^all'`, `rx_first ≥ now() − 7 días`, sin map reports; mediana (`percentile_cont(0.5)`) de los intervalos entre `rx_first` consecutivos; null con menos de 2 emisiones. El portal compara `telemetry`/`device_metrics`, `nodeinfo` y `position` con las recomendaciones.
 
 **`api_node_battery_daily`** — nodo × día local, 7 días (hoy incluido): `node_id`, `day` date, `min_level` smallint, `avg_level` real, `readings` integer, `readings_below_40` integer, **+** `max_level` smallint, **+** `powered_readings` integer. Origen `agg_telemetry_day`; solo lecturas válidas en mínimos, medias y recuentos.
 
 **`api_node_reboots_daily`** — nodo × día local, 7 días: `node_id`, `day` date, `reboots` integer, **+** `readings` integer (lecturas de telemetría del día: distingue "0 reinicios" de "sin datos"). Origen `agg_telemetry_day`.
+
+**`api_node_packets_24h`** — desglose de paquetes en las últimas 24 horas por nodo y portnum: `node_id` text, `portnum` text (nombre del portnum o `'other'`), `packets_24h` integer. Origen tabla `packet` con `rx_first >= now() - INTERVAL '24 hours'`, agrupado por emisor y tipo de paquete. Alimenta el modal de diagnóstico interactivo de `/mapa` y la ficha técnica de "Revisa tu nodo".
 
 ### Permisos
 
@@ -191,4 +224,4 @@ Las vistas de esta página. Quitar o renombrar una columna exige cambiar antes `
 - **Dado** el rol lector, **cuando** consulta `api_node_intervals` de un nodo, **entonces** obtiene una fila por tipo (y por variante en telemetría).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

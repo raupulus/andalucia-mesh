@@ -41,17 +41,18 @@ NODOS ──radio LoRa──▶ GATEWAYS ──MQTT 1883/8883──▶ [Mosquitt
                          └── comandos: GET /api/v1 ──┐
                                                      ▼
      PG "ingest" ──vistas api_* (solo lectura)──▶ (PORTAL) ◀──vistas api_*── PG "alertas"
-                                                  web · API /api/v1 · panel /admin
+                                                  web · API /api/v1 · panel /admin · mapa
                                                   el panel consulta /health de todos
+                                                  /configurador ──▶ [MeshConfig]
 
 Base común: servidor Debian 13 · Docker · [Nginx] nativo, HTTPS y MQTT-TLS · [PostgreSQL 17 + TimescaleDB] nativo · [Mosquitto] nativo
 ```
 
 ## Piezas
 
-| Propias (9) | Terceros (5) |
+| Propias (9) | Terceros (6) |
 |---|---|
-| ingesta · portal · detector-alertas · bot-telegram · bot-discord · webhooks · adaptador-potato · sync-peers · chat-ws | Mosquitto · MeshView · PotatoMesh · Nginx · PostgreSQL/TimescaleDB |
+| ingesta · portal · detector-alertas · bot-telegram · bot-discord · webhooks · adaptador-potato · sync-peers · chat-ws | Mosquitto · MeshView · PotatoMesh · MeshConfig · Nginx · PostgreSQL/TimescaleDB |
 
 ## Cómo se comunican
 
@@ -65,9 +66,10 @@ Base común: servidor Debian 13 · Docker · [Nginx] nativo, HTTPS y MQTT-TLS ·
 | Vistas SQL `api_*` | ingest y alertas → portal | Solo lectura, con roles dedicados (cobertura regional completa) |
 | HTTP `GET /api/v1` | Bots e integradores → portal | Estado, rankings, routers, alertas |
 | WebSocket `/ws/chat` | chat-ws → cualquiera | Mensajes de texto de los canales suscritos en toda la región |
+| HTTP `/configurador` | Portal → MeshConfig | Interfaz web de configuración (Web Serial, BLE, QR, YAML) |
 | HTTP `/health` | Panel → todos | Estado de cada pieza |
 
 Ninguna pieza lee la base de datos de otra salvo el portal, y solo por vistas `api_*`.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

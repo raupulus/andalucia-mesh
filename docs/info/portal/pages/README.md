@@ -20,6 +20,7 @@
 | Revisa tu nodo | `/revisa-tu-nodo` | [`14-node-check.md`](14-node-check.md) | Borrador, pendiente de revisión |
 | Firmware y apps | `/firmware` | [`15-firmware.md`](15-firmware.md) | Borrador, pendiente de revisión |
 | 16 | FAQ | `/faq` | [`16-faq.md`](16-faq.md) | Implementado |
+| 17 | Mapa interactivo | `/mapa` | [`../17-interactive-map.md`](../17-interactive-map.md) | Implementado |
 
 El panel `/admin` no está aquí: es privado y se describe en `../14-operator-panel.md`.
 
@@ -31,4 +32,4 @@ El panel `/admin` no está aquí: es privado y se describe en `../14-operator-pa
 4. Los textos publicados viven en `resources/contenido/*.md` del portal; estos documentos son su fuente de revisión. Ningún texto público usa la marca del firmware ni nombra comunidades ajenas: se habla de "la malla", "los nodos", "el firmware" y "la app del nodo".
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09
