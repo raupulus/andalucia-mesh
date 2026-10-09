@@ -125,7 +125,15 @@ class TopicValidator:
         # 2. Map reports: msh/EU_868/2/map/
         map_prefix = f"{self.topic_root}/2/map/"
         if topic.startswith(map_prefix) or topic == f"{self.topic_root}/2/map":
-            return TopicParseResult(topic_type="map")
+            remainder = topic[len(map_prefix) :] if topic.startswith(map_prefix) else ""
+            parts = [p for p in remainder.split("/") if p]
+            gw_id = None
+            for p in reversed(parts):
+                cand = validate_gateway_id(p)
+                if cand:
+                    gw_id = cand
+                    break
+            return TopicParseResult(topic_type="map", gateway_id=gw_id)
 
         # 3. Tráfico federado de peers: snm/v1/peer/<peer_id>/<type>
         peer_prefix = f"{self.topic_prefix}/v1/peer/"

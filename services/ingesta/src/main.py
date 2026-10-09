@@ -18,14 +18,14 @@ from typing import Any
 
 import asyncpg
 from aiomqtt import Client, MqttError
-from meshtastic.protobuf import mesh_pb2, mqtt_pb2
+from meshtastic.protobuf import config_pb2, mesh_pb2, mqtt_pb2
 
 from .airtime import calculate_airtime_ms
 from .config import IngestaConfig, load_config
 from .crypto import PacketDecryptor
 from .decoder import check_ok_to_mqtt, decode_data_payload
 from .dedup import PacketDeduplicator, ReceptionItem, UnifiedPacket
-from .geo import GeoEngine
+from .geo import GeoEngine, calculate_precision_m
 from .health import HealthReporter, start_health_server
 from .links import evaluate_direct_link
 from .migrations import MigrationRunner
@@ -255,13 +255,73 @@ async def main() -> None:
 
                     # 2. Desempaquetar ServiceEnvelope o evento federado
                     envelope = mqtt_pb2.ServiceEnvelope()
+                    is_service_envelope = False
                     try:
                         envelope.ParseFromString(raw_payload)
+                        is_service_envelope = envelope.HasField("packet")
                     except Exception:
-                        reporter.descartado_protobuf += 1
-                        continue
+                        is_service_envelope = False
 
-                    if not envelope.HasField("packet"):
+                    if not is_service_envelope:
+                        # Si es tópico de tipo 'map', procesar como MapReport crudo
+                        if t_info.topic_type == "map":
+                            try:
+                                mr = mqtt_pb2.MapReport()
+                                mr.ParseFromString(raw_payload)
+                                map_from_id = t_info.gateway_id
+                                if not map_from_id and mr.short_name:
+                                    for nid, nrec in registry.nodes.items():
+                                        if nrec.short_name == mr.short_name:
+                                            map_from_id = nid
+                                            break
+
+                                if map_from_id:
+                                    node_rec = registry.get_or_create_node(map_from_id, now)
+                                    if mr.short_name:
+                                        node_rec.short_name = mr.short_name
+                                    if mr.long_name:
+                                        node_rec.long_name = mr.long_name
+                                    if mr.hw_model:
+                                        node_rec.hw_model = mesh_pb2.HardwareModel.Name(mr.hw_model)
+                                    try:
+                                        node_rec.role = config_pb2.Config.DeviceConfig.Role.Name(mr.role)
+                                    except (ValueError, TypeError):
+                                        pass
+
+                                    lat = round(mr.latitude_i * 1e-7, 6) if mr.latitude_i else None
+                                    lon = round(mr.longitude_i * 1e-7, 6) if mr.longitude_i else None
+                                    p_bits = mr.position_precision if mr.position_precision else None
+                                    p_meters = calculate_precision_m(p_bits)
+                                    if lat is not None and lon is not None:
+                                        prov, uncertain = geo_engine.resolve_province(lat, lon, p_meters)
+                                        node_rec.latitude = lat
+                                        node_rec.longitude = lon
+                                        node_rec.position_precision_m = p_meters
+                                        node_rec.position_source = "map_report"
+                                        node_rec.last_position_at = now
+                                        node_rec.province = prov
+                                        node_rec.border_uncertain = uncertain
+
+                                        storage.enqueue_position(
+                                            at=now,
+                                            node_id=map_from_id,
+                                            lat=lat,
+                                            lon=lon,
+                                            alt=mr.altitude if mr.altitude else None,
+                                            precision_bits=p_bits,
+                                            precision_m=round(p_meters, 1),
+                                            source="map_report",
+                                            gps_time=None,
+                                            province=prov,
+                                            border_uncertain=uncertain,
+                                        )
+
+                                    registry.dirty_nodes.add(map_from_id)
+                                    reporter.paquetes_unicos += 1
+                                    continue
+                            except Exception as exc:
+                                logger.debug("Error procesando raw MapReport: %s", exc)
+
                         reporter.descartado_protobuf += 1
                         continue
 
@@ -279,7 +339,7 @@ async def main() -> None:
                     to_id = "^all" if to_num in (0xFFFFFFFF, 0) else f"!{to_num:08x}"
 
                     # Obtener y validar gateway
-                    gw_raw = envelope.gateway_id or t_info.gateway_id or ""
+                    gw_raw = envelope.gateway_id or t_info.gateway_id or (from_id if t_info.topic_type == "map" else "")
                     gateway_id = f"!{gw_raw.lstrip('!'):0>8}".lower()
                     if len(gateway_id) != 9:
                         reporter.descartado_gateway += 1
@@ -344,6 +404,26 @@ async def main() -> None:
                             node_rec.border_uncertain = uncertain
                             payload_dict["border_uncertain"] = uncertain
                             registry.dirty_nodes.add(from_id)
+
+                    elif portnum_name == "map_report" and payload_dict:
+                        node_rec.short_name = payload_dict.get("short_name", node_rec.short_name)
+                        node_rec.long_name = payload_dict.get("long_name", node_rec.long_name)
+                        node_rec.role = payload_dict.get("role", node_rec.role)
+                        node_rec.hw_model = payload_dict.get("hw_model", node_rec.hw_model)
+                        p_lat = payload_dict.get("latitude")
+                        p_lon = payload_dict.get("longitude")
+                        p_prec = payload_dict.get("precision_m", 10.0)
+                        if p_lat is not None and p_lon is not None:
+                            prov, uncertain = geo_engine.resolve_province(p_lat, p_lon, p_prec)
+                            node_rec.latitude = p_lat
+                            node_rec.longitude = p_lon
+                            node_rec.position_precision_m = p_prec
+                            node_rec.position_source = "map_report"
+                            node_rec.last_position_at = now
+                            node_rec.province = prov
+                            node_rec.border_uncertain = uncertain
+                            payload_dict["border_uncertain"] = uncertain
+                        registry.dirty_nodes.add(from_id)
 
                     elif portnum_name == "telemetry" and payload_dict:
                         if "device_metrics" in payload_dict:

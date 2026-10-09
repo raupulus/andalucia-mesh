@@ -148,7 +148,7 @@ class StorageManager:
 
         # 3. Filas especializadas según payload
         p = packet.payload
-        if packet.portnum == "position":
+        if packet.portnum in ("position", "map_report"):
             if "latitude" in p and "longitude" in p:
                 gps_time: datetime | None = None
                 raw_time = p.get("time")
@@ -158,15 +158,16 @@ class StorageManager:
                     except (ValueError, OSError, OverflowError):
                         gps_time = None
 
+                alt_val = p.get("altitude")
                 self._q_position.append((
                     packet.rx_first,
                     packet.from_id,
                     p["latitude"],
                     p["longitude"],
-                    p.get("altitude"),
+                    int(alt_val) if alt_val is not None else None,
                     p.get("precision_bits"),
                     p.get("precision_m"),
-                    "position",
+                    packet.portnum,
                     gps_time,
                     packet.province,
                     p.get("border_uncertain", False),
@@ -244,6 +245,36 @@ class StorageManager:
             packet.from_id,
             packet.packet_id,
             packet.rx_first,
+        ))
+
+    def enqueue_position(
+        self,
+        at: datetime,
+        node_id: str,
+        lat: float,
+        lon: float,
+        alt: int | float | None,
+        precision_bits: int | None,
+        precision_m: float | None,
+        source: str,
+        gps_time: datetime | None,
+        province: str | None,
+        border_uncertain: bool = False,
+    ) -> None:
+        """Encola directamente una posición geográfica para inserción en base de datos."""
+        self._check_buffer_limits()
+        self._q_position.append((
+            at,
+            node_id,
+            lat,
+            lon,
+            int(alt) if alt is not None else None,
+            precision_bits,
+            precision_m,
+            source,
+            gps_time,
+            province,
+            border_uncertain,
         ))
 
     def _check_buffer_limits(self) -> None:

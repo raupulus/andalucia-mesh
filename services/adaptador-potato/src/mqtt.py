@@ -155,9 +155,13 @@ class MqttProcessor:
         try:
             envelope.ParseFromString(bytes(payload_bytes))
         except Exception:
+            if is_map_topic:
+                self._dispatch_raw_map_report(topic, payload_bytes)
             return
 
         if not envelope.HasField("packet"):
+            if is_map_topic:
+                self._dispatch_raw_map_report(topic, payload_bytes)
             return
 
         packet: mesh_pb2.MeshPacket = envelope.packet
@@ -459,14 +463,22 @@ class MqttProcessor:
                 except (ValueError, TypeError):
                     role_name = "CLIENT"
 
+                hw_name = (
+                    mesh_pb2.HardwareModel.Name(mr.hw_model)
+                    if mr.hw_model
+                    else None
+                )
+
                 node_entry = {
                     "num": from_node,
                     "user": {
                         "id": node_id_str,
                         "shortName": mr.short_name or None,
                         "longName": mr.long_name or None,
+                        "hwModel": hw_name,
                         "role": role_name,
                     },
+                    "hwModel": hw_name,
                     "lastHeard": rx_time,
                 }
                 self.sender.enqueue("nodes", {node_id_str: node_entry}, priority=0)
@@ -474,6 +486,9 @@ class MqttProcessor:
                 if lat is not None and lon is not None:
                     pos_entry = {
                         "id": packet.id,
+                        "node_id": node_id_str,
+                        "node_num": from_node,
+                        "from_id": node_id_str,
                         "from": node_id_str,
                         "latitude": lat,
                         "longitude": lon,
@@ -483,3 +498,73 @@ class MqttProcessor:
                     self.sender.enqueue("positions", pos_entry, priority=1)
             except Exception as exc:
                 logger.debug("Error deserializando MapReport: %s", exc)
+
+    def _dispatch_raw_map_report(
+        self, topic: str, payload_bytes: bytes | bytearray
+    ) -> None:
+        """Procesa un MapReport directo no empaquetado en ServiceEnvelope."""
+        mr = mqtt_pb2.MapReport()
+        try:
+            mr.ParseFromString(bytes(payload_bytes))
+        except Exception as exc:
+            logger.debug("Error deserializando raw MapReport: %s", exc)
+            return
+
+        parts = topic.split("/")
+        node_id_str = None
+        for p in reversed(parts):
+            clean = p.strip().lower()
+            if clean.startswith("!") and len(clean) == 9:
+                node_id_str = clean
+                break
+
+        if not node_id_str:
+            return
+
+        try:
+            from_node = int(node_id_str.lstrip("!"), 16)
+        except ValueError:
+            return
+
+        rx_time = int(time.time())
+
+        try:
+            role_name = config_pb2.Config.DeviceConfig.Role.Name(mr.role)
+        except (ValueError, TypeError):
+            role_name = "CLIENT"
+
+        hw_name = (
+            mesh_pb2.HardwareModel.Name(mr.hw_model)
+            if mr.hw_model
+            else None
+        )
+
+        node_entry = {
+            "num": from_node,
+            "user": {
+                "id": node_id_str,
+                "shortName": mr.short_name or None,
+                "longName": mr.long_name or None,
+                "hwModel": hw_name,
+                "role": role_name,
+            },
+            "hwModel": hw_name,
+            "lastHeard": rx_time,
+        }
+        self.sender.enqueue("nodes", {node_id_str: node_entry}, priority=0)
+
+        lat = mr.latitude_i / 1e7 if mr.latitude_i else None
+        lon = mr.longitude_i / 1e7 if mr.longitude_i else None
+        if lat is not None and lon is not None:
+            pos_entry = {
+                "id": 0,
+                "node_id": node_id_str,
+                "node_num": from_node,
+                "from_id": node_id_str,
+                "from": node_id_str,
+                "latitude": lat,
+                "longitude": lon,
+                "altitude": mr.altitude if mr.altitude else None,
+                "rx_time": rx_time,
+            }
+            self.sender.enqueue("positions", pos_entry, priority=1)

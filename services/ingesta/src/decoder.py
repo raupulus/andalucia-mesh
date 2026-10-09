@@ -15,6 +15,7 @@ from typing import Any
 from meshtastic.protobuf import (
     config_pb2,
     mesh_pb2,
+    mqtt_pb2,
     portnums_pb2,
     telemetry_pb2,
 )
@@ -258,6 +259,34 @@ def decode_data_payload(
                 "neighbors": neighbors_list,
             }
             return DecodedPayload("neighborinfo", portnum, None, res, ok_to_mqtt_val, True)
+
+        # 8. MAP_REPORT_APP (73)
+        elif portnum == portnums_pb2.PortNum.MAP_REPORT_APP:
+            mr = mqtt_pb2.MapReport()
+            mr.ParseFromString(payload_bytes)
+            lat = round(mr.latitude_i * 1e-7, 6) if mr.latitude_i else None
+            lon = round(mr.longitude_i * 1e-7, 6) if mr.longitude_i else None
+            p_bits = mr.position_precision if mr.position_precision else None
+            p_meters = calculate_precision_m(p_bits)
+            hw_name = mesh_pb2.HardwareModel.Name(mr.hw_model) if mr.hw_model else None
+            try:
+                role_name = config_pb2.Config.DeviceConfig.Role.Name(mr.role)
+            except (ValueError, TypeError):
+                role_name = "CLIENT"
+
+            res = {
+                "latitude": lat,
+                "longitude": lon,
+                "altitude": mr.altitude if mr.altitude else None,
+                "precision_bits": p_bits,
+                "precision_m": round(p_meters, 1),
+                "short_name": mr.short_name or None,
+                "long_name": mr.long_name or None,
+                "role": role_name,
+                "hw_model": hw_name,
+            }
+            filtered = {k: v for k, v in res.items() if v is not None}
+            return DecodedPayload("map_report", portnum, None, filtered, ok_to_mqtt_val, True)
 
         # Resto de tipos no estructurados
         else:

@@ -240,3 +240,38 @@ def test_dispatch_direct_message_filtering(processor: tuple[MqttProcessor, FakeS
     assert sender.enqueued_items[0][0] == "neighbors"
     assert sender.enqueued_items[0][1]["neighbors"][0]["node_id"] == "!99887766"
 
+
+def test_dispatch_raw_map_report(processor: tuple[MqttProcessor, FakeSender]) -> None:
+    """Verifica que un MapReport publicado directamente en /2/map/ se procesa y encola."""
+    proc, sender = processor
+    sender.enqueued_items.clear()
+
+    mr = mqtt_pb2.MapReport(
+        short_name="Rau0",
+        long_name="Raupulus Base",
+        role=config_pb2.Config.DeviceConfig.Role.CLIENT,
+        hw_model=mesh_pb2.HardwareModel.RPI_PICO2,
+        latitude_i=367362048,
+        longitude_i=-64323584,
+        altitude=54,
+    )
+
+    proc.process_message("msh/EU_868/2/map/!5f3a3a29", mr.SerializeToString())
+    assert len(sender.enqueued_items) == 2  # nodes y positions
+
+    nodes_item = next(it for it in sender.enqueued_items if it[0] == "nodes")
+    node_entry = nodes_item[1]["!5f3a3a29"]
+    assert node_entry["user"]["shortName"] == "Rau0"
+    assert node_entry["user"]["longName"] == "Raupulus Base"
+    assert node_entry["user"]["role"] == "CLIENT"
+    assert node_entry["user"]["hwModel"] == "RPI_PICO2"
+
+    pos_item = next(it for it in sender.enqueued_items if it[0] == "positions")
+    pos_entry = pos_item[1]
+    assert pos_entry["node_id"] == "!5f3a3a29"
+    assert pos_entry["from"] == "!5f3a3a29"
+    assert pos_entry["latitude"] == pytest.approx(36.7362, abs=1e-3)
+    assert pos_entry["longitude"] == pytest.approx(-6.4323, abs=1e-3)
+    assert pos_entry["altitude"] == 54
+
+

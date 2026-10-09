@@ -15,7 +15,7 @@ import base64
 from datetime import datetime, timezone
 import pytest
 
-from meshtastic.protobuf import config_pb2, mesh_pb2, portnums_pb2, telemetry_pb2
+from meshtastic.protobuf import config_pb2, mesh_pb2, mqtt_pb2, portnums_pb2, telemetry_pb2
 
 from src.validator import (
     TopicValidator,
@@ -341,3 +341,49 @@ async def test_deduplicator_aggregation_and_late() -> None:
     assert status3 == "RECEPTION_LATE"
     assert len(late_receptions) == 1
     assert len(published_packets) == 1  # No se republica en decoded
+
+
+def test_decoder_map_report() -> None:
+    """Verifica la decodificación de paquetes MAP_REPORT_APP (73)."""
+    mr = mqtt_pb2.MapReport(
+        short_name="Rau0",
+        long_name="Raupulus Base",
+        role=config_pb2.Config.DeviceConfig.Role.CLIENT,
+        hw_model=mesh_pb2.HardwareModel.RPI_PICO2,
+        latitude_i=367362048,
+        longitude_i=-64323584,
+        altitude=54,
+        position_precision=16,
+    )
+    data = mesh_pb2.Data(
+        portnum=portnums_pb2.PortNum.MAP_REPORT_APP,
+        payload=mr.SerializeToString(),
+    )
+    res = decode_data_payload("!5f3a3a29", "!5f3a3a29", data)
+    assert res.portnum_name == "map_report"
+    assert res.portnum_num == 73
+    assert res.is_valid_consent
+    p = res.payload_dict
+    assert p["short_name"] == "Rau0"
+    assert p["long_name"] == "Raupulus Base"
+    assert p["role"] == "CLIENT"
+    assert p["hw_model"] == "RPI_PICO2"
+    assert abs(p["latitude"] - 36.736205) < 1e-5
+    assert abs(p["longitude"] - (-6.432358)) < 1e-5
+    assert p["altitude"] == 54
+
+
+def test_topic_validator_map() -> None:
+    """Verifica que el validador analiza correctamente los tópicos de tipo map."""
+    val = TopicValidator(allowed_channels=["SFNarrow", "Iberia"])
+    
+    # 1. Tópico con nodo/gateway al final
+    res1 = val.parse_topic("msh/EU_868/2/map/!5f3a3a29", 100)
+    assert res1.topic_type == "map"
+    assert res1.gateway_id == "!5f3a3a29"
+
+    # 2. Tópico raíz de mapa
+    res2 = val.parse_topic("msh/EU_868/2/map/", 100)
+    assert res2.topic_type == "map"
+    assert res2.gateway_id is None
+
