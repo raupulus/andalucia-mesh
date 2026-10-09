@@ -238,7 +238,7 @@
                                     <label style="display: flex; align-items: flex-start; gap: 0.6rem; cursor: pointer; font-size: 0.9rem;">
                                         <input type="checkbox" id="chkMqtt" onchange="actualizarConfiguracion()" style="margin-top: 0.2rem;" />
                                         <span>
-                                            <strong>{{ __('portal.configurator.mqtt_colaborar_label') }}</strong> (<code>mqtt.desdechipiona.es</code>)<br />
+                                            <strong>{{ __('portal.configurator.mqtt_colaborar_label') }}</strong> (<code>mqtt.mesh.desdechipiona.es</code>)<br />
                                             <span style="font-size: 0.8rem; color: var(--color-texto-2);">{{ __('portal.configurator.mqtt_colaborar_desc') }}</span>
                                         </span>
                                     </label>

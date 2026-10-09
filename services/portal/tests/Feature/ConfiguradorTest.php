@@ -85,6 +85,7 @@ class ConfiguradorTest extends TestCase
         $response->assertSee('role: CLIENT');
         $response->assertSee('hopLimit: 3');
         $response->assertSee('positionBroadcastSecs: 259200');
+        $response->assertSee('downlinkEnabled: false');
     }
 
     public function test_configurador_recurso_inexistente_devuelve_404(): void
@@ -148,7 +149,7 @@ class ConfiguradorTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('chkMqtt');
         $response->assertSee('¿Quieres colaborar subiendo a este MQTT?');
-        $response->assertSee('mqtt.desdechipiona.es');
+        $response->assertSee('mqtt.mesh.desdechipiona.es');
 
         $en = $this->get('/configurador?lang=en');
         $en->assertStatus(200);

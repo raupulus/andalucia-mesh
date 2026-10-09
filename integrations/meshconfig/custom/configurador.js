@@ -10740,7 +10740,7 @@ function f_() {
 			name: "SFNarrow",
 			psk: "AQ==",
 			uplinkEnabled: !0,
-			downlinkEnabled: !n,
+			downlinkEnabled: !1,
 			moduleSettings: { positionPrecision: 15 }
 		}
 	}], d = 1;
@@ -10751,7 +10751,7 @@ function f_() {
 			name: l,
 			psk: "AQ==",
 			uplinkEnabled: !0,
-			downlinkEnabled: !0,
+			downlinkEnabled: !1,
 			moduleSettings: { positionPrecision: 15 }
 		}
 	});
@@ -10784,7 +10784,7 @@ function f_() {
 			name: e.name,
 			psk: "AQ==",
 			uplinkEnabled: !0,
-			downlinkEnabled: !0,
+			downlinkEnabled: !1,
 			moduleSettings: { positionPrecision: 15 }
 		}
 	});
@@ -10797,7 +10797,7 @@ function f_() {
 	if (c) {
 		let e = {
 			enabled: !0,
-			address: "mqtt.desdechipiona.es",
+			address: "mqtt.mesh.desdechipiona.es",
 			username: "meshdev",
 			password: "large4cats",
 			root: "msh/EU_868",
@@ -10864,19 +10864,20 @@ function p_(e) {
 	let t = [];
 	if (Array.isArray(e.channels)) {
 		for (let n of e.channels) if (n.settings && n.settings.name) {
-			let r = n.role === "PRIMARY" ? e.config.device.role !== "CLIENT_MUTE" : n.settings.downlinkEnabled ?? !0, i = n.settings.uplinkEnabled ?? !0, a = new Uint8Array([1]);
+			n.role;
+			let e = n.settings.uplinkEnabled ?? !0, r = new Uint8Array([1]);
 			if (typeof n.settings.psk == "string" && n.settings.psk !== "AQ==" && n.settings.psk !== "") try {
 				let e = atob(n.settings.psk);
-				a = new Uint8Array(e.length);
-				for (let t = 0; t < e.length; t++) a[t] = e.charCodeAt(t);
+				r = new Uint8Array(e.length);
+				for (let t = 0; t < e.length; t++) r[t] = e.charCodeAt(t);
 			} catch {
-				a = new Uint8Array([1]);
+				r = new Uint8Array([1]);
 			}
 			t.push(h(O.Channel.ChannelSettingsSchema, {
 				name: n.settings.name,
-				psk: a,
-				uplinkEnabled: i,
-				downlinkEnabled: r,
+				psk: r,
+				uplinkEnabled: e,
+				downlinkEnabled: !1,
 				moduleSettings: n.settings.moduleSettings ? { positionPrecision: n.settings.moduleSettings.positionPrecision ?? 15 } : void 0
 			}));
 		}
@@ -10960,7 +10961,9 @@ function v_() {
 	});
 }
 function y_() {
-	let { configDoc: e } = f_(), t = e.config.lora, n = e.config.device, r = e.config.position, i = n.role === "CLIENT_MUTE", a = Number(document.getElementById("telemetriaSelect")?.value || 0), o = [
+	let { configDoc: e } = f_(), t = e.config.lora, n = e.config.device, r = e.config.position;
+	n.role;
+	let i = Number(document.getElementById("telemetriaSelect")?.value || 0), a = [
 		"# Configuración oficial Andalucía Mesh (SFNarrow)",
 		`meshtastic --set-owner "${e.owner}" --set-owner-short "${e.owner_short}"`,
 		`meshtastic --set lora.region ${t.region} --set lora.use_preset false`,
@@ -10968,19 +10971,19 @@ function y_() {
 		`meshtastic --set lora.channel_num ${t.channelNum} --set lora.hop_limit ${t.hopLimit} --set lora.tx_power ${t.txPower}`,
 		`meshtastic --set device.role ${n.role} --set device.node_info_broadcast_secs ${n.nodeInfoBroadcastSecs} --set device.disable_triple_click true --set device.tzdef "${n.tzdef}"`,
 		`meshtastic --set position.position_broadcast_smart_enabled false --set position.position_broadcast_secs ${r.positionBroadcastSecs} --set position.fixed_position ${r.fixedPosition || !1}`,
-		`meshtastic --set telemetry.device_update_interval ${a}`,
-		`meshtastic --ch-set name "SFNarrow" --ch-set psk "AQ==" --ch-set uplink_enabled true --ch-set downlink_enabled ${!i} --ch-index 0`
+		`meshtastic --set telemetry.device_update_interval ${i}`,
+		"meshtastic --ch-set name \"SFNarrow\" --ch-set psk \"AQ==\" --ch-set uplink_enabled true --ch-set downlink_enabled false --ch-index 0"
 	];
 	if (e.channels && e.channels.length > 1) for (let t = 1; t < e.channels.length; t++) {
 		let n = e.channels[t];
-		n && n.settings && n.settings.name && o.push(`meshtastic --ch-set name "${n.settings.name}" --ch-set psk "${n.settings.psk || "AQ=="}" --ch-set uplink_enabled true --ch-index ${t}`);
+		n && n.settings && n.settings.name && a.push(`meshtastic --ch-set name "${n.settings.name}" --ch-set psk "${n.settings.psk || "AQ=="}" --ch-set uplink_enabled true --ch-set downlink_enabled false --ch-index ${t}`);
 	}
 	if (e.module_config?.mqtt?.enabled) {
 		let t = e.module_config.mqtt;
-		o.push(`meshtastic --set mqtt.enabled true --set mqtt.address "${t.address}" --set mqtt.username "${t.username}" --set mqtt.password "${t.password}" --set mqtt.root "${t.root}" --set mqtt.encryption_enabled true --set mqtt.tls_enabled true`), o.push("meshtastic --set lora.ignore_mqtt true"), t.mapReportingEnabled && (o.push("meshtastic --set mqtt.map_reporting_enabled true --set mqtt.map_report_settings.publish_interval_secs 259200 --set mqtt.map_report_settings.position_precision 14 --set mqtt.map_report_settings.should_report_location true"), o.push("meshtastic --set lora.config_ok_to_mqtt true"));
+		a.push(`meshtastic --set mqtt.enabled true --set mqtt.address "${t.address}" --set mqtt.username "${t.username}" --set mqtt.password "${t.password}" --set mqtt.root "${t.root}" --set mqtt.encryption_enabled true --set mqtt.tls_enabled true`), a.push("meshtastic --set lora.ignore_mqtt true"), t.mapReportingEnabled && (a.push("meshtastic --set mqtt.map_reporting_enabled true --set mqtt.map_report_settings.publish_interval_secs 259200 --set mqtt.map_report_settings.position_precision 14 --set mqtt.map_report_settings.should_report_location true"), a.push("meshtastic --set lora.config_ok_to_mqtt true"));
 	}
-	let s = o.join("\n");
-	navigator.clipboard.writeText(s).then(() => {
+	let o = a.join("\n");
+	navigator.clipboard.writeText(o).then(() => {
 		alert("Comandos CLI de Meshtastic copiados al portapapeles."), $("Comandos CLI copiados al portapapeles.");
 	});
 }
@@ -11247,7 +11250,7 @@ async function O_() {
 		if (t.module_config?.mqtt) {
 			let e = {
 				enabled: !!t.module_config.mqtt.enabled,
-				address: t.module_config.mqtt.address || "mqtt.desdechipiona.es",
+				address: t.module_config.mqtt.address || "mqtt.mesh.desdechipiona.es",
 				username: t.module_config.mqtt.username || "meshdev",
 				password: t.module_config.mqtt.password || "large4cats",
 				root: t.module_config.mqtt.root || "msh/EU_868",
@@ -11276,7 +11279,7 @@ async function O_() {
 						name: e.settings.name,
 						psk: new Uint8Array([1]),
 						uplinkEnabled: e.settings.uplinkEnabled ?? !0,
-						downlinkEnabled: e.settings.downlinkEnabled ?? !0,
+						downlinkEnabled: e.settings.downlinkEnabled ?? !1,
 						moduleSettings: e.settings.moduleSettings ? { positionPrecision: e.settings.moduleSettings.positionPrecision ?? 15 } : void 0
 					}
 				});
@@ -11370,7 +11373,7 @@ async function k_() {
 		if (e.module_config?.mqtt?.enabled) {
 			let t = {
 				enabled: !0,
-				address: e.module_config.mqtt.address || "mqtt.desdechipiona.es",
+				address: e.module_config.mqtt.address || "mqtt.mesh.desdechipiona.es",
 				username: e.module_config.mqtt.username || "meshdev",
 				password: e.module_config.mqtt.password || "large4cats",
 				root: e.module_config.mqtt.root || "msh/EU_868",
@@ -11402,7 +11405,7 @@ async function k_() {
 						name: t.settings.name,
 						psk: new Uint8Array([1]),
 						uplinkEnabled: t.settings.uplinkEnabled ?? !0,
-						downlinkEnabled: t.settings.downlinkEnabled ?? !0,
+						downlinkEnabled: t.settings.downlinkEnabled ?? !1,
 						moduleSettings: t.settings.moduleSettings ? { positionPrecision: t.settings.moduleSettings.positionPrecision ?? 15 } : void 0
 					}
 				});

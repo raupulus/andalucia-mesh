@@ -15,6 +15,7 @@ return [
 
     'nav' => [
         'home' => 'Inicio',
+        'map' => 'Mapa',
         'node_setup' => 'Configura tu nodo',
         'gateway' => 'MQTT',
         'rankings' => 'Rankings',
@@ -704,7 +705,7 @@ return [
         'warning_experimental_report' => 'Si detecta algo extraño o inesperado, por favor repórtelo en :link.',
         'warning_experimental_link' => 'sugerencias',
         'mqtt_colaborar_label' => '¿Quieres colaborar subiendo a este MQTT?',
-        'mqtt_colaborar_desc' => 'Si lo habilitas, se configurará la pasarela MQTT comunitaria (mqtt.desdechipiona.es) para compartir telemetría y mensajes con la red. Si no lo activas, no se incluirá configuración MQTT.',
+        'mqtt_colaborar_desc' => 'Si lo habilitas, se configurará la pasarela MQTT comunitaria (mqtt.mesh.desdechipiona.es) para compartir telemetría y mensajes con la red. Si no lo activas, no se incluirá configuración MQTT.',
         'mqtt_map_label' => '¿Quieres aparecer en el mapa público de cobertura?',
         'mqtt_map_desc' => 'Publica periódicamente tu ubicación en el mapa de Andalucía Mesh (cada 72 h con precisión segura de ~1 km para proteger tu intimidad). Habilita el reporte en mapa y la difusión de identidad (config_ok_to_mqtt).',
     ],

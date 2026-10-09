@@ -43,7 +43,7 @@ module_config:
     deviceUpdateInterval: 0
   mqtt:
     enabled: false
-    address: "mqtt.desdechipiona.es"
+    address: "mqtt.mesh.desdechipiona.es"
     username: "meshdev"
     password: "large4cats"
     root: "msh"
@@ -58,7 +58,7 @@ channels:
       name: "SFNarrow"
       psk: "AQ=="
       uplinkEnabled: true
-      downlinkEnabled: true
+      downlinkEnabled: false
       moduleSettings:
         positionPrecision: 15
   - index: 1

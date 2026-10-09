@@ -15,6 +15,7 @@ return [
 
     'nav' => [
         'home' => 'Home',
+        'map' => 'Map',
         'node_setup' => 'Configure your node',
         'gateway' => 'MQTT',
         'rankings' => 'Rankings',
@@ -704,7 +705,7 @@ return [
         'warning_experimental_report' => 'If you notice anything unusual or unexpected, please report it in :link.',
         'warning_experimental_link' => 'suggestions',
         'mqtt_colaborar_label' => 'Do you want to collaborate by uploading to this MQTT?',
-        'mqtt_colaborar_desc' => 'If enabled, the community MQTT gateway (mqtt.desdechipiona.es) will be configured to share telemetry and messages with the network. If unchecked, no MQTT configuration will be included.',
+        'mqtt_colaborar_desc' => 'If enabled, the community MQTT gateway (mqtt.mesh.desdechipiona.es) will be configured to share telemetry and messages with the network. If unchecked, no MQTT configuration will be included.',
         'mqtt_map_label' => 'Do you want to appear on the public coverage map?',
         'mqtt_map_desc' => 'Periodically publishes your location on the Andalucía Mesh map (every 72h with safe ~1 km precision to protect privacy). Enables map reporting and identity broadcast (config_ok_to_mqtt).',
     ],

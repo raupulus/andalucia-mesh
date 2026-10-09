@@ -159,7 +159,7 @@ export function construirYamlDeseado() {
         name: "SFNarrow",
         psk: "AQ==",
         uplinkEnabled: true,
-        downlinkEnabled: !esClientMute,
+        downlinkEnabled: false,
         moduleSettings: { positionPrecision: 15 }
       }
     }
@@ -174,7 +174,7 @@ export function construirYamlDeseado() {
         name: provSeleccionada,
         psk: "AQ==",
         uplinkEnabled: true,
-        downlinkEnabled: true,
+        downlinkEnabled: false,
         moduleSettings: { positionPrecision: 15 }
       }
     });
@@ -199,7 +199,7 @@ export function construirYamlDeseado() {
           name: opc.name,
           psk: "AQ==",
           uplinkEnabled: true,
-          downlinkEnabled: true,
+          downlinkEnabled: false,
           moduleSettings: { positionPrecision: 15 }
         }
       });
@@ -225,7 +225,7 @@ export function construirYamlDeseado() {
   if (mqttActivo) {
     const mqttCfg = {
       enabled: true,
-      address: "mqtt.desdechipiona.es",
+      address: "mqtt.mesh.desdechipiona.es",
       username: "meshdev",
       password: "large4cats",
       root: "msh/EU_868",
@@ -303,7 +303,7 @@ export function generarMeshtasticUrl(doc) {
     for (const ch of doc.channels) {
       if (ch.settings && ch.settings.name) {
         const isPrimary = ch.role === "PRIMARY";
-        const downlink = isPrimary ? (doc.config.device.role !== "CLIENT_MUTE") : (ch.settings.downlinkEnabled ?? true);
+        const downlink = false;
         const uplink = ch.settings.uplinkEnabled ?? true;
 
         let pskBytes = new Uint8Array([1]);
@@ -501,7 +501,7 @@ export function copiarComandosCli() {
     `meshtastic --set device.role ${dev.role} --set device.node_info_broadcast_secs ${dev.nodeInfoBroadcastSecs} --set device.disable_triple_click true --set device.tzdef "${dev.tzdef}"`,
     `meshtastic --set position.position_broadcast_smart_enabled false --set position.position_broadcast_secs ${pos.positionBroadcastSecs} --set position.fixed_position ${pos.fixedPosition || false}`,
     `meshtastic --set telemetry.device_update_interval ${telemetriaSecs}`,
-    `meshtastic --ch-set name "SFNarrow" --ch-set psk "AQ==" --ch-set uplink_enabled true --ch-set downlink_enabled ${!esClientMute} --ch-index 0`
+    `meshtastic --ch-set name "SFNarrow" --ch-set psk "AQ==" --ch-set uplink_enabled true --ch-set downlink_enabled false --ch-index 0`
   ];
 
   // Canales secundarios añadidos
@@ -509,7 +509,7 @@ export function copiarComandosCli() {
     for (let i = 1; i < configDoc.channels.length; i++) {
       const ch = configDoc.channels[i];
       if (ch && ch.settings && ch.settings.name) {
-        comandos.push(`meshtastic --ch-set name "${ch.settings.name}" --ch-set psk "${ch.settings.psk || 'AQ=='}" --ch-set uplink_enabled true --ch-index ${i}`);
+        comandos.push(`meshtastic --ch-set name "${ch.settings.name}" --ch-set psk "${ch.settings.psk || 'AQ=='}" --ch-set uplink_enabled true --ch-set downlink_enabled false --ch-index ${i}`);
       }
     }
   }
@@ -1051,7 +1051,7 @@ export async function aplicarDeseadoANodo() {
     if (doc.module_config?.mqtt) {
       const mqttData = {
         enabled: Boolean(doc.module_config.mqtt.enabled),
-        address: doc.module_config.mqtt.address || "mqtt.desdechipiona.es",
+        address: doc.module_config.mqtt.address || "mqtt.mesh.desdechipiona.es",
         username: doc.module_config.mqtt.username || "meshdev",
         password: doc.module_config.mqtt.password || "large4cats",
         root: doc.module_config.mqtt.root || "msh/EU_868",
@@ -1089,7 +1089,7 @@ export async function aplicarDeseadoANodo() {
               name: ch.settings.name,
               psk: new Uint8Array([1]),
               uplinkEnabled: ch.settings.uplinkEnabled ?? true,
-              downlinkEnabled: ch.settings.downlinkEnabled ?? true,
+              downlinkEnabled: ch.settings.downlinkEnabled ?? false,
               moduleSettings: ch.settings.moduleSettings ? {
                 positionPrecision: ch.settings.moduleSettings.positionPrecision ?? 15
               } : undefined
@@ -1231,7 +1231,7 @@ export async function programarNodoDesdeAsistente() {
     if (configDoc.module_config?.mqtt?.enabled) {
       const mqttData = {
         enabled: true,
-        address: configDoc.module_config.mqtt.address || "mqtt.desdechipiona.es",
+        address: configDoc.module_config.mqtt.address || "mqtt.mesh.desdechipiona.es",
         username: configDoc.module_config.mqtt.username || "meshdev",
         password: configDoc.module_config.mqtt.password || "large4cats",
         root: configDoc.module_config.mqtt.root || "msh/EU_868",
@@ -1268,7 +1268,7 @@ export async function programarNodoDesdeAsistente() {
               name: ch.settings.name,
               psk: new Uint8Array([1]),
               uplinkEnabled: ch.settings.uplinkEnabled ?? true,
-              downlinkEnabled: ch.settings.downlinkEnabled ?? true,
+              downlinkEnabled: ch.settings.downlinkEnabled ?? false,
               moduleSettings: ch.settings.moduleSettings ? {
                 positionPrecision: ch.settings.moduleSettings.positionPrecision ?? 15
               } : undefined
