@@ -26,17 +26,17 @@ El topic se corta tras `MQTT_TOPIC_ROOT` (puede tener varios niveles):
 | Forma | Se extrae | Si no encaja |
 |---|---|---|
 | `<raíz>/2/e/<canal>/<!gw>` (exactamente dos niveles tras `e`) | canal (texto del topic) y gateway del topic | `descartado_topic` |
-| `<raíz>/2/map/` (niveles extra se ignoran) | nada: el gateway sale del sobre | — |
+| `<raíz>/2/map/` (con o sin `<!node_id>`) | gateway del topic si termina en `!hex8`; si no, del sobre o del mensaje | — |
 | Cualquier otra | — | `descartado_topic` |
 
 - Mensaje de más de 1.024 B → `descartado_tamano` (un `ServiceEnvelope` real no pasa de ~300 B).
 
 ### Sobre (`ServiceEnvelope`) y gateway
 
-- Campos: `packet` (`MeshPacket`), `channel_id`, `gateway_id`. Error de protobuf o sin `packet` → `descartado_protobuf`.
+- Campos: `packet` (`MeshPacket`), `channel_id`, `gateway_id`. Error de protobuf o sin `packet` → `descartado_protobuf` (excepto en tópicos `…/2/map/`, donde se procesa como `MapReport` crudo).
 - `gateway_id` se normaliza a minúsculas y debe cumplir `^![0-9a-f]{8}$`; si no → `descartado_gateway`.
 - En `…/2/e/`: gateway del topic ≠ `gateway_id` del sobre → descartado, contador `gateway_distinto` y log `WARN` con ambos ids (máximo uno por minuto y gateway).
-- En `…/2/map/`: el gateway es `gateway_id`; si `MeshPacket.from` ≠ `gateway_id` → descartado (`map_gateway_distinto`). La ACL no ata este topic al usuario (riesgo aceptado en el README).
+- En `…/2/map/`: el gateway es `gateway_id` del sobre o del topic; si no viene definido en el sobre, se asume el `from_id` del nodo emisor. Se admite tanto `ServiceEnvelope` como `MapReport` directo sin sobre. La ACL no ata este topic al usuario (riesgo aceptado en el README).
 - Todo mensaje que supera esta comprobación actualiza el registro de gateways ([03](03-provinces-registry.md)), aunque después se descarte por canal o sea un duplicado: el gateway está vivo.
 
 ### Lista blanca de canales (segunda barrera)
@@ -137,4 +137,4 @@ Contadores de este módulo (expuestos en `/health`): `mensajes`, `descartado_top
 - **Dado** un duplicado de un paquete ya visto, **cuando** llega por otro gateway, **entonces** no se descifra de nuevo (contador de descifrados sin cambios).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-09
