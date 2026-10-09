@@ -9,6 +9,7 @@ Este documento registra los incidentes críticos, fallos graves y análisis post
 | ID | Fecha | Componente | Severidad | Resumen | Estado |
 |---|---|---|---|---|---|
 | `INC-01` | 2026-10-08 | PotatoMesh / Limpieza Host | Crítico | Vaciado accidental de la tabla `nodes` en SQLite por incompatibilidad de tipos `INTEGER < TEXT` durante la purga automática de las 03:30 h | Resuelto / Salvaguardado |
+| `INC-02` | 2026-10-09 | adaptador-potato / ingesta | Alta | Nodos Meshtastic atascados como `CLIENT_HIDDEN` por fallo al acceder a `mesh_pb2.Config` (`AttributeError`), evaluación de `Role.CLIENT == 0` y discrepancia camelCase en telemetría | Resuelto / Salvaguardado |
 
 ---
 
@@ -79,4 +80,51 @@ Este documento registra los incidentes críticos, fallos graves y análisis post
    Se corrigió el método `_sync_nodes` en [`services/sync-peers/src/syncer.py`](../../services/sync-peers/src/syncer.py) para que transforme listas JSON en diccionarios `{node_id: node_data}`, evitando que PotatoMesh rechace los lotes de nodos remotos con HTTP 400.
 
 ---
-> Creado: 2026-10-08 · Última revisión: 2026-10-08
+
+### INC-02 · Nodos atascados como `CLIENT_HIDDEN` y telemetría desincronizada en PotatoMesh
+
+- **Fecha y hora del incidente:** 2026-10-09 02:25:00 CEST (00:25:00 UTC)
+- **Componente:** `services/adaptador-potato/src/mqtt.py`, `services/ingesta/src/decoder.py`
+- **Severidad:** **Alta** (degradación masiva de metadatos de nodos nuevos, roles de infraestructura no reconocidos y telemetría no reflejada en fichas de nodos)
+
+#### 1. Síntomas observados
+- Proliferación generalizada de nodos con rol `CLIENT_HIDDEN` en la interfaz web de PotatoMesh tras la ingesta de tráfico de radio local vía MQTT.
+- Nodos propios activos (como `Rau0` / `!5f3a3a29`) registraban sus paquetes de telemetría en la línea temporal de PotatoMesh (`Battery: 101%`, `Channel Util: 0.4%`, etc.), pero la tarjeta emergente del nodo no reflejaba estos datos y mostraba `Last seen: 1d 2h`, evidenciando desincronización entre la tabla `telemetry` y la tabla `nodes`.
+- Los nodos sincronizados desde instancias remotas (`sync-peers`) mantenían sus datos correctos, mientras que los nodos nuevos recibidos en local degradaban a `CLIENT_HIDDEN`.
+
+#### 2. Causa Raíz Técnica
+1. **Mecanismo de marcadores de PotatoMesh (`ensure_unknown_node`):**
+   PotatoMesh crea automáticamente un registro en la tabla `nodes` con rol por defecto `CLIENT_HIDDEN` en cuanto recibe cualquier paquete inicial (vecino, salto de traza, mensaje o telemetría) de un nodo no catalogado previamente.
+2. **Fallo de deserialización Protobuf (`Role` en `config_pb2`):**
+   El enum `Role` de Meshtastic se define en `config_pb2.Config.DeviceConfig.Role`. En `adaptador-potato` e `ingesta`, el código intentaba resolverlo mediante `mesh_pb2.Config.DeviceConfig.Role.Name(user.role)`:
+   - Para nodos con rol distinto de cliente (`ROUTER`=2, `REPEATER`=4, etc.): provocaba un `AttributeError: module 'meshtastic.protobuf.mesh_pb2' has no attribute 'Config'`, capturado en `except` y descartando por completo el paquete `NodeInfo`. El nodo permanecía permanentemente con el rol `CLIENT_HIDDEN` del marcador.
+   - Para nodos con rol cliente (`Role.CLIENT == 0`): en Python `if user.role:` evaluaba `0` como falsy, asignando `role: None`. Al enviar `POST /api/nodes`, PotatoMesh ejecutaba `role = COALESCE(excluded.role, nodes.role)`, conservando el `CLIENT_HIDDEN` previo.
+3. **Discrepancia de nombrado en métricas de telemetría:**
+   El endpoint interno de PotatoMesh `update_node_from_telemetry` busca las claves en formato `snake_case` (`battery_level`, `voltage`, `uptime_seconds`, `channel_utilization`, `air_util_tx`). `adaptador-potato` enviaba únicamente `camelCase` (`batteryLevel`, etc.), por lo que PotatoMesh registraba la telemetría en su tabla histórica pero omitía actualizar el registro en la tabla `nodes` y no actualizaba `last_heard`.
+4. **Incompatibilidad de `MapReport`:**
+   `MapReport` se intentaba instanciar desde `mesh_pb2` bajo portnum 72 (correspondiente a `ATAK_PLUGIN`), cuando en Meshtastic Protobuf pertenece a `mqtt_pb2.MapReport` bajo portnum 73 (`MAP_REPORT_APP`).
+
+#### 3. Impacto
+- Cero pérdida de paquetes crudos de radio ni de trazas en Mosquitto o TimescaleDB.
+- Todos los nodos nuevos y routers de infraestructura en PotatoMesh figuraban erróneamente como `CLIENT_HIDDEN` y sin métricas directas en su ficha resumen.
+
+#### 4. Mitigación Inmediata y Corrección
+1. **Corrección de deserialización Protobuf:**  
+   Se corrigió en [`services/adaptador-potato/src/mqtt.py`](../../services/adaptador-potato/src/mqtt.py) e [`services/ingesta/src/decoder.py`](../../services/ingesta/src/decoder.py) la importación de `config_pb2` y la resolución segura de `Role` con fallback `"CLIENT"` para soportar adecuadamente el enum `0`.
+2. **Formateo dual de telemetría:**  
+   Emisión simultánea de métricas en camelCase (para la API histórica de telemetría) y en snake_case (para la actualización directa de `nodes`).
+3. **Identificadores numéricos explícitos:**  
+   Adición de `num`, `node_num` y `node_id` en todas las cargas HTTP hacia PotatoMesh.
+4. **Corrección de `MapReport`:**  
+   Ajuste a portnum 73 y uso de `mqtt_pb2.MapReport`.
+
+#### 5. Medidas Preventivas Definitivas (Salvaguardas)
+1. **Regla permanente TR-19 incorporada a [`AGENTS.md`](../../AGENTS.md):**  
+   Obligación de importar siempre `config_pb2` para resolver roles de Meshtastic, comprobar `Role.CLIENT == 0` sin depender de falsedad booleana y usar portnum 73 con `mqtt_pb2.MapReport`.
+2. **Suite unitaria de despacho:**  
+   Creación de [`services/adaptador-potato/tests/test_dispatch.py`](../../services/adaptador-potato/tests/test_dispatch.py) cubriendo la serialización de todos los roles y estructuras de telemetría.
+3. **Ampliación de tests en ingesta:**  
+   Incorporación de pruebas de deserialización de roles en [`services/ingesta/tests/test_core.py`](../../services/ingesta/tests/test_core.py).
+
+---
+> Creado: 2026-10-08 · Última revisión: 2026-10-09

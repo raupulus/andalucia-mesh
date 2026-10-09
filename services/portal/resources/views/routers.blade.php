@@ -313,18 +313,20 @@
                             <tbody>
                                 @foreach($routers as $r)
                                     <tr class="routers-tr">
-                                        <!-- Router / Identidad -->
+                                        <!-- Nodo -->
                                         <td class="routers-td">
                                             <div style="display: flex; align-items: center; gap: 0.65rem;">
                                                 <span class="routers-status-dot {{ $r['esta_online'] ? 'routers-status-dot-online' : 'routers-status-dot-offline' }}" title="{{ $r['esta_online'] ? __('admin.widgets.routers.online') : __('admin.widgets.routers.offline') }}"></span>
-                                                <div>
-                                                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--color-texto); display: flex; align-items: center; gap: 0.4rem;">
-                                                        <span>{{ $r['short_name'] }}</span>
-                                                        @if($r['long_name'])
-                                                            <span style="font-size: 0.8rem; font-weight: normal; opacity: 0.7;">({{ $r['long_name'] }})</span>
-                                                        @endif
+                                                <div style="display: flex; flex-direction: column; gap: 0.15rem;">
+                                                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--color-texto); line-height: 1.2;">
+                                                        {{ $r['short_name'] }}
                                                     </div>
-                                                    <div style="font-family: var(--fuente-mono, monospace); font-size: 0.78rem; opacity: 0.65; letter-spacing: 0.04em;">{{ $r['id'] }}</div>
+                                                    @if($r['long_name'])
+                                                        <div class="routers-node-longname">
+                                                            {{ $r['long_name'] }}
+                                                        </div>
+                                                    @endif
+                                                    <div style="font-family: var(--fuente-mono, monospace); font-size: 0.75rem; opacity: 0.65; letter-spacing: 0.04em;">{{ $r['id'] }}</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -410,8 +412,11 @@
                                                 rel="noopener noreferrer"
                                                 class="routers-btn-inspect"
                                                 title="{{ __('admin.widgets.routers.inspect_title') }}"
+                                                aria-label="{{ __('admin.widgets.routers.inspect_title') }}"
                                             >
-                                                {{ __('admin.widgets.routers.btn_inspect') }}
+                                                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                                </svg>
                                             </a>
                                         </td>
                                     </tr>
@@ -822,11 +827,22 @@
             border: 1px solid rgba(16, 185, 129, 0.25);
         }
 
-        /* Barras de progreso de batería y ChUtil */
+        /* Nombre largo del nodo secundario (adaptado al tema) */
+        .routers-node-longname {
+            font-size: 0.78rem;
+            font-weight: 600;
+            line-height: 1.25;
+            color: #007A33;
+        }
+        [data-theme="dark"] .routers-node-longname {
+            color: #67EA94;
+        }
+
+        /* Barras de progreso de batería y ChUtil (optimizadas para no amontonarse) */
         .routers-battery-container,
         .routers-chutil-container {
-            min-width: 120px;
-            max-width: 150px;
+            min-width: 95px;
+            max-width: 115px;
         }
         .routers-progress-track {
             height: 6px;
@@ -870,27 +886,37 @@
             color: #ef4444;
         }
 
-        /* Botón de inspección */
+        /* Botón de diagnóstico (solo icono verde del logo) */
         .routers-btn-inspect {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: #222433;
-            border: 1px solid rgba(148, 163, 184, 0.28);
+            width: 2.25rem;
+            height: 2.25rem;
+            background: rgba(0, 122, 51, 0.08);
+            border: 1px solid rgba(0, 122, 51, 0.25);
             border-radius: 0.45rem;
-            color: #f8fafc;
-            padding: 0.42rem 0.85rem;
-            font-size: 0.78rem;
-            font-weight: 700;
+            color: #007A33;
             text-decoration: none;
-            transition: all 0.15s ease;
-            white-space: nowrap;
+            transition: all 0.2s ease;
         }
         .routers-btn-inspect:hover {
-            background: #2d3044;
-            border-color: #67EA94;
+            background: #007A33;
+            border-color: #007A33;
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 122, 51, 0.35);
+        }
+        [data-theme="dark"] .routers-btn-inspect {
+            background: rgba(103, 234, 148, 0.1);
+            border-color: rgba(103, 234, 148, 0.3);
             color: #67EA94;
-            transform: translateX(2px);
+        }
+        [data-theme="dark"] .routers-btn-inspect:hover {
+            background: #67EA94;
+            border-color: #67EA94;
+            color: #1F2029;
+            box-shadow: 0 0 10px rgba(103, 234, 148, 0.4);
         }
 
         /* Estados vacíos y alertas */

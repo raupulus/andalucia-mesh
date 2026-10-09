@@ -79,10 +79,10 @@ class RoutersFrontendTest extends TestCase
         $response = $this->get('/routers');
 
         $response->assertSee('routers-dashboard-table', false);
-        $response->assertSee('Router / Identidad', false);
-        $response->assertSee('Hardware / Zona', false);
-        $response->assertSee('Alimentación y Batería', false);
-        $response->assertSee('Presión Aire (ChUtil)', false);
+        $response->assertSee('Nodo', false);
+        $response->assertSee('Dispositivo', false);
+        $response->assertSee('Energía', false);
+        $response->assertSee('Presión (CHUTIL)', false);
         $response->assertSee('Saturación TX', false);
         $response->assertSee('Último Reporte', false);
         $response->assertSee('Acción', false);

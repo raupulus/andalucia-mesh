@@ -64,14 +64,16 @@
                                 <td class="fi-td">
                                     <div class="flex items-center gap-2">
                                         <span class="fi-status-dot {{ $r['esta_online'] ? 'fi-status-dot-online' : 'fi-status-dot-offline' }}" title="{{ $r['esta_online'] ? __('admin.widgets.routers.online') : __('admin.widgets.routers.offline') }}"></span>
-                                        <div>
-                                            <div class="font-bold text-sm text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
-                                                <span>{{ $r['short_name'] }}</span>
-                                                @if($r['long_name'])
-                                                    <span class="text-xs font-normal opacity-60">({{ $r['long_name'] }})</span>
-                                                @endif
+                                        <div class="flex flex-col gap-0.5">
+                                            <div class="font-bold text-sm text-gray-900 dark:text-gray-100 leading-tight">
+                                                {{ $r['short_name'] }}
                                             </div>
-                                            <div class="font-mono text-xs opacity-60 tracking-wider">{{ $r['id'] }}</div>
+                                            @if($r['long_name'])
+                                                <div class="fi-node-longname text-xs font-semibold leading-tight">
+                                                    {{ $r['long_name'] }}
+                                                </div>
+                                            @endif
+                                            <div class="font-mono text-[11px] opacity-60 tracking-wider">{{ $r['id'] }}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -140,8 +142,11 @@
                                         target="_blank"
                                         class="fi-btn-inspect"
                                         title="{{ __('admin.widgets.routers.inspect_title') }}"
+                                        aria-label="{{ __('admin.widgets.routers.inspect_title') }}"
                                     >
-                                        {{ __('admin.widgets.routers.btn_inspect') }}
+                                        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                        </svg>
                                     </a>
                                 </td>
                             </tr>

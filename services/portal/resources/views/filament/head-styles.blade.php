@@ -472,11 +472,11 @@
         color: #67EA94;
     }
 
-    /* Barras de progreso de batería y ChUtil */
+    /* Barras de progreso de batería y ChUtil (optimizadas para no amontonarse) */
     .fi-battery-container,
     .fi-chutil-container {
-        min-width: 6.5rem;
-        max-width: 8.5rem;
+        min-width: 5.8rem;
+        max-width: 7.2rem;
     }
 
     .fi-progress-track {
@@ -537,30 +537,43 @@
         color: inherit;
     }
 
-    /* Botón inspeccionar / diagnóstico */
+    /* Nombre largo del nodo en tabla repetidores (adaptado al tema) */
+    .fi-node-longname {
+        color: #007A33;
+    }
+    .dark .fi-node-longname {
+        color: #67EA94;
+    }
+
+    /* Botón inspeccionar / diagnóstico (solo icono verde del logo) */
     .fi-btn-inspect {
         display: inline-flex;
         align-items: center;
-        gap: 0.25rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 0.25rem 0.6rem;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
         border-radius: 0.375rem;
-        background-color: rgba(148, 163, 184, 0.1);
-        color: inherit;
-        border: 1px solid rgba(148, 163, 184, 0.2);
+        background-color: rgba(0, 122, 51, 0.08);
+        border: 1px solid rgba(0, 122, 51, 0.25);
+        color: #007A33;
         text-decoration: none;
         transition: all 0.15s ease;
     }
     .fi-btn-inspect:hover {
-        background-color: rgba(0, 122, 51, 0.15);
+        background-color: #007A33;
         border-color: #007A33;
-        color: #007A33;
+        color: #ffffff;
+    }
+    .dark .fi-btn-inspect {
+        background-color: rgba(103, 234, 148, 0.1);
+        border-color: rgba(103, 234, 148, 0.3);
+        color: #67EA94;
     }
     .dark .fi-btn-inspect:hover {
-        background-color: rgba(103, 234, 148, 0.15);
+        background-color: #67EA94;
         border-color: #67EA94;
-        color: #67EA94;
+        color: #1F2029;
+        box-shadow: 0 0 8px rgba(103, 234, 148, 0.35);
     }
 
     /* Alerta y estado vacío del dashboard */
