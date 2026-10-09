@@ -203,8 +203,14 @@ class PeerSyncer:
                     res = self.config.get_channel_index_and_name(ch_name)
                     if res is None:
                         continue
-                    ch_idx, _ = res
+                    ch_idx, official_name = res
                     msg["channel"] = ch_idx
+                    msg["channel_name"] = official_name
+                elif isinstance(ch_name, int) and ch_name == 0:
+                    msg["channel"] = 0
+                    msg["channel_name"] = self.config.primary_channel
+                else:
+                    continue
 
                 rx = msg.get("rx_time")
                 if isinstance(rx, int) and (max_rx is None or rx > max_rx):

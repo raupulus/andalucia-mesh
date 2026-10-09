@@ -71,6 +71,7 @@ def test_dispatch_nodeinfo_roles(processor: tuple[MqttProcessor, FakeSender]) ->
             packet=packet,
             data=data,
             channel_index=0,
+            channel_name="SFNarrow",
             rx_time=1700000000,
             node_id_str="!5f3a3a29",
             from_node=0x5F3A3A29,
@@ -113,6 +114,7 @@ def test_dispatch_telemetry_metrics(processor: tuple[MqttProcessor, FakeSender])
         packet=packet,
         data=data,
         channel_index=0,
+        channel_name="SFNarrow",
         rx_time=1700000000,
         node_id_str="!5f3a3a29",
         from_node=0x5F3A3A29,
@@ -157,6 +159,7 @@ def test_dispatch_map_report_role(processor: tuple[MqttProcessor, FakeSender]) -
         packet=packet,
         data=data,
         channel_index=0,
+        channel_name="SFNarrow",
         rx_time=1700000000,
         node_id_str="!11223344",
         from_node=0x11223344,
@@ -198,6 +201,7 @@ def test_dispatch_direct_message_filtering(processor: tuple[MqttProcessor, FakeS
     proc.process_message("msh/EU_868/2/e/SFNarrow/!11223344", envelope_direct_chat.SerializeToString())
     assert len(sender.enqueued_items) == 1
     assert sender.enqueued_items[0][0] == "messages"
+    assert sender.enqueued_items[0][1]["channel_name"] == "SFNarrow"
 
     # 3. Traceroute directo (to != 0xFFFFFFFF) -> admitido
     sender.enqueued_items.clear()

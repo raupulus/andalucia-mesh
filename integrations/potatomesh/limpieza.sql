@@ -4,13 +4,17 @@
 -- Purga periódica de datos en PotatoMesh SQLite:
 -- - Trazas (traceroutes) y saltos: retención de 5 días.
 -- - Nodos, chat, waypoints, posiciones, telemetría y vecinos: retención de 15 días.
+-- - Mensajes fuera de canales oficiales o sin nombre: purga automática.
 -- Ejecutado a diario por snm-potato-limpieza.timer a las 03:47 h en el host.
 -- ==============================================================================
 
 PRAGMA foreign_keys = ON;
 
--- 1. Mensajes del chat con más de 15 días
+-- 1. Mensajes del chat con más de 15 días o sin canal oficial reconocido
 DELETE FROM messages WHERE rx_time < unixepoch('now', '-15 days');
+DELETE FROM messages WHERE channel_name IS NULL OR channel_name = '' OR channel_name NOT IN (
+    'SFNarrow', 'Iberia', 'Andalucia', 'Cadiz', 'Huelva', 'Almeria', 'Granada', 'Jaen', 'Sevilla', 'Cordoba', 'Malaga', 'Ceuta', 'Melilla', 'sos'
+);
 
 -- 2. Waypoints con más de 15 días o con expiración vencida
 DELETE FROM waypoints WHERE rx_time < unixepoch('now', '-15 days') OR (expire IS NOT NULL AND expire > 0 AND expire < unixepoch('now'));

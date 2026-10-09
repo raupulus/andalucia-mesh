@@ -44,7 +44,7 @@ Clave (`from`, `id`), ventana de 15 min en memoria (LRU, hasta 200.000 claves). 
 | `NODEINFO_APP` | `POST /api/nodes` | Nombres, `num`, `hwModel`, rol (`config_pb2.Config.DeviceConfig.Role.Name`), `lastHeard`; mezcla con la caché de métricas |
 | `POSITION_APP` | `POST /api/positions` | Lat/lon en grados (`latitude_i` × 1e-7), altitud, precisión, `node_id`, `node_num` |
 | `TELEMETRY_APP` | `POST /api/telemetry` | Dispositivo, entorno y energía. Emite `telemetry.deviceMetrics` (camelCase) y `device_metrics` (snake_case) para actualizar tanto la tabla `telemetry` como las columnas del nodo en `nodes` |
-| `TEXT_MESSAGE_APP` | `POST /api/messages` | Solo canales (nunca directos) |
+| `TEXT_MESSAGE_APP` | `POST /api/messages` | Solo canales (nunca directos). Incluye `channel` (índice) y `channel_name` (nombre canónico) para que las pestañas del chat se etiqueten por nombre y no por número de ranura |
 | `TRACEROUTE_APP` | `POST /api/traces` | Origen = `from`, destino = `to`, `route` + `snr_towards`, y si existen `route_back` + `snr_back` |
 | `NEIGHBORINFO_APP` | `POST /api/neighbors` | Vecinos con SNR, `node_id`, `node_num` |
 | `WAYPOINT_APP` | `POST /api/waypoints` | |

@@ -136,6 +136,7 @@ class MqttProcessor:
 
         # Caso paquete canal: msh/EU_868/2/e/<canal>/<!id_gateway>
         channel_index = 0
+        channel_name = self.config.primary_channel
         if not is_map_topic:
             try:
                 # Localizar el segmento 'e'
@@ -148,7 +149,7 @@ class MqttProcessor:
             if res is None:
                 # Canal fuera de lista blanca
                 return
-            channel_index, _ = res
+            channel_index, channel_name = res
 
         # Deserializar sobre ServiceEnvelope
         envelope = mqtt_pb2.ServiceEnvelope()
@@ -201,6 +202,7 @@ class MqttProcessor:
                             "from": node_id_str,
                             "to": "^all",
                             "channel": channel_index,
+                            "channel_name": channel_name,
                             "rx_time": rx_time,
                             "encrypted": True,
                         },
@@ -211,7 +213,7 @@ class MqttProcessor:
             return
 
         self._dispatch_payload(
-            packet, data, channel_index, rx_time, node_id_str, from_node
+            packet, data, channel_index, channel_name, rx_time, node_id_str, from_node
         )
 
     def _dispatch_payload(
@@ -219,6 +221,7 @@ class MqttProcessor:
         packet: mesh_pb2.MeshPacket,
         data: mesh_pb2.Data,
         channel_index: int,
+        channel_name: str,
         rx_time: int,
         node_id_str: str,
         from_node: int,
@@ -385,6 +388,7 @@ class MqttProcessor:
                     "to": "^all",
                     "text": text,
                     "channel": channel_index,
+                    "channel_name": channel_name,
                     "rx_time": rx_time,
                     "snr": packet.rx_snr,
                     "rssi": packet.rx_rssi,
