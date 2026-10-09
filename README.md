@@ -333,4 +333,7 @@ Andalucía Mesh es una iniciativa ciudadana, sin ánimo de lucro y comprometida 
 Creado e impulsado por **Raúl Caro Pastorino**  
 Sitio web: [raupulus.dev](https://raupulus.dev) · Perfil: [@raupulus](https://github.com/raupulus) · Contacto público: [public@raupulus.dev](mailto:public@raupulus.dev)
 
-Distribuido bajo licencia de código abierto para la comunidad.
+- **Código fuente y servicios:** Publicados bajo la licencia [GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE).
+- **Contenidos y datos públicos:** Los textos divulgativos y los datos servidos por la API pública se comparten bajo licencia [Creative Commons Reconocimiento 4.0 Internacional (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.es).
+- **Cartografía oficial:** Delimitaciones provinciales del Instituto Geográfico Nacional ([CNIG/IGN](https://www.ign.es)) bajo licencia CC BY 4.0.
+- **Identidad de marca:** El nombre del proyecto, logotipo y diseño gráfico quedan reservados © Raúl Caro Pastorino.

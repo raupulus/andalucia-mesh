@@ -25,7 +25,7 @@ Cumplir RGPD, LOPDGDD y LSSI-CE con textos claros, explicar cómo no aparecer (O
 - Titular: Raúl Caro Pastorino (@raupulus), contacto `PROJECT_CONTACT`. Proyecto sin ánimo de lucro; LSSI-CE de forma limitada al no haber actividad económica (revisar si cambia).
 - Objeto, condiciones de uso, exclusión de responsabilidad, proyecto independiente (sin afiliación con proyectos de software, fabricantes ni otras comunidades).
 - Propiedad intelectual: textos del sitio bajo CC BY 4.0 (igual que los datos de la API); diseño y logo sin licencia abierta.
-- **Créditos (obligatorios):** Laravel y Filament (MIT), Nginx (BSD-2-Clause), Mosquitto (EPL-2.0/EDL-1.0), PostgreSQL (licencia PostgreSQL), TimescaleDB (Timescale License, Community), MeshView (AGPL-3.0), PotatoMesh (Apache-2.0), cada uno enlazado a su proyecto; servicios propios que usan las definiciones oficiales del protocolo bajo GPL-3.0; **límites provinciales "© Instituto Geográfico Nacional"** (CNIG, CC BY 4.0, simplificados). Nombrarlos es atribución exigida, no uso de marca.
+- **Créditos (obligatorios):** Laravel y Filament (MIT), Nginx (BSD-2-Clause), Mosquitto (EPL-2.0/EDL-1.0), PostgreSQL (licencia PostgreSQL), TimescaleDB (Timescale License, Community), MeshView (AGPL-3.0), PotatoMesh (Apache-2.0), meshconfig (GNU GPLv3), cada uno enlazado a su proyecto; servicios propios bajo AGPL-3.0; **límites provinciales "© Instituto Geográfico Nacional"** (CNIG, CC BY 4.0, simplificados). Nombrarlos es atribución exigida, no uso de marca.
 
 ### Privacidad (`/legal/privacidad`)
 
@@ -81,4 +81,4 @@ No es un servicio de emergencias; sin garantía de entrega ni disponibilidad; da
 4. **Dado** cualquier página del portal, **cuando** se inspecciona el HTML, **entonces** no hay coordenadas de nodos.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

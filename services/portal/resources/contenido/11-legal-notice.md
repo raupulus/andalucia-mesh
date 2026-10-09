@@ -66,11 +66,12 @@ Informar sobre la malla de radio LoRa de Cádiz y Andalucía y ofrecer herramien
 - **Software libre de terceros:**
   - [PotatoMesh](https://github.com/cameronfabbri/PotatoMesh): mapa web ágil de visualización de nodos LoRa, publicado bajo licencia Apache 2.0.
   - [MeshView](https://github.com/pdxlocations/MeshView): analizador y visor topológico de redes en malla, publicado bajo licencia AGPL-3.0.
+  - [meshconfig](https://github.com/pdxlocations/meshconfig): configurador web de nodos Meshtastic, publicado bajo licencia GNU GPLv3.
   - [Laravel](https://laravel.com) y [Filament](https://filamentphp.com): entorno de desarrollo web y panel de administración, bajo licencia MIT.
   - [Eclipse Mosquitto](https://mosquitto.org): servidor de mensajería MQTT, bajo licencias EPL-2.0 y EDL-1.0.
   - [PostgreSQL](https://www.postgresql.org) y [TimescaleDB](https://www.timescale.com): motor de base de datos relacional y series temporales (licencias PostgreSQL y Timescale Community Edition).
   - [Nginx](https://nginx.org): servidor proxy inverso y terminador TLS, bajo licencia BSD de 2 cláusulas.
-  - Servicios propios del proyecto que integran definiciones del protocolo oficial de radio se licencian bajo GNU GPL v3.0.
+- **Software y servicios propios:** El código fuente del proyecto y sus servicios asociados se licencian bajo la licencia [GNU Affero General Public License v3.0 (AGPL-3.0)](https://www.gnu.org/licenses/agpl-3.0.html).
 - **Emisiones y mensajes en malla:** Los nombres públicos de los nodos, sus identificadores y los mensajes transmitidos en canales abiertos pertenecen a sus respectivos emisores y operadores.
 
 ### 7. Privacidad y cookies
@@ -98,4 +99,4 @@ Este aviso legal y las relaciones entre el portal y sus usuarios se rigen por la
 - La sección de software de terceros nombra cada proyecto con su licencia y enlace: es atribución exigida por las licencias, no uso de marca (la regla de marcas no aplica a créditos).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

@@ -51,10 +51,12 @@ To document and support the citizen LoRa Meshtastic radio mesh network across CÃ
 - **Open-Source Software:**
   - [PotatoMesh](https://github.com/cameronfabbri/PotatoMesh) (Apache 2.0)
   - [MeshView](https://github.com/pdxlocations/MeshView) (AGPL-3.0)
+  - [meshconfig](https://github.com/pdxlocations/meshconfig) (GPL-3.0)
   - [Laravel](https://laravel.com) and [Filament](https://filamentphp.com) (MIT)
   - [Eclipse Mosquitto](https://mosquitto.org) (EPL-2.0 / EDL-1.0)
   - [PostgreSQL](https://www.postgresql.org) and [TimescaleDB](https://www.timescale.com)
   - [Nginx](https://nginx.org) (2-clause BSD)
+- **Own Software & Services:** Project source code and services are licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](https://www.gnu.org/licenses/agpl-3.0.html).
 
 ### 7. Privacy & Cookies
 

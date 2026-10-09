@@ -514,7 +514,7 @@
             <!-- Pie de herramienta con atribución de código abierto -->
             <div class="configurador-creditos" style="text-align: center; margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-borde); font-size: 0.85rem; color: var(--color-texto-2);">
                 Motor de comunicación basado en el proyecto de código abierto
-                <a href="https://github.com/pdxlocations/meshconfig" target="_blank" rel="noopener noreferrer" style="color: var(--color-enlace); text-decoration: underline;">pdxlocations/meshconfig</a> bajo licencia MIT.
+                <a href="https://github.com/pdxlocations/meshconfig" target="_blank" rel="noopener noreferrer" style="color: var(--color-enlace); text-decoration: underline;">pdxlocations/meshconfig</a> bajo licencia GNU GPLv3.
             </div>
         </div>
     </div>

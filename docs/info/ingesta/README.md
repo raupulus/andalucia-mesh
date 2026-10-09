@@ -46,7 +46,7 @@
 | PostgreSQL | 17, nativo del servidor | Base `ingest` |
 | TimescaleDB | ≥ 2.17 (primera con PostgreSQL 17), edición Community del repositorio apt de Timescale; fijar al crear | Hypertables, agregados continuos, compresión, retención, tareas |
 
-El servicio se publica con licencia GPL-3.0, compatible con los protobufs oficiales.
+El servicio se publica con licencia AGPL-3.0, compatible con los protobufs oficiales bajo GPL-3.0.
 
 ## 4. Contratos
 
@@ -269,7 +269,7 @@ Actualización: nueva etiqueta git → `deploy.sh ingesta`; las migraciones corr
 ## 11. Riesgos y limitaciones
 
 - **Edición de TimescaleDB:** el paquete de Debian es la edición Apache, sin agregados continuos, compresión ni políticas. Debe instalarse del repositorio de Timescale; la primera migración comprueba la licencia y aborta si no es `timescale`.
-- **Cambios del firmware:** campos nuevos se ignoran y `portnum` nuevos van a `other`; se actualiza `meshtastic` tras probar. Licencia GPL-3.0 por los protobufs.
+- **Cambios del firmware:** campos nuevos se ignoran y `portnum` nuevos van a `other`; se actualiza `meshtastic` tras probar. Licencia AGPL-3.0 (compatible con GPL-3.0 por los protobufs).
 - **Map reports:** la ACL no ata `…/2/map/` al usuario que publica; un gateway podría enviar map reports con otro id. Se descarta si `from` ≠ `gateway_id`, pero no evita una suplantación deliberada. Aceptado.
 - **Pérdida mientras está parado:** QoS 0 sin sesión persistente (`../integration.md` §14); igual para el detector con `decoded`. Una sola réplica: si el proceso cae, no hay datos nuevos hasta que Docker lo reinicia.
 - **Estimaciones:** el tiempo en el aire no incluye retransmisiones ni reintentos (±2 B en paquetes en claro); solo se ve lo que llega con OK to MQTT a nuestros gateways.
@@ -299,4 +299,4 @@ Actualización: nueva etiqueta git → `deploy.sh ingesta`; las migraciones corr
 12. Migraciones SQL propias numeradas (sin Alembic); vistas en una migración repetible. Sin `/metrics` Prometheus: contadores en `/health`. Horas con milisegundos en `decoded`.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

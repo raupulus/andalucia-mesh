@@ -4,7 +4,7 @@
 // Lógica de cliente para el Configurador de Dispositivos Meshtastic en Andalucía Mesh.
 // Soporta Web Serial (USB), Web Bluetooth (BLE), HTTP local, exportación YAML,
 // generación de URLs oficiales y códigos QR para la app móvil de Meshtastic.
-// Basado en el motor de comunicación de pdxlocations/meshconfig (Licencia MIT).
+// Basado en el motor de comunicación de pdxlocations/meshconfig (Licencia GNU GPLv3).
 // Compilado localmente para ejecución 100% autónoma sin dependencias externas de CDN.
 // ==============================================================================
 
