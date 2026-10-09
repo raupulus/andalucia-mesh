@@ -100,7 +100,11 @@ deploy_native() {
                 log "[INFO] Ejecutando instalador nativo de Mosquitto..."
                 "${BASE_DIR}/integrations/mosquitto/install.sh"
             else
-                "${BASE_DIR}/integrations/mosquitto/tools/generate-acl.sh"
+                if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+                    "${BASE_DIR}/integrations/mosquitto/tools/generate-acl.sh"
+                else
+                    sudo "${BASE_DIR}/integrations/mosquitto/tools/generate-acl.sh"
+                fi
                 sudo cp -f "${BASE_DIR}/integrations/mosquitto/config/mosquitto.conf" /etc/mosquitto/conf.d/snm.conf
                 if command -v systemctl >/dev/null 2>&1; then
                     sudo systemctl reload mosquitto 2>/dev/null || systemctl reload mosquitto 2>/dev/null || true
