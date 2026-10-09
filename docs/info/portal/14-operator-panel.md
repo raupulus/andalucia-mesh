@@ -180,7 +180,7 @@ Consola de operaciones y control administrativo de routers de la malla (`/admin/
 ### Usuarios y Perfil de Operador
 
 Recurso `UserResource` (`/admin/users`, base `portal`):
-- **Modelo de roles:** Tres niveles de privilegio estrictos: `superadmin` (superadministrador), `admin` (administrador estándar) y `editor` (editor de contenidos).
+- **Modelo de roles y mínimo privilegio:** Tres niveles jerárquicos estrictos: `superadmin` (superadministrador del sistema), `admin` (operador de gestión y mantenimiento) y `editor` (redactor de contenidos editoriales y operador de routers).
 - **Superadmin:**
   - Visualización completa en tabla: avatar, nombre, rol (badge destacado), correo electrónico, indicador de cuenta activa y fecha de último acceso.
   - Filtros por rol y estado activo.
@@ -188,16 +188,32 @@ Recurso `UserResource` (`/admin/users`, base `portal`):
   - Edición de cuentas existentes (`EditUser`) de cualquier usuario con actualización de datos, cambio de contraseña con doble verificación obligatoria (`password` y `password_confirmation`, conservándose intacta la contraseña existente si se deja vacía) y reasignación de rol.
   - Eliminación de usuarios con salvaguarda que impide la autoeliminación de la cuenta propia para evitar bloqueos accidentales.
 - **Admin (operador de gestión):**
-  - Acceso al listado (`ListUsers`) con privacidad de datos sensibles: visualiza avatar, nombre, rol y estado activo; las columnas de correo electrónico (`email`) y fecha de acceso quedan ocultas.
+  - Acceso al listado (`ListUsers`) con privacidad de datos personales: visualiza avatar, nombre, rol y estado activo; las columnas de correo electrónico (`email`) y fecha de acceso quedan estrictamente ocultas.
   - Puede editar a otros usuarios con rol `admin` o `editor` y a sí mismo, pero **NUNCA** a un `superadmin`.
   - Sin permisos de eliminación ni creación de nuevos usuarios (`canCreate` y `canDelete` devuelven `false`).
-- **Editor (redactor de contenidos):**
-  - Acceso de solo lectura al listado con privacidad (sin emails ni último acceso).
-  - Solo puede editar su propia cuenta personal (`canEdit` solo para su propio registro).
-  - No puede crear ni eliminar usuarios.
+- **Editor (redactor de contenidos y operador técnico de mallas):**
+  - Acceso al listado con privacidad estricta (sin correos ni último acceso).
+  - Solo puede editar su propia cuenta personal (`canEdit` exclusivo para su propio registro), sin capacidad de auto-promocionarse ni modificar su estado activo (`mutateFormDataBeforeSave`).
+  - No puede crear ni eliminar a ningún usuario.
+
+#### Matriz de Permisos por Rol
+
+| Módulo / Sección | `superadmin` | `admin` | `editor` |
+|---|---|---|---|
+| **Dashboard y Widgets** | Acceso completo | Acceso completo | Acceso completo |
+| **Preguntas Frecuentes (FAQs)** | Crear, editar, reordenar, eliminar | Crear, editar, reordenar, eliminar | Crear, editar, reordenar (**sin eliminar**) |
+| **Sugerencias** | Moderar, notas, aprobar, rechazar, eliminar | Moderar, notas, aprobar, rechazar, eliminar | **Solo lectura** (`ViewAction`; sin moderar ni eliminar) |
+| **Routers Coordinados** | Crear, editar, sincronizar malla, eliminar | Crear, editar, sincronizar malla, eliminar | **Solo lectura** (`ViewAction`; sin crear, editar, sincronizar ni borrar) |
+| **Gestión de Routers (`/gestion-routers`)** | Acceso completo (WebSerial, LoRa, comandos) | Acceso completo | Acceso completo |
+| **Páginas y Artículos (`/custom-pages`)** | Crear, editar, publicar (`is_active`), eliminar | Crear, editar, publicar (`is_active`), eliminar | Crear y editar en **borrador** (sin publicar ni eliminar) |
+| **Categorías de Hardware** | Crear, editar, reordenar, eliminar | Crear, editar, reordenar, eliminar | **Solo lectura** (`ViewAction`; sin crear, editar, reordenar ni borrar) |
+| **Artículos de Hardware** | Crear, editar, destacar, eliminar | Crear, editar, destacar, eliminar | Crear, editar, destacar y activar (**sin eliminar**) |
+| **Webhooks Técnicos** | Acceso completo y pings HMAC | Acceso completo y pings HMAC | **Sin acceso** (oculto en menú y 403 Forbidden) |
+| **Usuarios y Operadores** | Ver todo (email, acceso), crear, editar todos, borrar | Ver privacidad (sin email/acceso), editar no-superadmins, no borrar | Ver privacidad, **solo editarse a sí mismo**, no crear ni borrar |
+
 - **Políticas de autorización granulares (`Gate::policy`):**
-  - Registradas en `AppServiceProvider`: `UserPolicy`, `CustomPagePolicy`, `FaqPolicy`, `SuggestionPolicy`, `CoordinatedRouterPolicy`, `HardwareCategoryPolicy`, `HardwareItemPolicy` y `WebhookDestinationPolicy`.
-  - El rol `editor` dispone de permisos completos para crear y actualizar contenidos editoriales (`CustomPage`, `Faq`), pero carece de permisos de borrado (`delete` / `deleteAny`), garantizando la integridad de los registros.
+  - Registradas explícitamente en `AppServiceProvider`: `UserPolicy`, `CustomPagePolicy`, `FaqPolicy`, `SuggestionPolicy`, `CoordinatedRouterPolicy`, `HardwareCategoryPolicy`, `HardwareItemPolicy` y `WebhookDestinationPolicy`.
+  - El rol `editor` dispone de salvaguardas tanto a nivel de política como en controladores de ciclo de vida (`mutateFormDataBeforeCreate` y `mutateFormDataBeforeSave`), forzando `is_active = false` en páginas y preservando los valores de publicación para evitar cualquier manipulación directa por peticiones alteradas.
 - **Autorización y seguridad en capas:**
   - Control mediante `App\Policies\UserPolicy` registrado en `AppServiceProvider` y métodos de autorización del recurso (`canCreate`, `canEdit`, `canDelete`, `canView`, `canViewAny`).
   - Cualquier intento de acceso directo por URL no autorizado devuelve inmediatamente `403 Forbidden`.
