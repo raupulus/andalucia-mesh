@@ -119,7 +119,7 @@ Segmentos separados por un hueco de 2 px del color de la superficie. Leyenda sie
 - Ubuntu en títulos (redondeada, combina con el trazo del logo, con peso 800 en H1 y barra de acento verde en H2); Inter para texto largo por legibilidad.
 - Fuentes **autoalojadas** en local bajo `public/fonts/` (`ubuntu-500.woff2`, `ubuntu-700.woff2`, `inter-variable.woff2`, `ubuntu-mono-400.woff2`, `ubuntu-mono-700.woff2`), con subconjunto latino, `font-display: swap` y declaradas mediante `@font-face` en `app.css`. Cero peticiones o conexiones a Google Fonts o servicios de terceros.
 - **Puntos de lista (viñetas):** Todos los elementos de listas desordenadas (`ul > li::marker`) adoptan el verde corporativo en toda la web (`#007A33` en modo claro y `#67EA94` en modo oscuro), unificando la identidad visual del portal.
-- **Separadores corporativos:** Los separadores horizontales (`<hr>`, `.separador-bandera` y cabeceras de página con `<x-separador-bandera />`) emplean la bandera de Andalucía tricolor (verde, blanca, verde) de 4,5 px de altura con acabado accesible y resplandor sutil en modo oscuro.
+- **Separadores corporativos:** Los separadores horizontales (`<hr>`, `.separador-bandera` y cabeceras de página con `<x-separador-bandera />`) emplean la bandera de Andalucía tricolor (verde, blanca, verde) de 6 px de altura (2 px por franja) con acabado accesible y resplandor sutil en modo oscuro.
 - Longitud de línea máxima: 68 caracteres. En modo oscuro no se usa peso inferior a 400 (el texto fino se "come" sobre fondo oscuro).
 
 ## 6. Espaciado y rejilla

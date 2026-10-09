@@ -623,7 +623,7 @@ pre code {
 
 .borde-bandera-andalucia span {
   display: block;
-  height: 1.5px;
+  height: 2px;
   width: 100%;
 }
 
@@ -653,10 +653,11 @@ pre code {
 hr,
 .prose hr,
 .separador-bandera {
-  border: none;
-  height: 4.5px;
-  margin: 2.75rem 0;
-  width: 100%;
+  box-sizing: border-box;
+  border: 0 !important;
+  height: 6px !important;
+  margin: 2.75rem 0 !important;
+  width: 100% !important;
   background: linear-gradient(
     to bottom,
     #007A33 0%,
@@ -665,11 +666,12 @@ hr,
     #FFFFFF 66.66%,
     #007A33 66.66%,
     #007A33 100%
-  );
+  ) !important;
   border-radius: 2px;
-  box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.25);
   clear: both;
   display: block;
+  opacity: 1 !important;
 }
 
 [data-theme="dark"] hr,
@@ -683,8 +685,8 @@ hr,
     #FFFFFF 66.66%,
     #00A850 66.66%,
     #00A850 100%
-  );
-  box-shadow: 0 0 6px rgba(0, 168, 80, 0.35);
+  ) !important;
+  box-shadow: 0 0 8px rgba(0, 168, 80, 0.35);
 }
 
 /* ==============================================================================
