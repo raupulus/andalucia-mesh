@@ -208,4 +208,3 @@ class ConfiguradorTest extends TestCase
         $pt->assertSee('Queres aparecer no mapa público de cobertura?');
     }
 }
-
