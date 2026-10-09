@@ -109,6 +109,7 @@
             data-lon="{{ $mapaConfig['centro'][1] ?? -4.5 }}"
             data-zoom="{{ $mapaConfig['zoom'] ?? 7 }}"
             data-dominio="{{ $dominio }}"
+            data-carto-key="{{ $mapaConfig['carto_api_key'] ?? '' }}"
         ></div>
 
         <!-- Cajón Lateral de Detalle de Nodo (Bottom-Left Drawer) -->

@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const lonDefecto = parseFloat(contenedor.dataset.lon || '-4.5');
     const zoomDefecto = parseInt(contenedor.dataset.zoom || '7', 10);
     const dominio = contenedor.dataset.dominio || window.location.hostname;
+    const cartoKey = contenedor.dataset.cartoKey || '';
+    const cartoUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        + (cartoKey ? `?key=${encodeURIComponent(cartoKey)}` : '');
 
     // 1. Inicialización del Mapa Leaflet
     const map = L.map('mapa-lienzo', {
@@ -31,11 +34,30 @@ document.addEventListener('DOMContentLoaded', () => {
     L.control.zoom({ position: 'topleft' }).addTo(map);
 
     // Capa base de azulejos (CARTO Dark Matter por defecto)
-    const capaDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    const capaDark = L.tileLayer(cartoUrl, {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
         subdomains: 'abcd',
         maxZoom: 19
     }).addTo(map);
+
+    // Capa alternativa satelital (Esri World Imagery)
+    const capaSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; <a href="https://www.esri.com/" target="_blank" rel="noopener">Esri</a> · DigitalGlobe, Earthstar',
+        maxZoom: 19
+    });
+
+    // Capa alternativa estándar (OpenStreetMap)
+    const capaOSM = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
+        maxZoom: 19
+    });
+
+    // Selector de capas base (posicionado bajo la barra superior derecha)
+    L.control.layers({
+        '🌙 Modo Oscuro': capaDark,
+        '🛰️ Satélite': capaSatelite,
+        '🗺️ OpenStreetMap': capaOSM,
+    }, null, { position: 'topright' }).addTo(map);
 
     // 2. Estado local
     let nodos = [];

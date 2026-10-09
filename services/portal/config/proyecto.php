@@ -52,6 +52,7 @@ return [
     'mapa' => [
         'centro' => [37.4, -4.5],
         'zoom' => 7,
+        'carto_api_key' => env('CARTO_API_KEY', 'cb1_26of_1_cde5ff43289951c558dad8e2'),
         'carga' => [
             'verde_max' => (float) env('SATURACION_VERDE_MAX', 20.0),
             'rojo_min' => (float) env('SATURACION_ROJO_MIN', 40.0),
