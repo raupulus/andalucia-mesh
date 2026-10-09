@@ -125,3 +125,42 @@ async def test_sync_nodes_formats_dict() -> None:
     assert "!11111111" in posted_payload
     assert "!22222222" in posted_payload
     assert posted_payload["!11111111"]["short_name"] == "N1"
+
+
+@pytest.mark.asyncio
+async def test_sync_nodes_dynamic_limit() -> None:
+    """Verifica que _sync_nodes use limit=1000 en arranque en frío y limit=30 en caliente."""
+    from datetime import datetime, timezone, timedelta
+    from unittest.mock import AsyncMock, MagicMock
+    from src.syncer import PeerSyncer
+    from src.peers import PeerConfig
+
+    cfg = Config()
+    mock_pool = MagicMock()
+    mock_peer_manager = MagicMock()
+    mock_publisher = MagicMock()
+    syncer = PeerSyncer(cfg, mock_pool, mock_peer_manager, mock_publisher)
+
+    syncer._fetch_json = AsyncMock(return_value=[])
+    syncer._post_local_potatomesh = AsyncMock()
+    syncer.mqtt_publisher = MagicMock()
+    syncer.mqtt_publisher.publish_event = AsyncMock()
+
+    peer = PeerConfig("malla-test", "Malla Test", "https://potato.test.org", activo=True, intervalo_nodos_s=60)
+    mock_session = MagicMock()
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr("src.syncer.update_cursor_nodes", AsyncMock())
+
+        # 1. Arranque en frío: last_node_sync es None -> limit=1000
+        await syncer._sync_nodes(peer, mock_session, {}, {})
+        assert syncer._fetch_json.call_count == 1
+        url_called = syncer._fetch_json.call_args[0][1]
+        assert "limit=1000" in url_called
+
+        # 2. Sincronización continua: last_node_sync pasado -> limit=30
+        past_time = datetime.now(timezone.utc) - timedelta(seconds=120)
+        await syncer._sync_nodes(peer, mock_session, {}, {"last_node_sync": past_time})
+        assert syncer._fetch_json.call_count == 2
+        url_called_2 = syncer._fetch_json.call_args[0][1]
+        assert "limit=30" in url_called_2

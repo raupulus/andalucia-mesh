@@ -7,7 +7,7 @@
     "mensajes": true,
     "trazas": true,
     "nodos": true,
-    "intervalo_nodos_s": 180
+    "intervalo_nodos_s": 60
   },
   {
     "id": "malla-ejemplo-2",

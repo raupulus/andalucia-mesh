@@ -15,7 +15,7 @@ No es la federación nativa de PotatoMesh (desactivada): nunca se escribe ni se 
 ```json
 [
   {"id": "vecina-1", "nombre": "Instancia vecina", "url": "https://<instancia>", "activo": true,
-   "mensajes": true, "trazas": true, "nodos": true, "intervalo_nodos_s": 180}
+   "mensajes": true, "trazas": true, "nodos": true, "intervalo_nodos_s": 60}
 ]
 ```
 
@@ -24,7 +24,7 @@ No es la federación nativa de PotatoMesh (desactivada): nunca se escribe ni se 
 ### Ciclos (por peer, en tareas independientes)
 
 - **Mensajes y trazas:** cada 60 s, `GET /api/messages?since=<cursor>&limit=100` y `GET /api/traces?since=<cursor>&limit=100`. Si una respuesta trae 100 elementos se pide la siguiente página en el mismo ciclo hasta vaciar (tope 20 páginas por ciclo).
-- **Nodos:** cada `intervalo_nodos_s` (180 s), `GET /api/nodes?since=<cursor>` en lotes de 500.
+- **Nodos:** cada `intervalo_nodos_s` (por defecto 60 s), `GET /api/nodes?limit=<lote>`. En el arranque en frío (primer sync sin cursor previo) se solicitan 1.000 nodos para capturar todo el catálogo histórico; en las sincronizaciones continuas de mantenimiento se solicitan 30 nodos más recientes, cubriendo la actividad viva con un impacto de red y CPU insignificante.
 - Filtro: solo canales de `ALLOWED_CHANNELS`; `PRIMARY_CHANNEL` → índice 0 y el resto con el mismo índice estable que el adaptador (posición en la lista). Mensajes directos nunca.
 - **Envío doble:**
   1. A nuestra API de PotatoMesh con `POST` y el token propio (para actualizar el visor local).

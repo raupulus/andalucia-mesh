@@ -281,7 +281,12 @@ class PeerSyncer:
         if last_sync and (now - last_sync).total_seconds() < peer.intervalo_nodos_s:
             return
 
-        url = f"{peer.url}/api/nodes?limit=1000"
+        # Arranque en frío (primera sincronización del peer): solicitar 1000 nodos
+        # para registrar todo el catálogo histórico disponible en su ventana.
+        # En sincronizaciones continuas de mantenimiento: solicitar 30 nodos recientes,
+        # cubriendo con holgura los últimos minutos con impacto de red y CPU insignificante.
+        limit = 1000 if last_sync is None else 30
+        url = f"{peer.url}/api/nodes?limit={limit}"
         data = await self._fetch_json(session, url, headers)
 
         if not isinstance(data, (dict, list)) or not data:

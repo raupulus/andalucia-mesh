@@ -28,7 +28,7 @@ class PeerConfig:
     mensajes: bool = True
     trazas: bool = True
     nodos: bool = True
-    intervalo_nodos_s: int = 180
+    intervalo_nodos_s: int = 60
 
     @classmethod
     def from_dict(cls, data: dict[str, object]) -> PeerConfig | None:
@@ -59,14 +59,14 @@ class PeerConfig:
         raw_interval = (
             data.get("intervalo_nodos_s")
             if "intervalo_nodos_s" in data
-            else data.get("nodes_interval_seconds", 180)
+            else data.get("nodes_interval_seconds", 60)
         )
         try:
             intervalo_nodos = int(raw_interval)  # type: ignore[arg-type]
             if intervalo_nodos < 10:
                 intervalo_nodos = 10
         except (ValueError, TypeError):
-            intervalo_nodos = 180
+            intervalo_nodos = 60
 
         return cls(
             id=raw_id,
