@@ -103,6 +103,8 @@
   - Vista pública web principal del servicio.
   - Autenticación: No (pública, cero cookies).
   - Rate limit: 60 peticiones/min por IP.
+  - Metadatos SEO y Open Graph: Imagen dedicada `1200x630` WebP (`img/og/og-mapa.webp`), etiquetas multilingües `hreflang` (es, en, pt), Schema.org `WebApplication` y `BreadcrumbList`.
+  - Indexación: Incluido en `sitemap.xml` con frecuencia horaria (`hourly`), prioridad `0.9` y etiqueta `<image:image>`.
 - **`GET /api/v1/mapa/nodes`**:
   - Datos compactos de nodos geolocalizados para el lienzo.
   - Soporta `Content-Encoding: gzip`, `ETag` y respuesta 304.
