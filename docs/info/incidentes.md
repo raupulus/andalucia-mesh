@@ -117,6 +117,9 @@ Este documento registra los incidentes críticos, fallos graves y análisis post
    Adición de `num`, `node_num` y `node_id` en todas las cargas HTTP hacia PotatoMesh.
 4. **Corrección de `MapReport`:**  
    Ajuste a portnum 73 y uso de `mqtt_pb2.MapReport`.
+5. **Remediación y saneamiento de bases de datos (SQLite y PostgreSQL):**  
+   - Se ejecutó un proceso de saneamiento cruzado contra PostgreSQL `snm_ingest`, restaurando 619 nodos degradados a sus roles legítimos en PotatoMesh (`CLIENT`, `ROUTER`, `CLIENT_MUTE`, `CLIENT_BASE`, `ROUTER_LATE`).
+   - Se convirtieron 230 marcadores sintéticos residuales de `CLIENT_HIDDEN` a `CLIENT` en SQLite y 210 en PostgreSQL, eliminando por completo el rol artificial `CLIENT_HIDDEN` del sistema y desbloqueando la visibilidad de 145 nodos con coordenadas GPS y sus respectivos enlaces de red en el mapa.
 
 #### 5. Medidas Preventivas Definitivas (Salvaguardas)
 1. **Regla permanente TR-19 incorporada a [`AGENTS.md`](../../AGENTS.md):**  
