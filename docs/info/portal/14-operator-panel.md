@@ -51,7 +51,7 @@ El panel recibe a los operadores con un centro de control operativo estructurado
 3. **RoutersInfraestructuraWidget (Monitor de repetidores y nodos clave):**
    - Tabla interactiva conectada a la vista de contrato `api_routers` de Ingesta (con degradación segura en caché y manejo de caídas vía `Fuente::recordar`), filtrada según el ámbito activo mediante `Routers::obtenerResultado(..., ambito: $this->ambito)`.
    - Cabecera con badge dinámico indicando el número de routers y el contexto territorial activo (`· Andalucía` / `· España` / `· Andalucía + España`).
-   - Muestra para cada router: identificador (`!hex`), modelo de hardware (`hw_model`), provincia, estado de alimentación (`⚡ Red/Solar` con voltaje o barra de batería porcentual con código de color dinámico), nivel de presión local ChUtil, saturación TX, tiempo desde el último contacto y botón de inspección directa a `/revisa-tu-nodo/{id}`.
+   - Muestra para cada router en columnas optimizadas (`Nodo`, `Dispositivo`, `Energía`, `Presión (CHUTIL)`, `Saturación TX`, `Último Reporte`, `Acción`): nombre corto destacado con nombre largo en línea inferior estilizado en verde adaptativo según tema (`#007A33` claro / `#67EA94` oscuro) para evitar amontonamiento, identificador (`!hex`), modelo de hardware y provincia/rol, estado de energía (`⚡ Red/Solar` con voltaje o barra estrecha porcentual con código de color dinámico), nivel de presión local ChUtil con barra compacta, saturación TX, tiempo desde el último contacto y botón de solo icono verde con acceso directo a `/revisa-tu-nodo/{id}`.
 
 4. **EstadoServiciosWidget (Salud de la plataforma y microservicios):**
    - Supervisión periódica (cada minuto por `portal-tareas`, con botón de forzado manual `comprobarAhora`).
