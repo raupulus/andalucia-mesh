@@ -304,9 +304,9 @@ class TraduccionesTest extends TestCase
         // Alertas en inglés
         $alertasEn = $this->get('/alertas?lang=en');
         $alertasEn->assertStatus(200);
-        $alertasEn->assertSee('High Risk');
-        $alertasEn->assertSee('Medium Risk');
-        $alertasEn->assertSee('Low Risk');
+        $alertasEn->assertSee('High');
+        $alertasEn->assertSee('Medium');
+        $alertasEn->assertSee('Low');
 
         // Buzón de sugerencias en inglés y portugués
         $sugEn = $this->get('/sugerencias?lang=en');

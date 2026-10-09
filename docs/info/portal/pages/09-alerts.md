@@ -62,7 +62,7 @@ Sin alertas abiertas: "Ninguna alerta abierta ahora mismo."
 Panel oxigenado en tarjeta independiente (`DESIGN.md`):
 - Estado: **Abiertas** · **Resueltas** · **Todas**
 - Severidad / Riesgo: **Todos** · **Alto** · **Medio** · **Bajo**
-- Temática del problema (`?problema=`):
+- Temática del problema (`?problemas=` o individual `?problema=`):
   - 🔘 **Todas las temáticas**
   - 🪫 **Batería y Energía** (`battery-low`, `sunset-battery`)
   - 📍 **Posición y GPS** (`position-flood`, `router-moving`)
@@ -72,6 +72,9 @@ Panel oxigenado en tarjeta independiente (`DESIGN.md`):
   - 📊 **Canal y Saltos** (`chutil-high`, `airtime-high`, `hops-high`)
   - 🌐 **Gateways e Infraestructura** (`gateway-offline`, `gateway-no-traffic`, `infra-silent`, `router-role`, `router-cluster`)
   - 🔐 **Hardware y Seguridad** (`reboot-loop`, `key-security`, `asymmetric-link`)
+- Diseño responsive de filtros: cuadrícula de tarjetas cuadradas (`.grid-tematicas-filtro`) que aprovecha todo el ancho disponible (`repeat(auto-fill, minmax(130px, 1fr))` en escritorio y `repeat(2, 1fr)` en móvil < 540px) y permite selección múltiple acumulativa en tiempo real.
+- Navegación instantánea SPA / AJAX: las acciones de filtrado y paginación no recargan la página completa, sino que actualizan dinámicamente el contenedor `#alertas-app` vía `fetch()` y `DOMParser`, sincronizando la URL del navegador mediante `history.pushState` y evento `popstate`.
+- Paginación: listado paginado (15 por página) ordenado estrictamente por las alertas más recientes primero (`inicio_at DESC, id DESC`).
 - Barra de filtros activos: si hay filtros aplicados, muestra chips desmontables (`✕`) para cada filtro activo, contador de incidencias coincidentes y enlace rápido "Limpiar filtros".
 - Sincronización del catálogo inferior: filtrar por temática adapta simultáneamente las tarjetas del catálogo de anomalías a las reglas de dicha categoría con opción a restablecer.
 - Si la URL trae un nodo: "Alertas del nodo {short} (`{id}`) · Quitar".

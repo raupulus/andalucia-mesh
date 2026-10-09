@@ -43,8 +43,8 @@ Supervisión pública del estado de routers de infraestructura y repetidores:
 ### `/alertas`
 
 1. Resumen de abiertas: chips por riesgo con número (`stats/summary` → `alerts_open.by_risk`) y texto por tipo.
-2. Filtros: estado (`open` por defecto, `resolved`, `all`), riesgo, tipo, provincia y nodo si viene en la URL. Estado en la URL (`/alertas?state=resolved&risk=alto&province=ES-CA&node=!a1b2c3d4`).
-3. Lista (`GET /api/v1/alerts?…&sort=recent&limit=50`): chip de riesgo, tipo, regla (nombre del catálogo), mensaje, nodo o "N nodos", provincia, abierta/actualizada/resuelta. "Ver más" sigue `next_cursor`.
+2. Filtros: estado (`abiertas` por defecto, `resueltas`, `todas`), riesgo (`alto`, `medio`, `bajo`), temáticas del problema con selección múltiple acumulativa (`?problemas=bateria,posicion`), provincia y nodo si viene en la URL. Navegación fluida por AJAX/SPA.
+3. Lista (`GET /alertas` paginado a 15 por página, más recientes primero): chip de riesgo, tipo, regla (nombre del catálogo), mensaje, nodo o "N nodos", provincia, abierta/actualizada/resuelta. Navegación por páginas numeradas con retención de filtros.
 4. Qué significan riesgo y tipo (catálogo); "si una alerta es de tu nodo" con enlace a `/revisa-tu-nodo`; "recibe las alertas" con enlaces a `/bots` y `/api#webhooks`.
 
 Refresco de la lista abierta cada 30 s (solo si el usuario no ha pulsado "Ver más").

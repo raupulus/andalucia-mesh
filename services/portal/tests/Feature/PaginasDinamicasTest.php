@@ -104,6 +104,20 @@ class PaginasDinamicasTest extends TestCase
     }
 
     /**
+     * Comprueba que la selección múltiple de temáticas filtra simultáneamente varias categorías.
+     */
+    public function test_pagina_alertas_con_multiples_tematicas(): void
+    {
+        $response = $this->get('/alertas?problemas=bateria,posicion');
+
+        $response->assertStatus(200);
+        $response->assertHeaderMissing('Set-Cookie');
+        $response->assertSee('Batería baja', false);
+        $response->assertSee('Repetidor en movimiento físico', false);
+        $response->assertDontSee('Inundación de mensajes de texto', false);
+    }
+
+    /**
      * Comprueba la landing page del buscador de "Revisa tu nodo".
      */
     public function test_revisa_tu_nodo_buscador_devuelve_200(): void

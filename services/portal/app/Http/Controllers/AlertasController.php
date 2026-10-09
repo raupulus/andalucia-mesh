@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Api\V1\AlertsApiController;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
@@ -320,19 +321,34 @@ class AlertasController extends Controller
     {
         $estado = $request->query('estado');
         $riesgo = $request->query('riesgo');
-        $problema = $request->query('problema');
+        $problemaParam = $request->query('problemas', $request->query('problema'));
 
-        $alertas = [];
         $detectorCalibrando = false;
 
         $categorias = self::categoriasProblemas();
-        $problemaValido = is_string($problema) && isset($categorias[$problema]) ? $problema : null;
+
+        $problemasSeleccionados = [];
+        if (is_string($problemaParam) && trim($problemaParam) !== '') {
+            foreach (explode(',', $problemaParam) as $t) {
+                $t = trim($t);
+                if (isset($categorias[$t])) {
+                    $problemasSeleccionados[] = $t;
+                }
+            }
+        } elseif (is_array($problemaParam)) {
+            foreach ($problemaParam as $t) {
+                if (is_string($t) && isset($categorias[trim($t)])) {
+                    $problemasSeleccionados[] = trim($t);
+                }
+            }
+        }
+        $problemasSeleccionados = array_values(array_unique($problemasSeleccionados));
 
         try {
             $query = DB::connection('alertas')
                 ->table('api_alertas')
                 ->orderByDesc('inicio_at')
-                ->limit(100);
+                ->orderByDesc('id');
 
             if ($estado) {
                 $query->where('estado', $estado);
@@ -340,17 +356,20 @@ class AlertasController extends Controller
             if ($riesgo) {
                 $query->where('riesgo', $riesgo);
             }
-            if ($problemaValido) {
-                $query->whereIn('regla', $categorias[$problemaValido]['reglas']);
+            if (! empty($problemasSeleccionados)) {
+                $reglasAFiltrar = [];
+                foreach ($problemasSeleccionados as $p) {
+                    $reglasAFiltrar = array_merge($reglasAFiltrar, $categorias[$p]['reglas']);
+                }
+                $query->whereIn('regla', array_values(array_unique($reglasAFiltrar)));
             }
 
-            $filas = $query->get();
-            foreach ($filas as $f) {
-                $alertas[] = self::normalizarAlerta($f);
-            }
+            /** @var LengthAwarePaginator<object> $paginador */
+            $paginador = $query->paginate(15)->withQueryString();
+            $alertas = $paginador->through(fn ($f) => self::normalizarAlerta($f));
         } catch (Throwable) {
             $detectorCalibrando = true;
-            $alertas = [];
+            $alertas = new LengthAwarePaginator([], 0, 15);
         }
 
         $reglas = AlertsApiController::catalogoReglas();
@@ -361,7 +380,7 @@ class AlertasController extends Controller
             'reglas' => $reglas,
             'estadoFiltro' => $estado,
             'riesgoFiltro' => $riesgo,
-            'problemaFiltro' => $problemaValido,
+            'problemasFiltro' => $problemasSeleccionados,
             'categoriasProblemas' => $categorias,
         ]);
     }
