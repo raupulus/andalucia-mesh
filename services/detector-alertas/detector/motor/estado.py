@@ -1,11 +1,12 @@
 """Modelo de estado en memoria para nodos, pasarelas y métricas de malla."""
 
+import contextlib
+import math
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 
 from detector.modelos import PaqueteDecodificado
-
 
 ANDALUCIA_PROVINCES = frozenset({
     "ES-AL",  # Almería
@@ -17,6 +18,16 @@ ANDALUCIA_PROVINCES = frozenset({
     "ES-MA",  # Málaga
     "ES-SE",  # Sevilla
 })
+
+
+def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Calcula la distancia ortodrómica en metros entre dos coordenadas geográficas."""
+    r = 6_371_000.0
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2.0) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2.0) ** 2
+    return 2.0 * r * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
 
 
 @dataclass
@@ -33,6 +44,16 @@ class EstadoNodo:
 
     first_seen: datetime = field(default_factory=lambda: datetime.now(UTC))
     last_seen: datetime = field(default_factory=lambda: datetime.now(UTC))
+
+    # Identidad criptográfica
+    public_key: str | None = None
+    previous_keys: list[str] = field(default_factory=list)
+
+    # Posiciones geográficas de las últimas 24 h: tuplas de (timestamp, latitud, longitud)
+    positions_24h: deque[tuple[datetime, float, float]] = field(default_factory=lambda: deque(maxlen=200))
+
+    # Vecinos directos reportados por NeighborInfo/enlaces: neighbor_id -> (timestamp, snr)
+    direct_neighbors: dict[str, tuple[datetime, float]] = field(default_factory=dict)
 
     @property
     def dentro_andalucia(self) -> bool:
@@ -102,6 +123,38 @@ class EstadoNodo:
         # Hop start
         if pkt.hop_start is not None and pkt.hop_start > 0:
             self.hop_starts.append(pkt.hop_start)
+
+        payload = pkt.payload or {}
+
+        # Clave pública
+        key = payload.get("public_key")
+        if key and isinstance(key, str):
+            if self.public_key and self.public_key != key and self.public_key not in self.previous_keys:
+                self.previous_keys.append(self.public_key)
+            self.public_key = key
+
+        # Posiciones GPS para bounding box y movilidad física
+        lat_i = payload.get("latitude_i")
+        lon_i = payload.get("longitude_i")
+        if lat_i is not None and lon_i is not None:
+            try:
+                lat = float(lat_i) / 1e7
+                lon = float(lon_i) / 1e7
+                if lat != 0.0 or lon != 0.0:
+                    self.positions_24h.append((ahora, lat, lon))
+                    limite_24h = ahora - timedelta(hours=24)
+                    while self.positions_24h and self.positions_24h[0][0] < limite_24h:
+                        self.positions_24h.popleft()
+            except (ValueError, TypeError):
+                pass
+
+        # Vecinos directos (NeighborInfo)
+        neighbors = payload.get("neighbors")
+        if isinstance(neighbors, list):
+            for n in neighbors:
+                if isinstance(n, dict) and "node_id" in n and "snr" in n:
+                    with contextlib.suppress(ValueError, TypeError):
+                        self.direct_neighbors[str(n["node_id"])] = (ahora, float(n["snr"]))
 
         # Emisión a broadcast (^all) y detección de sondeos indiscriminados
         payload = pkt.payload or {}
@@ -203,12 +256,18 @@ class EstadoGateway:
 
     gateway_id: str
     last_seen_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    last_lora_rx_at: datetime | None = None
+    has_prior_traffic: bool = False
+    receptions_count: int = 0
     reception_intervals: deque[float] = field(default_factory=lambda: deque(maxlen=50))
     _last_reception_time: datetime | None = None
 
     def registrar_recepcion(self, rx_at: datetime) -> None:
         """Registra la recepción de un paquete subido por este gateway."""
         self.last_seen_at = rx_at
+        self.last_lora_rx_at = rx_at
+        self.has_prior_traffic = True
+        self.receptions_count += 1
         if self._last_reception_time is not None:
             delta_s = (rx_at - self._last_reception_time).total_seconds()
             if delta_s > 0:
@@ -227,6 +286,8 @@ class EstadoMotor:
         self.known_ids_90d: dict[str, datetime] = {}
         # Muestras de nodos únicos en ventana de 2 minutos para actividad de malla
         self.mesh_recent_nodes: deque[tuple[datetime, str]] = deque(maxlen=10000)
+        # Enlaces de radiofrecuencia dirigidos observados: (src_id, dst_id) -> (seen_at, snr)
+        self.rf_links: dict[tuple[str, str], tuple[datetime, float]] = {}
 
     def obtener_o_crear_nodo(self, node_id: str, ahora: datetime) -> EstadoNodo:
         """Obtiene el estado de un nodo o lo inicializa si es nuevo."""
@@ -266,6 +327,19 @@ class EstadoMotor:
 
         # 3. Registro para cálculo de ráfagas simultáneas de malla
         self.mesh_recent_nodes.append((current_time, pkt.from_node_id))
+
+        # 4. Registrar enlaces de radiofrecuencia (rf_links) observados
+        for rx in pkt.receptions:
+            if rx.snr is not None:
+                self.rf_links[(pkt.from_node_id, rx.gateway)] = (current_time, float(rx.snr))
+
+        payload_dict = pkt.payload or {}
+        neighbors_list = payload_dict.get("neighbors")
+        if isinstance(neighbors_list, list):
+            for n in neighbors_list:
+                if isinstance(n, dict) and "node_id" in n and "snr" in n:
+                    with contextlib.suppress(ValueError, TypeError):
+                        self.rf_links[(str(n["node_id"]), pkt.from_node_id)] = (current_time, float(n["snr"]))
 
     def purgar_obsoletos(self, ahora: datetime, dias: int = 30) -> int:
         """Elimina nodos inactivos durante más de 'dias' días. Devuelve el número de eliminados."""

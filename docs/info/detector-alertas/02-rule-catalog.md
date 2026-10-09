@@ -20,8 +20,9 @@ Leyenda: **MVP** = esta entrega, activa; **Ampl.** = ampliación, se implementa 
 | `chutil-high` | MVP | Canal saturado calculando saturación provincial (60 % peso routers, 40 % peso clientes) | Red: `bajo` > 20 %, `medio` > 30 %, `alto` > 40 % | — | ≤ 20 % | `dm.channel_utilization`, `fn.role`, `fn.province` |
 | `infra-silent` | MVP | Router que deja de oírse | Infra: `medio` > max(6 h, 3 × intervalo típico) · `alto` > 24 h | Intervalo típico del nodo | Se vuelve a oír | `from`, `fn.role`, `rx_first` (tick) |
 | `gateway-offline` | MVP | Gateway que deja de publicar | Infra: `medio` > max(15 min, 3 × intervalo típico) · `alto` > 120 min | Intervalo típico del gateway | Vuelve a publicar | `rx[].gateway`, `rx[].at`, `fn.is_gateway` (tick) |
+| `gateway-no-traffic` | Ampl. | Pasarela con transceptor LoRa sordo/bloqueado (> 1 h sin recepciones LoRa pese a proceso activo) | Infra: `bajo` > 60 min sin paquetes | — | Vuelve a recibir paquetes LoRa | `rx[].gateway`, `rx[].at`, `fn.is_gateway` (tick) |
 | `battery-drain` | Ampl. | Router solar que no recarga | Infra: `medio` | Proyección lineal del voltaje de 72 h hasta 3,3 V en < 3 días | Pendiente de 24 h ≥ 0 | `dm.voltage` |
-| `airtime-high` | Ampl. | Cerca del ciclo de trabajo del 10 % horario de EU_868 | Red: `medio` > 7 % · `alto` > 10 % (probable `override_duty_cycle`) | — | < 5 % | `dm.air_util_tx` |
+| `airtime-high` | Ampl. | Tiempo de aire propio por encima de límites operativos | Red: `bajo` > 4 % · `medio` > 6 % · `alto` > 8 % | — | ≤ 3 % durante 30 min | `dm.air_util_tx`, `ls.air_util_tx` |
 | `tx-dropped` | Ampl. | Cola de transmisión desbordada (solo infraestructura) | Infra: `medio` > 20 descartes/h | — | 120 min sin incrementos | `ls.num_tx_dropped` |
 | `noise-high` | Ampl. | Interferencia (solo infraestructura) | Infra: `medio` | ≥ 10 dB sobre su mediana de 7 días durante 60 min | < mediana + 5 dB | `ls.noise_floor` |
 
@@ -36,6 +37,10 @@ Leyenda: **MVP** = esta entrega, activa; **Ampl.** = ampliación, se implementa 
 | `private-chaff` | MVP | Tráfico cifrado privado o de sensores sobre la malla pública obligando a los repetidores a reenviarlo | Red/Cliente: `medio` > 10 en 10 min o > 30/h · `alto` > 60/h | — | 30 min sin exceso | `portnum=other`, `from` |
 | `position-flood` | MVP | Posiciones GPS aceleradas emitidas de forma continuada | Red/Cliente: `bajo` ≥ 4 en 5 min · `medio` ≥ 8 en 10 min · `alto` ≥ 20 en 15 min | — | 30 min dentro de norma | `portnum=position_app`, `from` |
 | `router-role` | MVP | Rol ROUTER/REPEATER no coordinado en Andalucía (excluye nodos fuera de Andalucía `FUERA`) | Infra: `medio` si no figura en `routers_coordinados` | — | Entra en coordinación o cambia a CLIENT | `fn.role`, `fn.province` |
+| `router-moving` | Ampl. | Repetidor de infraestructura con desplazamiento anómalo (> 5 km en 24 h) | Infra: `alto` > 5 km | — | Desplazamiento 24 h ≤ 3 km | `payload.latitude_i`, `payload.longitude_i`, `fn.role` |
+| `router-cluster` | Ampl. | Router enlazado directamente con 3 o más routers vecinos (excluye `ROUTER_LATE`) | Infra: `medio` ≥ 3 routers | — | < 3 routers vecinos directos | `payload.neighbors`, `fn.role` |
+| `asymmetric-link` | Ampl. | Enlace RF con asimetría severa (> 6 dB en ambos sentidos; solo CLIENT, CLIENT_BASE y ROUTER; excluye CLIENT_MUTE) | Red/Infra: `medio` Δ > 6 dB | — | Diferencia SNR ≤ 4 dB | `payload.neighbors`, `rx[].snr`, `fn.role` |
+| `key-security` | Ampl. | Clave pública débil (baja entropía, secuencias, patrones periódicos) o cambio imprevisto de clave en el mismo ID | Routers: `alto` · Clientes: `medio` | — | Clave con entropía estructural válida | `payload.public_key`, `fn.role` |
 | `hops-high` | MVP | Límite de saltos excesivo en origen | Red/nodo: `bajo` con `hop_start` = 6 · `alto` con `hop_start` ≥ 7 (3 recomendado; 4–5 válidos) | — | 2 paquetes seguidos con `hop_start` ≤ 5 | `hop_start` |
 | `flood` | MVP | Un nodo emite demasiados paquetes propios (spam o firmware desbocado) | Red: `medio` > max(30, 5 × ritmo) en 10 min · `alto` > max(100, 15 × ritmo) | Ritmo típico del nodo | 30 min bajo el umbral `medio` | `from`, `portnum`, `rx_first` |
 | `rafaga-masiva` | MVP | Muchos nodos emiten a la vez en la malla | Red: `alto`, `nodo: "all"` | Nodos por 2 min a esa hora; umbral max(50, 5 × base) | 15 min bajo el umbral | `from`, `portnum`, `rx_first` |
@@ -71,6 +76,12 @@ Todas las alertas emitidas por el motor incorporan obligatoriamente en su carga 
 | `hops-high` | `hop_start`, `recomendado`, `maximo_valido` | `{corto} usa {hop_start} saltos (recomendado 3, máximo 5)` |
 | `flood` | `paquetes`, `ventana_min`, `ritmo_tipico`, `umbral`, `por_tipo` | `{corto} ha emitido {paquetes} paquetes en {ventana_min} min` |
 | `rafaga-masiva` | `nodos_total`, `ventana_s`, `base`, `umbral`, `por_tipo` | `{nodos_total} nodos han emitido a la vez en {ventana_s} s` |
+| `gateway-no-traffic` | `ultimo_paquete`, `silencio_min`, `umbral_min` | `El gateway {corto} no recibe tráfico LoRa desde hace {silencio_min} min (posible radio bloqueada)` |
+| `airtime-high` | `air_util_tx`, `umbral` | `{corto} supera el límite de ocupación de transmisión: {air_util_tx}% de tiempo de aire` |
+| `router-moving` | `desplazamiento_km`, `umbral_km`, `muestras`, `rol` | `Router {corto} en movimiento físico: se ha desplazado {desplazamiento_km} km en 24h (umbral 5 km)` |
+| `router-cluster` | `routers_enlazados`, `vecinos`, `umbral` | `Router {corto} enlazado con {routers_enlazados} routers más: posible clúster redundante` |
+| `asymmetric-link` | `delta_db`, `snr_peor`, `snr_mejor`, `otro_nodo` | `Enlace asimétrico en {corto} (Δ > 6 dB): oye a {otro_nodo} a {snr_peor} dB pero él le oye a {snr_mejor} dB` |
+| `key-security` | `motivo`, `rol`, `clave_fingerprint`, `tipo_anomalia` | `{corto} ({rol}) presenta anomalía de clave pública: {motivo}` |
 
 ### `reglas.yaml` de arranque
 
@@ -190,6 +201,38 @@ rafaga-masiva:
   factor_linea_base: 5
   resolver_min: 15
 
+gateway-no-traffic:
+  activa: true
+  ventana_s: 3600
+  umbral_min: 60.0
+
+airtime-high:
+  activa: true
+  bajo: 4.0
+  medio: 6.0
+  alto: 8.0
+  resolver: 3.0
+
+router-moving:
+  activa: true
+  umbral_km: 5.0
+  ventana_h: 24
+  resolver_km: 3.0
+
+router-cluster:
+  activa: true
+  umbral_routers: 3
+  ventana_h: 24
+  resolver_routers: 2
+
+asymmetric-link:
+  activa: true
+  delta_snr_db: 6.0
+  resolver_db: 4.0
+
+key-security:
+  activa: true
+
 silencios: []
 ```
 
@@ -215,9 +258,9 @@ silencios: []
 - **UT-07.2.2 — `infra-silent` y `gateway-offline`.** Evaluadas en el tick. *Bordes:* nodo que deja de ser router (se resuelve con `fuera_de_seguimiento` si no vuelve), gateway que solo oye su propio nodo. *Aceptación:* escenario 3.
 - **UT-07.2.3 — `flood`, `rafaga-masiva` y `hops-high`.** *Bordes:* nodo nuevo sin base (solo mínimos), `hop_start` `null`. *Aceptación:* escenarios 4 y 5.
 - **UT-07.2.4 — Mensajes y `datos` del MVP.** Plantillas de la tabla con números enteros y `{corto}` de respaldo. *Aceptación:* prueba de instantánea (golden) por regla.
-- **UT-07.2.5 — Ampliación: salud** (`battery-drain`, `chutil-high`, `airtime-high`, `tx-dropped`, `noise-high`).
-- **UT-07.2.6 — Ampliación: comportamiento** (`text-flood`, `config-intervals`, `router-role`, `new-node-burst`).
-- **UT-07.2.7 — Ampliación: suplantación** (`mqtt-into-rf`, `ok-to-mqtt-violation`, `impossible-jump`, `duplicate-pubkey`, `identity-conflict`). Para 07.2.5–07.2.7: *aceptación* = pruebas de apertura y resolución por regla y calibración sobre 7 días antes de pasar a `activa: true`.
+- **UT-07.2.5 — Ampliación: salud** (`battery-drain`, `chutil-high`, `airtime-high`, `gateway-no-traffic`, `tx-dropped`, `noise-high`).
+- **UT-07.2.6 — Ampliación: comportamiento y topología** (`text-flood`, `config-intervals`, `router-role`, `router-moving`, `router-cluster`, `asymmetric-link`, `new-node-burst`).
+- **UT-07.2.7 — Ampliación: seguridad de claves y suplantación** (`key-security`, `mqtt-into-rf`, `ok-to-mqtt-violation`, `impossible-jump`, `duplicate-pubkey`, `identity-conflict`). Para 07.2.5–07.2.7: *aceptación* = pruebas de apertura y resolución por regla y calibración sobre 7 días antes de pasar a `activa: true`.
 
 ## Escenarios de prueba
 
@@ -228,4 +271,4 @@ silencios: []
 5. Dado un nodo con `hop_start` 7 / Cuando emite dos paquetes con `hop_start` 3 / Entonces `hops-high` se resuelve; con `hop_start` 5 nunca se abre.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09

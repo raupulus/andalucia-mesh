@@ -79,8 +79,8 @@ def test_paquete_decodificado_parsing() -> None:
 
 
 def test_catalogo_reglas_meta() -> None:
-    """Verifica que las 7 reglas MVP y las 20 de ampliación están catalogadas."""
-    assert len(METADATOS_REGLAS) == 27
+    """Verifica que las 7 reglas MVP y las 25 de ampliación están catalogadas."""
+    assert len(METADATOS_REGLAS) == 32
 
     mvp_rules = [r for r, m in METADATOS_REGLAS.items() if m["fase"] == "mvp"]
     assert len(mvp_rules) == 7
@@ -91,3 +91,7 @@ def test_catalogo_reglas_meta() -> None:
     assert "flood" in mvp_rules
     assert "rafaga-masiva" in mvp_rules
     assert "hops-high" in mvp_rules
+
+    ampliacion_rules = [r for r, m in METADATOS_REGLAS.items() if m["fase"] == "ampliacion"]
+    assert len(ampliacion_rules) == 25
+

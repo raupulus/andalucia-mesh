@@ -142,6 +142,40 @@ hops-high:
   alto_desde: 7
   resolver_paquetes: 2
 
+airtime-high:
+  activa: true
+  bajo: 4.0
+  medio: 6.0
+  alto: 8.0
+  resolver: 3.0
+
+gateway-no-traffic:
+  activa: true
+  ventana_s: 3600             # 1 hora conectada sin recepciones LoRa
+  resolver_recepciones: 1     # se resuelve al recibir tráfico de radio
+
+key-security:
+  activa: true
+  min_bytes_unicos: 16        # menos de 16 bytes únicos sobre 32 -> entropía sospechosa
+
+router-moving:
+  activa: true
+  umbral_km: 5.0              # 5 km de desplazamiento en 24h
+  ventana_h: 24               # 24 horas
+  resolver_km: 3.0            # saneamiento cuando la dispersión cae a <= 3 km
+
+router-cluster:
+  activa: true
+  umbral_routers: 3           # >= 3 routers vecinos directos -> riesgo medio
+  ventana_h: 24
+  resolver_routers: 2
+
+asymmetric-link:
+  activa: true
+  delta_snr_db: 6.0           # diferencia de SNR > 6 dB en direcciones opuestas
+  ventana_h: 24               # ventana temporal de 24 horas
+  resolver_db: 4.0            # saneamiento cuando delta SNR <= 4 dB
+
 # --- Reglas de Ampliación Futuras (Inactivas hasta telemetría específica) ---
 battery-drain:
   activa: false
@@ -149,11 +183,6 @@ battery-drain:
   dias_proyeccion: 3
   ventana_h: 72
 
-airtime-high:
-  activa: false
-  medio: 7
-  alto: 10
-  resolver: 5
 
 tx-dropped:
   activa: false

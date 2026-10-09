@@ -23,6 +23,7 @@ Registro de funcionalidades y conceptos que han sido decididos formalmente pero 
 | Gestión visual de routers en /admin (mapa, Web Serial y CLI) | Interfaz en el panel de operadores para seleccionar routers en un mapa interactivo o desplegable y enviar comandos/acciones; integrando conexión local por Web Serial (Chromium) y generación de comandos CLI de Meshtastic listos para copiar y pegar en terminal |
 | Sistema de bloqueos y baneo federado (autoban y manual) | Panel de reglas para autoban, bloqueos manuales, listado unificado y sincronización bidireccional por API autenticada (Sanctum) con instancias amigas ([ver detalle](#sistema-de-bloqueos-y-baneo-federado)) |
 | Desbloqueador público de nodos en el frontend | Comprobador y autoservicio de desbloqueo por Node ID para nodos autobaneados (excluyendo bloqueos manuales o federados), con guía de motivos de ban y FAQ ([ver detalle](#desbloqueador-publico-de-nodos-en-el-frontend)) |
+| Estadísticas básicas y anónimas de uso | Métricas agregadas y autoalojadas sin cookies (visitas por página, uso del flasheador/configurador, clics en hardware y diagnósticos) respetando RN-06 ([ver detalle](#estadisticas-basicas-y-anonimas-de-uso)) |
 
 ## Detalle de Ideas
 
@@ -56,6 +57,50 @@ Página y herramienta pública de autoservicio en el portal para verificar si un
   - Ayuda visual o modal sobre cómo localizar el `Node ID` en la app oficial de Meshtastic.
   - Acordeón interactivo de preguntas frecuentes: significado del bloqueo, motivos para proteger el canal común, cómo evitar reincidencias y funcionamiento del sistema de protección.
 
+### Estadísticas básicas y anónimas de uso
+
+Sistema de analítica agregada, autoalojada y orientada a la privacidad para conocer el impacto de la web y el uso real de las herramientas comunitarias, sin intrusión hacia los visitantes:
+
+- **Principios de privacidad y cumplimiento normativo (`RN-06`):**
+  - **Cero cookies:** No utiliza cookies, etiquetas de seguimiento externas ni almacenamiento local persistente de rastreo.
+  - **Sin datos personales ni perfiles:** No se almacenan direcciones IP ni identificadores únicos de dispositivo; las peticiones no se asocian a identidades de usuario ni huellas de navegador (*fingerprinting*).
+  - **Autoalojado e independiente:** 100% procesado internamente por el portal sin compartir datos con terceros (sin Google Analytics, Meta Pixel ni servicios externos). Cumplimiento GDPR estricto sin necesidad de banner de cookies.
+  - **Persistencia en contadores agregados:** Las métricas se consolidan por fecha, ruta o categoría de evento directamente en tablas agregadas de PostgreSQL (ej. `metric_daily_views`, `metric_event_counters`).
+
+- **Métricas y herramientas a evaluar:**
+  - **Tráfico web general y navegación:**
+    - Páginas vistas y visitas agregadas por ruta (`/`, `/configura-tu-nodo`, `/configurador`, `/hardware`, `/revisa-tu-nodo`, `/conecta-tu-gateway`, `/sugerencias`).
+    - *Referrers* agrupados y limpios de parámetros de tracking (conocer procedencia comunitaria: Telegram, GitHub, foros o búsquedas orgánicas).
+    - Idioma preferido de consulta (ES / EN / PT) para priorizar traducciones.
+  - **Uso del Configurador y Flasheador Web (`/configurador`):**
+    - Número de accesos a la herramienta.
+    - Flasheos o escrituras de configuración completadas por USB (Web Serial API).
+    - Conexiones y ajustes completados por Bluetooth (Web BLE API).
+    - Generación y escaneo de códigos QR de configuración.
+    - Descargas de archivos de configuración (`.yaml` o exportación de canales).
+    - Distribución agregada de roles configurados (Client, Client Mute, Router, Tracker, etc.).
+  - **Comprobador de Nodos (`/revisa-tu-nodo`):**
+    - Número total de diagnósticos solicitados.
+    - Proporción de nodos con estado óptimo frente a nodos con advertencias.
+    - Tipos de malas prácticas detectadas con mayor recurrencia (saltos excesivos, intervalos de telemetría agresivos, modo HAM indebido).
+  - **Catálogo de Hardware Recomendado (`/hardware`):**
+    - Clics salientes hacia enlaces de adquisición o tiendas recomendadas por modelo.
+    - Clics hacia guías de montaje o proyectos DIY.
+    - Categorías de mayor interés para la comunidad (dispositivos comerciales, montajes DIY, antenas, sistemas solares/baterías).
+  - **Otras herramientas e interacciones:**
+    - Volumen de propuestas recibidas en `/sugerencias` por temática.
+    - Acciones de copiado de comandos CLI o cadenas de configuración en guías.
+    - Consultas y desbloqueos completados en el desbloqueador de nodos (cuando esté operativo).
+
+- **Persistencia y captura en Laravel:**
+  - Middleware ligero para rutas públicas web que incremente el contador diario de la ruta (con amortiguación en caché de Laravel/Redis si hay picos).
+  - Endpoint interno protegido y rate-limited (`POST /api/v1/metrics/event`) consumido por JavaScript asíncrono no bloqueante (`navigator.sendBeacon` o `fetch`) para registrar eventos de interacción (clics en hardware, uso de Web Serial, descargas).
+
+- **Visualización en el panel de administración (`/admin`):**
+  - Panel o pestaña de métricas en Filament con widgets interactivos (gráficos temporales, rankings y contadores acumulados).
+  - Filtros temporales (últimos 7 días, 30 días, meses, histórico anual).
+  - Tarea periódica de consolidación y limpieza para mantener un tamaño de datos ultraligero y constante en base de datos.
+
 ### Edición de contenidos y textos desde el panel (/admin)
 
 - **Problema actual:** Los textos de las páginas públicas (`/configura-tu-nodo`, `/conecta-tu-gateway`, aviso legal, quién lo impulsa, etc.) residen en ficheros Markdown estáticos en `resources/contenido/*.md`. Cualquier ajuste, errata o ampliación requiere editar código fuente en git, crear un commit y reconstruir/redesplegar la imagen Docker del portal.
@@ -66,6 +111,6 @@ Página y herramienta pública de autoservicio en el portal para verificar si un
   - Invalidación automática de caché de vistas al guardar cambios, garantizando actualización inmediata sin caída de rendimiento.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09
 
 

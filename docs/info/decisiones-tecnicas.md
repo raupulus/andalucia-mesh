@@ -46,7 +46,12 @@ Registro de decisiones deliberadas de arquitectura, diseño y convenciones técn
 | DT-38 | Registro de personalizaciones sobre software de terceros (`docs/info/customizations.md`) | Cualquier parche de plantilla o código sobre imágenes docker de terceros se versiona en el repositorio (ej. `integrations/<pieza>/templates/`) y se cataloga con ID en `customizations.md` para garantizar que sea comprobado y reaplicado en cada actualización de versión. |
 | DT-39 | Agrupación provincial y exclusión estricta de nodos exteriores en comandos de routers (`/battery` y `/routers`) | Facilita la lectura rápida de telemetría de infraestructura por zona y evita contaminación visual con nodos foráneos, alineado con el alcance regional andaluz del proyecto. |
 | DT-40 | Puerto MQTT 1883 plano cerrado hacia el exterior; pasarela pública exclusiva por puerto 8883 con TLS terminado en Nginx stream | Garantiza el cifrado en tránsito de credenciales y telemetría de gateways comunitarios hacia el broker; el listener 1883 de Mosquitto solo atiende tráfico interno y el stream local de Nginx (`127.0.0.1`). |
+| DT-41 | Descarte estricto de alertas por cese de balizas GPS y desfase de reloj (`clock_skew`) | El cese de GPS responde habitualmente a ahorro deliberado de energía; el clock skew provoca decenas de falsos positivos cuando nodos sin cobertura reciente retransmiten la marca temporal de su último fix antiguo. |
+| DT-42 | Umbral de 5 km en 24 h para detección de repetidor en movimiento (`router-moving`) | Tolera imprecisión de señal, fluctuación de fix y camuflaje voluntario de coordenadas en repetidores fijos sin generar alertas espurias. |
+| DT-43 | Exclusión tajante de nodos `CLIENT_MUTE` en evaluador de asimetría RF (`asymmetric-link`) | La asimetría en nodos mudos o clientes de interior es normal por obstáculos domésticos; solo se evalúan enlaces entre `CLIENT`, `CLIENT_BASE`, `ROUTER` y `REPEATER`. |
+| DT-44 | Gestión manual en `/admin/coordinated-routers` de cambios de versión o revocación de firmware (ej. 2.8 / 2.8.1) | Evita correlaciones automáticas frágiles de claves e identidades en el detector; el operador marca o retira el router coordinado en el panel. |
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-09
+
 

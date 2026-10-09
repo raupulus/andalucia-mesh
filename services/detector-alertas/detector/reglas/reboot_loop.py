@@ -3,7 +3,7 @@
 from datetime import timedelta
 from typing import ClassVar, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from detector.motor.protocolos import Alerta, AlertaAbierta, Contexto, registrar
 

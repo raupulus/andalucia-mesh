@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime, timedelta
 
-from detector.modelos import FromNodeInfo, PaqueteDecodificado
+from detector.modelos import PaqueteDecodificado
 from detector.motor.bases import LineasBase
 from detector.motor.estado import EstadoMotor
 from detector.motor.protocolos import AlertaAbierta, ConfigGeneral, Contexto, Tick
@@ -486,3 +486,30 @@ def test_traceroute_flood_y_private_chaff() -> None:
     alts_chaff = r_chaff.comprobar(ctx_chaff)
     assert len(alts_chaff) == 1
     assert alts_chaff[0].riesgo == "medio"
+
+
+def test_position_flood_cadencia() -> None:
+    """Verifica detección de balizas de posición con cadencia excesiva (>= 4 en 5m bajo, >= 8 en 10m medio)."""
+    regla = ReglaPositionFlood(ConfigPositionFlood())
+    estado = EstadoMotor()
+    bases = LineasBase()
+    t0 = datetime(2026, 10, 1, 12, 0, 0, tzinfo=UTC)
+
+    nodo = estado.obtener_o_crear_nodo("!pos1", t0)
+    for _ in range(5):
+        nodo.position_timestamps_1h.append(t0 - timedelta(minutes=2))
+
+    ctx = Contexto(
+        ahora=t0,
+        evento=Tick(ahora=t0),
+        nodo=nodo,
+        estado=estado,
+        bases=bases,
+        config=regla.config,
+        general=ConfigGeneral(),
+        es_infraestructura=lambda _: False,
+    )
+    alts = regla.comprobar(ctx)
+    assert len(alts) == 1
+    assert alts[0].riesgo == "bajo"
+

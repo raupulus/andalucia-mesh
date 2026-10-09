@@ -58,12 +58,8 @@ class ReglaTelemetryBurst:
         if riesgo is not None:
             # Distinguir si es una ráfaga combinada de múltiples variantes o una constante acelerada
             variantes_1m = {v for _, v in emisiones_1m}
-            if len(variantes_1m) >= 2:
-                tipo_emision = "ráfaga_combinada"
-            else:
-                tipo_emision = "constante_acelerada"
-
-            variantes_total = sorted(list({v for _, v in emisiones_1h[-10:]} or variantes_1m))
+            tipo_emision = "ráfaga_combinada" if len(variantes_1m) >= 2 else "constante_acelerada"
+            variantes_total = sorted({v for _, v in emisiones_1h[-10:]} or variantes_1m)
 
             nombre_corto = ctx.nodo.short or ctx.nodo.node_id
             if riesgo == "alto":
