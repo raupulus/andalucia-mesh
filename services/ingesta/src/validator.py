@@ -101,11 +101,27 @@ class TopicValidator:
         Returns:
             Objeto TopicParseResult con la clasificación y campos extraídos.
         """
-        # Descarte preventivo de cargas excesivamente grandes (> 1024 B)
+        # 1. Tráfico federado de peers: snm/v1/peer/<peer_id>/<type> (hasta 16 KB)
+        peer_prefix = f"{self.topic_prefix}/v1/peer/"
+        if topic.startswith(peer_prefix):
+            if payload_len > 16384:
+                return TopicParseResult(topic_type="unknown")
+            remainder = topic[len(peer_prefix) :]
+            parts = remainder.split("/")
+            if len(parts) == 2:
+                p_id, ev_type = parts
+                return TopicParseResult(
+                    topic_type="peer",
+                    peer_id=p_id,
+                    event_type=ev_type,
+                )
+            return TopicParseResult(topic_type="unknown")
+
+        # Descarte preventivo de paquetes de radio LoRa excesivamente grandes (> 1024 B)
         if payload_len > 1024:
             return TopicParseResult(topic_type="unknown")
 
-        # 1. Tráfico estándar de radio: msh/EU_868/2/e/<canal>/<!gateway>
+        # 2. Tráfico estándar de radio: msh/EU_868/2/e/<canal>/<!gateway>
         envelope_prefix = f"{self.topic_root}/2/e/"
         if topic.startswith(envelope_prefix):
             remainder = topic[len(envelope_prefix) :]
@@ -122,7 +138,7 @@ class TopicValidator:
                     )
             return TopicParseResult(topic_type="unknown")
 
-        # 2. Map reports: msh/EU_868/2/map/
+        # 3. Map reports: msh/EU_868/2/map/
         map_prefix = f"{self.topic_root}/2/map/"
         if topic.startswith(map_prefix) or topic == f"{self.topic_root}/2/map":
             remainder = topic[len(map_prefix) :] if topic.startswith(map_prefix) else ""
@@ -134,19 +150,5 @@ class TopicValidator:
                     gw_id = cand
                     break
             return TopicParseResult(topic_type="map", gateway_id=gw_id)
-
-        # 3. Tráfico federado de peers: snm/v1/peer/<peer_id>/<type>
-        peer_prefix = f"{self.topic_prefix}/v1/peer/"
-        if topic.startswith(peer_prefix):
-            remainder = topic[len(peer_prefix) :]
-            parts = remainder.split("/")
-            if len(parts) == 2:
-                p_id, ev_type = parts
-                return TopicParseResult(
-                    topic_type="peer",
-                    peer_id=p_id,
-                    event_type=ev_type,
-                )
-            return TopicParseResult(topic_type="unknown")
 
         return TopicParseResult(topic_type="unknown")
