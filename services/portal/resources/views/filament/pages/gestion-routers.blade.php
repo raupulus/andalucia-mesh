@@ -1392,6 +1392,27 @@
 
             {{-- Contenido de las pestañas --}}
             <div class="fi-ra-tab-content">
+                {{-- Banner universal de orden administrativa en curso (hasta 60s) --}}
+                <div x-show="orderActive" class="mb-6 p-4 rounded-xl border border-blue-500/30 bg-blue-50/80 dark:bg-blue-950/40 flex items-center justify-between gap-4 transition-all shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl animate-spin inline-block">⏳</span>
+                        <div>
+                            <div class="text-sm font-bold text-blue-900 dark:text-blue-200 flex items-center gap-2">
+                                <span>Transmitiendo orden:</span>
+                                <span class="font-mono text-emerald-700 dark:text-emerald-400" x-text="orderLabel"></span>
+                                <span>hacia</span>
+                                <span class="font-mono font-bold" x-text="orderTargetHex"></span>
+                            </div>
+                            <div class="text-xs text-blue-700 dark:text-blue-300 mt-0.5">
+                                Esperando confirmación remota del router por radio LoRa... Por favor, mantén abierta esta pestaña.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="shrink-0 flex items-center gap-2 bg-blue-200/70 dark:bg-blue-900/70 px-3.5 py-1.5 rounded-full font-mono text-xs font-bold text-blue-900 dark:text-blue-100 shadow-sm">
+                        <span x-text="orderCountdown"></span>s restantes
+                    </div>
+                </div>
+
                 {{-- PESTAÑA 1: ROLES --}}
                 <div x-show="activeTab === 'roles'" class="space-y-6">
                     <div>
@@ -1467,7 +1488,7 @@
                         </div>
 
                         <div class="fi-ra-action-bar-btn">
-                            <button type="button" @click="applyRemoteRole()" :disabled="roleSending || connectionStatus !== 'connected' || (!selectedRouterNodeNum && !manualNodeInput)" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-lg">
+                            <button type="button" @click="applyRemoteRole()" :disabled="roleSending || orderActive || connectionStatus !== 'connected' || (!selectedRouterNodeNum && !manualNodeInput)" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-lg">
                                 <span x-show="!roleSending">🚀 {{ __('admin.gestion_routers.btn_apply_role') }}</span>
                                 <span x-show="roleSending">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
                             </button>
@@ -1540,7 +1561,7 @@
                                             </template>
                                         </div>
                                     </div>
-                                    <button type="button" @click="applyRemoteFavorite(fav, 'remove')" :disabled="favoriteSending || connectionStatus !== 'connected'"
+                                    <button type="button" @click="applyRemoteFavorite(fav, 'remove')" :disabled="favoriteSending || orderActive || connectionStatus !== 'connected'"
                                             class="fi-ra-btn fi-ra-btn-danger fi-ra-btn-sm shrink-0" title="Quitar este nodo de favoritos del router">
                                         <span>🗑️</span>
                                         <span class="hidden sm:inline">Quitar</span>
@@ -1626,13 +1647,13 @@
                                             </td>
                                             <td style="text-align: right;">
                                                 <template x-if="isNodeFavoriteInActiveRouter(c.hex)">
-                                                    <button type="button" @click="applyRemoteFavorite(c, 'remove')" :disabled="favoriteSending || connectionStatus !== 'connected'"
+                                                    <button type="button" @click="applyRemoteFavorite(c, 'remove')" :disabled="favoriteSending || orderActive || connectionStatus !== 'connected'"
                                                             class="fi-ra-btn fi-ra-btn-danger fi-ra-btn-sm" title="Quitar de favoritos">
                                                         <span>🗑️ Quitar</span>
                                                     </button>
                                                 </template>
                                                 <template x-if="!isNodeFavoriteInActiveRouter(c.hex)">
-                                                    <button type="button" @click="applyRemoteFavorite(c, 'add')" :disabled="favoriteSending || connectionStatus !== 'connected'"
+                                                    <button type="button" @click="applyRemoteFavorite(c, 'add')" :disabled="favoriteSending || orderActive || connectionStatus !== 'connected'"
                                                             class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm" title="Añadir este nodo a favoritos del router">
                                                         <span>➕ Añadir</span>
                                                     </button>
@@ -1656,11 +1677,11 @@
                             </div>
 
                             <div style="display: flex; gap: 0.75rem;">
-                                <button type="button" @click="applyRemoteFavorite(favoriteNodeInput, 'add')" :disabled="favoriteSending || !favoriteNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-primary" style="flex: 1;">
+                                <button type="button" @click="applyRemoteFavorite(favoriteNodeInput, 'add')" :disabled="favoriteSending || orderActive || !favoriteNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-primary" style="flex: 1;">
                                     <span>⭐</span> {{ __('admin.gestion_routers.btn_add_favorite') }}
                                 </button>
 
-                                <button type="button" @click="applyRemoteFavorite(favoriteNodeInput, 'remove')" :disabled="favoriteSending || !favoriteNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-danger" style="flex: 1;">
+                                <button type="button" @click="applyRemoteFavorite(favoriteNodeInput, 'remove')" :disabled="favoriteSending || orderActive || !favoriteNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-danger" style="flex: 1;">
                                     <span>🗑️</span> {{ __('admin.gestion_routers.btn_remove_favorite') }}
                                 </button>
                             </div>
@@ -1740,7 +1761,7 @@
                                             </template>
                                         </div>
                                     </div>
-                                    <button type="button" @click="applyRemoteBlocked(blk, 'remove')" :disabled="blockedSending || connectionStatus !== 'connected'"
+                                    <button type="button" @click="applyRemoteBlocked(blk, 'remove')" :disabled="blockedSending || orderActive || connectionStatus !== 'connected'"
                                             class="fi-ra-btn fi-ra-btn-warning fi-ra-btn-sm shrink-0" title="Desbloquear este nodo en el router">
                                         <span>🔓</span>
                                         <span class="hidden sm:inline">Desbloquear</span>
@@ -1826,13 +1847,13 @@
                                             </td>
                                             <td style="text-align: right;">
                                                 <template x-if="isNodeBlockedInActiveRouter(c.hex)">
-                                                    <button type="button" @click="applyRemoteBlocked(c, 'remove')" :disabled="blockedSending || connectionStatus !== 'connected'"
+                                                    <button type="button" @click="applyRemoteBlocked(c, 'remove')" :disabled="blockedSending || orderActive || connectionStatus !== 'connected'"
                                                             class="fi-ra-btn fi-ra-btn-warning fi-ra-btn-sm" title="Desbloquear este nodo">
                                                         <span>🔓 Desbloquear</span>
                                                     </button>
                                                 </template>
                                                 <template x-if="!isNodeBlockedInActiveRouter(c.hex)">
-                                                    <button type="button" @click="applyRemoteBlocked(c, 'add')" :disabled="blockedSending || connectionStatus !== 'connected'"
+                                                    <button type="button" @click="applyRemoteBlocked(c, 'add')" :disabled="blockedSending || orderActive || connectionStatus !== 'connected'"
                                                             class="fi-ra-btn fi-ra-btn-danger fi-ra-btn-sm" title="Bloquear nodo en el router remoto">
                                                         <span>🚫 Bloquear</span>
                                                     </button>
@@ -1856,11 +1877,11 @@
                             </div>
 
                             <div style="display: flex; gap: 0.75rem;">
-                                <button type="button" @click="applyRemoteBlocked(blockedNodeInput, 'add')" :disabled="blockedSending || !blockedNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-danger" style="flex: 1;">
+                                <button type="button" @click="applyRemoteBlocked(blockedNodeInput, 'add')" :disabled="blockedSending || orderActive || !blockedNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-danger" style="flex: 1;">
                                     <span>🚫</span> {{ __('admin.gestion_routers.btn_add_blocked') }}
                                 </button>
 
-                                <button type="button" @click="applyRemoteBlocked(blockedNodeInput, 'remove')" :disabled="blockedSending || !blockedNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-warning" style="flex: 1;">
+                                <button type="button" @click="applyRemoteBlocked(blockedNodeInput, 'remove')" :disabled="blockedSending || orderActive || !blockedNodeInput || connectionStatus !== 'connected'" class="fi-ra-btn fi-ra-btn-warning" style="flex: 1;">
                                     <span>🔓</span> {{ __('admin.gestion_routers.btn_remove_blocked') }}
                                 </button>
                             </div>
@@ -1934,32 +1955,32 @@
                     </div>
 
                     <div class="fi-ra-action-grid fi-ra-action-grid-4">
-                        <button type="button" @click="sendUnicastRequest('nodeinfo')" :disabled="unicastSending || connectionStatus !== 'connected'" class="fi-ra-action-card">
+                        <button type="button" @click="sendUnicastRequest('nodeinfo')" :disabled="unicastSending || orderActive || tracerouteActive || connectionStatus !== 'connected'" class="fi-ra-action-card">
                             <div class="fi-ra-action-icon">ℹ️</div>
                             <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_req_nodeinfo') }}</div>
                             <div class="fi-ra-action-desc">Identidad, modelo de hardware y roles del nodo.</div>
                         </button>
 
-                        <button type="button" @click="sendUnicastRequest('position')" :disabled="unicastSending || connectionStatus !== 'connected'" class="fi-ra-action-card">
+                        <button type="button" @click="sendUnicastRequest('position')" :disabled="unicastSending || orderActive || tracerouteActive || connectionStatus !== 'connected'" class="fi-ra-action-card">
                             <div class="fi-ra-action-icon">📍</div>
                             <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_req_position') }}</div>
                             <div class="fi-ra-action-desc">Coordenadas y altitud GPS directa.</div>
                         </button>
 
-                        <button type="button" @click="sendUnicastRequest('telemetry')" :disabled="unicastSending || connectionStatus !== 'connected'" class="fi-ra-action-card">
+                        <button type="button" @click="sendUnicastRequest('telemetry')" :disabled="unicastSending || orderActive || tracerouteActive || connectionStatus !== 'connected'" class="fi-ra-action-card">
                             <div class="fi-ra-action-icon">🔋</div>
                             <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_req_telemetry') }}</div>
                             <div class="fi-ra-action-desc">Métricas de batería y uso de radio.</div>
                         </button>
 
-                        <button type="button" @click="sendUnicastRequest('traceroute')" :disabled="unicastSending || connectionStatus !== 'connected'" class="fi-ra-action-card">
+                        <button type="button" @click="sendUnicastRequest('traceroute')" :disabled="unicastSending || orderActive || tracerouteActive || connectionStatus !== 'connected'" class="fi-ra-action-card">
                             <div class="fi-ra-action-icon">🔄</div>
                             <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_req_traceroute') }}</div>
-                            <div class="fi-ra-action-desc">Rastreo de saltos y calidad SNR de retorno (30s).</div>
+                            <div class="fi-ra-action-desc">Rastreo de saltos y calidad SNR de retorno (35s).</div>
                         </button>
                     </div>
 
-                    {{-- Caja de estado reactivo y resultados de Traceroute (espera de 30s) --}}
+                    {{-- Caja de estado reactivo y resultados de Traceroute (espera de 35s) --}}
                     <div x-show="tracerouteActive || tracerouteResult" class="p-4 rounded-xl border transition-all mt-3"
                          :style="tracerouteActive ? 'background-color: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.3);' : 'background-color: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.3);'">
                         <div class="flex items-center justify-between mb-2">
@@ -1978,7 +1999,7 @@
 
                         <template x-if="tracerouteActive">
                             <div class="text-xs text-gray-600 dark:text-gray-300">
-                                Emitiendo sonda de enrutamiento por radiofrecuencia a través de los nodos de la malla... Esperando hasta 30 segundos a que los paquetes de ida y vuelta completen el recorrido.
+                                Emitiendo sonda de enrutamiento por radiofrecuencia a través de los nodos de la malla... Esperando hasta 35 segundos a que los paquetes de ida y vuelta completen el recorrido.
                             </div>
                         </template>
 
@@ -2024,7 +2045,7 @@
                             </div>
 
                             <div class="fi-ra-action-bar-btn">
-                                <button type="button" @click="applyRemoteReboot()" :disabled="rebootSending || connectionStatus !== 'connected' || (!selectedRouterNodeNum && !manualNodeInput)" class="fi-ra-btn fi-ra-btn-warning fi-ra-btn-lg">
+                                <button type="button" @click="applyRemoteReboot()" :disabled="rebootSending || orderActive || connectionStatus !== 'connected' || (!selectedRouterNodeNum && !manualNodeInput)" class="fi-ra-btn fi-ra-btn-warning fi-ra-btn-lg">
                                     <span x-show="!rebootSending">⚠️ {{ __('admin.gestion_routers.btn_apply_reboot') }}</span>
                                     <span x-show="rebootSending">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
                                 </button>

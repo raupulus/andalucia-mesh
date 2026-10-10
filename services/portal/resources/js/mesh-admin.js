@@ -219,6 +219,7 @@ export function meshAdminComponent() {
         adminChannelIndex: 0,             // Canal administrativo (0 por defecto)
         adminSessions: {},                // Mapa de claves de sesión: { [nodeNum]: Uint8Array }
         _sessionKeyWaiters: {},           // Resolvers para ensureSessionKey
+        _adminAckWaiters: {},             // Resolvers para confirmaciones remotas de órdenes (hasta 60s)
         _nodeInfoCount: 0,                // Contador de nodos recibidos de la radio local
         _pkNodeCount: 0,                  // Contador de nodos con clave pública de 32 bytes
         _nodeInfoSummaryTimer: null,      // Temporizador para resumen de NodeDB
@@ -226,13 +227,20 @@ export function meshAdminComponent() {
         // Nodos descubiertos en el NodeDB del dispositivo local
         knownNodes: {},                   // { [num]: { num, hex, longName, shortName, isFavorite, hasPublicKey, role } }
 
-        // Traceroute activo con temporizador de 30 segundos
+        // Traceroute activo con temporizador de 35 segundos
         tracerouteActive: false,
-        tracerouteCountdown: 0,
+        tracerouteCountdown: 35,
         tracerouteTimer: null,
         tracerouteTargetHex: '',
         tracerouteResult: '',
         tracerouteHops: [],
+
+        // Orden administrativa remota en curso con temporizador de 60 segundos
+        orderActive: false,
+        orderLabel: '',
+        orderTargetHex: '',
+        orderCountdown: 60,
+        orderTimer: null,
 
         // Referencias internas del SDK
         _device: null,
@@ -603,6 +611,11 @@ export function meshAdminComponent() {
                 this.tracerouteTimer = null;
                 this.tracerouteActive = false;
             }
+            if (this.orderTimer) {
+                clearInterval(this.orderTimer);
+                this.orderTimer = null;
+                this.orderActive = false;
+            }
             try {
                 if (this._device) {
                     await this._device.disconnect();
@@ -612,6 +625,13 @@ export function meshAdminComponent() {
             } catch (err) {
                 console.warn('Error durante desconexión:', err);
             } finally {
+                for (const key of Object.keys(this._adminAckWaiters)) {
+                    if (this._adminAckWaiters[key]?.reject) {
+                        this._adminAckWaiters[key].reject(new Error('Conexión con nodo local cerrada.'));
+                    }
+                }
+                this._adminAckWaiters = {};
+                this._sessionKeyWaiters = {};
                 this._device = null;
                 this._transport = null;
                 this.connectionStatus = 'disconnected';
@@ -648,10 +668,42 @@ export function meshAdminComponent() {
                         if (routing.variant?.case === 'errorReason') {
                             const errCode = routing.variant.value;
                             const reqId = decoded.requestId || packet.id;
+                            const isLoopbackLocal = (fromHex === this.localNode.hexId && toHex === this.localNode.hexId);
+
+                            // Notificar waiters de órdenes administrativas pendientes si no es un loopback local
+                            if (!isLoopbackLocal) {
+                                if (this._adminAckWaiters[reqId]) {
+                                    if (errCode === Routing_Error.NONE) {
+                                        this._adminAckWaiters[reqId].resolve(reqId);
+                                    } else {
+                                        this._adminAckWaiters[reqId].reject({ error: errCode, id: reqId, fromHex });
+                                    }
+                                } else {
+                                    // Comprobar si coincide por targetNum
+                                    for (const [wId, waiter] of Object.entries(this._adminAckWaiters)) {
+                                        if (waiter.targetNum === fromNum) {
+                                            if (errCode === Routing_Error.NONE) {
+                                                waiter.resolve(reqId);
+                                            } else {
+                                                waiter.reject({ error: errCode, id: reqId, fromHex });
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
                             if (errCode === Routing_Error.NONE) {
-                                this.log('ack', `✅ Confirmación ACK de ${fromHex} hacia ${toHex} (ReqID: ${reqId}) ${meta ? `[${meta}]` : ''}`);
+                                if (isLoopbackLocal) {
+                                    this.log('ack', `📡 Paquete transmitido al aire por radio local (ReqID: ${reqId})`);
+                                } else {
+                                    this.log('ack', `✅ Confirmación ACK de ${fromHex} hacia ${toHex} (ReqID: ${reqId}) ${meta ? `[${meta}]` : ''}`);
+                                }
                             } else if (errCode === 39 || errCode === Routing_Error.PKI_UNKNOWN_PUBKEY) {
                                 this.log('error', `❌ El nodo ${toHex} no responde por radio LoRa o no está en cobertura de tu antena (ReqID: ${reqId})`);
+                            } else if (errCode === 36 || errCode === 53 || errCode === Routing_Error.ADMIN_BAD_SESSION_KEY) {
+                                delete this.adminSessions[fromNum];
+                                this.log('error', `❌ Rechazo [ADMIN_BAD_SESSION_KEY] de ${fromHex}: Pase de sesión administrativo caducado o no válido. Clave invalidada para renovación.`);
                             } else {
                                 const desc = ROUTING_ERROR_DESCRIPTIONS[errCode] || `Código ${errCode}`;
                                 this.log('error', `❌ Rechazo de enrutamiento [${desc}] de ${fromHex} (ReqID: ${reqId}) ${meta ? `[${meta}]` : ''}`);
@@ -683,6 +735,19 @@ export function meshAdminComponent() {
                             if (this._sessionKeyWaiters[fromNum]) {
                                 this._sessionKeyWaiters[fromNum](adminMsg.sessionPasskey);
                                 delete this._sessionKeyWaiters[fromNum];
+                            }
+                        }
+
+                        // Resolver waiters de órdenes administrativas pendientes si el router responde con un adminMsg
+                        const reqId = decoded.requestId || decoded.replyId || packet.id;
+                        if (reqId && this._adminAckWaiters[reqId]) {
+                            this._adminAckWaiters[reqId].resolve(reqId);
+                        } else {
+                            for (const [wId, waiter] of Object.entries(this._adminAckWaiters)) {
+                                if (waiter.targetNum === fromNum) {
+                                    waiter.resolve(reqId);
+                                    break;
+                                }
                             }
                         }
 
@@ -978,17 +1043,31 @@ export function meshAdminComponent() {
             }
 
             const targetHex = numToHex(targetNum);
-            this.log('info', `🔑 Solicitando pase de sesión administrativa (SessionKey) a ${targetHex}...`);
+            this.log('info', `🔑 Solicitando pase de sesión administrativa (SessionKey) a ${targetHex} (esperando hasta 60s)...`);
 
-            return new Promise(async (resolve) => {
-                const timer = setTimeout(() => {
+            return new Promise(async (resolve, reject) => {
+                let timer = null;
+                const cleanup = () => {
+                    if (timer) clearTimeout(timer);
                     delete this._sessionKeyWaiters[targetNum];
-                    resolve(null); // Continuar sin bloquear la orden
-                }, 6000);
+                };
 
-                this._sessionKeyWaiters[targetNum] = (key) => {
-                    clearTimeout(timer);
-                    resolve(key);
+                timer = setTimeout(() => {
+                    cleanup();
+                    const errMsg = `Tiempo de espera agotado (60s) al solicitar clave de sesión a ${targetHex}. El router no respondió.`;
+                    this.log('error', `❌ ${errMsg}`);
+                    reject(new Error(errMsg));
+                }, 60000);
+
+                this._sessionKeyWaiters[targetNum] = {
+                    resolve: (key) => {
+                        cleanup();
+                        resolve(key);
+                    },
+                    reject: (err) => {
+                        cleanup();
+                        reject(err);
+                    },
                 };
 
                 try {
@@ -1004,15 +1083,13 @@ export function meshAdminComponent() {
                         portNum: PortNum.ADMIN_APP,
                         destinationNum: targetNum,
                         channel: this.adminChannelIndex || 0,
-                        wantAck: true,
+                        wantAck: false,
                         wantResponse: true,
                         pkiEncrypted: true,
-                        timeoutMs: 6000,
                     });
-                } catch {
-                    clearTimeout(timer);
-                    delete this._sessionKeyWaiters[targetNum];
-                    resolve(null);
+                } catch (txErr) {
+                    cleanup();
+                    reject(txErr);
                 }
             });
         },
@@ -1128,42 +1205,126 @@ export function meshAdminComponent() {
             const targetHex = numToHex(targetNum);
             const isLocal = (targetNum === this.localNode.nodeNum || targetNum === 0);
 
-            // Si es un router remoto, asegurar SessionKey si dispone de clave pública
-            if (!isLocal) {
-                if (this.targetHasPublicKeyInLocalRadio() && !this.adminSessions[targetNum]) {
-                    await this.ensureSessionKey(targetNum);
+            // Activar estado visual de orden en curso
+            this.orderActive = true;
+            this.orderLabel = operationLabel;
+            this.orderTargetHex = targetHex;
+            this.orderCountdown = 60;
+            if (this.orderTimer) clearInterval(this.orderTimer);
+            this.orderTimer = setInterval(() => {
+                this.orderCountdown--;
+                if (this.orderCountdown <= 0) {
+                    clearInterval(this.orderTimer);
+                    this.orderTimer = null;
                 }
-                if (this.adminSessions[targetNum]) {
-                    adminMsg.sessionPasskey = this.adminSessions[targetNum];
-                }
-            }
-
-            const payload = toBinary(AdminMessageSchema, adminMsg);
-            const hasPkInRadio = this.targetHasPublicKeyInLocalRadio();
-            const effectivePki = Boolean(!isLocal && hasPkInRadio);
-
-            this.log('tx', `Preparando orden '${operationLabel}' hacia router ${targetHex}...`);
+            }, 1000);
 
             try {
-                const pktId = await this.sendMeshPacketCustom({
-                    payloadBytes: payload,
-                    portNum: PortNum.ADMIN_APP,
-                    destinationNum: targetNum,
-                    channel: this.adminChannelIndex || 0,
-                    wantAck: true,
-                    wantResponse: true,
-                    pkiEncrypted: effectivePki,
-                });
+                // Si es un router remoto, asegurar SessionKey si dispone de clave pública
+                if (!isLocal) {
+                    if (this.targetHasPublicKeyInLocalRadio() && !this.adminSessions[targetNum]) {
+                        await this.ensureSessionKey(targetNum);
+                    }
+                    if (this.adminSessions[targetNum]) {
+                        adminMsg.sessionPasskey = this.adminSessions[targetNum];
+                    }
+                }
 
-                const okMsg = `Orden '${operationLabel}' transmitida con éxito a ${targetHex} (ID: ${pktId}). Esperando confirmación de la malla...`;
-                this.setNotification('success', okMsg);
-                this.log('tx', `🚀 ${okMsg}`);
-                return pktId;
-            } catch (err) {
-                const errMsg = formatMeshtasticError(err, targetHex);
-                this.setNotification('error', `No se pudo aplicar '${operationLabel}': ${errMsg}`);
-                this.log('error', `❌ Error al enviar '${operationLabel}' hacia ${targetHex}: ${errMsg}`);
-                throw err;
+                const payload = toBinary(AdminMessageSchema, adminMsg);
+                const hasPkInRadio = this.targetHasPublicKeyInLocalRadio();
+                const effectivePki = Boolean(!isLocal && hasPkInRadio);
+
+                this.log('tx', `Preparando orden '${operationLabel}' hacia router ${targetHex}...`);
+
+                // Para nodos locales, enviamos directamente
+                if (isLocal) {
+                    const pktId = await this.sendMeshPacketCustom({
+                        payloadBytes: payload,
+                        portNum: PortNum.ADMIN_APP,
+                        destinationNum: targetNum,
+                        channel: this.adminChannelIndex || 0,
+                        wantAck: true,
+                        wantResponse: true,
+                        pkiEncrypted: effectivePki,
+                        timeoutMs: 15000,
+                    });
+                    const okMsg = `Orden '${operationLabel}' aplicada en nodo local (ID: ${pktId}).`;
+                    this.setNotification('success', okMsg);
+                    this.log('tx', `✅ ${okMsg}`);
+                    return pktId;
+                }
+
+                // Para routers remotos: transmitimos al aire y esperamos confirmación remota real de la malla (hasta 60s)
+                return await new Promise(async (resolve, reject) => {
+                    let ackTimer = null;
+                    let transmittedPktId = 0;
+
+                    const cleanup = () => {
+                        if (ackTimer) clearTimeout(ackTimer);
+                        if (transmittedPktId) delete this._adminAckWaiters[transmittedPktId];
+                        for (const [k, v] of Object.entries(this._adminAckWaiters)) {
+                            if (v.targetNum === targetNum) {
+                                delete this._adminAckWaiters[k];
+                            }
+                        }
+                    };
+
+                    ackTimer = setTimeout(() => {
+                        cleanup();
+                        const errMsg = `Tiempo de espera agotado (60s) sin confirmación del router ${targetHex}. El router no respondió por radio.`;
+                        this.setNotification('error', `Error en '${operationLabel}': ${errMsg}`);
+                        this.log('error', `❌ Error al enviar '${operationLabel}' hacia ${targetHex}: ${errMsg}`);
+                        reject(new Error(errMsg));
+                    }, 60000);
+
+                    try {
+                        transmittedPktId = await this.sendMeshPacketCustom({
+                            payloadBytes: payload,
+                            portNum: PortNum.ADMIN_APP,
+                            destinationNum: targetNum,
+                            channel: this.adminChannelIndex || 0,
+                            wantAck: false,
+                            wantResponse: true,
+                            pkiEncrypted: effectivePki,
+                        });
+
+                        this.log('tx', `🚀 Orden '${operationLabel}' transmitida al aire hacia ${targetHex} (ID: ${transmittedPktId}). Esperando confirmación remota (hasta 60s)...`);
+
+                        this._adminAckWaiters[transmittedPktId] = {
+                            targetNum,
+                            pktId: transmittedPktId,
+                            resolve: (resId) => {
+                                cleanup();
+                                const okMsg = `Orden '${operationLabel}' confirmada por el router remoto ${targetHex}.`;
+                                this.setNotification('success', okMsg);
+                                this.log('ack', `✅ ${okMsg}`);
+                                resolve(transmittedPktId);
+                            },
+                            reject: (errData) => {
+                                cleanup();
+                                const errCode = typeof errData === 'object' ? errData.error : errData;
+                                const desc = ROUTING_ERROR_DESCRIPTIONS[errCode] || `Código ${errCode}`;
+                                const errMsg = `Rechazo del router ${targetHex}: ${desc}`;
+                                this.setNotification('error', `Error en '${operationLabel}': ${errMsg}`);
+                                this.log('error', `❌ ${errMsg}`);
+                                reject(new Error(errMsg));
+                            },
+                        };
+                    } catch (txErr) {
+                        cleanup();
+                        const errMsg = formatMeshtasticError(txErr, targetHex);
+                        this.setNotification('error', `Fallo al transmitir '${operationLabel}': ${errMsg}`);
+                        this.log('error', `❌ Fallo al transmitir '${operationLabel}' hacia ${targetHex}: ${errMsg}`);
+                        reject(txErr);
+                    }
+                });
+            } finally {
+                this.orderActive = false;
+                this.orderLabel = '';
+                if (this.orderTimer) {
+                    clearInterval(this.orderTimer);
+                    this.orderTimer = null;
+                }
             }
         },
 
@@ -1180,19 +1341,33 @@ export function meshAdminComponent() {
                 const targetNum = this.resolveTargetNodeNum();
                 const targetHex = numToHex(targetNum);
 
-                this.log('tx', `🔑 Solicitando clave de sesión (SESSIONKEY_CONFIG) al router ${targetHex}...`);
+                this.orderActive = true;
+                this.orderLabel = 'Solicitud de SessionKey';
+                this.orderTargetHex = targetHex;
+                this.orderCountdown = 60;
+                if (this.orderTimer) clearInterval(this.orderTimer);
+                this.orderTimer = setInterval(() => {
+                    this.orderCountdown--;
+                    if (this.orderCountdown <= 0) {
+                        clearInterval(this.orderTimer);
+                        this.orderTimer = null;
+                    }
+                }, 1000);
 
-                const adminMsg = create(AdminMessageSchema, {
-                    payloadVariant: {
-                        case: 'getConfigRequest',
-                        value: 8, // SESSIONKEY_CONFIG
-                    },
-                });
+                this.log('tx', `🔑 Solicitando clave de sesión (SessionKey) al router ${targetHex} (esperando hasta 60s)...`);
 
-                await this.sendAdminMessageToTarget(targetNum, adminMsg, 'Solicitud de SessionKey');
-                this.setNotification('info', `Petición de SessionKey enviada a ${targetHex}. La clave se guardará automáticamente al recibir respuesta.`);
+                await this.ensureSessionKey(targetNum);
+                this.setNotification('success', `Clave de sesión administrativa obtenida y guardada para ${targetHex}.`);
             } catch (err) {
+                this.setNotification('error', `Error solicitando clave de sesión: ${err.message}`);
                 console.error('Error solicitando SessionKey:', err);
+            } finally {
+                this.orderActive = false;
+                this.orderLabel = '';
+                if (this.orderTimer) {
+                    clearInterval(this.orderTimer);
+                    this.orderTimer = null;
+                }
             }
         },
 
@@ -1592,14 +1767,15 @@ export function meshAdminComponent() {
                     }
 
                     this.tracerouteActive = true;
-                    this.tracerouteCountdown = 30;
+                    this.tracerouteCountdown = 35;
                     this.tracerouteTargetHex = targetHex;
                     this.tracerouteResult = '';
                     this.tracerouteHops = [];
 
-                    this.log('tx', `🔄 Iniciando Traceroute hacia ${targetHex} (esperando hasta 30 segundos)...`);
+                    this.log('tx', `🔄 Iniciando Traceroute hacia ${targetHex} (esperando hasta 35 segundos)...`);
 
-                    // Temporizador reactivo de 30 segundos
+                    // Temporizador reactivo de 35 segundos
+                    if (this.tracerouteTimer) clearInterval(this.tracerouteTimer);
                     this.tracerouteTimer = setInterval(() => {
                         this.tracerouteCountdown--;
                         if (this.tracerouteCountdown <= 0) {
@@ -1607,9 +1783,9 @@ export function meshAdminComponent() {
                             this.tracerouteTimer = null;
                             if (this.tracerouteActive) {
                                 this.tracerouteActive = false;
-                                this.tracerouteResult = `Tiempo de espera agotado (30s) sin respuesta de ruta de ${targetHex}.`;
-                                this.setNotification('warning', `Traceroute: tiempo de espera agotado (30s) sin respuesta de ${targetHex}.`);
-                                this.log('warn', `⏱️ Traceroute hacia ${targetHex}: tiempo de espera agotado (30s). El nodo no respondió.`);
+                                this.tracerouteResult = `Tiempo de espera agotado (35s) sin respuesta de ruta de ${targetHex}. El nodo no respondió o no hay ruta.`;
+                                this.setNotification('warning', `Traceroute: tiempo de espera agotado (35s) sin respuesta de ${targetHex}.`);
+                                this.log('warn', `⏱️ Traceroute hacia ${targetHex}: tiempo de espera agotado (35s). El nodo no respondió.`);
                             }
                         }
                     }, 1000);
@@ -1623,12 +1799,11 @@ export function meshAdminComponent() {
                             portNum: PortNum.TRACEROUTE_APP,
                             destinationNum: targetNum,
                             channel: 0,
-                            wantAck: true,
+                            wantAck: false, // Transmitir sin esperar ACK local; la respuesta llega por TRACEROUTE_APP
                             wantResponse: true,
                             pkiEncrypted: false,
-                            timeoutMs: 8000,
                         });
-                        this.setNotification('info', `Traceroute enviado a ${targetHex} (ID: ${pktId}). Esperando respuesta de los saltos de malla (30s)...`);
+                        this.setNotification('info', `Traceroute transmitido a ${targetHex} (ID: ${pktId}). Esperando respuesta de saltos en la malla (35s)...`);
                     } catch (txErr) {
                         this.log('warn', `⚠️ Aviso al transmitir sonda Traceroute: ${txErr.message}`);
                     }
