@@ -259,53 +259,77 @@ export function meshAdminComponent() {
                     }
                 }
             }
-            this.loadRouterListsFromStorage();
+
+            // Purgar cualquier caché local obsoleta para garantizar que la BD del portal sea la única fuente de verdad
+            try {
+                if (typeof window !== 'undefined' && window.localStorage) {
+                    const keysToRemove = [];
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const k = localStorage.key(i);
+                        if (k && (k.startsWith('mesh_favs_') || k.startsWith('mesh_blocked_'))) {
+                            keysToRemove.push(k);
+                        }
+                    }
+                    for (const k of keysToRemove) {
+                        localStorage.removeItem(k);
+                    }
+                }
+            } catch (e) {
+                // Silencioso si localStorage está restringido
+            }
+
             this.log('info', 'Consola de Gestión Remota de Routers inicializada.');
         },
 
         /**
-         * Recupera listas de favoritos y bloqueados guardadas en localStorage.
+         * Limpia la lista de favoritos del router activo tanto en frontend como en base de datos.
          */
-        loadRouterListsFromStorage() {
-            try {
-                if (typeof window === 'undefined' || !window.localStorage) return;
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key && key.startsWith('mesh_favs_')) {
-                        const rHex = key.replace('mesh_favs_', '');
-                        const val = JSON.parse(localStorage.getItem(key) || '[]');
-                        if (!this.routerFavorites[rHex] || this.routerFavorites[rHex].length === 0) {
-                            this.routerFavorites[rHex] = val;
-                        }
-                    } else if (key && key.startsWith('mesh_blocked_')) {
-                        const rHex = key.replace('mesh_blocked_', '');
-                        const val = JSON.parse(localStorage.getItem(key) || '[]');
-                        if (!this.routerBlocked[rHex] || this.routerBlocked[rHex].length === 0) {
-                            this.routerBlocked[rHex] = val;
-                        }
-                    }
-                }
-            } catch (e) {
-                console.warn('Error leyendo listas de localStorage:', e);
+        clearRouterFavorites() {
+            const hex = this.getActiveRouterHex();
+            if (!hex) return;
+            this.routerFavorites[hex] = [];
+            if (typeof window !== 'undefined' && window.localStorage) {
+                localStorage.removeItem('mesh_favs_' + hex);
             }
+            if (window.Livewire && this.$wire && typeof this.$wire.clearRouterFavorites === 'function') {
+                try {
+                    this.$wire.clearRouterFavorites(hex);
+                } catch (e) {
+                    console.warn('Error limpiando favoritos en Livewire:', e);
+                }
+            }
+            this.setNotification('info', `Lista de favoritos de ${hex} restablecida.`);
         },
 
         /**
-         * Persiste en localStorage las listas de favoritos y bloqueados del router.
+         * Limpia la lista de bloqueados del router activo tanto en frontend como en base de datos.
          */
-        saveRouterListsToStorage(rHex) {
-            try {
-                if (typeof window === 'undefined' || !window.localStorage || !rHex) return;
-                if (this.routerFavorites[rHex]) {
-                    localStorage.setItem('mesh_favs_' + rHex, JSON.stringify(this.routerFavorites[rHex]));
-                }
-                if (this.routerBlocked[rHex]) {
-                    localStorage.setItem('mesh_blocked_' + rHex, JSON.stringify(this.routerBlocked[rHex]));
-                }
-            } catch (e) {
-                console.warn('Error guardando listas en localStorage:', e);
+        clearRouterBlocked() {
+            const hex = this.getActiveRouterHex();
+            if (!hex) return;
+            this.routerBlocked[hex] = [];
+            if (typeof window !== 'undefined' && window.localStorage) {
+                localStorage.removeItem('mesh_blocked_' + hex);
             }
+            if (window.Livewire && this.$wire && typeof this.$wire.clearRouterBlocked === 'function') {
+                try {
+                    this.$wire.clearRouterBlocked(hex);
+                } catch (e) {
+                    console.warn('Error limpiando bloqueados en Livewire:', e);
+                }
+            }
+            this.setNotification('info', `Lista de bloqueados de ${hex} restablecida.`);
         },
+
+        /**
+         * Obsoleto: Mantenido por compatibilidad sin efecto secundario de caché divergente.
+         */
+        loadRouterListsFromStorage() {},
+
+        /**
+         * Obsoleto: Mantenido por compatibilidad sin efecto secundario de caché divergente.
+         */
+        saveRouterListsToStorage() {},
 
         /**
          * Retorna el ID hexadecimal del router objetivo actualmente seleccionado.
@@ -733,7 +757,11 @@ export function meshAdminComponent() {
                             this.log('info', `🔑 Clave de sesión administrativa (SessionKey) guardada para ${fromHex}`);
                             this.setNotification('success', `Clave de sesión administrativa establecida con éxito para ${fromHex}.`);
                             if (this._sessionKeyWaiters[fromNum]) {
-                                this._sessionKeyWaiters[fromNum](adminMsg.sessionPasskey);
+                                if (typeof this._sessionKeyWaiters[fromNum] === 'function') {
+                                    this._sessionKeyWaiters[fromNum](adminMsg.sessionPasskey);
+                                } else if (typeof this._sessionKeyWaiters[fromNum]?.resolve === 'function') {
+                                    this._sessionKeyWaiters[fromNum].resolve(adminMsg.sessionPasskey);
+                                }
                                 delete this._sessionKeyWaiters[fromNum];
                             }
                         }

@@ -208,4 +208,28 @@ class GestionRouters extends Page
         $router->blocked_nodes = $blocked;
         $router->save();
     }
+
+    /**
+     * Limpia la lista completa de favoritos para el router indicado.
+     */
+    public function clearRouterFavorites(string $routerId): void
+    {
+        $router = CoordinatedRouter::where('node_id', $routerId)->first();
+        if ($router) {
+            $router->favorite_nodes = null;
+            $router->save();
+        }
+    }
+
+    /**
+     * Limpia la lista completa de bloqueados para el router indicado.
+     */
+    public function clearRouterBlocked(string $routerId): void
+    {
+        $router = CoordinatedRouter::where('node_id', $routerId)->first();
+        if ($router) {
+            $router->blocked_nodes = null;
+            $router->save();
+        }
+    }
 }

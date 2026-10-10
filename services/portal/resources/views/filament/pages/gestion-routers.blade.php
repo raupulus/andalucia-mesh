@@ -1536,6 +1536,13 @@
                                 <span class="font-mono px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold"
                                       x-text="`${getActiveRouterFavorites().length} configurados`"></span>
                             </div>
+                            <template x-if="getActiveRouterFavorites().length > 0">
+                                <button type="button" @click="if (confirm('¿Deseas restablecer la lista de favoritos guardada para este router?')) { clearRouterFavorites(); }"
+                                        class="text-[11px] text-gray-500 hover:text-rose-600 dark:text-gray-400 dark:hover:text-rose-400 transition-colors flex items-center gap-1 font-medium">
+                                    <span>🗑️</span>
+                                    <span>Restablecer lista</span>
+                                </button>
+                            </template>
                         </div>
 
                         {{-- Estado vacío --}}
@@ -1736,6 +1743,13 @@
                                 <span class="font-mono px-2 py-0.5 rounded-full text-[10px] bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 font-bold"
                                       x-text="`${getActiveRouterBlocked().length} bloqueados`"></span>
                             </div>
+                            <template x-if="getActiveRouterBlocked().length > 0">
+                                <button type="button" @click="if (confirm('¿Deseas restablecer la lista de nodos bloqueados guardada para este router?')) { clearRouterBlocked(); }"
+                                        class="text-[11px] text-gray-500 hover:text-rose-600 dark:text-gray-400 dark:hover:text-rose-400 transition-colors flex items-center gap-1 font-medium">
+                                    <span>🗑️</span>
+                                    <span>Restablecer lista</span>
+                                </button>
+                            </template>
                         </div>
 
                         {{-- Estado vacío --}}
