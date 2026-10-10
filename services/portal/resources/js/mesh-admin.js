@@ -1224,6 +1224,7 @@ export function meshAdminComponent() {
                 if (!isLocal) {
                     if (this.targetHasPublicKeyInLocalRadio() && !this.adminSessions[targetNum]) {
                         await this.ensureSessionKey(targetNum);
+                        this.orderCountdown = 60;
                     }
                     if (this.adminSessions[targetNum]) {
                         adminMsg.sessionPasskey = this.adminSessions[targetNum];

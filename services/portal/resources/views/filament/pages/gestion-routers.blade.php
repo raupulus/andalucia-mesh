@@ -2,7 +2,7 @@
     <script>
         window.portalKnownNodes = @js($allKnownNodes);
     </script>
-    <script src="/js/mesh-admin.bundle.js"></script>
+    <script src="{{ asset('js/mesh-admin.bundle.js') }}?v={{ @filemtime(public_path('js/mesh-admin.bundle.js')) ?: time() }}"></script>
 
     <div x-data="meshAdmin()" class="fi-router-admin-page">
         <style>
