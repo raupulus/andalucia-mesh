@@ -986,7 +986,10 @@ export function meshAdminComponent() {
          */
         getRoleName(roleNum) {
             const num = Number(roleNum);
-            return Config_DeviceConfig_Role[num] || `ROL_${num}`;
+            const ROLES_EXT = {
+                12: 'CLIENT_BASE',
+            };
+            return Config_DeviceConfig_Role[num] || ROLES_EXT[num] || `ROL_${num}`;
         },
 
         /**
@@ -1111,9 +1114,10 @@ export function meshAdminComponent() {
                         portNum: PortNum.ADMIN_APP,
                         destinationNum: targetNum,
                         channel: this.adminChannelIndex || 0,
-                        wantAck: false,
+                        wantAck: true,
                         wantResponse: true,
                         pkiEncrypted: true,
+                        timeoutMs: 12000,
                     });
                 } catch (txErr) {
                     cleanup();
@@ -1185,40 +1189,17 @@ export function meshAdminComponent() {
 
             const binaryToRadio = toBinary(ToRadioSchema, toRadio);
 
-            if (isBroadcast || !wantAck) {
-                // Para emisiones broadcast o sin ACK, transmitimos directamente por la cola serie
-                // y confirmamos inmediatamente tras el envío al dispositivo físico, evitando el falso TIMEOUT de 60s
-                this._device.queue.push({
-                    id: randId,
-                    data: binaryToRadio,
-                });
-                await this._device.queue.processQueue(this._device.transport.toDevice);
-                this._device.queue.processAck(randId);
-                return randId;
+            // Empaquetar y enviar al dispositivo físico a través del transporte serie/BLE
+            this._device.queue.push({
+                id: randId,
+                data: binaryToRadio,
+                sent: false,
+            });
+            await this._device.queue.processQueue(this._device.transport.toDevice);
+            if (this._device && this._device.queue && typeof this._device.queue.remove === 'function') {
+                this._device.queue.remove(randId);
             }
-
-            // Para unicast con ACK, aplicamos un timeout controlado (por defecto 15s) evitando bloqueos de 60s
-            try {
-                const sendPromise = this._device.sendRaw(binaryToRadio, randId);
-                const effectiveTimeout = timeoutMs || 15000;
-
-                const timeoutPromise = new Promise((_, reject) => {
-                    setTimeout(() => {
-                        if (this._device && this._device.queue) {
-                            this._device.queue.remove(randId);
-                        }
-                        reject({
-                            id: randId,
-                            error: Routing_Error.TIMEOUT,
-                        });
-                    }, effectiveTimeout);
-                });
-
-                await Promise.race([sendPromise, timeoutPromise]);
-                return randId;
-            } catch (rawErr) {
-                throw new Error(formatMeshtasticError(rawErr));
-            }
+            return randId;
         },
 
         /**
@@ -1312,9 +1293,10 @@ export function meshAdminComponent() {
                             portNum: PortNum.ADMIN_APP,
                             destinationNum: targetNum,
                             channel: this.adminChannelIndex || 0,
-                            wantAck: false,
+                            wantAck: true,
                             wantResponse: true,
                             pkiEncrypted: effectivePki,
+                            timeoutMs: 12000,
                         });
 
                         this.log('tx', `🚀 Orden '${operationLabel}' transmitida al aire hacia ${targetHex} (ID: ${transmittedPktId}). Esperando confirmación remota (hasta 60s)...`);
