@@ -66,7 +66,30 @@ class GestionRouters extends Page
             ->orderBy('short_name')
             ->get();
 
-        $formattedRouters = $routers->map(function (CoordinatedRouter $r): array {
+        $normalizeList = function (?array $list): array {
+            if (! is_array($list)) {
+                return [];
+            }
+
+            return array_values(array_map(function ($item): array {
+                $hex = is_array($item) ? ($item['hex'] ?? '') : (string) $item;
+                $sName = is_array($item) ? ($item['short_name'] ?? $item['shortName'] ?? '') : '';
+                $lName = is_array($item) ? ($item['long_name'] ?? $item['longName'] ?? '') : '';
+                $role = is_array($item) ? ($item['role'] ?? 'ROUTER') : 'ROUTER';
+
+                return [
+                    'hex' => $hex,
+                    'short_name' => $sName,
+                    'shortName' => $sName,
+                    'long_name' => $lName,
+                    'longName' => $lName,
+                    'role' => $role,
+                    'added_at' => is_array($item) ? ($item['added_at'] ?? null) : null,
+                ];
+            }, $list));
+        };
+
+        $formattedRouters = $routers->map(function (CoordinatedRouter $r) use ($normalizeList): array {
             $cleanHex = ltrim($r->node_id, '!');
             $decId = (int) hexdec($cleanHex);
 
@@ -78,8 +101,8 @@ class GestionRouters extends Page
                 'province' => $r->province,
                 'role' => $r->role,
                 'status' => $r->status,
-                'favorite_nodes' => $r->favorite_nodes ?? [],
-                'blocked_nodes' => $r->blocked_nodes ?? [],
+                'favorite_nodes' => $normalizeList($r->favorite_nodes),
+                'blocked_nodes' => $normalizeList($r->blocked_nodes),
             ];
         })->values()->all();
 
@@ -87,19 +110,26 @@ class GestionRouters extends Page
         $allKnownNodes = $formattedRouters;
         try {
             $schema = Schema::connection('ingesta');
-            if ($schema->hasTable('api_routers') || $schema->hasView('api_routers')) {
-                $ingestaRouters = DB::connection('ingesta')->table('api_routers')->get();
+            $tableName = null;
+            if ($schema->hasView('api_nodes') || $schema->hasTable('api_nodes')) {
+                $tableName = 'api_nodes';
+            } elseif ($schema->hasView('api_routers') || $schema->hasTable('api_routers')) {
+                $tableName = 'api_routers';
+            }
+
+            if ($tableName) {
+                $ingestaNodes = DB::connection('ingesta')->table($tableName)->select(['id', 'short_name', 'long_name', 'role', 'province'])->get();
                 $existingIds = array_column($allKnownNodes, 'node_id');
-                foreach ($ingestaRouters as $ir) {
-                    if (! in_array($ir->id, $existingIds, true)) {
-                        $cleanHex = ltrim($ir->id, '!');
+                foreach ($ingestaNodes as $in) {
+                    if (! in_array($in->id, $existingIds, true)) {
+                        $cleanHex = ltrim($in->id, '!');
                         $allKnownNodes[] = [
-                            'node_id' => $ir->id,
+                            'node_id' => $in->id,
                             'dec_id' => (string) hexdec($cleanHex),
-                            'short_name' => $ir->short_name ?? '',
-                            'long_name' => $ir->long_name ?? '',
-                            'province' => $ir->province ?? '',
-                            'role' => $ir->role ?? 'ROUTER',
+                            'short_name' => $in->short_name ?? '',
+                            'long_name' => $in->long_name ?? '',
+                            'province' => $in->province ?? '',
+                            'role' => $in->role ?? 'CLIENT',
                             'status' => 'known',
                             'favorite_nodes' => [],
                             'blocked_nodes' => [],
@@ -114,6 +144,44 @@ class GestionRouters extends Page
         return [
             'routers' => $formattedRouters,
             'allKnownNodes' => $allKnownNodes,
+        ];
+    }
+
+    /**
+     * Resuelve el nombre y rol conocido de un nodo a partir de la base de datos si vienen vacíos.
+     *
+     * @return array{short_name: string, long_name: string, role: string}
+     */
+    protected function resolveNodeIdentity(string $targetHex, ?array $nodeData): array
+    {
+        $shortName = $nodeData['short_name'] ?? $nodeData['shortName'] ?? '';
+        $longName = $nodeData['long_name'] ?? $nodeData['longName'] ?? '';
+        $role = $nodeData['role'] ?? '';
+
+        if (empty($shortName) || empty($longName)) {
+            $known = CoordinatedRouter::where('node_id', $targetHex)->first();
+            if ($known) {
+                $shortName = $shortName ?: ($known->short_name ?? '');
+                $longName = $longName ?: ($known->long_name ?? '');
+                $role = $role ?: ($known->role ?? 'ROUTER');
+            } else {
+                try {
+                    $apiNode = DB::connection('ingesta')->table('api_nodes')->where('id', $targetHex)->first();
+                    if ($apiNode) {
+                        $shortName = $shortName ?: ($apiNode->short_name ?? '');
+                        $longName = $longName ?: ($apiNode->long_name ?? '');
+                        $role = $role ?: ($apiNode->role ?? 'ROUTER');
+                    }
+                } catch (\Throwable) {
+                    // Ignorar si ingesta no está accesible
+                }
+            }
+        }
+
+        return [
+            'short_name' => $shortName ?: substr(ltrim($targetHex, '!'), -4),
+            'long_name' => $longName ?: $targetHex,
+            'role' => $role ?: 'ROUTER',
         ];
     }
 
@@ -147,11 +215,15 @@ class GestionRouters extends Page
                 }
             }
             if (! $exists) {
+                $identity = $this->resolveNodeIdentity($targetHex, $nodeData);
+
                 $favs[] = [
                     'hex' => $targetHex,
-                    'short_name' => $nodeData['short_name'] ?? '',
-                    'long_name' => $nodeData['long_name'] ?? '',
-                    'role' => $nodeData['role'] ?? '',
+                    'short_name' => $identity['short_name'],
+                    'shortName' => $identity['short_name'],
+                    'long_name' => $identity['long_name'],
+                    'longName' => $identity['long_name'],
+                    'role' => $identity['role'],
                     'added_at' => now()->toIso8601String(),
                 ];
             }
@@ -193,11 +265,15 @@ class GestionRouters extends Page
                 }
             }
             if (! $exists) {
+                $identity = $this->resolveNodeIdentity($targetHex, $nodeData);
+
                 $blocked[] = [
                     'hex' => $targetHex,
-                    'short_name' => $nodeData['short_name'] ?? '',
-                    'long_name' => $nodeData['long_name'] ?? '',
-                    'role' => $nodeData['role'] ?? '',
+                    'short_name' => $identity['short_name'],
+                    'shortName' => $identity['short_name'],
+                    'long_name' => $identity['long_name'],
+                    'longName' => $identity['long_name'],
+                    'role' => $identity['role'],
                     'added_at' => now()->toIso8601String(),
                 ];
             }

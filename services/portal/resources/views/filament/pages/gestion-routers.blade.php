@@ -1561,10 +1561,10 @@
                                             ⭐
                                         </div>
                                         <div class="overflow-hidden">
-                                            <div class="font-bold text-xs truncate text-gray-900 dark:text-gray-100" x-text="fav.shortName || (fav.hex || fav)"></div>
+                                            <div class="font-bold text-xs truncate text-gray-900 dark:text-gray-100" x-text="(fav.shortName || fav.short_name) || (fav.hex || fav)"></div>
                                             <div class="font-mono text-[11px] text-emerald-700 dark:text-emerald-400 truncate" x-text="fav.hex || fav"></div>
-                                            <template x-if="fav.longName && fav.longName !== fav.hex">
-                                                <div class="text-[10px] text-gray-500 truncate" x-text="fav.longName"></div>
+                                            <template x-if="(fav.longName || fav.long_name) && (fav.longName || fav.long_name) !== (fav.hex || fav)">
+                                                <div class="text-[10px] text-gray-500 truncate" x-text="fav.longName || fav.long_name"></div>
                                             </template>
                                         </div>
                                     </div>
@@ -1768,10 +1768,10 @@
                                             🚫
                                         </div>
                                         <div class="overflow-hidden">
-                                            <div class="font-bold text-xs truncate text-gray-900 dark:text-gray-100" x-text="blk.shortName || (blk.hex || blk)"></div>
+                                            <div class="font-bold text-xs truncate text-gray-900 dark:text-gray-100" x-text="(blk.shortName || blk.short_name) || (blk.hex || blk)"></div>
                                             <div class="font-mono text-[11px] text-rose-700 dark:text-rose-400 truncate" x-text="blk.hex || blk"></div>
-                                            <template x-if="blk.longName && blk.longName !== blk.hex">
-                                                <div class="text-[10px] text-gray-500 truncate" x-text="blk.longName"></div>
+                                            <template x-if="(blk.longName || blk.long_name) && (blk.longName || blk.long_name) !== (blk.hex || blk)">
+                                                <div class="text-[10px] text-gray-500 truncate" x-text="blk.longName || blk.long_name"></div>
                                             </template>
                                         </div>
                                     </div>

@@ -255,8 +255,36 @@ export function meshAdminComponent() {
                 this.portalKnownNodes = window.portalKnownNodes.slice();
                 for (const r of this.portalKnownNodes) {
                     if (r.node_id) {
-                        this.routerFavorites[r.node_id] = Array.isArray(r.favorite_nodes) ? r.favorite_nodes : [];
-                        this.routerBlocked[r.node_id] = Array.isArray(r.blocked_nodes) ? r.blocked_nodes : [];
+                        this.routerFavorites[r.node_id] = (Array.isArray(r.favorite_nodes) ? r.favorite_nodes : []).map((f) => {
+                            const hex = f.hex || f;
+                            const sName = f.shortName || f.short_name || '';
+                            const lName = f.longName || f.long_name || '';
+                            return {
+                                hex,
+                                num: f.num || hexToNum(hex),
+                                shortName: sName,
+                                short_name: sName,
+                                longName: lName,
+                                long_name: lName,
+                                role: f.role || 'ROUTER',
+                                added_at: f.added_at,
+                            };
+                        });
+                        this.routerBlocked[r.node_id] = (Array.isArray(r.blocked_nodes) ? r.blocked_nodes : []).map((b) => {
+                            const hex = b.hex || b;
+                            const sName = b.shortName || b.short_name || '';
+                            const lName = b.longName || b.long_name || '';
+                            return {
+                                hex,
+                                num: b.num || hexToNum(hex),
+                                shortName: sName,
+                                short_name: sName,
+                                longName: lName,
+                                long_name: lName,
+                                role: b.role || 'NODE',
+                                added_at: b.added_at,
+                            };
+                        });
                     }
                 }
             }
@@ -1530,13 +1558,16 @@ export function meshAdminComponent() {
             const isAdd = action === 'add';
             const activeRouterHex = this.getActiveRouterHex();
 
-            if (!nodeData) {
-                nodeData = this.getAllAvailableNodes().find((n) => n.hex === favHex) || {
+            if (!nodeData || typeof nodeData !== 'object' || !nodeData.shortName) {
+                const found = this.getAllAvailableNodes().find((n) => n.hex === favHex);
+                nodeData = {
                     hex: favHex,
                     num: favNum,
-                    shortName: favHex.substring(1, 5),
-                    longName: favHex,
-                    role: 'ROUTER',
+                    shortName: (nodeData && nodeData.shortName) || (found && found.shortName) || (nodeData && nodeData.short_name) || (found && found.short_name) || favHex.substring(1, 5),
+                    short_name: (nodeData && nodeData.shortName) || (found && found.shortName) || (nodeData && nodeData.short_name) || (found && found.short_name) || favHex.substring(1, 5),
+                    longName: (nodeData && nodeData.longName) || (found && found.longName) || (nodeData && nodeData.long_name) || (found && found.long_name) || favHex,
+                    long_name: (nodeData && nodeData.longName) || (found && found.longName) || (nodeData && nodeData.long_name) || (found && found.long_name) || favHex,
+                    role: (nodeData && nodeData.role) || (found && found.role) || 'ROUTER',
                 };
             }
 
@@ -1570,8 +1601,10 @@ export function meshAdminComponent() {
                         this.routerFavorites[activeRouterHex].push({
                             hex: favHex,
                             num: favNum,
-                            shortName: nodeData.shortName || favHex.substring(1, 5),
-                            longName: nodeData.longName || favHex,
+                            shortName: nodeData.shortName || nodeData.short_name || favHex.substring(1, 5),
+                            short_name: nodeData.shortName || nodeData.short_name || favHex.substring(1, 5),
+                            longName: nodeData.longName || nodeData.long_name || favHex,
+                            long_name: nodeData.longName || nodeData.long_name || favHex,
                             role: nodeData.role || 'ROUTER',
                             added_at: new Date().toISOString(),
                         });
@@ -1589,7 +1622,14 @@ export function meshAdminComponent() {
                 // Sincronizar en base de datos si Livewire está disponible
                 if (window.Livewire && this.$wire && typeof this.$wire.updateRouterFavoriteNode === 'function') {
                     try {
-                        this.$wire.updateRouterFavoriteNode(activeRouterHex, favHex, isAdd, nodeData);
+                        const payloadToSync = {
+                            short_name: nodeData.shortName || nodeData.short_name || '',
+                            shortName: nodeData.shortName || nodeData.short_name || '',
+                            long_name: nodeData.longName || nodeData.long_name || '',
+                            longName: nodeData.longName || nodeData.long_name || '',
+                            role: nodeData.role || 'ROUTER',
+                        };
+                        this.$wire.updateRouterFavoriteNode(activeRouterHex, favHex, isAdd, payloadToSync);
                     } catch (lwErr) {
                         console.warn('Error sincronizando con Livewire:', lwErr);
                     }
@@ -1637,13 +1677,16 @@ export function meshAdminComponent() {
             const isAdd = action === 'add';
             const activeRouterHex = this.getActiveRouterHex();
 
-            if (!nodeData) {
-                nodeData = this.getAllAvailableNodes().find((n) => n.hex === ignHex) || {
+            if (!nodeData || typeof nodeData !== 'object' || !nodeData.shortName) {
+                const found = this.getAllAvailableNodes().find((n) => n.hex === ignHex);
+                nodeData = {
                     hex: ignHex,
                     num: ignNum,
-                    shortName: ignHex.substring(1, 5),
-                    longName: ignHex,
-                    role: 'NODE',
+                    shortName: (nodeData && nodeData.shortName) || (found && found.shortName) || (nodeData && nodeData.short_name) || (found && found.short_name) || ignHex.substring(1, 5),
+                    short_name: (nodeData && nodeData.shortName) || (found && found.shortName) || (nodeData && nodeData.short_name) || (found && found.short_name) || ignHex.substring(1, 5),
+                    longName: (nodeData && nodeData.longName) || (found && found.longName) || (nodeData && nodeData.long_name) || (found && found.long_name) || ignHex,
+                    long_name: (nodeData && nodeData.longName) || (found && found.longName) || (nodeData && nodeData.long_name) || (found && found.long_name) || ignHex,
+                    role: (nodeData && nodeData.role) || (found && found.role) || 'NODE',
                 };
             }
 
@@ -1677,8 +1720,10 @@ export function meshAdminComponent() {
                         this.routerBlocked[activeRouterHex].push({
                             hex: ignHex,
                             num: ignNum,
-                            shortName: nodeData.shortName || ignHex.substring(1, 5),
-                            longName: nodeData.longName || ignHex,
+                            shortName: nodeData.shortName || nodeData.short_name || ignHex.substring(1, 5),
+                            short_name: nodeData.shortName || nodeData.short_name || ignHex.substring(1, 5),
+                            longName: nodeData.longName || nodeData.long_name || ignHex,
+                            long_name: nodeData.longName || nodeData.long_name || ignHex,
                             role: nodeData.role || 'NODE',
                             added_at: new Date().toISOString(),
                         });
@@ -1696,7 +1741,14 @@ export function meshAdminComponent() {
                 // Sincronizar en base de datos si Livewire está disponible
                 if (window.Livewire && this.$wire && typeof this.$wire.updateRouterBlockedNode === 'function') {
                     try {
-                        this.$wire.updateRouterBlockedNode(activeRouterHex, ignHex, isAdd, nodeData);
+                        const payloadToSync = {
+                            short_name: nodeData.shortName || nodeData.short_name || '',
+                            shortName: nodeData.shortName || nodeData.short_name || '',
+                            long_name: nodeData.longName || nodeData.long_name || '',
+                            longName: nodeData.longName || nodeData.long_name || '',
+                            role: nodeData.role || 'NODE',
+                        };
+                        this.$wire.updateRouterBlockedNode(activeRouterHex, ignHex, isAdd, payloadToSync);
                     } catch (lwErr) {
                         console.warn('Error sincronizando con Livewire:', lwErr);
                     }

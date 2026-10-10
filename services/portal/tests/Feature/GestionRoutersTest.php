@@ -193,4 +193,60 @@ class GestionRoutersTest extends TestCase
         $router->refresh();
         $this->assertCount(0, $router->blocked_nodes);
     }
+
+    /**
+     * El método updateRouterFavoriteNode acepta payload con camelCase (shortName, longName) y normaliza ambos.
+     */
+    public function test_actualizar_favorito_con_payload_camelcase_y_autoresolucion(): void
+    {
+        $user = User::factory()->create();
+
+        // Router que se gestiona
+        $router = CoordinatedRouter::create([
+            'node_id' => '!63760c00',
+            'short_name' => 'CA05',
+            'long_name' => 'EA7-CA-05',
+            'role' => 'ROUTER',
+            'province' => 'ES-CA',
+            'status' => CoordinatedRouter::STATUS_MANAGED,
+            'favorite_nodes' => [],
+        ]);
+
+        // Nodo conocido en base de datos para probar auto-resolución
+        CoordinatedRouter::create([
+            'node_id' => '!4abdfee8',
+            'short_name' => 'BA01',
+            'long_name' => 'BA01ZSuarezTentudia',
+            'role' => 'ROUTER',
+            'province' => 'FUERA',
+            'status' => CoordinatedRouter::STATUS_KNOWN,
+        ]);
+
+        // 1. Añadir con camelCase desde JS (shortName y longName)
+        Livewire::actingAs($user)
+            ->test(GestionRouters::class)
+            ->call('updateRouterFavoriteNode', '!63760c00', '!5f3a3a29', true, [
+                'shortName' => 'Rau0',
+                'longName' => 'Raupulus Base',
+                'role' => 'CLIENT',
+            ]);
+
+        $router->refresh();
+        $this->assertCount(1, $router->favorite_nodes);
+        $this->assertSame('Rau0', $router->favorite_nodes[0]['short_name']);
+        $this->assertSame('Rau0', $router->favorite_nodes[0]['shortName']);
+        $this->assertSame('Raupulus Base', $router->favorite_nodes[0]['long_name']);
+        $this->assertSame('Raupulus Base', $router->favorite_nodes[0]['longName']);
+
+        // 2. Añadir nodo pasando nombres vacíos para comprobar auto-resolución en base de datos
+        Livewire::actingAs($user)
+            ->test(GestionRouters::class)
+            ->call('updateRouterFavoriteNode', '!63760c00', '!4abdfee8', true, []);
+
+        $router->refresh();
+        $this->assertCount(2, $router->favorite_nodes);
+        $this->assertSame('BA01', $router->favorite_nodes[1]['short_name']);
+        $this->assertSame('BA01', $router->favorite_nodes[1]['shortName']);
+        $this->assertSame('BA01ZSuarezTentudia', $router->favorite_nodes[1]['long_name']);
+    }
 }
