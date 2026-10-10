@@ -251,40 +251,95 @@ export function meshAdminComponent() {
          * Inicialización del componente.
          */
         init() {
-            if (typeof window !== 'undefined' && window.portalKnownNodes && Array.isArray(window.portalKnownNodes)) {
-                this.portalKnownNodes = window.portalKnownNodes.slice();
-                for (const r of this.portalKnownNodes) {
-                    if (r.node_id) {
-                        this.routerFavorites[r.node_id] = (Array.isArray(r.favorite_nodes) ? r.favorite_nodes : []).map((f) => {
-                            const hex = f.hex || f;
-                            const sName = f.shortName || f.short_name || '';
-                            const lName = f.longName || f.long_name || '';
-                            return {
-                                hex,
-                                num: f.num || hexToNum(hex),
-                                shortName: sName,
-                                short_name: sName,
-                                longName: lName,
-                                long_name: lName,
-                                role: f.role || 'ROUTER',
-                                added_at: f.added_at,
-                            };
-                        });
-                        this.routerBlocked[r.node_id] = (Array.isArray(r.blocked_nodes) ? r.blocked_nodes : []).map((b) => {
-                            const hex = b.hex || b;
-                            const sName = b.shortName || b.short_name || '';
-                            const lName = b.longName || b.long_name || '';
-                            return {
-                                hex,
-                                num: b.num || hexToNum(hex),
-                                shortName: sName,
-                                short_name: sName,
-                                longName: lName,
-                                long_name: lName,
-                                role: b.role || 'NODE',
-                                added_at: b.added_at,
-                            };
-                        });
+            if (typeof window !== 'undefined') {
+                // 1. Cargar favoritos y bloqueados de los routers coordinados oficiales del portal
+                if (window.portalRouters && Array.isArray(window.portalRouters)) {
+                    for (const r of window.portalRouters) {
+                        if (r.node_id) {
+                            const hexKey = r.node_id.toLowerCase();
+                            const mappedFavs = (Array.isArray(r.favorite_nodes) ? r.favorite_nodes : []).map((f) => {
+                                const hex = f.hex || f;
+                                const sName = f.shortName || f.short_name || '';
+                                const lName = f.longName || f.long_name || '';
+                                return {
+                                    hex,
+                                    num: f.num || parseNodeNum(hex),
+                                    shortName: sName,
+                                    short_name: sName,
+                                    longName: lName,
+                                    long_name: lName,
+                                    role: f.role || 'ROUTER',
+                                    added_at: f.added_at,
+                                };
+                            });
+                            const mappedBlocked = (Array.isArray(r.blocked_nodes) ? r.blocked_nodes : []).map((b) => {
+                                const hex = b.hex || b;
+                                const sName = b.shortName || b.short_name || '';
+                                const lName = b.longName || b.long_name || '';
+                                return {
+                                    hex,
+                                    num: b.num || parseNodeNum(hex),
+                                    shortName: sName,
+                                    short_name: sName,
+                                    longName: lName,
+                                    long_name: lName,
+                                    role: b.role || 'NODE',
+                                    added_at: b.added_at,
+                                };
+                            });
+
+                            this.routerFavorites[hexKey] = mappedFavs;
+                            this.routerFavorites[r.node_id] = mappedFavs;
+                            this.routerBlocked[hexKey] = mappedBlocked;
+                            this.routerBlocked[r.node_id] = mappedBlocked;
+                        }
+                    }
+                }
+
+                // 2. Cargar catálogo completo de nodos para búsqueda
+                if (window.portalKnownNodes && Array.isArray(window.portalKnownNodes)) {
+                    this.portalKnownNodes = window.portalKnownNodes.slice();
+                    // Fallback si no existía window.portalRouters
+                    if (!window.portalRouters) {
+                        for (const r of this.portalKnownNodes) {
+                            if (r.node_id && !this.routerFavorites[r.node_id.toLowerCase()]) {
+                                const hexKey = r.node_id.toLowerCase();
+                                const mappedFavs = (Array.isArray(r.favorite_nodes) ? r.favorite_nodes : []).map((f) => {
+                                    const hex = f.hex || f;
+                                    const sName = f.shortName || f.short_name || '';
+                                    const lName = f.longName || f.long_name || '';
+                                    return {
+                                        hex,
+                                        num: f.num || parseNodeNum(hex),
+                                        shortName: sName,
+                                        short_name: sName,
+                                        longName: lName,
+                                        long_name: lName,
+                                        role: f.role || 'ROUTER',
+                                        added_at: f.added_at,
+                                    };
+                                });
+                                const mappedBlocked = (Array.isArray(r.blocked_nodes) ? r.blocked_nodes : []).map((b) => {
+                                    const hex = b.hex || b;
+                                    const sName = b.shortName || b.short_name || '';
+                                    const lName = b.longName || b.long_name || '';
+                                    return {
+                                        hex,
+                                        num: b.num || parseNodeNum(hex),
+                                        shortName: sName,
+                                        short_name: sName,
+                                        longName: lName,
+                                        long_name: lName,
+                                        role: b.role || 'NODE',
+                                        added_at: b.added_at,
+                                    };
+                                });
+                                this.routerFavorites[hexKey] = mappedFavs;
+                                this.routerFavorites[r.node_id] = mappedFavs;
+                                this.routerBlocked[hexKey] = mappedBlocked;
+                                this.routerBlocked[r.node_id] = mappedBlocked;
+                            }
+                        }
                     }
                 }
             }
@@ -316,13 +371,20 @@ export function meshAdminComponent() {
         clearRouterFavorites() {
             const hex = this.getActiveRouterHex();
             if (!hex) return;
+            const hexLower = hex.toLowerCase();
+            this.routerFavorites[hexLower] = [];
             this.routerFavorites[hex] = [];
             if (typeof window !== 'undefined' && window.localStorage) {
+                localStorage.removeItem('mesh_favs_' + hexLower);
                 localStorage.removeItem('mesh_favs_' + hex);
             }
-            if (window.Livewire && this.$wire && typeof this.$wire.clearRouterFavorites === 'function') {
+            if (window.Livewire && this.$wire) {
                 try {
-                    this.$wire.clearRouterFavorites(hex);
+                    if (typeof this.$wire.clearRouterFavorites === 'function') {
+                        this.$wire.clearRouterFavorites(hex);
+                    } else if (typeof this.$wire.clearRouterFavoriteNodes === 'function') {
+                        this.$wire.clearRouterFavoriteNodes(hex);
+                    }
                 } catch (e) {
                     console.warn('Error limpiando favoritos en Livewire:', e);
                 }
@@ -336,13 +398,20 @@ export function meshAdminComponent() {
         clearRouterBlocked() {
             const hex = this.getActiveRouterHex();
             if (!hex) return;
+            const hexLower = hex.toLowerCase();
+            this.routerBlocked[hexLower] = [];
             this.routerBlocked[hex] = [];
             if (typeof window !== 'undefined' && window.localStorage) {
+                localStorage.removeItem('mesh_blocked_' + hexLower);
                 localStorage.removeItem('mesh_blocked_' + hex);
             }
-            if (window.Livewire && this.$wire && typeof this.$wire.clearRouterBlocked === 'function') {
+            if (window.Livewire && this.$wire) {
                 try {
-                    this.$wire.clearRouterBlocked(hex);
+                    if (typeof this.$wire.clearRouterBlocked === 'function') {
+                        this.$wire.clearRouterBlocked(hex);
+                    } else if (typeof this.$wire.clearRouterBlockedNodes === 'function') {
+                        this.$wire.clearRouterBlockedNodes(hex);
+                    }
                 } catch (e) {
                     console.warn('Error limpiando bloqueados en Livewire:', e);
                 }
@@ -366,9 +435,10 @@ export function meshAdminComponent() {
         getActiveRouterHex() {
             try {
                 const targetNum = this.resolveTargetNodeNum();
-                return numToHex(targetNum);
+                return numToHex(targetNum).toLowerCase();
             } catch {
-                return this.selectedRouterHex || (this.manualNodeInput ? this.manualNodeInput.trim() : '');
+                const fallback = this.selectedRouterHex || (this.manualNodeInput ? this.manualNodeInput.trim() : '');
+                return fallback ? fallback.toLowerCase() : '';
             }
         },
 
@@ -378,7 +448,7 @@ export function meshAdminComponent() {
         getActiveRouterFavorites() {
             const hex = this.getActiveRouterHex();
             if (!hex) return [];
-            return this.routerFavorites[hex] || [];
+            return this.routerFavorites[hex.toLowerCase()] || this.routerFavorites[hex.toUpperCase()] || this.routerFavorites[hex] || [];
         },
 
         /**
@@ -387,7 +457,7 @@ export function meshAdminComponent() {
         getActiveRouterBlocked() {
             const hex = this.getActiveRouterHex();
             if (!hex) return [];
-            return this.routerBlocked[hex] || [];
+            return this.routerBlocked[hex.toLowerCase()] || this.routerBlocked[hex.toUpperCase()] || this.routerBlocked[hex] || [];
         },
 
         /**
@@ -396,7 +466,8 @@ export function meshAdminComponent() {
         isNodeFavoriteInActiveRouter(targetHex) {
             if (!targetHex) return false;
             const favs = this.getActiveRouterFavorites();
-            return favs.some((f) => (f.hex || f) === targetHex);
+            const targetLower = targetHex.toLowerCase();
+            return favs.some((f) => ((f.hex || f) || '').toLowerCase() === targetLower);
         },
 
         /**
@@ -405,7 +476,8 @@ export function meshAdminComponent() {
         isNodeBlockedInActiveRouter(targetHex) {
             if (!targetHex) return false;
             const blk = this.getActiveRouterBlocked();
-            return blk.some((b) => (b.hex || b) === targetHex);
+            const targetLower = targetHex.toLowerCase();
+            return blk.some((b) => ((b.hex || b) || '').toLowerCase() === targetLower);
         },
 
         /**
@@ -416,27 +488,34 @@ export function meshAdminComponent() {
             // Nodos del catálogo del portal
             for (const n of this.portalKnownNodes) {
                 if (n.node_id) {
-                    map.set(n.node_id, {
+                    map.set(n.node_id.toLowerCase(), {
                         hex: n.node_id,
                         num: Number(n.dec_id) || parseNodeNum(n.node_id),
-                        shortName: n.short_name || '',
-                        longName: n.long_name || '',
+                        shortName: n.short_name || n.shortName || '',
+                        longName: n.long_name || n.longName || '',
                         role: n.role || 'ROUTER',
                         province: n.province || '',
                     });
                 }
             }
-            // Nodos descubiertos en la sesión de radio local
+            // Nodos descubiertos en la sesión de radio local (enriquecen si tienen datos más recientes)
             for (const [num, n] of Object.entries(this.knownNodes)) {
-                if (n.hex && !map.has(n.hex)) {
-                    map.set(n.hex, {
-                        hex: n.hex,
-                        num: Number(num),
-                        shortName: n.shortName || '',
-                        longName: n.longName || '',
-                        role: n.role !== null ? this.getRoleName(n.role) : 'CLIENT',
-                        province: '',
-                    });
+                if (n.hex) {
+                    const key = n.hex.toLowerCase();
+                    const existing = map.get(key);
+                    if (!existing) {
+                        map.set(key, {
+                            hex: n.hex,
+                            num: Number(num) || parseNodeNum(n.hex),
+                            shortName: n.shortName || '',
+                            longName: n.longName || '',
+                            role: n.role !== null ? this.getRoleName(n.role) : 'CLIENT',
+                            province: '',
+                        });
+                    } else {
+                        if (!existing.shortName && n.shortName) existing.shortName = n.shortName;
+                        if (!existing.longName && n.longName) existing.longName = n.longName;
+                    }
                 }
             }
             return Array.from(map.values());
@@ -1592,13 +1671,14 @@ export function meshAdminComponent() {
                 await this.sendAdminMessageToTarget(targetNum, adminMsg, opLabel);
 
                 // Actualizar lista local de favoritos del router
-                if (!this.routerFavorites[activeRouterHex]) {
-                    this.routerFavorites[activeRouterHex] = [];
+                const activeHexLower = activeRouterHex.toLowerCase();
+                if (!this.routerFavorites[activeHexLower]) {
+                    this.routerFavorites[activeHexLower] = [];
                 }
 
                 if (isAdd) {
-                    if (!this.routerFavorites[activeRouterHex].some((f) => (f.hex || f) === favHex)) {
-                        this.routerFavorites[activeRouterHex].push({
+                    if (!this.routerFavorites[activeHexLower].some((f) => ((f.hex || f) || '').toLowerCase() === favHex.toLowerCase())) {
+                        this.routerFavorites[activeHexLower].push({
                             hex: favHex,
                             num: favNum,
                             shortName: nodeData.shortName || nodeData.short_name || favHex.substring(1, 5),
@@ -1609,12 +1689,15 @@ export function meshAdminComponent() {
                             added_at: new Date().toISOString(),
                         });
                     }
+                    this.routerFavorites[activeRouterHex] = this.routerFavorites[activeHexLower];
                     // Si estaba bloqueado, retirarlo automáticamente de bloqueados
-                    if (this.routerBlocked[activeRouterHex]) {
-                        this.routerBlocked[activeRouterHex] = this.routerBlocked[activeRouterHex].filter((b) => (b.hex || b) !== favHex);
+                    if (this.routerBlocked[activeHexLower]) {
+                        this.routerBlocked[activeHexLower] = this.routerBlocked[activeHexLower].filter((b) => ((b.hex || b) || '').toLowerCase() !== favHex.toLowerCase());
+                        this.routerBlocked[activeRouterHex] = this.routerBlocked[activeHexLower];
                     }
                 } else {
-                    this.routerFavorites[activeRouterHex] = this.routerFavorites[activeRouterHex].filter((f) => (f.hex || f) !== favHex);
+                    this.routerFavorites[activeHexLower] = this.routerFavorites[activeHexLower].filter((f) => ((f.hex || f) || '').toLowerCase() !== favHex.toLowerCase());
+                    this.routerFavorites[activeRouterHex] = this.routerFavorites[activeHexLower];
                 }
 
                 this.saveRouterListsToStorage(activeRouterHex);
@@ -1711,13 +1794,14 @@ export function meshAdminComponent() {
                 await this.sendAdminMessageToTarget(targetNum, adminMsg, opLabel);
 
                 // Actualizar lista local de bloqueados del router
-                if (!this.routerBlocked[activeRouterHex]) {
-                    this.routerBlocked[activeRouterHex] = [];
+                const activeHexLower = activeRouterHex.toLowerCase();
+                if (!this.routerBlocked[activeHexLower]) {
+                    this.routerBlocked[activeHexLower] = [];
                 }
 
                 if (isAdd) {
-                    if (!this.routerBlocked[activeRouterHex].some((b) => (b.hex || b) === ignHex)) {
-                        this.routerBlocked[activeRouterHex].push({
+                    if (!this.routerBlocked[activeHexLower].some((b) => ((b.hex || b) || '').toLowerCase() === ignHex.toLowerCase())) {
+                        this.routerBlocked[activeHexLower].push({
                             hex: ignHex,
                             num: ignNum,
                             shortName: nodeData.shortName || nodeData.short_name || ignHex.substring(1, 5),
@@ -1728,12 +1812,15 @@ export function meshAdminComponent() {
                             added_at: new Date().toISOString(),
                         });
                     }
+                    this.routerBlocked[activeRouterHex] = this.routerBlocked[activeHexLower];
                     // Si estaba en favoritos, retirarlo automáticamente de favoritos
-                    if (this.routerFavorites[activeRouterHex]) {
-                        this.routerFavorites[activeRouterHex] = this.routerFavorites[activeRouterHex].filter((f) => (f.hex || f) !== ignHex);
+                    if (this.routerFavorites[activeHexLower]) {
+                        this.routerFavorites[activeHexLower] = this.routerFavorites[activeHexLower].filter((f) => ((f.hex || f) || '').toLowerCase() !== ignHex.toLowerCase());
+                        this.routerFavorites[activeRouterHex] = this.routerFavorites[activeHexLower];
                     }
                 } else {
-                    this.routerBlocked[activeRouterHex] = this.routerBlocked[activeRouterHex].filter((b) => (b.hex || b) !== ignHex);
+                    this.routerBlocked[activeHexLower] = this.routerBlocked[activeHexLower].filter((b) => ((b.hex || b) || '').toLowerCase() !== ignHex.toLowerCase());
+                    this.routerBlocked[activeRouterHex] = this.routerBlocked[activeHexLower];
                 }
 
                 this.saveRouterListsToStorage(activeRouterHex);
@@ -2044,6 +2131,7 @@ if (typeof window !== 'undefined') {
     window.meshAdmin = meshAdminComponent;
     window.numToHex = numToHex;
     window.parseNodeNum = parseNodeNum;
+    window.hexToNum = parseNodeNum;
 
     if (window.Alpine) {
         window.Alpine.data('meshAdmin', meshAdminComponent);

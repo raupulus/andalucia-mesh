@@ -77,8 +77,12 @@ class GestionRouters extends Page
                 $lName = is_array($item) ? ($item['long_name'] ?? $item['longName'] ?? '') : '';
                 $role = is_array($item) ? ($item['role'] ?? 'ROUTER') : 'ROUTER';
 
+                $clean = ltrim($hex, '!');
+                $num = ctype_xdigit($clean) ? (int) hexdec($clean) : 0;
+
                 return [
                     'hex' => $hex,
+                    'num' => $num,
                     'short_name' => $sName,
                     'shortName' => $sName,
                     'long_name' => $lName,
@@ -91,7 +95,7 @@ class GestionRouters extends Page
 
         $formattedRouters = $routers->map(function (CoordinatedRouter $r) use ($normalizeList): array {
             $cleanHex = ltrim($r->node_id, '!');
-            $decId = (int) hexdec($cleanHex);
+            $decId = ctype_xdigit($cleanHex) ? (int) hexdec($cleanHex) : 0;
 
             return [
                 'node_id' => $r->node_id,
@@ -119,13 +123,14 @@ class GestionRouters extends Page
 
             if ($tableName) {
                 $ingestaNodes = DB::connection('ingesta')->table($tableName)->select(['id', 'short_name', 'long_name', 'role', 'province'])->get();
-                $existingIds = array_column($allKnownNodes, 'node_id');
+                $existingIds = array_map('strtolower', array_column($allKnownNodes, 'node_id'));
                 foreach ($ingestaNodes as $in) {
-                    if (! in_array($in->id, $existingIds, true)) {
+                    if (! in_array(strtolower($in->id), $existingIds, true)) {
                         $cleanHex = ltrim($in->id, '!');
+                        $decId = ctype_xdigit($cleanHex) ? (string) hexdec($cleanHex) : '0';
                         $allKnownNodes[] = [
                             'node_id' => $in->id,
-                            'dec_id' => (string) hexdec($cleanHex),
+                            'dec_id' => $decId,
                             'short_name' => $in->short_name ?? '',
                             'long_name' => $in->long_name ?? '',
                             'province' => $in->province ?? '',
@@ -192,7 +197,9 @@ class GestionRouters extends Page
      */
     public function updateRouterFavoriteNode(string $routerId, string $targetHex, bool $isAdd, ?array $nodeData = null): void
     {
-        $router = CoordinatedRouter::where('node_id', $routerId)->first();
+        $router = CoordinatedRouter::where('node_id', $routerId)
+            ->orWhereRaw('LOWER(node_id) = ?', [strtolower($routerId)])
+            ->first();
         if (! $router) {
             $cleanHex = ltrim($routerId, '!');
             $router = CoordinatedRouter::create([
@@ -209,16 +216,19 @@ class GestionRouters extends Page
         if ($isAdd) {
             $exists = false;
             foreach ($favs as $f) {
-                if (($f['hex'] ?? $f) === $targetHex) {
+                if (strtolower($f['hex'] ?? (string) $f) === strtolower($targetHex)) {
                     $exists = true;
                     break;
                 }
             }
             if (! $exists) {
                 $identity = $this->resolveNodeIdentity($targetHex, $nodeData);
+                $clean = ltrim($targetHex, '!');
+                $num = ctype_xdigit($clean) ? (int) hexdec($clean) : 0;
 
                 $favs[] = [
                     'hex' => $targetHex,
+                    'num' => $num,
                     'short_name' => $identity['short_name'],
                     'shortName' => $identity['short_name'],
                     'long_name' => $identity['long_name'],
@@ -228,7 +238,7 @@ class GestionRouters extends Page
                 ];
             }
         } else {
-            $favs = array_values(array_filter($favs, fn ($f): bool => ($f['hex'] ?? $f) !== $targetHex));
+            $favs = array_values(array_filter($favs, fn ($f): bool => strtolower($f['hex'] ?? (string) $f) !== strtolower($targetHex)));
         }
 
         $router->favorite_nodes = $favs;
@@ -242,7 +252,9 @@ class GestionRouters extends Page
      */
     public function updateRouterBlockedNode(string $routerId, string $targetHex, bool $isAdd, ?array $nodeData = null): void
     {
-        $router = CoordinatedRouter::where('node_id', $routerId)->first();
+        $router = CoordinatedRouter::where('node_id', $routerId)
+            ->orWhereRaw('LOWER(node_id) = ?', [strtolower($routerId)])
+            ->first();
         if (! $router) {
             $cleanHex = ltrim($routerId, '!');
             $router = CoordinatedRouter::create([
@@ -259,16 +271,19 @@ class GestionRouters extends Page
         if ($isAdd) {
             $exists = false;
             foreach ($blocked as $b) {
-                if (($b['hex'] ?? $b) === $targetHex) {
+                if (strtolower($b['hex'] ?? (string) $b) === strtolower($targetHex)) {
                     $exists = true;
                     break;
                 }
             }
             if (! $exists) {
                 $identity = $this->resolveNodeIdentity($targetHex, $nodeData);
+                $clean = ltrim($targetHex, '!');
+                $num = ctype_xdigit($clean) ? (int) hexdec($clean) : 0;
 
                 $blocked[] = [
                     'hex' => $targetHex,
+                    'num' => $num,
                     'short_name' => $identity['short_name'],
                     'shortName' => $identity['short_name'],
                     'long_name' => $identity['long_name'],
@@ -278,7 +293,7 @@ class GestionRouters extends Page
                 ];
             }
         } else {
-            $blocked = array_values(array_filter($blocked, fn ($b): bool => ($b['hex'] ?? $b) !== $targetHex));
+            $blocked = array_values(array_filter($blocked, fn ($b): bool => strtolower($b['hex'] ?? (string) $b) !== strtolower($targetHex)));
         }
 
         $router->blocked_nodes = $blocked;
@@ -290,7 +305,9 @@ class GestionRouters extends Page
      */
     public function clearRouterFavorites(string $routerId): void
     {
-        $router = CoordinatedRouter::where('node_id', $routerId)->first();
+        $router = CoordinatedRouter::where('node_id', $routerId)
+            ->orWhereRaw('LOWER(node_id) = ?', [strtolower($routerId)])
+            ->first();
         if ($router) {
             $router->favorite_nodes = null;
             $router->save();
@@ -298,14 +315,32 @@ class GestionRouters extends Page
     }
 
     /**
+     * Alias de compatibilidad para limpiar favoritos.
+     */
+    public function clearRouterFavoriteNodes(string $routerId): void
+    {
+        $this->clearRouterFavorites($routerId);
+    }
+
+    /**
      * Limpia la lista completa de bloqueados para el router indicado.
      */
     public function clearRouterBlocked(string $routerId): void
     {
-        $router = CoordinatedRouter::where('node_id', $routerId)->first();
+        $router = CoordinatedRouter::where('node_id', $routerId)
+            ->orWhereRaw('LOWER(node_id) = ?', [strtolower($routerId)])
+            ->first();
         if ($router) {
             $router->blocked_nodes = null;
             $router->save();
         }
+    }
+
+    /**
+     * Alias de compatibilidad para limpiar bloqueados.
+     */
+    public function clearRouterBlockedNodes(string $routerId): void
+    {
+        $this->clearRouterBlocked($routerId);
     }
 }

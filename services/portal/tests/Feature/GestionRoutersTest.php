@@ -249,4 +249,40 @@ class GestionRoutersTest extends TestCase
         $this->assertSame('BA01', $router->favorite_nodes[1]['shortName']);
         $this->assertSame('BA01ZSuarezTentudia', $router->favorite_nodes[1]['long_name']);
     }
+
+    /**
+     * Comprueba que los métodos de limpieza y sus alias funcionan con mayúsculas/minúsculas.
+     */
+    public function test_limpiar_listas_con_alias_y_case_insensitive(): void
+    {
+        $user = User::factory()->create();
+
+        $router = CoordinatedRouter::create([
+            'node_id' => '!63760c00',
+            'short_name' => 'CA05',
+            'long_name' => 'EA7-CA-05',
+            'role' => 'ROUTER',
+            'province' => 'ES-CA',
+            'status' => CoordinatedRouter::STATUS_MANAGED,
+            'favorite_nodes' => [['hex' => '!30618df9', 'num' => 811699705, 'short_name' => 'CA01']],
+            'blocked_nodes' => [['hex' => '!deadbeef', 'num' => 3735928559, 'short_name' => 'DEAD']],
+        ]);
+
+        // Probar clearRouterFavoriteNodes con mayúsculas
+        Livewire::actingAs($user)
+            ->test(GestionRouters::class)
+            ->call('clearRouterFavoriteNodes', '!63760C00');
+
+        $router->refresh();
+        $this->assertNull($router->favorite_nodes);
+
+        // Probar clearRouterBlockedNodes con minúsculas
+        Livewire::actingAs($user)
+            ->test(GestionRouters::class)
+            ->call('clearRouterBlockedNodes', '!63760c00');
+
+        $router->refresh();
+        $this->assertNull($router->blocked_nodes);
+    }
 }
+

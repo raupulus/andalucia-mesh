@@ -1,5 +1,6 @@
 <x-filament-panels::page>
     <script>
+        window.portalRouters = @js($routers);
         window.portalKnownNodes = @js($allKnownNodes);
     </script>
     <script src="{{ asset('js/mesh-admin.bundle.js') }}?v={{ @filemtime(public_path('js/mesh-admin.bundle.js')) ?: time() }}"></script>
