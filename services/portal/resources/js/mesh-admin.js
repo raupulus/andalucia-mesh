@@ -1295,32 +1295,32 @@ export function meshAdminComponent() {
                         }
                     };
 
-                    // Temporizador de seguridad inicial (75s para dar margen a la cola interna de la radio)
+                    // Temporizador de seguridad inicial por si el paquete queda atascado en cola local
                     ackTimer = setTimeout(() => {
                         cleanup();
-                        const errMsg = `Tiempo de espera agotado (60s) sin confirmación del router ${targetHex}. El router no respondió por radio.`;
+                        const errMsg = `Tiempo de espera agotado sin transmisión al aire hacia ${targetHex}. Verifica la conexión con la radio local.`;
                         this.setNotification('error', `Error en '${operationLabel}': ${errMsg}`);
                         this.log('error', `❌ Error al enviar '${operationLabel}' hacia ${targetHex}: ${errMsg}`);
                         reject(new Error(errMsg));
-                    }, 75000);
+                    }, 25000);
 
                     // Registrar el waiter ANTES de enviar para evitar cualquier condición de carrera
                     this._adminAckWaiters[randId] = {
                         targetNum,
                         pktId: randId,
                         onAir: () => {
-                            // En cuanto la radio física confirma que el paquete ha salido de la antena al aire,
-                            // iniciamos los 60 segundos completos de espera por la respuesta remota
+                            // En cuanto la radio física confirma que el paquete ha salido de la antena al aire (Implicit ACK),
+                            // concedemos una ventana de 6s para capturar cualquier NAK o rechazo remoto inmediato (ej. ADMIN_BAD_SESSION_KEY).
                             if (ackTimer) clearTimeout(ackTimer);
-                            this.orderCountdown = 60;
-                            this.log('info', `⏳ Paquete en el aire hacia ${targetHex}. Esperando confirmación remota (60s)...`);
+                            this.orderCountdown = 6;
+                            this.log('info', `⏳ Paquete transmitido al aire hacia ${targetHex}. Esperando confirmación o posible rechazo (6s)...`);
                             ackTimer = setTimeout(() => {
                                 cleanup();
-                                const errMsg = `Tiempo de espera agotado (60s) sin confirmación del router ${targetHex}. El router no respondió por radio.`;
-                                this.setNotification('error', `Error en '${operationLabel}': ${errMsg}`);
-                                this.log('error', `❌ Error al enviar '${operationLabel}' hacia ${targetHex}: ${errMsg}`);
-                                reject(new Error(errMsg));
-                            }, 60000);
+                                const okMsg = `Orden '${operationLabel}' transmitida con éxito hacia ${targetHex} (confirmada por radio local / ACK implícito de malla).`;
+                                this.setNotification('success', okMsg);
+                                this.log('ack', `✅ ${okMsg}`);
+                                resolve(randId);
+                            }, 6000);
                         },
                         resolve: (resId) => {
                             cleanup();
