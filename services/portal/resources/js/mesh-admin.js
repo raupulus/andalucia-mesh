@@ -1531,9 +1531,10 @@ export function meshAdminComponent() {
                 return;
             }
 
+            let targetHex = '';
             try {
                 const targetNum = this.resolveTargetNodeNum();
-                const targetHex = numToHex(targetNum);
+                targetHex = numToHex(targetNum);
 
                 this.log('tx', `📡 Iniciando intercambio de identidad (NodeInfo / Claves) con ${targetHex}...`);
 
@@ -1560,9 +1561,9 @@ export function meshAdminComponent() {
                 this.setNotification('success', okMsg);
                 this.log('tx', `📡 ${okMsg}`);
             } catch (err) {
-                const errMsg = formatMeshtasticError(err);
+                const errMsg = formatMeshtasticError(err, targetHex);
                 this.setNotification('error', `Error en intercambio con router: ${errMsg}`);
-                this.log('error', `❌ Error en intercambio con ${numToHex(this.resolveTargetNodeNum())}: ${errMsg}`);
+                this.log('error', `❌ Error en intercambio con ${targetHex || 'router'}: ${errMsg}`);
             }
         },
 
@@ -1933,6 +1934,7 @@ export function meshAdminComponent() {
             }
 
             this.unicastSending = true;
+            let targetHex = '';
             try {
                 let targetNum;
                 if (this.unicastTargetInput.trim()) {
@@ -1941,7 +1943,7 @@ export function meshAdminComponent() {
                     targetNum = this.resolveTargetNodeNum();
                 }
 
-                const targetHex = numToHex(targetNum);
+                targetHex = numToHex(targetNum);
 
                 if (reqType === 'traceroute') {
                     if (this.tracerouteActive) {
