@@ -218,6 +218,7 @@ export function meshAdminComponent() {
         // Seguridad y sesiones administrativas remotas (v2.5+)
         adminChannelIndex: 0,             // Canal administrativo (0 por defecto)
         adminSessions: {},                // Mapa de claves de sesión: { [nodeNum]: Uint8Array }
+        adminSessionTimes: {},           // Marcas de tiempo de emisión de SessionKey: { [nodeNum]: timestampMs }
         _sessionKeyWaiters: {},           // Resolvers para ensureSessionKey
         _adminAckWaiters: {},             // Resolvers para confirmaciones remotas de órdenes (hasta 60s)
         _nodeInfoCount: 0,                // Contador de nodos recibidos de la radio local
@@ -720,6 +721,9 @@ export function meshAdminComponent() {
                             if (errCode === Routing_Error.NONE) {
                                 if (isLoopbackLocal) {
                                     this.log('ack', `📡 Paquete transmitido al aire por radio local (ReqID: ${reqId})`);
+                                    if (this._adminAckWaiters[reqId]?.onAir) {
+                                        this._adminAckWaiters[reqId].onAir();
+                                    }
                                 } else {
                                     this.log('ack', `✅ Confirmación ACK de ${fromHex} hacia ${toHex} (ReqID: ${reqId}) ${meta ? `[${meta}]` : ''}`);
                                 }
@@ -727,6 +731,7 @@ export function meshAdminComponent() {
                                 this.log('error', `❌ El nodo ${toHex} no responde por radio LoRa o no está en cobertura de tu antena (ReqID: ${reqId})`);
                             } else if (errCode === 36 || errCode === 53 || errCode === Routing_Error.ADMIN_BAD_SESSION_KEY) {
                                 delete this.adminSessions[fromNum];
+                                delete this.adminSessionTimes[fromNum];
                                 this.log('error', `❌ Rechazo [ADMIN_BAD_SESSION_KEY] de ${fromHex}: Pase de sesión administrativo caducado o no válido. Clave invalidada para renovación.`);
                             } else {
                                 const desc = ROUTING_ERROR_DESCRIPTIONS[errCode] || `Código ${errCode}`;
@@ -754,6 +759,7 @@ export function meshAdminComponent() {
                         // Si el mensaje incluye una session_passkey, guardarla en sesión para este router
                         if (adminMsg.sessionPasskey && adminMsg.sessionPasskey.length > 0) {
                             this.adminSessions[fromNum] = adminMsg.sessionPasskey;
+                            this.adminSessionTimes[fromNum] = Date.now();
                             this.log('info', `🔑 Clave de sesión administrativa (SessionKey) guardada para ${fromHex}`);
                             this.setNotification('success', `Clave de sesión administrativa establecida con éxito para ${fromHex}.`);
                             if (this._sessionKeyWaiters[fromNum]) {
@@ -1032,7 +1038,9 @@ export function meshAdminComponent() {
         hasTargetSessionKey() {
             try {
                 const targetNum = this.resolveTargetNodeNum();
-                return Boolean(this.adminSessions[targetNum]);
+                const sessionKey = this.adminSessions[targetNum];
+                const sessionTime = this.adminSessionTimes[targetNum] || 0;
+                return Boolean(sessionKey && sessionKey.length > 0 && (Date.now() - sessionTime) < 120000);
             } catch {
                 return false;
             }
@@ -1064,8 +1072,12 @@ export function meshAdminComponent() {
                 return null;
             }
 
-            if (this.adminSessions[targetNum] && this.adminSessions[targetNum].length > 0) {
-                return this.adminSessions[targetNum];
+            const existingKey = this.adminSessions[targetNum];
+            const sessionTime = this.adminSessionTimes[targetNum] || 0;
+            const isFresh = Boolean(existingKey && existingKey.length > 0 && (Date.now() - sessionTime) < 120000);
+
+            if (isFresh) {
+                return existingKey;
             }
 
             // Si la radio física local aún no tiene la clave pública de este router, no intentar handshake PKI
@@ -1149,13 +1161,14 @@ export function meshAdminComponent() {
             wantResponse = true,
             pkiEncrypted = false,
             timeoutMs = 15000,
+            packetId = null,
         }) {
             if (!this._device || this.connectionStatus !== 'connected') {
                 throw new Error('Debes conectar primero tu nodo Meshtastic local.');
             }
 
             const isBroadcast = destinationNum === Constants.broadcastNum;
-            const randId = this._device.generateRandId();
+            const randId = packetId || this._device.generateRandId();
             const fromNum = this.localNode.nodeNum || this._device.myNodeInfo?.myNodeNum || 0;
 
             const meshPacket = create(MeshPacketSchema, {
@@ -1165,6 +1178,9 @@ export function meshAdminComponent() {
                 channel: channel,
                 wantAck: isBroadcast ? false : Boolean(wantAck),
                 pkiEncrypted: Boolean(pkiEncrypted),
+                hopLimit: isBroadcast ? 3 : 5,
+                hopStart: isBroadcast ? 3 : 5,
+                priority: isBroadcast ? 64 : 70,
                 payloadVariant: {
                     case: 'decoded',
                     value: {
@@ -1229,14 +1245,14 @@ export function meshAdminComponent() {
             }, 1000);
 
             try {
-                // Si es un router remoto, asegurar SessionKey si dispone de clave pública
+                // Si es un router remoto, asegurar SessionKey fresca si dispone de clave pública
                 if (!isLocal) {
-                    if (this.targetHasPublicKeyInLocalRadio() && !this.adminSessions[targetNum]) {
-                        await this.ensureSessionKey(targetNum);
+                    if (this.targetHasPublicKeyInLocalRadio()) {
+                        const key = await this.ensureSessionKey(targetNum);
+                        if (key) {
+                            adminMsg.sessionPasskey = key;
+                        }
                         this.orderCountdown = 60;
-                    }
-                    if (this.adminSessions[targetNum]) {
-                        adminMsg.sessionPasskey = this.adminSessions[targetNum];
                     }
                 }
 
@@ -1267,11 +1283,11 @@ export function meshAdminComponent() {
                 // Para routers remotos: transmitimos al aire y esperamos confirmación remota real de la malla (hasta 60s)
                 return await new Promise(async (resolve, reject) => {
                     let ackTimer = null;
-                    let transmittedPktId = 0;
+                    const randId = this._device.generateRandId();
 
                     const cleanup = () => {
                         if (ackTimer) clearTimeout(ackTimer);
-                        if (transmittedPktId) delete this._adminAckWaiters[transmittedPktId];
+                        delete this._adminAckWaiters[randId];
                         for (const [k, v] of Object.entries(this._adminAckWaiters)) {
                             if (v.targetNum === targetNum) {
                                 delete this._adminAckWaiters[k];
@@ -1279,16 +1295,53 @@ export function meshAdminComponent() {
                         }
                     };
 
+                    // Temporizador de seguridad inicial (75s para dar margen a la cola interna de la radio)
                     ackTimer = setTimeout(() => {
                         cleanup();
                         const errMsg = `Tiempo de espera agotado (60s) sin confirmación del router ${targetHex}. El router no respondió por radio.`;
                         this.setNotification('error', `Error en '${operationLabel}': ${errMsg}`);
                         this.log('error', `❌ Error al enviar '${operationLabel}' hacia ${targetHex}: ${errMsg}`);
                         reject(new Error(errMsg));
-                    }, 60000);
+                    }, 75000);
+
+                    // Registrar el waiter ANTES de enviar para evitar cualquier condición de carrera
+                    this._adminAckWaiters[randId] = {
+                        targetNum,
+                        pktId: randId,
+                        onAir: () => {
+                            // En cuanto la radio física confirma que el paquete ha salido de la antena al aire,
+                            // iniciamos los 60 segundos completos de espera por la respuesta remota
+                            if (ackTimer) clearTimeout(ackTimer);
+                            this.orderCountdown = 60;
+                            this.log('info', `⏳ Paquete en el aire hacia ${targetHex}. Esperando confirmación remota (60s)...`);
+                            ackTimer = setTimeout(() => {
+                                cleanup();
+                                const errMsg = `Tiempo de espera agotado (60s) sin confirmación del router ${targetHex}. El router no respondió por radio.`;
+                                this.setNotification('error', `Error en '${operationLabel}': ${errMsg}`);
+                                this.log('error', `❌ Error al enviar '${operationLabel}' hacia ${targetHex}: ${errMsg}`);
+                                reject(new Error(errMsg));
+                            }, 60000);
+                        },
+                        resolve: (resId) => {
+                            cleanup();
+                            const okMsg = `Orden '${operationLabel}' confirmada por el router remoto ${targetHex}.`;
+                            this.setNotification('success', okMsg);
+                            this.log('ack', `✅ ${okMsg}`);
+                            resolve(randId);
+                        },
+                        reject: (errData) => {
+                            cleanup();
+                            const errCode = typeof errData === 'object' ? errData.error : errData;
+                            const desc = ROUTING_ERROR_DESCRIPTIONS[errCode] || `Código ${errCode}`;
+                            const errMsg = `Rechazo del router ${targetHex}: ${desc}`;
+                            this.setNotification('error', `Error en '${operationLabel}': ${errMsg}`);
+                            this.log('error', `❌ ${errMsg}`);
+                            reject(new Error(errMsg));
+                        },
+                    };
 
                     try {
-                        transmittedPktId = await this.sendMeshPacketCustom({
+                        await this.sendMeshPacketCustom({
                             payloadBytes: payload,
                             portNum: PortNum.ADMIN_APP,
                             destinationNum: targetNum,
@@ -1297,30 +1350,10 @@ export function meshAdminComponent() {
                             wantResponse: true,
                             pkiEncrypted: effectivePki,
                             timeoutMs: 12000,
+                            packetId: randId,
                         });
 
-                        this.log('tx', `🚀 Orden '${operationLabel}' transmitida al aire hacia ${targetHex} (ID: ${transmittedPktId}). Esperando confirmación remota (hasta 60s)...`);
-
-                        this._adminAckWaiters[transmittedPktId] = {
-                            targetNum,
-                            pktId: transmittedPktId,
-                            resolve: (resId) => {
-                                cleanup();
-                                const okMsg = `Orden '${operationLabel}' confirmada por el router remoto ${targetHex}.`;
-                                this.setNotification('success', okMsg);
-                                this.log('ack', `✅ ${okMsg}`);
-                                resolve(transmittedPktId);
-                            },
-                            reject: (errData) => {
-                                cleanup();
-                                const errCode = typeof errData === 'object' ? errData.error : errData;
-                                const desc = ROUTING_ERROR_DESCRIPTIONS[errCode] || `Código ${errCode}`;
-                                const errMsg = `Rechazo del router ${targetHex}: ${desc}`;
-                                this.setNotification('error', `Error en '${operationLabel}': ${errMsg}`);
-                                this.log('error', `❌ ${errMsg}`);
-                                reject(new Error(errMsg));
-                            },
-                        };
+                        this.log('tx', `🚀 Orden '${operationLabel}' enviada a radio hacia ${targetHex} (ID: ${randId})...`);
                     } catch (txErr) {
                         cleanup();
                         const errMsg = formatMeshtasticError(txErr, targetHex);
