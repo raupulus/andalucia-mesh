@@ -1050,4 +1050,15 @@
         border: 1px solid #f87171 !important;
         box-shadow: 0 2px 8px rgba(220, 38, 38, 0.5) !important;
     }
+
+    /* Salvaguarda global de iconos SVG en páginas administrativas personalizadas */
+    .fi-umbrales-admin-page svg {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+        max-width: 1.25rem !important;
+        max-height: 1.25rem !important;
+        display: inline-block !important;
+        vertical-align: middle !important;
+        flex-shrink: 0 !important;
+    }
 </style>
