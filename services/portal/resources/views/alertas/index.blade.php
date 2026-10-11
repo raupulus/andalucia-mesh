@@ -4,13 +4,16 @@
     $langQuery = $currentLang !== 'es' ? '?lang=' . $currentLang : '';
 
     $problemasSeleccionados = (array) ($problemasFiltro ?? []);
+    $provinciaActual = (string) ($provinciaFiltro ?? 'espana');
 
     $filtroUrl = function(
         ?string $nuevoEstado = null,
         ?string $nuevoRiesgo = null,
         ?string $toggleProblema = null,
-        bool $limpiarProblemas = false
-    ) use ($estadoFiltro, $riesgoFiltro, $problemasSeleccionados, $langParam) {
+        bool $limpiarProblemas = false,
+        ?string $nuevaProvincia = null,
+        bool $limpiarProvincia = false
+    ) use ($estadoFiltro, $riesgoFiltro, $problemasSeleccionados, $provinciaActual, $langParam) {
         $params = [];
 
         // Estado
@@ -40,6 +43,12 @@
             $params['problemas'] = implode(',', $pList);
         }
 
+        // Provincia / Ámbito territorial
+        $p = $limpiarProvincia ? 'espana' : ($nuevaProvincia !== null ? $nuevaProvincia : $provinciaActual);
+        if (!empty($p) && $p !== 'espana') {
+            $params['provincia'] = $p;
+        }
+
         $query = http_build_query($params);
         $base = '/alertas';
         if (!empty($query)) {
@@ -50,7 +59,7 @@
         return $base;
     };
 
-    $hayFiltrosActivos = !empty($estadoFiltro) || !empty($riesgoFiltro) || !empty($problemasSeleccionados);
+    $hayFiltrosActivos = !empty($estadoFiltro) || !empty($riesgoFiltro) || !empty($problemasSeleccionados) || (!empty($provinciaActual) && $provinciaActual !== 'espana');
 @endphp
 
 <x-layout :title="__('portal.alerts.meta_title')" :description="__('portal.alerts.meta_description')" :image="asset('img/og/og-alertas.webp')">
@@ -108,8 +117,8 @@
             <!-- Panel oxigenado de filtros -->
             <div class="tarjeta" style="padding: 1.5rem; margin-bottom: 2rem; background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio-md);">
                 
-                <!-- Nivel 1: Filtros de Control (Estado y Severidad) -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; align-items: flex-start; padding-bottom: 1.25rem; border-bottom: 1px solid var(--color-borde);">
+                <!-- Nivel 1: Filtros de Control (Estado, Severidad y Provincia/Ámbito) -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; align-items: flex-start; padding-bottom: 1.25rem; border-bottom: 1px solid var(--color-borde);">
                     
                     <!-- Estado de la incidencia -->
                     <div>
@@ -148,6 +157,42 @@
                                 🔵 {{ __('portal.alerts.filter_low') }}
                             </a>
                         </div>
+                    </div>
+
+                    <!-- Provincia / Ámbito territorial -->
+                    <div>
+                        <label for="filtro-provincia-select" style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-texto-3); margin-bottom: 0.5rem;">
+                            📍 {{ __('portal.alerts.province_label') }}
+                        </label>
+                        <select id="filtro-provincia-select" data-filtro-action="1" style="width: 100%; max-width: 100%; padding: 0.42rem 0.75rem; font-size: 0.85rem; font-weight: 600; background: var(--color-superficie); color: var(--color-texto-1); border: 1px solid var(--color-borde); border-radius: var(--radio-sm); cursor: pointer;">
+                            <option value="{{ $filtroUrl(null, null, null, false, 'espana') }}" {{ ($provinciaActual === 'espana' || empty($provinciaActual)) ? 'selected' : '' }}>
+                                🇪🇸 {{ __('portal.alerts.provinces.all_spain') }}
+                            </option>
+                            <option value="{{ $filtroUrl(null, null, null, false, 'todas') }}" {{ $provinciaActual === 'todas' ? 'selected' : '' }}>
+                                🌐 {{ __('portal.alerts.provinces.all_locations') }}
+                            </option>
+                            <option value="{{ $filtroUrl(null, null, null, false, 'fuera') }}" {{ $provinciaActual === 'fuera' ? 'selected' : '' }}>
+                                ✈️ {{ __('portal.alerts.provinces.outside_spain') }}
+                            </option>
+                            @if(!empty($provinciasCatalogo['andalucia']))
+                                <optgroup label="{{ __('portal.alerts.provinces.group_andalucia') }}">
+                                    @foreach($provinciasCatalogo['andalucia'] as $code => $name)
+                                        <option value="{{ $filtroUrl(null, null, null, false, $code) }}" {{ $provinciaActual === $code ? 'selected' : '' }}>
+                                            {{ $name }} ({{ $code }})
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                            @if(!empty($provinciasCatalogo['resto']))
+                                <optgroup label="{{ __('portal.alerts.provinces.group_spain') }}">
+                                    @foreach($provinciasCatalogo['resto'] as $code => $name)
+                                        <option value="{{ $filtroUrl(null, null, null, false, $code) }}" {{ $provinciaActual === $code ? 'selected' : '' }}>
+                                            {{ $name }} ({{ $code }})
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                        </select>
                     </div>
                 </div>
 
@@ -216,6 +261,19 @@
                                     </a>
                                 @endif
                             @endforeach
+                            @if(!empty($provinciaActual) && $provinciaActual !== 'espana')
+                                @php
+                                    $textoProvFiltro = match($provinciaActual) {
+                                        'todas' => __('portal.alerts.provinces.all_locations'),
+                                        'fuera' => __('portal.alerts.provinces.outside_spain'),
+                                        default => ($catalogoProvinciasPlano[$provinciaActual] ?? $provinciaActual) . ' (' . $provinciaActual . ')',
+                                    };
+                                @endphp
+                                <a href="{{ $filtroUrl(null, null, null, false, 'espana') }}" data-filtro-action="1" class="badge" style="background: var(--color-superficie-sutil); border: 1px solid var(--color-borde); padding: 0.2rem 0.5rem; border-radius: var(--radio-sm); color: var(--color-texto-1); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                                    <span>📍 {{ $textoProvFiltro }}</span>
+                                    <span style="color: var(--color-texto-3); font-weight: 700;">✕</span>
+                                </a>
+                            @endif
                         </div>
 
                         <div style="display: flex; align-items: center; gap: 1rem;">
@@ -225,7 +283,7 @@
                             <span style="color: var(--color-texto-2); font-weight: 600;">
                                 {{ trans_choice('portal.alerts.showing_alerts_count', $totalIncidencias, ['count' => $totalIncidencias]) }}
                             </span>
-                            <a href="{{ $filtroUrl('', '', null, true) }}" data-filtro-action="1" style="font-weight: 700; color: var(--color-critico-texto, #9B1E15); text-decoration: none; font-size: 0.82rem;">
+                            <a href="{{ $filtroUrl('', '', null, true, 'espana') }}" data-filtro-action="1" style="font-weight: 700; color: var(--color-critico-texto, #9B1E15); text-decoration: none; font-size: 0.82rem;">
                                 🗑️ {{ __('portal.alerts.clear_filters') }}
                             </a>
                         </div>
@@ -258,7 +316,7 @@
                         <p style="color: var(--color-texto-2); font-size: 0.92rem; margin-bottom: 1.25rem;">
                             No existen incidencias que coincidan con la combinación de filtros seleccionada.
                         </p>
-                        <a href="{{ $filtroUrl('', '', null, true) }}" data-filtro-action="1" class="btn btn-secundario" style="font-size: 0.85rem; padding: 0.4rem 1rem;">
+                        <a href="{{ $filtroUrl('', '', null, true, 'espana') }}" data-filtro-action="1" class="btn btn-secundario" style="font-size: 0.85rem; padding: 0.4rem 1rem;">
                             {{ __('portal.alerts.clear_filters') }}
                         </a>
                     @endif
@@ -342,7 +400,7 @@
                                                         {{ $a['nodo_codigo'] }}
                                                     </code>
                                                     @if($provincia)
-                                                        <span style="font-size: 0.75rem; color: var(--color-texto-3);">· {{ $provincia }}</span>
+                                                        <span style="font-size: 0.75rem; color: var(--color-texto-3);">· {{ $a['nodo_provincia_nombre'] ?? $provincia }}</span>
                                                     @endif
                                                 </div>
                                             @endif
@@ -520,6 +578,16 @@
                 if (!url) return;
 
                 e.preventDefault();
+                cargarVistaAsincrona(url, true);
+            });
+
+            document.addEventListener('change', function(e) {
+                const select = e.target.closest('#alertas-app select[data-filtro-action]');
+                if (!select) return;
+
+                const url = select.value;
+                if (!url) return;
+
                 cargarVistaAsincrona(url, true);
             });
 
