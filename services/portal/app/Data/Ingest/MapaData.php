@@ -6,6 +6,7 @@ namespace App\Data\Ingest;
 
 use App\Data\Fuente;
 use App\Http\Controllers\AlertasController;
+use App\Services\AlertThresholdService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -154,25 +155,29 @@ class MapaData
 
             // Auditoría y detección de problemas de configuración
             $problemas = [];
+            $thresholdService = app(AlertThresholdService::class);
+            $hopCrit = (int) $thresholdService->getForRole($role, 'hop_limit_critical', 7.0);
+            $hopWarn = (int) $thresholdService->getForRole($role, 'hop_limit_warning', 6.0);
+            $hopRec = (int) $thresholdService->getForRole($role, 'hop_limit_recommended', 3.0);
 
             // A) Hop limit alto o excesivo
             if ($hopLimit !== null) {
-                if ($hopLimit > 5) {
+                if ($hopLimit >= $hopCrit) {
                     $problemas[] = [
                         'clave' => 'hop_limit_alto',
                         'severidad' => 'critico',
                         'titulo' => "Hop Limit excesivo ({$hopLimit} saltos)",
                         'descripcion' => "El nodo emite con {$hopLimit} saltos, lo que causa tormentas de retransmisión innecesarias por toda la región.",
-                        'solucion' => 'Configuración LoRa → Hop Limit → cambiar a 3 (máximo 5 en zonas aisladas)',
+                        'solucion' => "Configuración LoRa → Hop Limit → cambiar a {$hopRec} (máximo {$hopWarn} en zonas aisladas)",
                     ];
                     $breakdownMotivos['hop_limit_alto']++;
-                } elseif ($hopLimit > 3) {
+                } elseif ($hopLimit >= $hopWarn) {
                     $problemas[] = [
                         'clave' => 'hop_limit_alto',
                         'severidad' => 'aviso',
                         'titulo' => "Hop Limit superior al recomendado ({$hopLimit} saltos)",
-                        'descripcion' => "Tu nodo emite con {$hopLimit} saltos. El estándar de la red es 3 saltos para proteger el aire.",
-                        'solucion' => 'Configuración LoRa → Hop Limit → cambiar a 3',
+                        'descripcion' => "Tu nodo emite con {$hopLimit} saltos. El estándar de la red es {$hopRec} saltos para proteger el aire.",
+                        'solucion' => "Configuración LoRa → Hop Limit → cambiar a {$hopRec}",
                     ];
                     $breakdownMotivos['hop_limit_alto']++;
                 }
@@ -197,30 +202,37 @@ class MapaData
 
             // C) Intervalos de emisión rápidos
             if (isset($intervalosPorNodo[$id])) {
+                $nodeinfoMin = $thresholdService->getForRole($role, 'nodeinfo_interval_min_s', 43200.0);
+                $nodeinfoRec = $thresholdService->getForRole($role, 'nodeinfo_interval_recommended_s', 259200.0);
+                $nodeinfoRecH = (int) round($nodeinfoRec / 3600);
+                $telemetryMin = $thresholdService->getForRole($role, 'telemetry_interval_min_s', 3600.0);
+                $telemetryMinH = round($telemetryMin / 3600, 1);
+                $telemetryRec = $thresholdService->getForRole($role, 'telemetry_interval_recommended_s', 7200.0);
+
                 foreach ($intervalosPorNodo[$id] as $inv) {
                     $pnum = $inv['portnum'] ?? '';
                     $mediana = $inv['median_interval_s'] !== null ? (float) $inv['median_interval_s'] : null;
 
-                    if ($pnum === 'nodeinfo' && $mediana !== null && $mediana < 43200) { // < 12h
+                    if ($pnum === 'nodeinfo' && $mediana !== null && $mediana < $nodeinfoMin) {
                         $horas = round($mediana / 3600, 1);
                         $problemas[] = [
                             'clave' => 'nodeinfo_frecuente',
                             'severidad' => 'aviso',
                             'titulo' => "NodeInfo frecuente (~cada {$horas}h)",
-                            'descripcion' => 'La información básica del nodo cambia rara vez. Emitir con cadencia menor a 12 horas satura el espectro.',
-                            'solucion' => 'Config → Dispositivo → NodeInfo Broadcast Interval → 86400 (24h) o 259200 (72h)',
+                            'descripcion' => 'La información básica del nodo cambia rara vez. Emitir con cadencia menor a '.round($nodeinfoMin / 3600, 1).' horas satura el espectro.',
+                            'solucion' => "Config → Dispositivo → NodeInfo Broadcast Interval → {$nodeinfoRec} ({$nodeinfoRecH}h)",
                         ];
                         $breakdownMotivos['nodeinfo_frecuente']++;
                     }
 
-                    if ($pnum === 'telemetry' && ($inv['variant'] ?? '') === 'device_metrics' && $mediana !== null && $mediana < 7200) { // < 2h
+                    if ($pnum === 'telemetry' && ($inv['variant'] ?? '') === 'device_metrics' && $mediana !== null && $mediana < $telemetryMin) {
                         $minutos = round($mediana / 60);
                         $problemas[] = [
                             'clave' => 'telemetria_frecuente',
                             'severidad' => 'aviso',
                             'titulo' => "Telemetría frecuente (~cada {$minutos}m)",
                             'descripcion' => 'La telemetría de dispositivo se transmite con periodicidad excesiva para nodos en batería o solares.',
-                            'solucion' => 'Config → Telemetría → Device Metrics Interval → al menos 7200s (2h) o desactivar si está enchufado',
+                            'solucion' => "Config → Telemetría → Device Metrics Interval → al menos {$telemetryMin}s ({$telemetryMinH}h) o desactivar si está enchufado",
                         ];
                         $breakdownMotivos['telemetria_frecuente']++;
                     }
@@ -495,16 +507,22 @@ class MapaData
             }
 
             $hopLimit = isset($node->hop_start_last) && $node->hop_start_last !== null ? (int) $node->hop_start_last : null;
+            $nodeRole = (string) ($node->role ?? 'CLIENT');
             $hopStatus = 'desconocido';
             $hopMensaje = 'Hop Limit no registrado';
 
+            $thresholdService = app(AlertThresholdService::class);
+            $hopCrit = (int) $thresholdService->getForRole($nodeRole, 'hop_limit_critical', 7.0);
+            $hopWarn = (int) $thresholdService->getForRole($nodeRole, 'hop_limit_warning', 6.0);
+            $hopRec = (int) $thresholdService->getForRole($nodeRole, 'hop_limit_recommended', 3.0);
+
             if ($hopLimit !== null) {
-                if ($hopLimit <= 3) {
+                if ($hopLimit < $hopWarn) {
                     $hopStatus = 'recomendado';
-                    $hopMensaje = "Hop Limit configurado: {$hopLimit} — dentro del rango recomendado (estándar de la red)";
-                } elseif ($hopLimit <= 5) {
+                    $hopMensaje = "Hop Limit configurado: {$hopLimit} — dentro del rango recomendado (estándar de la red: {$hopRec} saltos)";
+                } elseif ($hopLimit < $hopCrit) {
                     $hopStatus = 'aviso';
-                    $hopMensaje = "Hop Limit configurado: {$hopLimit} — mayor al estándar recomendado (3 saltos)";
+                    $hopMensaje = "Hop Limit configurado: {$hopLimit} — mayor al estándar recomendado ({$hopRec} saltos)";
                 } else {
                     $hopStatus = 'critico';
                     $hopMensaje = "Hop Limit configurado: {$hopLimit} — excesivo (genera saturación en la malla)";
@@ -530,24 +548,24 @@ class MapaData
                     }
                 }
 
-                if ($hopLimit !== null && $hopLimit > 3) {
+                if ($hopLimit !== null && $hopLimit >= $hopWarn) {
                     $problemas[] = [
                         'clave' => 'saltos_altos',
-                        'severidad' => $hopLimit > 5 ? 'critico' : 'aviso',
+                        'severidad' => $hopLimit >= $hopCrit ? 'critico' : 'aviso',
                         'titulo' => "Hop Limit excesivo ({$hopLimit} saltos)",
                         'descripcion' => "El nodo emite con {$hopLimit} saltos, lo que degrada la capacidad del canal regional.",
-                        'solucion' => 'Configuración LoRa → Hop Limit → cambiar a 3.',
+                        'solucion' => "Configuración LoRa → Hop Limit → cambiar a {$hopRec}.",
                     ];
                 }
             }
             foreach ($problemas as &$p) {
                 if (! isset($p['solucion'])) {
                     if ($p['clave'] === 'saltos_excesivos' || $p['clave'] === 'saltos_altos') {
-                        $p['solucion'] = 'Ajustes de Radio → Configuración LoRa → Hop Limit: cambiar a 3.';
+                        $p['solucion'] = "Ajustes de Radio → Configuración LoRa → Hop Limit: cambiar a {$hopRec}.";
                     } elseif ($p['clave'] === 'nodeinfo_frecuente') {
-                        $p['solucion'] = 'Ajustes de Dispositivo → NodeInfo Broadcast Interval: fijar en 86400 (24h) o 259200 (72h).';
+                        $p['solucion'] = 'Ajustes de Dispositivo → NodeInfo Broadcast Interval: fijar en el valor recomendado de tu rol.';
                     } elseif ($p['clave'] === 'telemetria_rapida') {
-                        $p['solucion'] = 'Ajustes de Telemetría → Device Metrics Interval: al menos 7200s (2h) o desactivar.';
+                        $p['solucion'] = 'Ajustes de Telemetría → Device Metrics Interval: espaciar transmisiones o desactivar si está enchufado.';
                     } elseif ($p['clave'] === 'reboot_loop') {
                         $p['solucion'] = 'Verificar alimentación, cables USB, tensión de celda y actualizar a la última versión beta estable de firmware.';
                     } elseif ($p['clave'] === 'bateria_critica') {

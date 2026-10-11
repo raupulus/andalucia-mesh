@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo
 from pydantic import BaseModel
 
 from detector.motor.protocolos import Alerta, AlertaAbierta, Contexto, registrar
+from detector.motor.umbrales import GestorUmbrales
 
 
 class ConfigSunsetBattery(BaseModel):
@@ -48,6 +49,19 @@ class ReglaSunsetBattery:
         if hora_local != self.config.hora_evaluacion:
             return []
 
+        gestor = ctx.umbrales or GestorUmbrales()
+        umbrales_rtr = gestor.obtener_grupo("ROUTER")
+
+        if ctx.umbrales is not None:
+            min_sunset = umbrales_rtr.sunset_battery_min_pct
+            if min_sunset <= 0:
+                return []
+            umbral_medio = min_sunset
+            umbral_alto = min(umbrales_rtr.battery_critical_pct, min_sunset)
+        else:
+            umbral_medio = float(self.config.umbral_medio)
+            umbral_alto = float(self.config.umbral_alto)
+
         alertas: list[Alerta] = []
         limite_reciente = ctx.ahora - timedelta(hours=3)
 
@@ -74,9 +88,9 @@ class ReglaSunsetBattery:
                 continue
 
             riesgo: str | None = None
-            if ult_bat < self.config.umbral_alto:
+            if ult_bat < umbral_alto:
                 riesgo = "alto"
-            elif ult_bat < self.config.umbral_medio:
+            elif ult_bat < umbral_medio:
                 riesgo = "medio"
 
             if riesgo is not None:
@@ -91,8 +105,8 @@ class ReglaSunsetBattery:
                         datos={
                             "bateria": ult_bat,
                             "voltaje": round(ult_volt, 2),
-                            "umbral_medio": self.config.umbral_medio,
-                            "umbral_alto": self.config.umbral_alto,
+                            "umbral_medio": round(umbral_medio, 1),
+                            "umbral_alto": round(umbral_alto, 1),
                             "rol": rol,
                             "provincia": nodo.province,
                             "dentro_andalucia": True,
@@ -112,5 +126,16 @@ class ReglaSunsetBattery:
         if ult_bat > 100:
             return False
 
+        if ctx.umbrales is not None:
+            gestor = ctx.umbrales
+            umbrales_rtr = gestor.obtener_grupo("ROUTER")
+            umbral_resolucion = (
+                umbrales_rtr.sunset_battery_min_pct
+                if umbrales_rtr.sunset_battery_min_pct > 0
+                else float(self.config.resolver)
+            )
+        else:
+            umbral_resolucion = float(self.config.resolver)
+
         # Se resuelve si el nivel supera el umbral de resolución o sale el sol y recarga (> 60%)
-        return ult_bat <= self.config.resolver
+        return ult_bat <= umbral_resolucion

@@ -11,6 +11,7 @@ from ulid import StrictMonotonicPolicy, ULIDGenerator
 from detector.modelos import AlertaObjeto, NodoInfoResumen, PaqueteDecodificado, TransicionMensaje
 from detector.motor.bases import LineasBase
 from detector.motor.estado import EstadoMotor, EstadoNodo
+from detector.motor.umbrales import GestorUmbrales
 
 
 @dataclass(frozen=True)
@@ -130,6 +131,7 @@ class Contexto:
     config: BaseModel
     general: ConfigGeneral
     es_infraestructura: Callable[[str], bool]
+    umbrales: GestorUmbrales | None = None
 
 
 class Regla(Protocol):

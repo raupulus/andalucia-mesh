@@ -305,6 +305,13 @@ Correspondencia de claves del objeto alerta (socket → API): `regla→rule`, `r
 
 Todos los servicios propios exponen además su `/health` en el puerto 8080 **solo en la red `mesh`**.
 
+### APIs internas inter-servicio (red Docker `mesh`)
+
+| Servicio | Puerto | Endpoint | Método | Autenticación | Función |
+|---|---|---|---|---|---|
+| `detector-alertas` | 8080 | `/internal/recargar-umbrales` | `POST` | `X-Internal-Secret: ${INTERNAL_API_SECRET}` | Recarga atómica en RAM de umbrales dinámicos modificados en `/admin`. |
+| `webhooks` | 8080 | `/internal/destinos` | `GET`, `POST`, `PUT`, `DELETE` | `X-Internal-Secret: ${INTERNAL_API_SECRET}` | Administración de destinos y pruebas de entrega (Ping). |
+
 ## 12. Configuración común (`.env.comun`)
 
 Un archivo en el servidor (`/srv/comun/.env`) que cada `compose.yaml` carga con `env_file` antes del `.env` propio. Ningún valor de esta tabla se escribe en el código.
@@ -329,6 +336,7 @@ Un archivo en el servidor (`/srv/comun/.env`) que cada `compose.yaml` carga con 
 | `MAP_CENTER` / `MAP_ZOOM` | `36.48,-5.85` / `9` | PotatoMesh, portal |
 | `DB_HOST` / `DB_PORT` | `172.30.0.1` / `5432` | Servicios con base de datos |
 | `ALERTAS_SOCKET` / `ALERTAS_SOCKET_GID` | `/run/snm/alertas.sock` / `10500` | Detector, bots, webhooks |
+| `INTERNAL_API_SECRET` | Token secreto compartido para APIs internas en red `mesh` | Portal, detector-alertas, webhooks |
 | `PORTAL_API_URL` | `https://mesh.example.org/api/v1` | Bots |
 
 Variables propias de cada servicio (en su `.env`, nunca en git): `MQTT_USER`, `MQTT_PASSWORD`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, tokens (`POTATOMESH_API_TOKEN`, `TELEGRAM_BOT_TOKEN`, `DISCORD_BOT_TOKEN`), secretos de webhooks. Cada ficha las lista.
@@ -390,4 +398,4 @@ services/             portal/, ingesta/, detector-alertas/, bot-telegram/, bot-d
 - Sin secretos ni `.env` reales en git. Commits sin firmas de atribución de herramientas.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-09
+> Creado: 2026-10-07 · Última revisión: 2026-10-11

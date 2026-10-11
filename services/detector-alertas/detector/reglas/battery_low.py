@@ -5,6 +5,7 @@ from typing import ClassVar, Literal
 from pydantic import BaseModel, Field
 
 from detector.motor.protocolos import Alerta, AlertaAbierta, Contexto, registrar
+from detector.motor.umbrales import GestorUmbrales
 
 
 class ConfigBatteryLow(BaseModel):
@@ -38,7 +39,7 @@ class ReglaBatteryLow:
         self.config = config or ConfigBatteryLow()
 
     def comprobar(self, ctx: Contexto) -> list[Alerta]:
-        """Evalúa si las últimas muestras consecutivas están por debajo de los umbrales."""
+        """Evalúa si las últimas muestras consecutivas están por debajo de los umbrales dinámicos."""
         if ctx.nodo is None or len(ctx.nodo.battery_samples) < self.config.muestras_minimas:
             return []
 
@@ -49,36 +50,60 @@ class ReglaBatteryLow:
 
         rol = (ctx.nodo.role or "").strip().upper()
         es_infra = ctx.es_infraestructura(ctx.nodo.node_id) or rol in ctx.bases.infra_roles
-        es_cliente = rol in ("CLIENT", "CLIENT_BASE")
+        es_cliente = rol in ("CLIENT", "CLIENT_BASE", "CLIENT_HIDDEN")
 
-        # Los demás tipos de nodos (sensores, trackers, etc.) no afectan a la malla
-        if not es_infra and not es_cliente:
+        # En modo compatibilidad legacy sin gestor de umbrales, solo alertar en infraestructura y clientes
+        if ctx.umbrales is None and not es_infra and not es_cliente:
             return []
 
-        umbrales_infra = self.config.umbral.get("infraestructura", {})
-        umbrales_cli = self.config.umbral.get("clientes", {})
+        gestor = ctx.umbrales or GestorUmbrales()
+        rol_evaluar = "ROUTER" if es_infra else rol
+        umbrales_grupo = gestor.obtener_grupo(rol_evaluar)
+        grupo_id = gestor.resolver_grupo(rol_evaluar)
 
         riesgo: str | None = None
-        umbral_aplicado: int = 0
+        umbral_aplicado: float = 0.0
 
-        if es_infra:
-            alto_u = umbrales_infra.get("alto", 40)
-            medio_u = umbrales_infra.get("medio", 60)
-            if all(bat < alto_u for _, bat, _ in ultimas):
-                riesgo = "alto"
-                umbral_aplicado = alto_u
-            elif all(bat < medio_u for _, bat, _ in ultimas):
-                riesgo = "medio"
-                umbral_aplicado = medio_u
+        if ctx.umbrales is not None:
+            if grupo_id == "router":
+                alto_u = umbrales_grupo.battery_critical_pct
+                medio_u = umbrales_grupo.battery_warning_pct
+                if alto_u > 0 and all(bat < alto_u for _, bat, _ in ultimas):
+                    riesgo = "alto"
+                    umbral_aplicado = alto_u
+                elif medio_u > 0 and all(bat < medio_u for _, bat, _ in ultimas):
+                    riesgo = "medio"
+                    umbral_aplicado = medio_u
+            else:
+                medio_u = umbrales_grupo.battery_critical_pct
+                bajo_u = umbrales_grupo.battery_warning_pct
+                if medio_u > 0 and all(bat < medio_u for _, bat, _ in ultimas):
+                    riesgo = "medio"
+                    umbral_aplicado = medio_u
+                elif bajo_u > 0 and all(bat < bajo_u for _, bat, _ in ultimas):
+                    riesgo = "bajo"
+                    umbral_aplicado = bajo_u
         else:
-            medio_u = umbrales_cli.get("medio", 15)
-            bajo_u = umbrales_cli.get("bajo", 35)
-            if all(bat < medio_u for _, bat, _ in ultimas):
-                riesgo = "medio"
-                umbral_aplicado = medio_u
-            elif all(bat < bajo_u for _, bat, _ in ultimas):
-                riesgo = "bajo"
-                umbral_aplicado = bajo_u
+            umbrales_infra = self.config.umbral.get("infraestructura", {})
+            umbrales_cli = self.config.umbral.get("clientes", {})
+            if es_infra:
+                alto_u = umbrales_infra.get("alto", int(umbrales_grupo.battery_critical_pct))
+                medio_u = umbrales_infra.get("medio", int(umbrales_grupo.battery_warning_pct))
+                if all(bat < alto_u for _, bat, _ in ultimas):
+                    riesgo = "alto"
+                    umbral_aplicado = float(alto_u)
+                elif all(bat < medio_u for _, bat, _ in ultimas):
+                    riesgo = "medio"
+                    umbral_aplicado = float(medio_u)
+            else:
+                medio_u = umbrales_cli.get("medio", int(umbrales_grupo.battery_critical_pct))
+                bajo_u = umbrales_cli.get("bajo", int(umbrales_grupo.battery_warning_pct))
+                if all(bat < medio_u for _, bat, _ in ultimas):
+                    riesgo = "medio"
+                    umbral_aplicado = float(medio_u)
+                elif all(bat < bajo_u for _, bat, _ in ultimas):
+                    riesgo = "bajo"
+                    umbral_aplicado = float(bajo_u)
 
         if riesgo is not None:
             _, ult_bat, ult_volt = ultimas[-1]
@@ -92,7 +117,7 @@ class ReglaBatteryLow:
                     datos={
                         "bateria": ult_bat,
                         "voltaje": round(ult_volt, 2),
-                        "umbral": umbral_aplicado,
+                        "umbral": round(umbral_aplicado, 1),
                         "rol": rol,
                         "provincia": ctx.nodo.province or "FUERA",
                         "dentro_andalucia": ctx.nodo.dentro_andalucia,
@@ -115,5 +140,12 @@ class ReglaBatteryLow:
 
         rol = (nodo.role or "").strip().upper()
         es_infra = ctx.es_infraestructura(nodo.node_id) or rol in ctx.bases.infra_roles
-        umbral_resolucion = self.config.resolver if es_infra else 35
+
+        if ctx.umbrales is not None:
+            rol_evaluar = "ROUTER" if es_infra else rol
+            umbrales_grupo = ctx.umbrales.obtener_grupo(rol_evaluar)
+            umbral_resolucion = umbrales_grupo.battery_resolution_pct
+        else:
+            umbral_resolucion = float(self.config.resolver if es_infra else 35)
+
         return not (ult_bat > umbral_resolucion)

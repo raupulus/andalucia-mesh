@@ -107,7 +107,4 @@ class ReglaClientBaseFw:
 
         ver = self.parse_version(nodo.firmware)
         min_ver = self.parse_version(self.config.version_minima) or (2, 7, 17)
-        if ver is None or ver < min_ver:
-            return False
-
-        return True
+        return ver is not None and ver >= min_ver

@@ -375,4 +375,3 @@ class GestionRoutersTest extends TestCase
         $this->assertSame('ATLAS BASE 📡☀🔋', $router->blocked_nodes[0]['longName']);
     }
 }
-

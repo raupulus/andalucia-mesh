@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Servicios;
 
+use App\Models\AlertThreshold;
+use App\Services\AlertThresholdService;
 use Illuminate\Support\Facades\Cache;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
@@ -11,6 +13,7 @@ use League\CommonMark\Extension\ExternalLink\ExternalLinkExtension;
 use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
 use League\CommonMark\MarkdownConverter;
 use RuntimeException;
+use Throwable;
 
 class ContenidoMarkdown
 {
@@ -60,6 +63,15 @@ class ContenidoMarkdown
 
         $this->converter = new MarkdownConverter($environment);
 
+        $hopLimit = (string) config('proyecto.lora.hop_limit');
+        try {
+            /** @var AlertThresholdService $thresholdService */
+            $thresholdService = app(AlertThresholdService::class);
+            $hopLimit = (string) (int) $thresholdService->getForGroup(AlertThreshold::GROUP_CLIENT, 'hop_limit_recommended', (float) $hopLimit);
+        } catch (Throwable) {
+            // Fallback a config si la base de datos o servicio no estuvieran disponibles
+        }
+
         $this->variables = [
             '{PROJECT_NAME}' => (string) config('proyecto.nombre'),
             '{PROJECT_DOMAIN}' => (string) $projectDomain,
@@ -74,7 +86,7 @@ class ContenidoMarkdown
             '{LORA_CODING_RATE}' => (string) config('proyecto.lora.coding_rate'),
             '{LORA_FREQUENCY_SLOT}' => (string) config('proyecto.lora.frequency_slot'),
             '{LORA_FREQUENCY_MHZ}' => (string) config('proyecto.lora.frequency_mhz'),
-            '{LORA_HOP_LIMIT}' => (string) config('proyecto.lora.hop_limit'),
+            '{LORA_HOP_LIMIT}' => $hopLimit,
             '{INGESTA_LORA_PREAMBULO}' => (string) config('proyecto.lora.preambulo'),
             '{MQTT_HOST}' => (string) config('proyecto.mqtt.host_publico'),
             '{MQTT_PORT}' => (string) config('proyecto.mqtt.puerto_tls'),
@@ -131,7 +143,8 @@ class ContenidoMarkdown
         }
 
         $mtime = filemtime($path);
-        $cacheKey = "markdown_render_v5:{$locale}:{$ficheroEfectivo}:{$mtime}";
+        $hopLimit = $this->variables['{LORA_HOP_LIMIT}'] ?? '3';
+        $cacheKey = "markdown_render_v5:{$locale}:{$ficheroEfectivo}:{$mtime}:{$hopLimit}";
 
         /** @var array{titulo: string, descripcion: string, html: string, h1: string, image: string} */
         return Cache::rememberForever($cacheKey, function () use ($path, $nombreFichero): array {

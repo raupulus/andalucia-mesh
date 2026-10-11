@@ -2,6 +2,7 @@
 
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from detector.config import Settings
 from detector.modelos import AlertaObjeto
@@ -118,6 +119,7 @@ def test_persistencia_cola_contingencia() -> None:
 async def test_restaurar_ciclo_desde_db() -> None:
     """Verifica que las alertas abiertas y resueltas de la BD se carguen en el ciclo de vida."""
     from unittest.mock import AsyncMock
+
     from detector.motor.ciclo import GestorCicloVida
 
     ciclo = GestorCicloVida()
@@ -143,7 +145,7 @@ async def test_restaurar_ciclo_desde_db() -> None:
             "evidencia_en": t_ahora,
         }
     ]
-    filas_resueltas = []
+    filas_resueltas: list[dict[str, Any]] = []
 
     mock_conn.fetch.side_effect = [filas_abiertas, filas_resueltas]
 

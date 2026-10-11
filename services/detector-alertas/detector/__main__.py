@@ -50,6 +50,7 @@ async def ejecutar_servicio(settings: Settings) -> None:
                 motor.estado = estado_previo
                 logger.info("Estado previo restaurado exitosamente en el motor.")
             await GestorInstantaneas.restaurar_ciclo_desde_db(conn, motor.ciclo)
+        await motor.umbrales.verificar_y_recargar_db(persistencia.pool)
 
     # 4. Servidor de Socket UNIX de salida
     socket_alertas = ServidorSocketAlertas(settings, persistencia)
@@ -113,6 +114,20 @@ async def ejecutar_servicio(settings: Settings) -> None:
 
     tarea_snapshots = asyncio.create_task(bucle_snapshots())
 
+    # Bucle periódico de sondeo de umbrales como mecanismo de seguridad (cada 60s)
+    async def bucle_sondeo_umbrales() -> None:
+        while not detenido.is_set():
+            try:
+                await asyncio.sleep(60)
+                if persistencia.conectado and persistencia.pool:
+                    await motor.umbrales.verificar_y_recargar_db(persistencia.pool)
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.debug("Error en sondeo periódico de umbrales: %s", e)
+
+    tarea_umbrales = asyncio.create_task(bucle_sondeo_umbrales())
+
     # Manejo de señales de parada limpia
     loop = asyncio.get_running_loop()
 
@@ -131,6 +146,7 @@ async def ejecutar_servicio(settings: Settings) -> None:
     logger.info("Deteniendo componentes...")
     tarea_paquetes.cancel()
     tarea_snapshots.cancel()
+    tarea_umbrales.cancel()
     await entrada.detener()
     await temporizador.stop()
     await retencion.detener()

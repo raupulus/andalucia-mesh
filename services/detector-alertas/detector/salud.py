@@ -36,6 +36,7 @@ class ServidorSalud:
         self.app = web.Application()
         self.app.router.add_get("/health", self._handle_health)
         self.app.router.add_get("/", self._handle_health)
+        self.app.router.add_post("/internal/recargar-umbrales", self._handle_recargar_umbrales)
         self.runner: web.AppRunner | None = None
         self.site: web.TCPSite | None = None
 
@@ -115,6 +116,38 @@ class ServidorSalud:
                 "gateways_rastreados": len(self.motor.estado.gateways),
                 "reglas_activas": len(self.motor.recarga.reglas_activas),
             },
+            "umbrales": {
+                "version": self.motor.umbrales.version,
+                "ultima_recarga": self.motor.umbrales.ultima_recarga.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            },
         }
 
         return web.json_response(cuerpo, status=status_code)
+
+    async def _handle_recargar_umbrales(self, request: web.Request) -> web.Response:
+        """Recarga en caliente los umbrales dinámicos del motor de alertas en memoria RAM."""
+        secreto_esperado = self.settings.internal_api_secret.strip()
+        secreto_recibido = request.headers.get("X-Internal-Secret", "").strip()
+
+        if not secreto_esperado or secreto_recibido != secreto_esperado:
+            return web.json_response(
+                {"ok": False, "error": "Acceso no autorizado: credenciales internas inválidas o ausentes"},
+                status=401,
+            )
+
+        try:
+            datos: dict[str, Any] = await request.json() if request.can_read_body else {}
+        except Exception as e:
+            logger.warning("Error al deserializar JSON en recarga de umbrales: %s", e)
+            return web.json_response({"ok": False, "error": f"JSON inválido: {e}"}, status=400)
+
+        try:
+            version = self.motor.umbrales.actualizar_desde_dict(datos)
+            return web.json_response({
+                "status": "reloaded",
+                "version": version,
+                "ok": True,
+            })
+        except Exception as e:
+            logger.error("Error al aplicar nuevos umbrales: %s", e, exc_info=True)
+            return web.json_response({"ok": False, "error": f"Error al aplicar umbrales: {e}"}, status=500)

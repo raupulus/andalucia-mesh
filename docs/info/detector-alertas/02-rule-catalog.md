@@ -14,11 +14,11 @@ Leyenda: **MVP** = esta entrega, activa; **Ampl.** = ampliación, se implementa 
 
 | Id | Fase | Detecta | Riesgo por tipo | Base dinámica | Resolución | Campos |
 |---|---|---|---|---|---|---|
-| `reboot-loop` | MVP | Bucle de reinicio anómalo (uptime menor que el anterior o < 100 s tras reinicio) | `medio` ≥ 3 en 5 min · `alto` ≥ 5 en 10 min | — | 30 min sin reinicios | `dm.uptime_seconds`, `ls.uptime_seconds`, `rx_first` |
-| `battery-low` | MVP | Batería baja confirmada en 2 muestras seguidas (batería 1–100 %; > 100 = alimentado; otros roles se ignoran) | Routers: `medio` < 60 %, `alto` < 40 % · Clientes: `bajo` < 35 %, `medio` < 15 % | — | > 70 % en routers, > 45 % en clientes | `dm.battery_level`, `dm.voltage`, `fn.role` |
-| `sunset-battery` | MVP | Router solar que llega a las 20:00 h peninsulares con carga insuficiente (excluye nodos fuera de Andalucía `FUERA`) | Infra: `medio` < 60 %, `alto` < 40 % | — | > 70 % o luz solar | `dm.battery_level`, `fn.role`, `fn.province` (tick 20:00) |
+| `reboot-loop` | MVP | Bucle de reinicio anómalo (uptime menor que el anterior o < 100 s tras reinicio) | Dinámico vía `GestorUmbrales`: Routers/Clientes `medio` ≥ 3 en 5 min, `alto` ≥ 5 en 10 min · Mudos: 4/6 | — | 30 min sin reinicios | `dm.uptime_seconds`, `ls.uptime_seconds`, `rx_first` |
+| `battery-low` | MVP | Batería baja confirmada en 2 muestras seguidas (batería 1–100 %; > 100 = alimentado) | Dinámico vía `GestorUmbrales`: Routers `medio` < 60 %, `alto` < 40 % · Clientes: `bajo` < 35 %, `medio` < 15 % · Mudos: `bajo` < 25 %, `medio` < 10 % | — | Histéresis dinámica (> 70 % routers, > 45 % clientes, > 30 % mudos) | `dm.battery_level`, `dm.voltage`, `fn.role` |
+| `sunset-battery` | MVP | Router solar que llega a las 20:00 h peninsulares con carga insuficiente (excluye nodos fuera de Andalucía `FUERA`) | Dinámico vía `GestorUmbrales`: `medio` < 60 %, `alto` < 40 % (desactivable con umbral 0) | — | > 70 % o luz solar | `dm.battery_level`, `fn.role`, `fn.province` (tick 20:00) |
 | `chutil-high` | MVP | Canal saturado calculando saturación provincial (60 % peso routers, 40 % peso clientes) | Red: `bajo` > 20 %, `medio` > 30 %, `alto` > 40 % | — | ≤ 20 % | `dm.channel_utilization`, `fn.role`, `fn.province` |
-| `infra-silent` | MVP | Router que deja de oírse | Infra: `medio` > max(6 h, 3 × intervalo típico) · `alto` > 24 h | Intervalo típico del nodo | Se vuelve a oír | `from`, `fn.role`, `rx_first` (tick) |
+| `infra-silent` | MVP | Router que deja de oírse | Dinámico vía `GestorUmbrales`: `medio` > max(6 h, 3 × típico) · `alto` > 24 h (desactivable con 0) | Intervalo típico del nodo | Se vuelve a oír | `from`, `fn.role`, `rx_first` (tick) |
 | `gateway-offline` | MVP | Gateway que deja de publicar | Infra: `medio` > max(15 min, 3 × intervalo típico) · `alto` > 120 min | Intervalo típico del gateway | Vuelve a publicar | `rx[].gateway`, `rx[].at`, `fn.is_gateway` (tick) |
 | `gateway-no-traffic` | Ampl. | Pasarela con transceptor LoRa sordo/bloqueado (> 1 h sin recepciones LoRa pese a proceso activo) | Infra: `bajo` > 60 min sin paquetes | — | Vuelve a recibir paquetes LoRa | `rx[].gateway`, `rx[].at`, `fn.is_gateway` (tick) |
 | `battery-drain` | Ampl. | Router solar que no recarga | Infra: `medio` | Proyección lineal del voltaje de 72 h hasta 3,3 V en < 3 días | Pendiente de 24 h ≥ 0 | `dm.voltage` |
@@ -41,7 +41,7 @@ Leyenda: **MVP** = esta entrega, activa; **Ampl.** = ampliación, se implementa 
 | `router-cluster` | Ampl. | Router enlazado directamente con 3 o más routers vecinos (excluye `ROUTER_LATE`) | Infra: `medio` ≥ 3 routers | — | < 3 routers vecinos directos | `payload.neighbors`, `fn.role` |
 | `asymmetric-link` | Ampl. | Enlace RF con asimetría severa (> 6 dB en ambos sentidos; solo CLIENT, CLIENT_BASE y ROUTER; excluye CLIENT_MUTE) | Red/Infra: `medio` Δ > 6 dB | — | Diferencia SNR ≤ 4 dB | `payload.neighbors`, `rx[].snr`, `fn.role` |
 | `key-security` | Ampl. | Clave pública débil (baja entropía, secuencias, patrones periódicos) o cambio imprevisto de clave en el mismo ID | Routers: `alto` · Clientes: `medio` | — | Clave con entropía estructural válida | `payload.public_key`, `fn.role` |
-| `hops-high` | MVP | Límite de saltos excesivo en origen | Red/nodo: `bajo` con `hop_start` = 6 · `alto` con `hop_start` ≥ 7 (3 recomendado; 4–5 válidos) | — | 2 paquetes seguidos con `hop_start` ≤ 5 | `hop_start` |
+| `hops-high` | MVP | Límite de saltos excesivo en origen | Dinámico vía `GestorUmbrales`: `bajo` con `hop_start` ≥ aviso (5 routers, 6 clientes) · `alto` ≥ crítico (7) | — | 2 paquetes seguidos por debajo del umbral de aviso | `hop_start` |
 | `flood` | MVP | Un nodo emite demasiados paquetes propios (spam o firmware desbocado) | Red: `medio` > max(30, 5 × ritmo) en 10 min · `alto` > max(100, 15 × ritmo) | Ritmo típico del nodo | 30 min bajo el umbral `medio` | `from`, `portnum`, `rx_first` |
 | `rafaga-masiva` | MVP | Muchos nodos emiten a la vez en la malla | Red: `alto`, `nodo: "all"` | Nodos por 2 min a esa hora; umbral max(50, 5 × base) | 15 min bajo el umbral | `from`, `portnum`, `rx_first` |
 | `config-intervals` | Ampl. | Intervalos de emisión más cortos que las recomendaciones del portal | Red: `bajo` | Nodo fijo o móvil según desplazamiento en 24 h | 24 h dentro de los intervalos | `portnum`, `to`, `payload.*_metrics` |
@@ -271,4 +271,4 @@ silencios: []
 5. Dado un nodo con `hop_start` 7 / Cuando emite dos paquetes con `hop_start` 3 / Entonces `hops-high` se resuelve; con `hop_start` 5 nunca se abre.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-09
+> Creado: 2026-10-07 · Última revisión: 2026-10-11

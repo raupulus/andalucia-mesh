@@ -5,6 +5,7 @@ from typing import ClassVar, Literal
 from pydantic import BaseModel, Field
 
 from detector.motor.protocolos import Alerta, AlertaAbierta, Contexto, registrar
+from detector.motor.umbrales import GestorUmbrales
 
 
 class ConfigMedioInfraSilent(BaseModel):
@@ -42,9 +43,24 @@ class ReglaInfraSilent:
         """Evalúa todos los routers registrados y genera alertas si superan los umbrales de silencio."""
         alertas: list[Alerta] = []
 
+        gestor = ctx.umbrales or GestorUmbrales()
+        umbrales_rtr = gestor.obtener_grupo("ROUTER")
+
+        if ctx.umbrales is not None:
+            silence_warn = umbrales_rtr.silence_warning_h
+            silence_crit = umbrales_rtr.silence_critical_h
+            if silence_warn <= 0 and silence_crit <= 0:
+                return []
+            min_medio_h = silence_warn
+            alto_h = silence_crit
+        else:
+            min_medio_h = self.config.medio.minimo_h
+            alto_h = self.config.alto_h
+
         for nodo in ctx.estado.nodes.values():
             rol = (nodo.role or "").strip().upper()
-            if rol not in ctx.bases.infra_roles:
+            es_infra = ctx.es_infraestructura(nodo.node_id) or rol in ctx.bases.infra_roles
+            if not es_infra:
                 continue
 
             # El silencio se computa desde max(último visto, arranque del detector)
@@ -53,21 +69,21 @@ class ReglaInfraSilent:
             silencio_h = silencio_s / 3600.0
 
             intervalo_s = ctx.bases.intervalo_tipico_nodo(nodo, ctx.ahora)
-            if intervalo_s is not None:
+            if intervalo_s is not None and min_medio_h > 0:
                 umbral_medio_h = max(
-                    self.config.medio.minimo_h,
+                    min_medio_h,
                     (self.config.medio.factor_intervalo * intervalo_s) / 3600.0,
                 )
             else:
-                umbral_medio_h = self.config.medio.minimo_h
+                umbral_medio_h = min_medio_h
 
             riesgo: str | None = None
             umbral_aplicado: float = 0.0
 
-            if silencio_h >= self.config.alto_h:
+            if alto_h > 0 and silencio_h >= alto_h:
                 riesgo = "alto"
-                umbral_aplicado = self.config.alto_h
-            elif silencio_h >= umbral_medio_h:
+                umbral_aplicado = alto_h
+            elif min_medio_h > 0 and silencio_h >= umbral_medio_h:
                 riesgo = "medio"
                 umbral_aplicado = umbral_medio_h
 

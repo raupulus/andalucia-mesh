@@ -10,6 +10,7 @@ from detector.motor.ciclo import GestorCicloVida
 from detector.motor.estado import EstadoMotor
 from detector.motor.protocolos import Alerta, Contexto, Tick, TransicionAlerta
 from detector.motor.recarga import GestorRecarga
+from detector.motor.umbrales import GestorUmbrales
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ class MotorAlertas:
         self,
         settings: Settings,
         estado: EstadoMotor | None = None,
+        umbrales: GestorUmbrales | None = None,
     ) -> None:
         """Inicializa el motor con su configuración y estado."""
         self.settings = settings
@@ -31,6 +33,7 @@ class MotorAlertas:
         )
         self.recarga = GestorRecarga(settings)
         self.ciclo = GestorCicloVida()
+        self.umbrales = umbrales or GestorUmbrales()
 
     def inicializar(self) -> None:
         """Carga inicial obligatoria de las configuraciones YAML."""
@@ -67,6 +70,7 @@ class MotorAlertas:
                     es_infraestructura=lambda nid: self.recarga.clasificador.es_infraestructura(nid)
                     if self.recarga.clasificador
                     else False,
+                    umbrales=self.umbrales,
                 )
 
                 try:
@@ -140,6 +144,7 @@ class MotorAlertas:
                 es_infraestructura=lambda nid: self.recarga.clasificador.es_infraestructura(nid)
                 if self.recarga.clasificador
                 else False,
+                umbrales=self.umbrales,
             )
 
             try:
@@ -189,6 +194,7 @@ class MotorAlertas:
                     es_infraestructura=lambda nid: self.recarga.clasificador.es_infraestructura(nid)
                     if self.recarga.clasificador
                     else False,
+                    umbrales=self.umbrales,
                 )
 
                 try:
@@ -257,6 +263,7 @@ class MotorAlertas:
                 es_infraestructura=lambda nid: self.recarga.clasificador.es_infraestructura(nid)
                 if self.recarga.clasificador
                 else False,
+                umbrales=self.umbrales,
             )
 
             try:

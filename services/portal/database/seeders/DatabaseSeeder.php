@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             HardwareSeeder::class,
             SuggestionSeeder::class,
             CustomPageSeeder::class,
+            AlertThresholdSeeder::class,
         ]);
     }
 }

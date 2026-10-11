@@ -121,6 +121,25 @@ Gestión dinámica de integradores de webhooks (base `portal`, tabla local repli
     - Presenta barra superior de KPIs con umbrales críticos de RN-11, RN-32 y RN-39, tarjetas de niveles de riesgo (**Alto**: baterías router < 40% o al atardecer 20:00 h < 40%, bucles ≥ 5/10 min, silencio > 24 h, gateways caídos > 2 h, saturación ChUtil > 40%, ráfagas masivas de texto > 10/min, telemetría > 50/h, sondeos ^all ≥ 5/15m, traceroutes ≥ 20/30m, paquetes privados > 60/h o saltos ≥ 7; **Medio**: baterías router < 60% o cliente < 15%, reinicios ≥ 3/5 min, silencio > 6 h, gateway sin publicar > 15 min, saturación provincial > 30%, routers no coordinados en Andalucía `router-role`, ráfagas de texto 6–10/min o traceroutes 10–19/30m; **Bajo**: batería cliente < 35%, saturación > 20%, textos > 5/min, telemetrías ≥ 2/1m, sondeo aislado, GPS acelerado o 6 saltos).
     - Incluye cuadrícula de 4 grupos funcionales (Baterías, Ráfagas/NodeInfo, Reinicios y Gobernanza con enlace a [Routers Coordinados](14-operator-panel.md#routers-coordinados-coordinatedrouterresource)), diferenciación entre `infraestructura` y `clientes`, discriminación geográfica andaluza con descarte tajante de nodos exteriores `FUERA`, y aviso del modo comodín (campos vacíos reciben todas las alertas del criterio).
 
+### Gestión de Umbrales de Alertas (`GestionUmbralesAlertas`)
+
+Página de configuración operativa (`/admin/gestion-umbrales-alertas`, base `portal`, tabla `alert_thresholds`):
+- **Objetivo:** Centralizar la administración y calibración de los umbrales de detección y criterios de salud de nodos en una única interfaz unificada, eliminando valores cableados en código y archivos YAML estáticos.
+- **Taxonomía de 3 grupos de roles independientes:**
+  - **Troncal (`router`):** Repetidores e infraestructura clave (`ROUTER`, `ROUTER_LATE`, `REPEATER`). Máxima exigencia: saltos estrictos (3 recomendado), silencios breves (aviso 6h, crítico 24h), batería vigilada con control solar al anochecer (60% aviso, 40% crítico).
+  - **Clientes fijos / estándar (`client`):** Nodos domésticos y bases fijas (`CLIENT`, `CLIENT_HIDDEN`, `CLIENT_BASE`). Exigencia moderada: mayor tolerancia a descansos nocturnos, intervalos recomendados de NodeInfo de 72h y telemetría de 2–4h.
+  - **Personales / Mudos (`client_mute`):** Dispositivos de bolsillo, interior o sensores que no enrutan (`CLIENT_MUTE`, `TRACKER`, `LOST_AND_FOUND`, `TAK`, etc.). No disparan alertas de infraestructura ni caídas de red; umbrales de batería orientados al usuario final.
+- **Secciones de parámetros por grupo:**
+  1. *Saltos LoRa:* Saltos estándar recomendados, umbral de aviso (riesgo bajo) y umbral crítico (riesgo alto).
+  2. *Intervalos de Emisión:* NodeInfo mínimo y recomendado, Telemetría mínima y recomendada (en segundos).
+  3. *Batería y Energía:* Umbral de aviso (%), umbral crítico (%), umbral de resolución por recarga (%) y carga mínima solar al anochecer (20:00 h peninsulares).
+  4. *Silencios y Reinicios:* Horas de silencio para aviso y crítico (solo router), y número de reinicios en ventanas de 5 min y 10 min.
+- **Validación cruzada en interfaz:** Validación de campos numéricos positivos y comprobaciones lógicas automáticas (el umbral de aviso no puede ser más estricto que el umbral crítico).
+- **Acción «Restablecer valores de fábrica»:** Acción de cabecera con diálogo modal de confirmación de seguridad para restaurar la matriz completa de calibración inicial de Andalucía Mesh en cualquier momento.
+- **Arquitectura de memoria RAM y propagación en caliente:**
+  - Lectura en RAM en el portal mediante `Cache::rememberForever('alert_thresholds')` en `AlertThresholdService`.
+  - Notificación Push inmediata tras guardar hacia `POST http://detector-alertas:8080/internal/recargar-umbrales` con cabecera `X-Internal-Secret: ${INTERNAL_API_SECRET}` para recargar atómicamente la memoria RAM del detector en nanosegundos sin reiniciar servicios.
+
 ### Routers Coordinados (`CoordinatedRouterResource`)
 
 Gestión y gobernanza comunitaria de la infraestructura de repetidores en Andalucía (base `portal`, tabla `coordinated_routers`):
@@ -249,6 +268,7 @@ Gestión y publicación de páginas y artículos divulgativos (base `portal`, ta
 | `webhook_destinations` | `id`, `name` único, `url`, `host`, `active` bool, `disabled_reason` null, `consecutive_failures`, `pending_deliveries`, `last_ok_at`, `risks` json, `types` json, `provinces` json, `nodes` json, `created_at`, `updated_at` |
 | `coordinated_routers` | `id`, `node_id` único, `short_name`, `long_name`, `province`, `role`, `status` varchar, `favorite_nodes` json, `blocked_nodes` json, `approved` bool, `is_gateway` bool, `hw_model`, `notes`, `last_seen_at`, `created_at`, `updated_at` |
 | `custom_pages` | `id`, `title`, `slug` único, `description`, `content` markdown, `keywords` json, `featured_image`, `is_active` bool, `created_at`, `updated_at` |
+| `alert_thresholds` | `id`, `role_group` (`router` \| `client` \| `client_mute`), `parameter`, `value_numeric`, `unit`, `description`, `created_at`, `updated_at` |
 
 ### Configuración
 
@@ -259,6 +279,7 @@ Gestión y publicación de páginas y artículos divulgativos (base `portal`, ta
 | `ADMIN_PATH` | `admin` | Propia | No |
 | `SESSION_LIFETIME` | `480` | Propia | No |
 | `WEBHOOKS_INTERNAL_URL` | `http://webhooks:8080` | Común / Propia | No |
+| `DETECTOR_INTERNAL_URL` | `http://detector-alertas:8080` | Común / Propia | No |
 | `INTERNAL_API_SECRET` | Token compartido para endpoints internos en red `mesh` | Común / Propia | **Sí** |
 
 ## Unidades de trabajo
@@ -270,6 +291,7 @@ Gestión y publicación de páginas y artículos divulgativos (base `portal`, ta
 - **UT-06.14.5 — Operadores.** *Aceptación:* desactivar un operador cierra sus sesiones.
 - **UT-06.14.6 — Tareas programadas y purga.** `portal-tareas` ejecuta `php artisan schedule:work` de forma continua: `ComprobarServicios` cada minuto (con auditoría de salud y purga de `estado_servicio_cambio` > 90 días) y `portal:sitemap` cada noche a las 04:00 (regeneración de `sitemap.xml`).
 - **UT-06.14.7 — Gestión de webhooks.** Integración con `WebhooksClient`, réplica local `webhook_destinations`, acciones de ping HMAC y reactivación dinámica.
+- **UT-06.14.8 — Gestión centralizada de umbrales y diagnósticos.** Página `/admin/gestion-umbrales-alertas` con 3 pestañas por grupo de roles (`router`, `client`, `client_mute`), persistencia en `alert_thresholds`, `AlertThresholdService` con caché en RAM permanente (`Cache::rememberForever`), invalidación atómica y notificación Push HTTP hacia `POST http://detector-alertas:8080/internal/recargar-umbrales`.
 
 ## Escenarios de prueba
 

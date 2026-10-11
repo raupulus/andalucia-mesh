@@ -42,10 +42,22 @@ class Contexto:
     config: BaseModel                           # bloque validado de la regla
     general: ConfigGeneral                      # bloque general de reglas.yaml
     es_infraestructura: Callable[[str], bool]
+    umbrales: GestorUmbrales | None = None      # umbrales dinámicos calibrados en RAM por grupo de roles
 ```
 
 - Las reglas son síncronas, sin E/S y deterministas para un `ahora` dado; presupuesto total < 5 ms por paquete.
 - **Registro:** decorador `@registrar` en `detector/reglas/`; al cargar `reglas.yaml` se instancian solo las de `activa: true`, validando el bloque con su `Config`. Regla registrada sin bloque → inactiva con aviso.
+
+### Gestor de Umbrales Dinámicos en Memoria RAM (`GestorUmbrales`)
+
+Mantiene en memoria RAM los parámetros de calibración organizados en 3 grupos independientes de roles Meshtastic:
+1. `router`: `ROUTER`, `ROUTER_LATE`, `REPEATER`.
+2. `client`: `CLIENT`, `CLIENT_HIDDEN`, `CLIENT_BASE`.
+3. `client_mute`: `CLIENT_MUTE`, `TRACKER`, `LOST_AND_FOUND`, `SENSOR`, etc.
+
+- **Rendimiento ultra-rápido:** Cero consultas recurrentes a PostgreSQL por paquete; lectura atómica en memoria RAM (< 5 ms de presupuesto por paquete).
+- **Recarga en caliente HTTP:** Expone `POST /internal/recargar-umbrales` protegido con cabecera `X-Internal-Secret: ${INTERNAL_API_SECRET}` para sustitución atómica de la matriz de umbrales al guardar cambios desde el panel Filament.
+- **Sondeo periódico de seguridad (Fallback):** Comprobación en segundo plano cada 60 s contra la tabla `alert_thresholds` de PostgreSQL; ante caídas de base de datos o fallos temporales de conexión, preserva de forma transparente los umbrales en RAM sin interrumpir la supervisión.
 
 ### Clasificador
 
@@ -158,4 +170,4 @@ Cada `SNAPSHOT_S` y en `SIGTERM`: estado de nodos, gateways, ids conocidos y bas
 - Dado `reglas.yaml` con un riesgo inexistente / Cuando se guarda / Entonces sigue la configuración anterior y `/health.config` muestra el error.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-11

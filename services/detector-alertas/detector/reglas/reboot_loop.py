@@ -6,6 +6,7 @@ from typing import ClassVar, Literal
 from pydantic import BaseModel
 
 from detector.motor.protocolos import Alerta, AlertaAbierta, Contexto, registrar
+from detector.motor.umbrales import GestorUmbrales
 
 
 class ConfigRebootLoop(BaseModel):
@@ -41,6 +42,18 @@ class ReglaRebootLoop:
         if ctx.nodo is None:
             return []
 
+        gestor = ctx.umbrales or GestorUmbrales()
+        es_infra = ctx.es_infraestructura(ctx.nodo.node_id) if ctx.nodo else False
+        rol = "ROUTER" if es_infra else (ctx.nodo.role if ctx.nodo else None)
+        umbrales_grupo = gestor.obtener_grupo(rol)
+
+        if ctx.umbrales is not None:
+            umbral_alto = umbrales_grupo.reboot_loop_count_10m
+            umbral_medio = umbrales_grupo.reboot_loop_count_5m
+        else:
+            umbral_alto = self.config.umbral_alto
+            umbral_medio = self.config.umbral_medio
+
         ahora = ctx.ahora
         limite_10m = ahora - timedelta(minutes=self.config.ventana_alta_min)
         limite_5m = ahora - timedelta(minutes=self.config.ventana_media_min)
@@ -59,16 +72,16 @@ class ReglaRebootLoop:
         eventos = 0
         ventana_min = 0
 
-        if cuenta_10m >= self.config.umbral_alto:
+        if cuenta_10m >= umbral_alto:
             riesgo = "alto"
             eventos = cuenta_10m
             ventana_min = self.config.ventana_alta_min
-        elif cuenta_5m >= self.config.umbral_medio:
+        elif cuenta_5m >= umbral_medio:
             riesgo = "medio"
             eventos = cuenta_5m
             ventana_min = self.config.ventana_media_min
-        # Soporte para bucles lentos acumulados en 60 min (>= 3 reinicios)
-        elif len([r for r in ctx.nodo.reboots_24h if r >= ahora - timedelta(minutes=60)]) >= 3:
+        # Soporte para bucles lentos acumulados en 60 min (>= umbral_medio reinicios)
+        elif len([r for r in ctx.nodo.reboots_24h if r >= ahora - timedelta(minutes=60)]) >= umbral_medio:
             es_infra = ctx.es_infraestructura(ctx.nodo.node_id) or (ctx.nodo.role or "").upper() in ctx.bases.infra_roles
             riesgo = "alto" if es_infra else "medio"
             eventos = len([r for r in ctx.nodo.reboots_24h if r >= ahora - timedelta(minutes=60)])

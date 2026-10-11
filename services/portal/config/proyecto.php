@@ -26,6 +26,7 @@ return [
         'coding_rate' => (int) env('LORA_CODING_RATE', 5),
         'frequency_slot' => (int) env('LORA_FREQUENCY_SLOT', 4),
         'frequency_mhz' => (string) env('LORA_FREQUENCY_MHZ', '869.618'),
+        // Límite de saltos LoRa estándar / fallback (fuente de verdad viva en AlertThresholdService)
         'hop_limit' => (int) env('LORA_HOP_LIMIT', 3),
         'preambulo' => (int) env('INGESTA_LORA_PREAMBULO', 16),
         'infra_roles' => array_filter(array_map('trim', explode(',', env('INFRA_ROLES', 'ROUTER,ROUTER_LATE,REPEATER')))),

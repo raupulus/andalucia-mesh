@@ -111,4 +111,15 @@ return [
         'secret' => env('INTERNAL_API_SECRET', ''),
         'timeout' => (int) env('WEBHOOKS_INTERNAL_TIMEOUT', 5),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | API Interna del Detector de Alertas (Recarga Dinámica de Umbrales)
+    |--------------------------------------------------------------------------
+    */
+    'detector_api' => [
+        'url' => env('DETECTOR_INTERNAL_URL', 'http://detector-alertas:8080'),
+        'secret' => env('INTERNAL_API_SECRET', ''),
+        'timeout' => (int) env('DETECTOR_INTERNAL_TIMEOUT', 5),
+    ],
 ];

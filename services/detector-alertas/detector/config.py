@@ -63,6 +63,9 @@ class Settings(BaseSettings):
     # Calibración y diagnósticos
     grabacion_dias: int = Field(default=0, validation_alias="GRABACION_DIAS")
 
+    # API interna inter-servicio
+    internal_api_secret: str = Field(default="", validation_alias="INTERNAL_API_SECRET")
+
     @property
     def parsed_infra_roles(self) -> frozenset[str]:
         """Devuelve el conjunto de roles considerados como infraestructura en mayúsculas."""

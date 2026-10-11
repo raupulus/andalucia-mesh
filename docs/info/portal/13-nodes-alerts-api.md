@@ -24,7 +24,7 @@ Dar a "Revisa tu nodo", a la página de alertas, a la portada y a los bots los d
 
 Ventana fija de 7 días. Fuentes: `api_nodes`, `api_node_intervals` (con `variant`), `api_node_battery_daily`, `api_node_reboots_daily`, `api_rank_network_usage` (suma de filas `day` de 7 días), `api_province_load` y `api_alertas` (abiertas del nodo). Nodo inexistente → `404`; nodo existente sin datos en 7 días → `200` con `findings: []` y `notes: ["Sin datos en los últimos 7 días"]`.
 
-Comprobaciones (umbrales en `config('proyecto.recomendaciones')`, los mismos que muestra `/configura-tu-nodo`; ningún número en el código del controlador):
+Comprobaciones (umbrales dinámicos calibrados en el panel de operadores vía `App\Services\AlertThresholdService` en memoria RAM según el rol del nodo en sus 3 grupos `router`, `client` o `client_mute`, con respaldo en `config('proyecto.recomendaciones')`; ningún número cableado en código):
 
 | `check` | Fuente | Hallazgo cuando | `risk` | Recomendación (texto) |
 |---|---|---|---|---|
@@ -120,4 +120,4 @@ De `api_catalogo`: `{"risks": [{"id", "order", "name", "description"}], "types":
 7. **Dado** `/alerts?state=all&sort=risk&limit=2`, **cuando** se sigue `next_cursor` hasta `null`, **entonces** se recorren todas en orden de riesgo sin duplicados.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-11
