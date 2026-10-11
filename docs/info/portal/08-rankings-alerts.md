@@ -47,8 +47,11 @@ Supervisión pública del estado de routers de infraestructura y repetidores:
 ### `/alertas`
 
 1. Resumen de abiertas: chips por riesgo con número (`stats/summary` → `alerts_open.by_risk`) y texto por tipo.
-2. Filtros: estado (`abiertas` por defecto, `resueltas`, `todas`), riesgo (`alto`, `medio`, `bajo`), temáticas del problema con selección múltiple acumulativa (`?problemas=bateria,posicion`), provincia y nodo si viene en la URL. Navegación fluida por AJAX/SPA.
-3. Lista (`GET /alertas` paginado a 15 por página, más recientes primero): chip de riesgo, tipo, regla (nombre del catálogo), mensaje, nodo o "N nodos", provincia, abierta/actualizada/resuelta. Navegación por páginas numeradas con retención de filtros.
+2. Filtros:
+   - Nivel 1 (Control): Estado (`abierta`, `resuelta`, todas), Severidad/Riesgo (`alto`, `medio`, `bajo`) y Provincia / Ámbito territorial (`?provincia=espana|todas|fuera|ES-XX`). Por defecto aplica el ámbito nacional **"Toda España"** (excluye incidencias de nodos exteriores `FUERA`), con opciones accesibles para "Todas las ubicaciones", "Fuera de España (Exterior)" y cada provincia individual agrupada en optgroups (Andalucía y Resto de España).
+   - Nivel 2 (Temáticas): Temáticas del problema con selección múltiple acumulativa (`?problemas=bateria,posicion`).
+   - Nivel 3 (Activos): Barra con chips desmontables (`✕`), contador de resultados y botón de limpieza rápida. Navegación fluida por AJAX/SPA sincronizada con `history.pushState` y cero cookies (RN-06).
+3. Lista (`GET /alertas` paginado a 15 por página, más recientes primero): chip de riesgo, tipo, regla (nombre del catálogo), mensaje, nodo o "N nodos", provincia con nombre amigable resuelto, abierta/actualizada/resuelta. Navegación por páginas numeradas con retención de filtros.
 4. Qué significan riesgo y tipo (catálogo); "si una alerta es de tu nodo" con enlace a `/revisa-tu-nodo`; "recibe las alertas" con enlaces a `/bots` y `/api#webhooks`.
 
 Refresco de la lista abierta cada 30 s (solo si el usuario no ha pulsado "Ver más").

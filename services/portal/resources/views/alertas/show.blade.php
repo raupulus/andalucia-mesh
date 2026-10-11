@@ -24,7 +24,7 @@
     $nodoNombre = $alerta['nodo_nombre_corto'] ?? $nodoCodigo;
     $nodoLargo = $alerta['nodo_nombre_largo'] ?? null;
     $nodoRol = $alerta['nodo_rol'] ?? null;
-    $nodoProvincia = $alerta['nodo_provincia'] ?? null;
+    $nodoProvincia = $alerta['nodo_provincia_nombre'] ?? $alerta['nodo_provincia'] ?? null;
 
     $datos = $alerta['datos'] ?? [];
     $reaperturas = (int) ($alerta['reaperturas'] ?? 0);

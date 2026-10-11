@@ -60,9 +60,16 @@ Sin alertas abiertas: "Ninguna alerta abierta ahora mismo."
 **Filtros**
 
 Panel oxigenado en tarjeta independiente (`DESIGN.md`):
-- Estado: **Abiertas** · **Resueltas** · **Todas**
-- Severidad / Riesgo: **Todos** · **Alto** · **Medio** · **Bajo**
-- Temática del problema (`?problemas=` o individual `?problema=`):
+- Nivel 1 (Control general):
+  - Estado: **Abiertas** · **Resueltas** · **Todas**
+  - Severidad / Riesgo: **Todos** · **Alto** · **Medio** · **Bajo**
+  - Selector de Provincia / Ámbito territorial (`?provincia=`):
+    - 🇪🇸 **Toda España (por defecto)** (`espana`): muestra incidencias de ámbito nacional (excluye explícitamente nodos exteriores `FUERA`).
+    - 🌐 **Todas las ubicaciones** (`todas`): incluye todas las incidencias (nacionales, exteriores y globales).
+    - ✈️ **Fuera de España (Exterior)** (`fuera`): incidencias de nodos internacionales o transfronterizos.
+    - Optgroup **Andalucía (8 provincias)**: Almería (`ES-AL`), Cádiz (`ES-CA`), Córdoba (`ES-CO`), Granada (`ES-GR`), Huelva (`ES-H`), Jaén (`ES-J`), Málaga (`ES-MA`), Sevilla (`ES-SE`).
+    - Optgroup **Resto de España**: 44 provincias y ciudades autónomas en orden alfabético.
+- Nivel 2 (Temáticas de problemas, `?problemas=` o individual `?problema=`):
   - 🔘 **Todas las temáticas**
   - 🪫 **Batería y Energía** (`battery-low`, `sunset-battery`)
   - 📍 **Posición y GPS** (`position-flood`, `router-moving`)
@@ -72,10 +79,10 @@ Panel oxigenado en tarjeta independiente (`DESIGN.md`):
   - 📊 **Canal y Saltos** (`chutil-high`, `airtime-high`, `hops-high`)
   - 🌐 **Gateways e Infraestructura** (`gateway-offline`, `gateway-no-traffic`, `infra-silent`, `router-role`, `router-cluster`)
   - 🔐 **Hardware y Seguridad** (`reboot-loop`, `key-security`, `asymmetric-link`)
-- Diseño responsive de filtros: cuadrícula de tarjetas cuadradas (`.grid-tematicas-filtro`) que aprovecha todo el ancho disponible (`repeat(auto-fill, minmax(130px, 1fr))` en escritorio y `repeat(2, 1fr)` en móvil < 540px) y permite selección múltiple acumulativa en tiempo real.
-- Navegación instantánea SPA / AJAX: las acciones de filtrado y paginación no recargan la página completa, sino que actualizan dinámicamente el contenedor `#alertas-app` vía `fetch()` y `DOMParser`, sincronizando la URL del navegador mediante `history.pushState` y evento `popstate`.
+- Diseño responsive de filtros: rejilla adaptable en Nivel 1 y cuadrícula de tarjetas cuadradas (`.grid-tematicas-filtro`) en Nivel 2 que aprovecha todo el ancho disponible (`repeat(auto-fill, minmax(130px, 1fr))` en escritorio y `repeat(2, 1fr)` en móvil < 540px) y permite selección múltiple acumulativa en tiempo real.
+- Navegación instantánea SPA / AJAX: las acciones de filtrado (incluyendo el cambio en el selector de provincia) y paginación no recargan la página completa, sino que actualizan dinámicamente el contenedor `#alertas-app` vía `fetch()` y `DOMParser`, sincronizando la URL del navegador mediante `history.pushState` y evento `popstate`.
 - Paginación: listado paginado (15 por página) ordenado estrictamente por las alertas más recientes primero (`inicio_at DESC, id DESC`).
-- Barra de filtros activos: si hay filtros aplicados, muestra chips desmontables (`✕`) para cada filtro activo, contador de incidencias coincidentes y enlace rápido "Limpiar filtros".
+- Barra de filtros activos (Nivel 3): si hay filtros aplicados (incluyendo provincias específicas, "todas" o "fuera"), muestra chips desmontables (`✕`) para cada filtro activo, contador de incidencias coincidentes y enlace rápido "Limpiar filtros" (restableciendo a Toda España).
 - Sincronización del catálogo inferior: filtrar por temática adapta simultáneamente las tarjetas del catálogo de anomalías a las reglas de dicha categoría con opción a restablecer.
 - Si la URL trae un nodo: "Alertas del nodo {short} (`{id}`) · Quitar".
 
@@ -202,4 +209,4 @@ Si es tu nodo, revisa la guía [Configura tu nodo](/configura-tu-nodo). Si crees
 - `/alertas` y las fichas `/alertas/{id}` son indexables (criterio: todo es público); las fichas no van en `sitemap.xml` por volumen.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-09
+> Creado: 2026-10-07 · Última revisión: 2026-10-11

@@ -20,13 +20,13 @@
     };
 @endphp
 
-<div class="grupo-botones-compartir" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: {{ $justifyContent }}; gap: 0.5rem;" {{ $attributes }}>
+<div class="grupo-botones-compartir grupo-compartir-cobertura" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: {{ $justifyContent }}; gap: 0.5rem;" {{ $attributes }}>
     <!-- WhatsApp -->
     <a
         href="{{ $whatsAppUrl }}"
         target="_blank"
         rel="noopener noreferrer"
-        class="btn-compartir-red btn-compartir-whatsapp"
+        class="btn-compartir-red btn-compartir-whatsapp btn-share-whatsapp"
         title="{{ __('portal.share.whatsapp_title') }}"
         aria-label="{{ __('portal.share.whatsapp_title') }}"
     >
@@ -41,7 +41,7 @@
         href="{{ $telegramUrl }}"
         target="_blank"
         rel="noopener noreferrer"
-        class="btn-compartir-red btn-compartir-telegram"
+        class="btn-compartir-red btn-compartir-telegram btn-share-telegram"
         title="{{ __('portal.share.telegram_title') }}"
         aria-label="{{ __('portal.share.telegram_title') }}"
     >
@@ -54,7 +54,7 @@
     <!-- Email -->
     <a
         href="{{ $emailUrl }}"
-        class="btn-compartir-red btn-compartir-email"
+        class="btn-compartir-red btn-compartir-email btn-share-email"
         title="{{ __('portal.share.email_title') }}"
         aria-label="{{ __('portal.share.email_title') }}"
     >
@@ -69,7 +69,7 @@
     <button
         type="button"
         id="{{ $uniqueId }}"
-        class="btn-compartir-red btn-compartir-copiar"
+        class="btn-compartir-red btn-compartir-copiar btn-share-copiar"
         onclick="copiarEnlaceCompartirUniversal('{{ $targetUrl }}', '{{ $uniqueId }}');"
         title="{{ __('portal.share.copy_title') }}"
         aria-label="{{ __('portal.share.copy_title') }}"
