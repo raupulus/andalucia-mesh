@@ -608,6 +608,7 @@ return [
         'validation_nodeinfo_order' => 'NodeInfo minimum interval cannot exceed recommended interval.',
         'validation_telemetry_order' => 'Telemetry minimum interval cannot exceed recommended interval.',
         'saved_success' => 'Thresholds saved and live-synced successfully.',
+        'saved_local' => 'Thresholds saved locally.',
         'reset_success' => 'Factory default values restored successfully.',
     ],
 ];

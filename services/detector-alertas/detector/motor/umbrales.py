@@ -100,8 +100,8 @@ class UmbralesConfig(BaseModel):
                 reboot_loop_count_5m=4,
                 reboot_loop_count_10m=6,
             ),
-            version=int(ahora.timestamp()),
-            actualizado_en=ahora,
+            version=0,
+            actualizado_en=datetime(1970, 1, 1, tzinfo=UTC),
         )
 
 

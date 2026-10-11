@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Filament\Pages\GestionUmbralesAlertas;
+use App\Jobs\ComprobarServicios;
 use App\Models\User;
 use App\Services\AlertThresholdService;
 use Database\Seeders\AlertThresholdSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -197,5 +200,59 @@ class GestionUmbralesAlertasTest extends TestCase
             ->set('umbrales.router.silence_warning_h', 30.0) // Critical está en 24.0
             ->call('save')
             ->assertHasErrors(['umbrales.router.silence_warning_h']);
+    }
+
+    /**
+     * Cuando detector-alertas no responde, la notificación de aviso utiliza la traducción saved_local.
+     */
+    public function test_guardar_umbrales_con_detector_caido_emite_notificacion_warning_traducida(): void
+    {
+        Http::fake([
+            '*/internal/recargar-umbrales' => Http::response(null, 500),
+        ]);
+
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'activo' => true,
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(GestionUmbralesAlertas::class)
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertNotified(__('admin.alert_thresholds.saved_local'));
+    }
+
+    /**
+     * ComprobarServicios sincroniza automáticamente los umbrales hacia detector-alertas si su versión es 0.
+     */
+    public function test_comprobar_servicios_auto_sincroniza_umbrales_cuando_detector_esta_en_version_cero(): void
+    {
+        Http::fake([
+            '*/health' => Http::response([
+                'ok' => true,
+                'servicio' => 'detector-alertas',
+                'umbrales' => [
+                    'version' => 0,
+                    'ultima_recarga' => '1970-01-01T00:00:00Z',
+                ],
+            ], 200),
+            '*/internal/recargar-umbrales' => Http::response([
+                'ok' => true,
+                'status' => 'reloaded',
+                'version' => 1791715000,
+            ], 200),
+            '*' => Http::response(['ok' => true], 200),
+        ]);
+
+        config(['servicios.lista' => ['detector-alertas' => config('servicios.lista.detector-alertas')]]);
+
+        $job = new ComprobarServicios;
+        $job->handle();
+
+        Http::assertSent(function (Request $request) {
+            return str_contains($request->url(), '/internal/recargar-umbrales')
+                && isset($request['umbrales']['router']);
+        });
     }
 }

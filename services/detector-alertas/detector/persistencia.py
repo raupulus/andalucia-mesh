@@ -358,3 +358,42 @@ class GestorPersistencia:
         except Exception as e:
             logger.error("Error al purgar retención en PostgreSQL: %s", e)
             return 0, 0
+
+    async def guardar_umbrales(
+        self,
+        umbrales: dict[str, Any],
+        updated_at: datetime | None = None,
+    ) -> bool:
+        """Persiste la matriz de umbrales en PostgreSQL para tolerancia a reinicios del servicio."""
+        if not self.pool or not self.conectado:
+            return False
+
+        ts = updated_at or datetime.now(UTC)
+        query = """
+        INSERT INTO alert_thresholds (role_group, parameter, value_numeric, updated_at)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (role_group, parameter) DO UPDATE
+        SET value_numeric = EXCLUDED.value_numeric,
+            updated_at = EXCLUDED.updated_at;
+        """
+        filas: list[tuple[str, str, float, datetime]] = []
+        for grp, params in umbrales.items():
+            if isinstance(params, dict):
+                for param, val in params.items():
+                    try:
+                        filas.append((grp, str(param), float(val), ts))
+                    except (ValueError, TypeError):
+                        continue
+
+        if not filas:
+            return False
+
+        try:
+            async with self.pool.acquire() as conn:
+                await conn.executemany(query, filas)
+            logger.info("Persistidos %d umbrales dinámicos en base de datos PostgreSQL snm_detector", len(filas))
+            return True
+        except Exception as e:
+            logger.warning("No se pudieron persistir los umbrales en DB: %s", e)
+            return False
+

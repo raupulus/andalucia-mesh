@@ -212,11 +212,12 @@ class AlertThresholdService
      *
      * @param  array<string, array<string, float>>  $matrix
      */
-    public function notifyDetector(array $matrix): bool
+    public function notifyDetector(array $matrix, ?int $version = null): bool
     {
         $url = rtrim((string) config('servicios.detector_api.url', 'http://detector-alertas:8080'), '/').'/internal/recargar-umbrales';
         $secret = (string) config('servicios.detector_api.secret', '');
         $timeout = (int) config('servicios.detector_api.timeout', 5);
+        $v = $version ?? (int) (AlertThreshold::max('updated_at')?->timestamp ?? time());
 
         try {
             $response = Http::timeout($timeout)
@@ -225,7 +226,7 @@ class AlertThresholdService
                     'X-Internal-Secret' => $secret,
                 ])
                 ->post($url, [
-                    'version' => time(),
+                    'version' => $v,
                     'umbrales' => $matrix,
                 ]);
 

@@ -143,6 +143,18 @@ class ServidorSalud:
 
         try:
             version = self.motor.umbrales.actualizar_desde_dict(datos)
+
+            # Persistir en PostgreSQL snm_detector para tolerancia a reinicios
+            fuente_umbrales = datos.get("umbrales", datos)
+            if isinstance(fuente_umbrales, dict) and self.persistencia.conectado:
+                try:
+                    await self.persistencia.guardar_umbrales(
+                        fuente_umbrales,
+                        self.motor.umbrales.ultima_recarga,
+                    )
+                except Exception as e_db:
+                    logger.warning("No se pudieron persistir los umbrales en DB tras recarga HTTP: %s", e_db)
+
             return web.json_response({
                 "status": "reloaded",
                 "version": version,
@@ -151,3 +163,4 @@ class ServidorSalud:
         except Exception as e:
             logger.error("Error al aplicar nuevos umbrales: %s", e, exc_info=True)
             return web.json_response({"ok": False, "error": f"Error al aplicar umbrales: {e}"}, status=500)
+

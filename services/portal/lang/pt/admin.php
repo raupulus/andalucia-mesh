@@ -608,6 +608,7 @@ return [
         'validation_nodeinfo_order' => 'O intervalo mínimo de NodeInfo não pode ser superior ao recomendado.',
         'validation_telemetry_order' => 'O intervalo mínimo de telemetria não pode ser superior ao recomendado.',
         'saved_success' => 'Limiares guardados e sincronizados com sucesso.',
+        'saved_local' => 'Limiares guardados localmente.',
         'reset_success' => 'Valores de fábrica restaurados com sucesso.',
     ],
 ];

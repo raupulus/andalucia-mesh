@@ -92,6 +92,40 @@ async def test_gestor_umbrales_fallback_db_resiliente() -> None:
 
 
 @pytest.mark.asyncio
+async def test_gestor_umbrales_recarga_desde_db_exito() -> None:
+    """Verifica que GestorUmbrales sincronice correctamente los umbrales persistidos en PostgreSQL."""
+    gestor = GestorUmbrales()
+    assert gestor.version == 0
+
+    mock_pool = MagicMock()
+    mock_conn = AsyncMock()
+    mock_pool.acquire.return_value.__aenter__.return_value = mock_conn
+
+    db_timestamp = datetime(2026, 10, 11, 10, 0, 0, tzinfo=UTC)
+    mock_conn.fetch.return_value = [
+        {
+            "role_group": "router",
+            "parameter": "hop_limit_warning",
+            "value_numeric": 4.0,
+            "updated_at": db_timestamp,
+        },
+        {
+            "role_group": "client",
+            "parameter": "battery_warning_pct",
+            "value_numeric": 40.0,
+            "updated_at": db_timestamp,
+        },
+    ]
+
+    recargado = await gestor.verificar_y_recargar_db(mock_pool)
+    assert recargado is True
+    assert gestor.version == int(db_timestamp.timestamp())
+    assert gestor.config.router.hop_limit_warning == 4
+    assert gestor.config.client.battery_warning_pct == 40.0
+
+
+
+@pytest.mark.asyncio
 async def test_endpoint_recargar_umbrales_y_health() -> None:
     """Comprueba el endpoint interno de recarga HTTP y la presencia de métricas de umbrales en /health."""
     settings = Settings(

@@ -17,18 +17,23 @@ def test_migraciones_sql_vistas_contrato() -> None:
     base_dir = Path(__file__).resolve().parent.parent
     f_tablas = base_dir / "migrations" / "001_tablas.sql"
     f_vistas = base_dir / "migrations" / "002_vistas.sql"
+    f_umbrales = base_dir / "migrations" / "003_alert_thresholds.sql"
 
     assert f_tablas.is_file(), "El archivo 001_tablas.sql debe existir"
     assert f_vistas.is_file(), "El archivo 002_vistas.sql debe existir"
+    assert f_umbrales.is_file(), "El archivo 003_alert_thresholds.sql debe existir"
 
     txt_tablas = f_tablas.read_text(encoding="utf-8")
     txt_vistas = f_vistas.read_text(encoding="utf-8")
+    txt_umbrales = f_umbrales.read_text(encoding="utf-8")
 
     # Tablas indispensables
     assert "CREATE TABLE IF NOT EXISTS alerta" in txt_tablas
     assert "CREATE TABLE IF NOT EXISTS transicion" in txt_tablas
     assert "CREATE TABLE IF NOT EXISTS estado_snapshot" in txt_tablas
     assert "CREATE TABLE IF NOT EXISTS catalogo" in txt_tablas
+    assert "CREATE TABLE IF NOT EXISTS alert_thresholds" in txt_umbrales
+
 
     # Vistas de contrato para el Portal
     assert "CREATE OR REPLACE VIEW api_alertas" in txt_vistas

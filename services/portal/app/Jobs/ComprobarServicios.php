@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Models\AlertThreshold;
+use App\Services\AlertThresholdService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -107,6 +109,24 @@ class ComprobarServicios
                         } else {
                             $ok = $res->successful();
                             $motivo = $ok ? null : 'Código HTTP '.$codigo;
+                        }
+
+                        // Sincronización automática de umbrales hacia detector-alertas si está desactualizado o en valores por defecto
+                        if ($clave === 'detector-alertas' && $ok) {
+                            try {
+                                $detectorVersion = (int) ($json['umbrales']['version'] ?? 0);
+                                $portalVersion = (int) (AlertThreshold::max('updated_at')?->timestamp ?? 0);
+                                if ($detectorVersion === 0 || ($portalVersion > 0 && $detectorVersion < $portalVersion)) {
+                                    /** @var AlertThresholdService $thresholdService */
+                                    $thresholdService = app(AlertThresholdService::class);
+                                    $thresholdService->notifyDetector(
+                                        $thresholdService->getAllThresholds(),
+                                        $portalVersion > 0 ? $portalVersion : null
+                                    );
+                                }
+                            } catch (Throwable $e) {
+                                // Silencioso: no interrumpir la auditoría de salud por fallo de sincronización
+                            }
                         }
                     } else {
                         $ok = $res->successful();

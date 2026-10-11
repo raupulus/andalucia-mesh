@@ -99,7 +99,7 @@ class GestionUmbralesAlertas extends Page
                 ->send();
         } else {
             Notification::make()
-                ->title('Umbrales guardados localmente')
+                ->title(__('admin.alert_thresholds.saved_local'))
                 ->body($resultado['message'])
                 ->warning()
                 ->send();

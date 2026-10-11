@@ -57,6 +57,8 @@ Mantiene en memoria RAM los parámetros de calibración organizados en 3 grupos 
 
 - **Rendimiento ultra-rápido:** Cero consultas recurrentes a PostgreSQL por paquete; lectura atómica en memoria RAM (< 5 ms de presupuesto por paquete).
 - **Recarga en caliente HTTP:** Expone `POST /internal/recargar-umbrales` protegido con cabecera `X-Internal-Secret: ${INTERNAL_API_SECRET}` para sustitución atómica de la matriz de umbrales al guardar cambios desde el panel Filament.
+- **Persistencia en base de datos local:** Cada recarga HTTP persiste la matriz en la tabla `alert_thresholds` de `snm_detector` (migración 003). Al reiniciar el servicio, los umbrales se restauran inmediatamente desde PostgreSQL sin perder la configuración previa.
+- **Auto-sincronización desde Portal:** La tarea programada de comprobación de servicios del portal (`ComprobarServicios`) detecta si `detector-alertas` opera con valores no inicializados (versión 0) o versión anterior, empujando automáticamente los umbrales vigentes.
 - **Sondeo periódico de seguridad (Fallback):** Comprobación en segundo plano cada 60 s contra la tabla `alert_thresholds` de PostgreSQL; ante caídas de base de datos o fallos temporales de conexión, preserva de forma transparente los umbrales en RAM sin interrumpir la supervisión.
 
 ### Clasificador

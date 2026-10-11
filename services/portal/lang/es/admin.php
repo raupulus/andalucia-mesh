@@ -608,6 +608,7 @@ return [
         'validation_nodeinfo_order' => 'El intervalo mínimo de NodeInfo no puede ser mayor que el recomendado.',
         'validation_telemetry_order' => 'El intervalo mínimo de telemetría no puede ser mayor que el recomendado.',
         'saved_success' => 'Umbrales guardados y sincronizados en caliente.',
+        'saved_local' => 'Umbrales guardados localmente.',
         'reset_success' => 'Valores de fábrica restablecidos correctamente.',
     ],
 ];
