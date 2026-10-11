@@ -344,7 +344,7 @@ Opciones y comandos:
 `/help`
 
 ```
-Bot de alertas de Sur Nodos en Mallas
+Bot de alertas de Andalucía Mesh
 /status — estado general de la malla
 /battery [provincia] — batería de los routers
 /routers [provincia] — routers con batería, chutil y tx
@@ -439,7 +439,7 @@ Cada `compose.yaml` carga `/srv/comun/.env` y después su `.env` propio.
 
 | Variable | Valor o ejemplo | Común o propia | Secreto |
 |---|---|---|---|
-| `PROJECT_NAME` | `Sur Nodos en Mallas` | Común | No |
+| `PROJECT_NAME` | `Andalucía Mesh` | Común | No |
 | `PROJECT_DOMAIN` | `mesh.example.org` | Común | No |
 | `PROJECT_CONTACT` | `public@raupulus.dev` | Común | No |
 | `TZ` | `Europe/Madrid` | Común | No |
@@ -751,4 +751,4 @@ Actualizar: cambiar la etiqueta de la imagen en `compose.yaml` y repetir el paso
 13. **Retención 1 año** para envíos y entregas; destinos inactivos se borran al año de su baja.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-12

@@ -1,6 +1,6 @@
 # DESIGN.md — Sistema visual del portal
 
-> Paleta, tipografía, espaciado y componentes del portal de **Sur Nodos en Mallas** (`${PROJECT_NAME}`). Estética Material (tarjetas, elevación suave, iconos Material, rejilla de 8 px) pero **cuidada y oxigenada**: mucho aire, pocos colores, un solo acento. **Modo claro y modo oscuro con el mismo nivel de contraste.** Es la referencia obligatoria para quien implemente el portal: lo que no está aquí no se añade sin pasar por `dudas/`.
+> Paleta, tipografía, espaciado y componentes del portal de **Andalucía Mesh** (`${PROJECT_NAME}`). Estética Material (tarjetas, elevación suave, iconos Material, rejilla de 8 px) pero **cuidada y oxigenada**: mucho aire, pocos colores, un solo acento. **Modo claro y modo oscuro con el mismo nivel de contraste.** Es la referencia obligatoria para quien implemente el portal: lo que no está aquí no se añade sin pasar por `dudas/`.
 
 ## 1. Principios
 
@@ -245,4 +245,4 @@ Alto 40 px, radio 8 px. Un solo botón primario por pantalla.
 15. Reducir la separación entre secciones para meter más contenido: si no cabe, sobra contenido.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-09
+> Creado: 2026-10-07 · Última revisión: 2026-10-12

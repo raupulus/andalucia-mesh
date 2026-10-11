@@ -58,7 +58,7 @@ Total `84992`. Enlace: `https://discord.com/oauth2/authorize?client_id=${DISCORD
 Respuesta de `/subscribe` (riesgos y tipos por defecto desde `BOT_RIESGOS_DEFECTO`/`BOT_TIPOS_DEFECTO` y el catálogo):
 
 ```
-✅ Este canal recibirá las alertas de Sur Nodos en Mallas.
+✅ Este canal recibirá las alertas de Andalucía Mesh.
 Riesgos: alto · Tipos: infraestructura (por defecto)
 Cámbialos con /levels y /types. Ayuda: /help
 ```
@@ -107,7 +107,7 @@ Los anuncios se publican en el canal de anuncios, pero no se difunden (*crosspos
     "description": "CAD1 (Repetidor Sierra Cádiz) · `!a1b2c3d4` · ROUTER · Cádiz\nCAD1 se ha reiniciado 7 veces en la última hora",
     "color": 0,                      // entero del token `critico` (modo oscuro)
     "timestamp": "2026-10-01T15:00:00Z",
-    "footer": {"text": "Sur Nodos en Mallas"}
+    "footer": {"text": "Andalucía Mesh"}
   }],
   "allowed_mentions": {"parse": []}
 }
@@ -191,4 +191,4 @@ Hilo: `reference = MessageReference(message_id=<mensaje_id del hilo>, channel_id
 En despliegues donde la integración con Discord no se utilice de forma inmediata, el servicio se mantiene inactivo mediante el marcador `/srv/bot-discord/disabled` (o `.disabled`). El script de despliegue `infrastructure/deploy.sh` omite su construcción y arranque garantizando su detención con `docker compose down`, y en el portal permanece con `BOT_DISCORD_ENABLED=false` en `config/servicios.php`.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-09
+> Creado: 2026-10-07 · Última revisión: 2026-10-12

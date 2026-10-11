@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * config/proyecto.php
  *
- * Configuración central y agnóstica para Andalucía Mesh (Sur Nodos en Mallas).
+ * Configuración central y agnóstica para Andalucía Mesh.
  * Todos los valores provienen de variables de entorno o valores por defecto del proyecto.
  * Ningún texto en vistas o markdown debe tener estos datos quemados.
  */

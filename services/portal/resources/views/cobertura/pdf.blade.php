@@ -421,7 +421,7 @@
                     @if(!empty($logoBase64))
                         <img src="{{ $logoBase64 }}" class="header-logo" alt="Logo">
                     @endif
-                    <span class="header-title">Sur Nodos en Mallas</span>
+                    <span class="header-title">Andalucía Mesh</span>
                     <span class="header-subtitle">Red Ciudadana de Telecomunicaciones en Malla LoRa Meshtastic</span>
                 </td>
                 <td style="width: 38%; text-align: right; vertical-align: middle;">
@@ -450,7 +450,7 @@
             <span class="footer-url">{{ $projectDomain }}</span>
         </div>
         <div class="footer-credito">
-            Sur Nodos en Mallas · Generado desde telemetría y trazas RF reales de la red Meshtastic (100% Directos / 0 saltos RF)
+            Andalucía Mesh · Generado desde telemetría y trazas RF reales de la red Meshtastic (100% Directos / 0 saltos RF)
         </div>
     </footer>
 
@@ -458,7 +458,7 @@
     <main>
         <!-- Banner Informativo Superior -->
         <div class="doc-banner">
-            <span class="doc-pildora-red">SUR NODOS EN MALLAS · RED MESHTASTIC ANDALUCÍA</span>
+            <span class="doc-pildora-red">ANDALUCÍA MESH · RED MESHTASTIC ANDALUCÍA</span>
             <h1 class="doc-titulo-matriz">
                 {{ ($datos['filtro'] ?? '') === 'todos' ? 'Matriz de Enlaces Completa (Todos)' : 'Matriz de Enlaces Positivos (SNR > 0 dB)' }}
             </h1>

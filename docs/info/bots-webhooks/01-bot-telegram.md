@@ -42,7 +42,7 @@ Un destino es un chat `group`, `supergroup` o `channel` (`destino.clase`); `plat
 - **Saludo** (solo grupos, no se guarda en `envio`):
 
 ```
-Hola. Avisaré aquí de los problemas de la malla de Sur Nodos en Mallas.
+Hola. Avisaré aquí de los problemas de la malla de Andalucía Mesh.
 Riesgos: alto · Tipos: infraestructura (por defecto)
 Los administradores pueden cambiarlos con /levels y /types. Ayuda: /help
 ```
@@ -165,4 +165,4 @@ Descripción (`setMyDescription`): `Avisos de los problemas de la malla de ${PRO
 9. **Privacidad.** Dado el bot administrador de un canal, cuando se publican 10 mensajes normales, entonces no se escribe nada en la base ni en el registro (salvo, en `DEBUG`, "actualización descartada" sin contenido).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-12

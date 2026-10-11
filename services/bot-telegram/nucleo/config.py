@@ -16,7 +16,7 @@ class ConfiguracionBase(BaseSettings):
         case_sensitive=False,
     )
 
-    project_name: str = "Sur Nodos en Mallas"
+    project_name: str = "Andalucía Mesh"
     project_domain: str = "mesh.desdechipiona.es"
     project_contact: str = "public@raupulus.dev"
     tz: str = "Europe/Madrid"

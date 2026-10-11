@@ -1706,7 +1706,7 @@ class Cobertura
         }, $datos['nodos_evaluados'] ?? []));
 
         $md = "# {$filtroTitulo}\n\n";
-        $md .= "**SUR NODOS EN MALLAS · RED MESHTASTIC ANDALUCÍA**\n\n";
+        $md .= "**ANDALUCÍA MESH · RED MESHTASTIC ANDALUCÍA**\n\n";
         $md .= "- **Nodos Evaluados:** {$nodosTexto}\n";
         $md .= '- **Ventana de Análisis:** '.($datos['ventana_texto'] ?? 'Últimas 24 horas')."\n";
         $md .= '- **Generado en Servidor:** '.($datos['generado_en'] ?? now()->toIso8601String())."\n";
@@ -1808,7 +1808,7 @@ class Cobertura
         if (($datos['filtro'] ?? '') === 'todos') {
             $md .= "- 🔴 **< 0 dB:** Límite / Marginal\n";
         }
-        $md .= "\n*Sur Nodos en Mallas · Generado desde telemetría y trazas RF reales de la red Meshtastic (Enlaces directos 100% / 0 saltos RF)*\n";
+        $md .= "\n*Andalucía Mesh · Generado desde telemetría y trazas RF reales de la red Meshtastic (Enlaces directos 100% / 0 saltos RF)*\n";
 
         return $md;
     }

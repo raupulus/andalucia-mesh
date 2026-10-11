@@ -97,7 +97,7 @@ Columnas, tipos, origen y ventana: [05-contract-views.md](05-contract-views.md).
 
 | Variable | Valor o ejemplo | Común / propia | Secreto |
 |---|---|---|---|
-| `PROJECT_NAME` | `Sur Nodos en Mallas` | común | no |
+| `PROJECT_NAME` | `Andalucía Mesh` | común | no |
 | `TZ` | `Europe/Madrid` (días de agregados y rankings) | común | no |
 | `MQTT_HOST` / `MQTT_PORT` | `mosquitto` / `1884` | común | no |
 | `MQTT_TOPIC_ROOT` | `msh/EU_868` | común | no |
@@ -300,4 +300,4 @@ Actualización: nueva etiqueta git → `deploy.sh ingesta`; las migraciones corr
 13. Trazabilidad de descartes mediante `DiscardTracker`: contadores agregados en memoria por motivo, registro muestreado con limitación de tasa (30 s), búfer circular de 50 eventos recientes y resumen consolidado cada 10 minutos (y al apagar), expuesto en `/health` para monitorización operativa sin sobrecarga de disco.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-09
+> Creado: 2026-10-07 · Última revisión: 2026-10-12

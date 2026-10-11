@@ -11,7 +11,7 @@
 
 **Ficha `/alertas/{id}`** (dinámicos, recortados a 60 y 155 caracteres)
 
-- **Título:** `{regla} · {nodo} · {PROJECT_NAME}`. Ejemplo: "Bucle de reinicio · CAD1 · Sur Nodos en Mallas" (46). Si la alerta afecta a muchos nodos, `{nodo}` = "{n} nodos".
+- **Título:** `{regla} · {nodo} · {PROJECT_NAME}`. Ejemplo: "Bucle de reinicio · CAD1 · Andalucía Mesh" (46). Si la alerta afecta a muchos nodos, `{nodo}` = "{n} nodos".
 - **Descripción:** `{mensaje}. Riesgo {riesgo}, {tipo}, {provincia}. Abierta el {fecha}.`
 
 ## Estructura

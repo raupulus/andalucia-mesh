@@ -21,7 +21,7 @@ def test_formato_apertura_embed() -> None:
         db_name="test",
         db_user="test",
         db_password="test",
-        project_name="Sur Nodos en Mallas",
+        project_name="Andalucía Mesh",
     )
     cliente_portal = ClientePortal(config, "test")
     catalogo = GestorCatalogo(cliente_portal)
@@ -56,7 +56,7 @@ def test_formato_apertura_embed() -> None:
         dominio_proyecto="mesh.desdechipiona.es",
     )
 
-    adaptador = AdaptadorFormatoDiscord(project_name="Sur Nodos en Mallas")
+    adaptador = AdaptadorFormatoDiscord(project_name="Andalucía Mesh")
     contenido = adaptador.serializar_contenido(aviso)
 
     assert "embeds" in contenido
@@ -68,7 +68,7 @@ def test_formato_apertura_embed() -> None:
     assert embed["color"] == 0xFFB4AE  # critico
     assert "`!a1b2c3d4`" in embed["description"]
     assert "Repetidor Sierra Cádiz" in embed["description"]
-    assert embed["footer"]["text"] == "Sur Nodos en Mallas"
+    assert embed["footer"]["text"] == "Andalucía Mesh"
     assert contenido["allowed_mentions"] == {"parse": []}
 
 
@@ -105,7 +105,7 @@ def test_formato_resolucion_embed() -> None:
         dominio_proyecto="mesh.desdechipiona.es",
     )
 
-    adaptador = AdaptadorFormatoDiscord(project_name="Sur Nodos en Mallas")
+    adaptador = AdaptadorFormatoDiscord(project_name="Andalucía Mesh")
     contenido = adaptador.serializar_contenido(aviso)
 
     embed = contenido["embeds"][0]

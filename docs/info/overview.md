@@ -1,6 +1,6 @@
 # Visión general del proyecto
 
-> Qué es Sur Nodos en Mallas, qué se construye y con qué decisiones. Cómo se conectan las piezas: [`integration.md`](integration.md). Mapa: [`architecture-map.md`](architecture-map.md). Orden de despliegue: [`deployment.md`](deployment.md).
+> Qué es Andalucía Mesh, qué se construye y con qué decisiones. Cómo se conectan las piezas: [`integration.md`](integration.md). Mapa: [`architecture-map.md`](architecture-map.md). Orden de despliegue: [`deployment.md`](deployment.md).
 
 ## 1. Qué es
 
@@ -111,4 +111,4 @@ Cuándo ampliar: disco > 70 %, RAM > 80 % sostenida, carga > 2,5 durante 5 min, 
 - PotatoMesh no lee MQTT: depende del adaptador propio mientras su proyecto no lo incorpore.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-12

@@ -51,7 +51,7 @@ MeshView solo lee `config.ini` (no lee variables de entorno). El despliegue lo g
 
 | Variable | Valor o ejemplo | Común / propia | Secreto |
 |---|---|---|---|
-| `PROJECT_NAME` | `Sur Nodos en Mallas` | Común | No |
+| `PROJECT_NAME` | `Andalucía Mesh` | Común | No |
 | `PROJECT_DOMAIN` | `mesh.example.org` | Común | No |
 | `TZ` | `Europe/Madrid` | Común | No |
 | `MQTT_HOST` / `MQTT_PORT` | `mosquitto` / `1884` | Común | No |
@@ -260,4 +260,4 @@ Contenido de `integrations/meshview/`: `README.md` (referencia, versión, licenc
 7. Plantillas `chat.html` y `net.html` montadas para forzar formato 24h y zona `Europe/Madrid` (DT-36, CUST-01).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-12

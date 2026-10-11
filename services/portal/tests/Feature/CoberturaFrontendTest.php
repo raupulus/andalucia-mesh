@@ -29,7 +29,7 @@ class CoberturaFrontendTest extends TestCase
         $response->assertStatus(200);
         $response->assertHeaderMissing('Set-Cookie');
         $response->assertSee('Mi Cobertura', false);
-        $response->assertSee('SUR NODOS EN MALLAS · RED MESHTASTIC ANDALUCÍA', false);
+        $response->assertSee('ANDALUCÍA MESH · RED MESHTASTIC ANDALUCÍA', false);
         $response->assertSee('Solo SNR positivo', false);
         $response->assertSee('Todos (incluye marginales)', false);
         $response->assertSee('id="modal-cargando-cobertura"', false);
@@ -213,7 +213,7 @@ class CoberturaFrontendTest extends TestCase
 
         $content = (string) $response->getContent();
         $this->assertStringContainsString('# Matriz de Enlaces Positivos (SNR > 0 dB)', $content);
-        $this->assertStringContainsString('**SUR NODOS EN MALLAS · RED MESHTASTIC ANDALUCÍA**', $content);
+        $this->assertStringContainsString('**ANDALUCÍA MESH · RED MESHTASTIC ANDALUCÍA**', $content);
         $this->assertStringContainsString('NODOS ÚNICOS DETECTADOS:', $content);
         $this->assertStringContainsString('ENLACE DIRECTO INTER-ROUTER', $content);
         $this->assertStringContainsString('NODOS CON COBERTURA BILATERAL', $content);

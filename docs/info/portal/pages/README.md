@@ -27,9 +27,9 @@ El panel `/admin` no está aquí: es privado y se describe en `../14-operator-pa
 ## Reglas del directorio
 
 1. **Un archivo por página pública**, siempre con la misma estructura: SEO, estructura, borrador del texto, datos dinámicos y configuración y, solo si hace falta, lo pendiente de revisar. Cabecera y pie son comunes a todas las páginas y se definen una sola vez en `01-home.md`.
-2. **Textos con variables entre llaves.** En MAYÚSCULAS, variables de configuración (`{PROJECT_NAME}`, `{PROJECT_DOMAIN}`, `{PROJECT_CONTACT}`, `{LORA_…}`, `{PRIMARY_CHANNEL}`…); en minúsculas, datos de la API (`{total_andalucia}`), con su endpoint en "Datos dinámicos". Nada configurable se escribe a mano en vistas ni Markdown. Los datos de autoría se escriben en claro para revisarlos, pero salen de `config/autoria.php`. Las longitudes de SEO se cuentan con el nombre actual ("Sur Nodos en Mallas").
+2. **Textos con variables entre llaves.** En MAYÚSCULAS, variables de configuración (`{PROJECT_NAME}`, `{PROJECT_DOMAIN}`, `{PROJECT_CONTACT}`, `{LORA_…}`, `{PRIMARY_CHANNEL}`…); en minúsculas, datos de la API (`{total_andalucia}`), con su endpoint en "Datos dinámicos". Nada configurable se escribe a mano en vistas ni Markdown. Los datos de autoría se escriben en claro para revisarlos, pero salen de `config/autoria.php`. Las longitudes de SEO se cuentan con el nombre actual ("Andalucía Mesh").
 3. **Lo que cambie en los módulos se refleja aquí** en el mismo cambio (portal, API, bots, detector, broker). Si dos documentos chocan, manda `../../integration.md` y después el módulo.
 4. Los textos publicados viven en `resources/contenido/*.md` del portal; estos documentos son su fuente de revisión. Ningún texto público usa la marca del firmware ni nombra comunidades ajenas: se habla de "la malla", "los nodos", "el firmware" y "la app del nodo".
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-09
+> Creado: 2026-10-07 · Última revisión: 2026-10-12

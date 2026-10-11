@@ -22,7 +22,7 @@
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem;">
             <div>
                 <div class="pildora-header-cobertura">
-                    SUR NODOS EN MALLAS · RED MESHTASTIC ANDALUCÍA
+                    ANDALUCÍA MESH · RED MESHTASTIC ANDALUCÍA
                 </div>
                 <h1 style="font-family: 'Ubuntu', sans-serif; font-size: 2.1rem; font-weight: 800; color: var(--color-texto); margin: 0.5rem 0 0.35rem 0; line-height: 1.2;">
                     @if(!empty($datos['valido']))
@@ -458,7 +458,7 @@
                         @endif
                     </div>
                     <div style="font-style: italic; color: var(--color-texto-3);">
-                        Sur Nodos en Mallas · Generado desde telemetría y trazas RF reales de la red Meshtastic (Enlaces directos 100% / 0 saltos RF)
+                        Andalucía Mesh · Generado desde telemetría y trazas RF reales de la red Meshtastic (Enlaces directos 100% / 0 saltos RF)
                     </div>
                 </div>
             </div>
