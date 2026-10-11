@@ -28,9 +28,9 @@ class Periodos
         $tz = (string) config('proyecto.zona_horaria', 'Europe/Madrid');
         $ahora = CarbonImmutable::now($tz);
 
-        $validPeriods = ['hour', 'day', 'week', 'month'];
+        $validPeriods = ['hour', 'day', 'week', '14d', 'month'];
         if (! in_array($period, $validPeriods, true)) {
-            throw new InvalidArgumentException("Periodo inválido '{$period}'. Usa hour, day, week o month.");
+            throw new InvalidArgumentException("Periodo inválido '{$period}'. Usa hour, day, week, 14d o month.");
         }
 
         if (! in_array($which, ['current', 'previous'], true)) {
@@ -58,9 +58,10 @@ class Periodos
                 $ttl = $isCurrent ? 900 : 3600;
                 break;
 
+            case '14d':
             case 'month':
-                $start = $isCurrent ? $ahora->startOfMonth() : $ahora->subMonth()->startOfMonth();
-                $end = $start->addMonth();
+                $start = $isCurrent ? $ahora->subDays(14)->startOfDay() : $ahora->subDays(28)->startOfDay();
+                $end = $isCurrent ? $ahora : $ahora->subDays(14)->startOfDay();
                 $ttl = $isCurrent ? 900 : 3600;
                 break;
 

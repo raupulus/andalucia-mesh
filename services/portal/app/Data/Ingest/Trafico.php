@@ -12,23 +12,43 @@ use Illuminate\Support\Facades\DB;
 class Trafico
 {
     /**
-     * Obtiene la distribución de tráfico y tiempo de aire por tipo de paquete (portnum).
+     * Obtiene la distribución de tráfico y tiempo de aire por tipo de paquete (portnum)
+     * filtrado opcionalmente por ámbito territorial (Andalucía, España, Ambos).
      */
-    public function obtenerResultado(string $period = 'day', string $which = 'current'): Resultado
+    public function obtenerResultado(string $period = 'day', string $which = 'current', string $ambito = 'andalucia'): Resultado
     {
         $rango = Periodos::rango($period, $which);
 
         $params = [
             'period' => $period,
             'which' => $which,
-            'bucket_start' => $rango['bucket_start'],
+            'ambito' => $ambito,
+            'from' => $rango['from'],
+            'to' => $rango['to'],
         ];
 
-        return Fuente::recordar('traffic_mix', $params, $rango['ttl'], function () use ($rango, $period, $which) {
-            $filas = DB::connection('ingesta')
-                ->table('api_traffic_mix')
-                ->where('granularity', $rango['granularity'])
-                ->where('bucket_start', $rango['bucket_start'])
+        return Fuente::recordar('traffic_mix', $params, $rango['ttl'], function () use ($rango, $period, $which, $ambito) {
+            $table = ($period === 'hour' || $period === 'day') ? 'agg_node_hour' : 'agg_node_day';
+            $query = DB::connection('ingesta')
+                ->table($table)
+                ->where('bucket', '>=', $rango['from'])
+                ->where('bucket', '<', $rango['to']);
+
+            if ($ambito === 'andalucia') {
+                $query->whereIn('province', Routers::PROVINCIAS_ANDALUCIA);
+            } elseif ($ambito === 'espana') {
+                $query->where(function ($q) {
+                    $q->whereNotIn('province', Routers::PROVINCIAS_ANDALUCIA)
+                        ->orWhereNull('province');
+                });
+            }
+
+            $filas = $query->select([
+                'portnum',
+                DB::raw('sum(packets) as packets'),
+                DB::raw('sum(airtime_s) as airtime_s'),
+            ])
+                ->groupBy('portnum')
                 ->orderByDesc('packets')
                 ->get();
 
@@ -57,6 +77,7 @@ class Trafico
             return [
                 'period' => $period,
                 'which' => $which,
+                'ambito' => $ambito,
                 'bucket_start' => $rango['bucket_start'],
                 'partial' => $rango['partial'],
                 'total_packets' => $totalPackets,

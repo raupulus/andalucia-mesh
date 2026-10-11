@@ -325,4 +325,58 @@ class TraduccionesTest extends TestCase
         $revisaEn->assertSee('Check your node');
         $revisaEn->assertSee('Search node');
     }
+
+    /**
+     * Comprueba que la página de bots traduce correctamente todas las clasificaciones
+     * de riesgo y tipos de incidencia sin exponer claves sin traducir.
+     */
+    public function test_bots_vista_traduce_todos_los_niveles_y_tipos_sin_claves_pendientes(): void
+    {
+        // Español
+        $botsEs = $this->get('/bots?lang=es');
+        $botsEs->assertStatus(200);
+        $botsEs->assertDontSee('portal.bots.');
+        $botsEs->assertSee('Fallo activo o daño a la malla:');
+        $botsEs->assertSee('Riesgo real o incidencia zonal:');
+        $botsEs->assertSee('Aviso informativo preventivo:');
+
+        // Inglés
+        $botsEn = $this->get('/bots?lang=en');
+        $botsEn->assertStatus(200);
+        $botsEn->assertDontSee('portal.bots.');
+        $botsEn->assertSee('Active failure or mesh damage:');
+        $botsEn->assertSee('Real risk or localized issue:');
+        $botsEn->assertSee('Preventive informative notice:');
+
+        // Portugués
+        $botsPt = $this->get('/bots?lang=pt');
+        $botsPt->assertStatus(200);
+        $botsPt->assertDontSee('portal.bots.');
+        $botsPt->assertSee('Falha ativa ou dano na malha:');
+        $botsPt->assertSee('Aviso informativo preventivo:');
+    }
+
+    /**
+     * Comprueba que el selector de periodo en /rankings soporta 14 días y ámbitos territoriales.
+     */
+    public function test_rankings_filtro_14_dias_y_ambitos(): void
+    {
+        $response = $this->get('/rankings?period=14d&ambito=andalucia');
+        $response->assertStatus(200);
+        $response->assertSee('Últimos 14 días');
+        $response->assertSee('Andalucía');
+        $response->assertSee('España');
+        $response->assertSee('Provincia');
+        $response->assertSee('Rol');
+    }
+
+    /**
+     * Comprueba que el endpoint reactivo de búsqueda en Revisa tu nodo responde JSON.
+     */
+    public function test_revisa_tu_nodo_buscar_endpoint_retorna_json(): void
+    {
+        $response = $this->get('/revisa-tu-nodo/buscar?q=30');
+        $response->assertStatus(200);
+        $response->assertHeader('content-type', 'application/json');
+    }
 }

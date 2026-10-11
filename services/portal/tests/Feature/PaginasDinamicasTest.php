@@ -30,10 +30,18 @@ class PaginasDinamicasTest extends TestCase
     public function test_pagina_rankings_admite_periodos(): void
     {
         $response = $this->get('/rankings?period=week&which=current');
-
         $response->assertStatus(200);
         $response->assertHeaderMissing('Set-Cookie');
+
+        $response14d = $this->get('/rankings?period=14d&which=current&ambito=espana');
+        $response14d->assertStatus(200);
+        $response14d->assertHeaderMissing('Set-Cookie');
+
+        $responseAndalucia = $this->get('/rankings?period=month&which=current&ambito=andalucia');
+        $responseAndalucia->assertStatus(200);
+        $responseAndalucia->assertHeaderMissing('Set-Cookie');
     }
+
 
     /**
      * Comprueba que la página de alertas devuelve 200 OK y cero cookies.
@@ -324,4 +332,21 @@ class PaginasDinamicasTest extends TestCase
         $this->assertSame('Cádiz', $alertaNormalizada['nodo_provincia_nombre']);
         $this->assertSame('ES-CA', $alertaNormalizada['nodo_provincia']);
     }
+
+    /**
+     * Comprueba que el endpoint de búsqueda reactiva en revisa-tu-nodo responde JSON adecuadamente.
+     */
+    public function test_revisa_nodo_buscar_endpoint(): void
+    {
+        // Con menos de 2 caracteres responde array vacío
+        $responseVacio = $this->get('/revisa-tu-nodo/buscar?q=a');
+        $responseVacio->assertStatus(200);
+        $responseVacio->assertJson([]);
+
+        // Con query suficiente responde JSON
+        $response = $this->get('/revisa-tu-nodo/buscar?q=CA01');
+        $response->assertStatus(200);
+        $response->assertHeaderMissing('Set-Cookie');
+    }
 }
+

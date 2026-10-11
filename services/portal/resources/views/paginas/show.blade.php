@@ -86,6 +86,10 @@
                     {{ $pagina->description }}
                 </p>
 
+                <div style="margin-bottom: 1.5rem;">
+                    <x-botones-compartir :url="url()->current()" :titulo="$pagina->title" :texto="$pagina->description" />
+                </div>
+
                 <x-separador-bandera />
             </header>
 
@@ -94,9 +98,17 @@
                 {!! $contenidoHtml !!}
             </div>
 
+            <!-- Compartir al pie del artículo -->
+            <div style="margin-top: 3rem; padding: 1.25rem 1.5rem; background: var(--color-superficie-sutil); border-radius: var(--radio-md, 8px); border: 1px solid var(--color-borde); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 0.95rem; font-weight: 700; color: var(--color-texto);">{{ __('portal.share.title') }}:</span>
+                </div>
+                <x-botones-compartir :url="url()->current()" :titulo="$pagina->title" :texto="$pagina->description" />
+            </div>
+
             <!-- Footer del artículo con keywords y vuelta al listado -->
             @if(!empty($pagina->keywords))
-                <div style="margin-top: 3rem;">
+                <div style="margin-top: 2rem;">
                     <x-separador-bandera style="margin-bottom: 1.5rem;" />
                     <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                         <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">

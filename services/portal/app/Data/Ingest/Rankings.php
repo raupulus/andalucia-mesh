@@ -114,7 +114,7 @@ class Rankings
     /**
      * Obtiene los resultados de un ranking concreto.
      */
-    public function obtenerRanking(string $id, string $period = 'day', string $which = 'current', int $limit = 10): Resultado
+    public function obtenerRanking(string $id, string $period = 'day', string $which = 'current', int $limit = 10, string $ambito = 'andalucia'): Resultado
     {
         $catalogo = self::catalogo();
         if (! isset($catalogo[$id])) {
@@ -130,17 +130,55 @@ class Rankings
             'period' => $period,
             'which' => $which,
             'limit' => $limit,
-            'bucket_start' => $rango['bucket_start'],
+            'ambito' => $ambito,
+            'from' => $rango['from'],
+            'to' => $rango['to'],
         ];
 
-        return Fuente::recordar("rank:{$id}", $params, $rango['ttl'], function () use ($meta, $rango, $limit, $period, $which) {
-            $filas = DB::connection('ingesta')
-                ->table($meta['tabla'])
-                ->where('granularity', $rango['granularity'])
-                ->where('bucket_start', $rango['bucket_start'])
-                ->orderByDesc('value')
-                ->limit($limit)
-                ->get();
+        return Fuente::recordar("rank:{$id}", $params, $rango['ttl'], function () use ($meta, $rango, $limit, $period, $which, $id, $ambito) {
+            if ($id === 'network-usage') {
+                $table = ($period === 'hour' || $period === 'day') ? 'agg_node_hour' : 'agg_node_day';
+                $query = DB::connection('ingesta')
+                    ->table($table)
+                    ->where('bucket', '>=', $rango['from'])
+                    ->where('bucket', '<', $rango['to']);
+
+                if ($ambito === 'andalucia') {
+                    $query->whereIn('province', Routers::PROVINCIAS_ANDALUCIA);
+                } elseif ($ambito === 'espana') {
+                    $query->where(function ($q) {
+                        $q->whereNotIn('province', Routers::PROVINCIAS_ANDALUCIA)
+                            ->orWhereNull('province');
+                    });
+                }
+
+                $filas = $query->select([
+                    'from_id as subject_id',
+                    DB::raw('sum(airtime_s) as value'),
+                    DB::raw('sum(packets) as total_packets'),
+                    DB::raw('round(sum(airtime_s)::numeric, 2) as total_airtime'),
+                ])
+                    ->groupBy('from_id')
+                    ->orderByDesc('value')
+                    ->limit($limit)
+                    ->get()
+                    ->map(function ($f) {
+                        $f->extra = [
+                            'packets' => (int) $f->total_packets,
+                            'airtime_s' => (float) $f->total_airtime,
+                        ];
+
+                        return $f;
+                    });
+            } else {
+                $filas = DB::connection('ingesta')
+                    ->table($meta['tabla'])
+                    ->where('granularity', $rango['granularity'])
+                    ->where('bucket_start', $rango['bucket_start'])
+                    ->orderByDesc('value')
+                    ->limit($limit)
+                    ->get();
+            }
 
             // Si los sujetos son nodos, enriquecer con nombres públicos
             $nodeIds = [];

@@ -5,12 +5,21 @@
             <header class="encabezado-pagina" style="margin-bottom: 2.5rem; padding-bottom: 1.5rem;">
                 <h1 class="titulo-pagina-vistoso" style="margin-bottom: 0.75rem;">{{ $h1 }}</h1>
                 <p class="lead" style="margin-bottom: 1.5rem;">{{ $descripcion }}</p>
+                <div style="margin-bottom: 1.25rem;">
+                    <x-botones-compartir :url="url()->current()" :titulo="$titulo" :texto="$descripcion" />
+                </div>
                 <x-separador-bandera />
             </header>
 
             <!-- Contenido HTML procesado desde Markdown -->
             <div class="prose" style="line-height: 1.7; font-size: 1.05rem;">
                 {!! $html !!}
+            </div>
+
+            <!-- Compartir al pie del artículo -->
+            <div style="margin-top: 2.5rem; padding: 1.25rem 1.5rem; background: var(--color-superficie-sutil); border-radius: var(--radio-md, 8px); border: 1px solid var(--color-borde); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+                <span style="font-size: 0.95rem; font-weight: 700; color: var(--color-texto);">{{ __('portal.share.title') }}:</span>
+                <x-botones-compartir :url="url()->current()" :titulo="$titulo" :texto="$descripcion" />
             </div>
 
             <!-- Bloque especial de autoría (si aplica) -->

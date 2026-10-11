@@ -46,9 +46,10 @@ Sin nodos en peligro: "Ningún nodo en peligro ahora mismo."
 
 [Ver todas las alertas →](/alertas)
 
-### Periodo
+### Ámbito y Periodo
 
-Selector: **Hora** · **Día** · **Semana** · **Mes**, y **En curso** · **Anterior**. Por defecto: Día, Anterior.
+- **Ámbito territorial:** Selector de contexto visual entre **Andalucía** y **España**, con recuento dinámico de nodos activos en cada territorio.
+- **Periodo:** **Hora** · **Día** · **Semana** · **14 días** (`14d`) · **Mes**, y **En curso** · **Anterior**. Por defecto: Día, Anterior.
 
 Bajo el selector, una línea con lo que se está viendo y sus fechas:
 
@@ -57,9 +58,11 @@ Bajo el selector, una línea con lo que se está viendo y sus fechas:
 | Hora · en curso / anterior | "Esta hora" / "La última hora completa" |
 | Día · en curso / anterior | "Hoy" / "Ayer" |
 | Semana · en curso / anterior | "Esta semana" / "La semana pasada" |
+| 14 días · en curso / anterior | "Últimos 14 días" / "14 días anteriores" |
 | Mes · en curso / anterior | "Este mes" / "El mes pasado" |
 
 Seguido de "· del {from} al {to}". Nota bajo el selector: "Los periodos cerrados ya no cambian; los que están en curso se van actualizando."
+
 
 ### Consumo de red por nodo
 
@@ -130,4 +133,4 @@ Barra apilada (NodeInfo · Posición · Telemetría · Texto · Otros) y tabla c
 - **Cambio respecto al módulo 04:** la severidad "crítico / aviso" pasa a riesgo `alto` / `medio`, con chips `critico` / `aviso`.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-11

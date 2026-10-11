@@ -13,8 +13,11 @@ Mostrar qué nodos están en peligro ahora, cuáles consumen más tiempo de aire
 Orden fijo:
 
 1. **Nodos en peligro** (siempre arriba): `GET /api/v1/nodes/at-risk?min_risk=medio`, refresco cada 30 s. Fila: chip de riesgo (icono + texto), nodo (corto, largo, id en Ubuntu Mono), provincia, motivos (`reasons`), desde cuándo, enlaces a la alerta más grave (`/alertas/{id}`), a `/revisa-tu-nodo/{id}` y a la ficha del nodo en MeshView. Orden de la API (`riesgo_max_orden` desc, `desde` asc). Vacío: "Ningún nodo en peligro ahora mismo".
-2. **Selector de periodo:** Hora · Día · Semana · Mes y En curso / Anterior; por defecto Día + Anterior ("ayer", cerrado y estable). Afecta a 3, 4 y 5. Estado en la URL (`/rankings?period=week&which=previous`).
+2. **Selector territorial y de periodo:**
+   - **Ámbito territorial:** Selector visual interactivo (Andalucía vs España) con contadores de nodos activos en tiempo real (`?ambito=andalucia|espana|ambos`).
+   - **Periodo:** Hora · Día · Semana · 14 días (`14d`) · Mes y En curso / Anterior; por defecto Día + Anterior ("ayer", cerrado y estable). Afecta a 3, 4 y 5. Estado en la URL (`/rankings?period=14d&which=current&ambito=andalucia`).
 3. **Consumo de red por nodo:** `GET /api/v1/stats/rankings/network-usage?period=&which=&limit=20`. Fila: puesto, nodo, provincia, tiempo de aire (s) y % del total, paquetes, barra apilada por tipo (nodeinfo, posición, telemetría, texto, otros; `traceroute` y resto suman en "Otros", 5 categorías de `DESIGN.md`). Texto fijo: "Mucho consumo suele deberse a intervalos demasiado cortos" con enlace a `/configura-tu-nodo#intervalos`. Tono de diagnóstico.
+
 4. **Más rankings:** un panel por ranking del catálogo (`GET /api/v1/stats/rankings`) salvo `network-usage`, con su top 10 (`limit=10`): puesto, nodo o gateway, valor con unidad.
 5. **Cómo se reparte el tráfico:** `GET /api/v1/stats/traffic-mix?period=&which=`: barra apilada de paquetes y de tiempo de aire por tipo, con tabla equivalente.
 6. **Sobre estos datos:** solo canales de la lista, solo lo que llega con OK to MQTT, periodos en hora de Madrid.

@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Data\Ingest\Diagnostico;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Throwable;
@@ -45,6 +46,27 @@ class DiagnosticoController extends Controller
             'busqueda' => $busqueda,
             'resultados' => $resultados,
         ]);
+    }
+
+    /**
+     * Endpoint asíncrono para el autocompletado reactivo de nodos en el buscador de auditoría.
+     */
+    public function buscar(Request $request): JsonResponse
+    {
+        $query = trim((string) ($request->query('q') ?? $request->query('buscar') ?? ''));
+
+        if (mb_strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        try {
+            $res = $this->diagnostico->buscar($query, 15);
+            $items = (array) ($res->datos['items'] ?? []);
+
+            return response()->json($items);
+        } catch (Throwable) {
+            return response()->json([]);
+        }
     }
 
     /**

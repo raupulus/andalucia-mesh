@@ -49,6 +49,7 @@ Route::get('/routers', [RoutersController::class, 'index'])->name('routers');
 Route::get('/alertas', [AlertasController::class, 'index'])->name('alertas');
 Route::get('/alertas/{id}', [AlertasController::class, 'show'])->name('alertas.show');
 Route::get('/revisa-tu-nodo', [DiagnosticoController::class, 'index'])->name('revisa-nodo');
+Route::get('/revisa-tu-nodo/buscar', [DiagnosticoController::class, 'buscar'])->name('revisa-nodo.buscar');
 Route::get('/revisa-tu-nodo/{id}', [DiagnosticoController::class, 'show'])->name('revisa-nodo.show');
 Route::get('/configurador', [ConfiguradorController::class, 'index'])->name('configurador');
 Route::get('/configurador/{file}', [ConfiguradorController::class, 'asset'])->where('file', '.*')->name('configurador.asset');

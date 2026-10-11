@@ -6,9 +6,24 @@
 <x-layout :title="__('portal.node_check.report_title', ['id' => $idBuscado, 'name' => config('proyecto.nombre')])" :description="__('portal.node_check.report_description')" :image="asset('img/og/og-revisa-nodo.webp')">
     <div class="contenedor seccion">
         <div style="max-width: 820px; margin: 0 auto;">
-            <a href="/revisa-tu-nodo{{ $langQuery }}" style="font-size: 0.9rem; color: var(--color-texto-2); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 1.5rem;">
-                {{ __('portal.node_check.back_to_search') }}
-            </a>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <a href="/revisa-tu-nodo{{ $langQuery }}" style="font-size: 0.9rem; color: var(--color-texto-2); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                    {{ __('portal.node_check.back_to_search') }}
+                </a>
+                <div style="position: relative; width: 280px;">
+                    <input type="search"
+                           id="campo-buscar-nodo-nav"
+                           placeholder="{{ __('portal.node_check.search_placeholder') }}"
+                           autocomplete="off"
+                           oninput="enInputBuscarRevisa(this.value);"
+                           onkeydown="enKeydownBuscarRevisa(event);"
+                           style="width: 100%; padding: 0.45rem 2rem 0.45rem 0.85rem; font-size: 0.85rem; border: 1px solid var(--color-borde); border-radius: var(--radio-sm, 6px); background: var(--color-superficie); color: var(--color-texto);" />
+                    <div id="spinner-busqueda-revisa" style="display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                        <div class="spinner-inline-mini" style="width: 14px; height: 14px;"></div>
+                    </div>
+                    <ul id="lista-sugerencias-revisa" class="desplegable-sugerencias-cobertura" style="display: none; top: calc(100% + 4px);" role="listbox"></ul>
+                </div>
+            </div>
 
             @if(!empty($noEncontrado))
                 <div class="tarjeta" style="padding: 2.5rem; text-align: center;">
@@ -87,6 +102,10 @@
                         </div>
                     </div>
                 </header>
+
+                <div style="margin-bottom: 2rem; display: flex; justify-content: flex-end;">
+                    <x-botones-compartir :url="url()->current()" :titulo="'Informe de Salud del Nodo ' . ($informe['node']['short_name'] ?? $informe['node']['id'])" />
+                </div>
 
                 <!-- 1. Hallazgos y recomendaciones constructivas -->
                 @if(!empty($informe['findings']))
@@ -221,7 +240,109 @@
                         </table>
                     </div>
                 </section>
+
+                <!-- Compartir informe al pie -->
+                <div style="margin-top: 2rem; padding: 1.25rem 1.5rem; background: var(--color-superficie-sutil); border-radius: var(--radio-md, 8px); border: 1px solid var(--color-borde); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+                    <span style="font-size: 0.95rem; font-weight: 700; color: var(--color-texto);">{{ __('portal.share.title') }}:</span>
+                    <x-botones-compartir :url="url()->current()" :titulo="'Auditoría del Nodo ' . ($informe['node']['short_name'] ?? $informe['node']['id'])" />
+                </div>
             @endif
         </div>
     </div>
+
+    <script>
+        let timerBusquedaRevisa = null;
+        const langQuery = '{{ $langQuery }}';
+
+        function enInputBuscarRevisa(valor) {
+            clearTimeout(timerBusquedaRevisa);
+            const desplegable = document.getElementById('lista-sugerencias-revisa');
+            const spinner = document.getElementById('spinner-busqueda-revisa');
+
+            if (!desplegable) return;
+
+            if (!valor || valor.trim().length < 2) {
+                desplegable.style.display = 'none';
+                if (spinner) spinner.style.display = 'none';
+                return;
+            }
+
+            if (spinner) spinner.style.display = 'block';
+            timerBusquedaRevisa = setTimeout(async () => {
+                try {
+                    const resp = await fetch('/revisa-tu-nodo/buscar?q=' + encodeURIComponent(valor.trim()));
+                    const items = await resp.json();
+                    renderizarSugerenciasRevisa(items);
+                } catch (e) {
+                    console.error('Error buscando nodos:', e);
+                } finally {
+                    if (spinner) spinner.style.display = 'none';
+                }
+            }, 180);
+        }
+
+        function renderizarSugerenciasRevisa(items) {
+            const desplegable = document.getElementById('lista-sugerencias-revisa');
+            if (!desplegable) return;
+            desplegable.innerHTML = '';
+
+            if (!items || items.length === 0) {
+                desplegable.innerHTML = '<li style="padding: 10px 14px; font-size: 0.85rem; color: var(--color-texto-3); font-style: italic;">Sin coincidencias en la red</li>';
+                desplegable.style.display = 'block';
+                return;
+            }
+
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'item-sugerencia-nodo';
+                li.dataset.nodeId = item.id;
+                li.dataset.alias = item.short_name || '';
+
+                li.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                        <div style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <span style="font-family: 'Ubuntu Mono', monospace; font-size: 0.85rem; color: var(--color-enlace); font-weight: 600;">${item.id}</span>
+                            <strong style="color: var(--color-texto); font-size: 0.95rem; margin-left: 0.35rem;">${item.short_name || ''}</strong>
+                            ${item.long_name ? `<span style="font-size: 0.82rem; color: var(--color-texto-2); margin-left: 0.35rem;">(${item.long_name})</span>` : ''}
+                        </div>
+                        <div style="display: flex; gap: 0.4rem; align-items: center; flex-shrink: 0;">
+                            <span class="badge-rol badge-rol-client" style="font-size: 0.65rem;">${item.role || 'CLIENT'}</span>
+                            <span class="badge-prov badge-prov-general" style="font-size: 0.65rem;">${item.province || 'General'}</span>
+                            <span style="color: var(--color-acento); font-size: 0.8rem; font-weight: 700; margin-left: 0.25rem;">Auditar →</span>
+                        </div>
+                    </div>
+                `;
+
+                li.onclick = () => {
+                    window.location.href = `/revisa-tu-nodo/${encodeURIComponent(item.id)}${langQuery}`;
+                };
+
+                desplegable.appendChild(li);
+            });
+
+            desplegable.style.display = 'block';
+        }
+
+        function enKeydownBuscarRevisa(event) {
+            if (event.key === 'Escape') {
+                const desplegable = document.getElementById('lista-sugerencias-revisa');
+                if (desplegable) desplegable.style.display = 'none';
+            } else if (event.key === 'Enter') {
+                const desplegable = document.getElementById('lista-sugerencias-revisa');
+                const primera = desplegable ? desplegable.querySelector('.item-sugerencia-nodo') : null;
+                if (desplegable && desplegable.style.display !== 'none' && primera && primera.dataset.nodeId) {
+                    event.preventDefault();
+                    window.location.href = `/revisa-tu-nodo/${encodeURIComponent(primera.dataset.nodeId)}${langQuery}`;
+                }
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            const desplegable = document.getElementById('lista-sugerencias-revisa');
+            const input = document.getElementById('campo-buscar-nodo-nav');
+            if (desplegable && !desplegable.contains(e.target) && e.target !== input) {
+                desplegable.style.display = 'none';
+            }
+        });
+    </script>
 </x-layout>
