@@ -84,9 +84,21 @@ class ComprobarServicios
 
                     $json = $res->json();
                     if (is_array($json)) {
-                        $detalle = json_encode(array_slice($json, 0, 50, true), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                        if (strlen((string) $detalle) > 4096) {
-                            $detalle = substr((string) $detalle, 0, 4096);
+                        $detalleArray = array_slice($json, 0, 50, true);
+                        if (isset($detalleArray['descartes']['ultimos_50']) && is_array($detalleArray['descartes']['ultimos_50'])) {
+                            $detalleArray['descartes']['ultimos_50'] = array_slice($detalleArray['descartes']['ultimos_50'], 0, 5);
+                        }
+                        $detalle = json_encode($detalleArray, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                        if (strlen((string) $detalle) > 4000) {
+                            $resumen = [];
+                            foreach ($detalleArray as $k => $v) {
+                                if (is_scalar($v) || $v === null) {
+                                    $resumen[$k] = $v;
+                                } elseif (is_array($v)) {
+                                    $resumen[$k] = array_slice($v, 0, 3);
+                                }
+                            }
+                            $detalle = json_encode($resumen, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                         }
 
                         if (isset($json['ok'])) {
