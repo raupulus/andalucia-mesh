@@ -10,9 +10,9 @@ Que cualquiera sepa en un minuto si su nodo perjudica a la malla y qué cambiar,
 
 ### Flujo
 
-1. `/revisa-tu-nodo`: campo de búsqueda (id `!a1b2c3d4` o nombre corto/largo). Formulario `GET` (sin sesión ni CSRF) a `/revisa-tu-nodo?q=…`.
+1. `/revisa-tu-nodo`: campo de búsqueda (id `!a1b2c3d4` o nombre corto/largo). Autocompletado reactivo en tiempo real mediante `/revisa-tu-nodo/buscar?q=…` (retorna JSON con nodos coincidentes, nombre, rol y provincia, navegación por teclado y selección directa) con soporte de envío tradicional por formulario `GET` (sin sesión ni CSRF) a `/revisa-tu-nodo?q=…`.
 2. Una coincidencia → redirección 302 a `/revisa-tu-nodo/{id}`. Varias → lista para elegir (nombre, id, rol, provincia, último visto). Ninguna → mensaje con enlaces a `/conecta-tu-gateway` ("¿tu nodo sube con OK to MQTT?") y a `/configura-tu-nodo`.
-3. `/revisa-tu-nodo/{id}`: resultado renderizado en servidor; enlazable desde fichas de alerta, nodos en peligro y bots.
+3. `/revisa-tu-nodo/{id}`: resultado renderizado en servidor; enlazable desde fichas de alerta, nodos en peligro y bots. Incluye botones para compartir el informe de diagnóstico en redes y canales mediante `<x-botones-compartir>`.
 
 ### Resultado
 
@@ -36,13 +36,13 @@ Que cualquiera sepa en un minuto si su nodo perjudica a la malla y qué cambiar,
 
 ## Contratos propios
 
-- Rutas `revisa-tu-nodo` (`GET`, opcional `q`) y `revisa-tu-nodo/{id}` (id normalizado como en la API; uno no válido → `404`).
+- Rutas `revisa-tu-nodo` (`GET`, opcional `q`), `revisa-tu-nodo/buscar` (`GET`, parámetro `q` para autocompletado en JSON) y `revisa-tu-nodo/{id}` (id normalizado como en la API; uno no válido → `404`).
 - `lang/es/diagnostico.php`: título por `check` (`telemetry-interval`, `environment-interval`, `nodeinfo-interval`, `position-interval`, `battery-low-sustained`, `reboots`, `hops`, `role`, `channel-busy`).
 - Anclas de `/configura-tu-nodo` (`03-node-setup-guide.md`).
 
 ## Unidades de trabajo
 
-- **UT-06.9.1 — Búsqueda.** Formulario sin sesión, redirección con una coincidencia, lista con varias. *Aceptación:* `!A1B2C3D4`, `a1b2c3d4` y el nombre corto llevan al mismo nodo.
+- **UT-06.9.1 — Búsqueda.** Formulario sin sesión, autocompletado reactivo, redirección con una coincidencia, lista con varias. *Aceptación:* `!A1B2C3D4`, `a1b2c3d4` y el nombre corto llevan al mismo nodo.
 - **UT-06.9.2 — Resultado.** Bloques, orden, enlaces de guía. *Aceptación:* cada hallazgo muestra problema, dato y enlace.
 - **UT-06.9.3 — Estados.** Sin datos, desconocido, `alertas` caída, todo bien. *Aceptación:* los cuatro con datos simulados.
 - **UT-06.9.4 — Títulos de comprobaciones.** *Aceptación:* prueba que falla si la API devuelve un `check` sin título en `lang/es/diagnostico.php`.
@@ -57,4 +57,4 @@ Que cualquiera sepa en un minuto si su nodo perjudica a la malla y qué cambiar,
 6. **Dado** la página de resultado, **cuando** se inspeccionan cabeceras, **entonces** `X-Robots-Tag: noindex` y ninguna cookie.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-11

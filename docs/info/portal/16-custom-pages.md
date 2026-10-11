@@ -7,7 +7,7 @@
   - Permite a los operadores crear, editar, publicar y retirar artículos y páginas dinámicas desde el panel `/admin` (`CustomPageResource`).
   - Valida de forma estricta la obligatoriedad y unicidad del `slug` antes de guardar.
   - Ofrece listado público en `/paginas` con tarjetas horizontales de ancho completo: imagen a la izquierda, franja separadora inspirada en la bandera de Andalucía con degradado vertical (verde en extremos y blanco en el centro), borde verde/blanco con contraste accesible (WCAG AAA) en temas claro y oscuro, fecha formateada, descripción y keywords como badges verdes en la esquina inferior derecha.
-  - Ofrece vista de detalle en `/paginas/{slug}`: imagen de portada en la parte superior, título H1, fecha de publicación, descripción principal, badges de keywords, contenido completo renderizado desde Markdown mediante `ContenidoMarkdown` y aviso de emergencias.
+  - Ofrece vista de detalle en `/paginas/{slug}`: imagen de portada en la parte superior, título H1, fecha de publicación, descripción principal, badges de keywords, botones de difusión en redes con `<x-botones-compartir>` en cabecera y pie del artículo, contenido completo renderizado desde Markdown mediante `ContenidoMarkdown` y aviso de emergencias.
   - Genera metadatos SEO completos: Open Graph, Twitter Cards y datos estructurados Schema.org `Article` en formato JSON-LD.
   - Muestra en la portada (`/`) un bloque con las 4 últimas páginas activas en tarjetas compactas (2 por fila en escritorio, 1 en móvil) colocado encima de la sección «Quién está detrás», con un botón verde centrado que enlaza al catálogo completo `/paginas`.
   - Integra automáticamente `/paginas` (prioridad 0.8) y todas las páginas activas `/paginas/{slug}` (prioridad 0.7) en `/sitemap.xml`.
@@ -97,4 +97,4 @@ No requiere variables de entorno adicionales. Utiliza el almacenamiento de Larav
 - [x] Módulo implementado y verificado con 100% de tests pasando.
 
 ---
-> Creado: 2026-10-08 · Última revisión: 2026-10-09
+> Creado: 2026-10-08 · Última revisión: 2026-10-11

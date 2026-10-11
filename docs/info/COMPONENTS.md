@@ -87,5 +87,19 @@ Catálogo de componentes reutilizables de interfaz de usuario de Andalucía Mesh
 - **Propósito:** Separador horizontal decorativo con la bandera tricolor de Andalucía (verde `#007A33` / blanco `#FFFFFF` / verde `#007A33`) para delimitar secciones, cabeceras de página y bloques temáticos.
 - **Propiedades / Atributos:** Admite paso directo de atributos HTML y clases adicionales mediante `$attributes->merge(...)`. Utiliza la clase de utilidad `.borde-bandera-andalucia`.
 
+### `x-botones-compartir` (`botones-compartir.blade.php`)
+- **Propósito:** Barra reutilizable y parametrizable de botones para compartir contenido o fichas en redes y canales directos: WhatsApp, Telegram, Correo Electrónico y Copiar Enlace permanente con portapapeles.
+- **Propiedades:**
+  - `url` (string, opcional, por defecto `url()->current()`): enlace de la página o recurso a compartir.
+  - `titulo` (string, opcional, por defecto nombre del proyecto): asunto o título descriptivo.
+  - `texto` (string, opcional): cuerpo de texto sugerido para la difusión.
+  - `whatsappUrl` / `telegramUrl` / `emailUrl` (string, opcional): enlaces de acción directos personalizados si la vista requiere un formateo previo específico (ej. `/mi-cobertura`).
+  - `align` (string, `'start'` | `'center'` | `'end'`, por defecto `'start'`): alineación del contenedor flex.
+- **Estilos y comportamiento:**
+  - Colores distintivos de marca por plataforma (WhatsApp verde `#25D366`, Telegram azul `#229ED9`, Email coral `#EA4335`, Copiar enlace con acento verde Andalucía).
+  - Copiado universal asíncrono (`navigator.clipboard.writeText` con fallback a `document.execCommand('copy')`).
+  - Feedback visual inmediato e interactivo tras copiar (`✓ Copiado` con transición y reversión automática tras 2.2 segundos).
+  - Accesibilidad WCAG AAA: contraste de textos, atributos `title` y `aria-label` localizados con i18n (`portal.share.*`).
+
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-09
+> Creado: 2026-10-07 · Última revisión: 2026-10-11
