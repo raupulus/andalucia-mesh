@@ -737,24 +737,124 @@ FROM packet p
 WHERE p.rx_first >= (now() - INTERVAL '24 hours')
 GROUP BY 1, 2;
 
--- 8.5 api_coverage_links (resumen de enlaces RF directos de las últimas 48 horas con estadísticas SNR)
+-- 8.5 api_coverage_links (resumen de enlaces RF directos 100% de los últimos 7 días con estadísticas SNR)
+-- Unifica recepciones directas en gateways (reception direct=true), reportes de vecindad (neighbor) y saltos directos en rutas (traceroute)
+DROP VIEW IF EXISTS api_coverage_links CASCADE;
 CREATE OR REPLACE VIEW api_coverage_links AS
+WITH raw_links AS (
+    -- 1. Recepciones directas en gateways MQTT (0 saltos RF)
+    SELECT
+        r.gateway_id AS node_a,
+        r.from_id AS node_b,
+        r.snr::real AS snr,
+        r.rx_at,
+        r.distance_km::real AS distance_km
+    FROM reception r
+    WHERE r.direct = true
+      AND r.own = false
+      AND r.snr IS NOT NULL
+      AND r.rx_at >= (now() - INTERVAL '7 days')
+
+    UNION ALL
+
+    -- 2. Reportes directos de vecindad (NeighborInfo)
+    SELECT
+        n.node_id AS node_a,
+        n.neighbor_id AS node_b,
+        n.snr::real AS snr,
+        n.at AS rx_at,
+        NULL::real AS distance_km
+    FROM neighbor n
+    WHERE n.snr IS NOT NULL
+      AND n.at >= (now() - INTERVAL '7 days')
+
+    UNION ALL
+
+    -- 3. Hops directos de ida en rutas de traceroute (0 saltos entre nodos consecutivos)
+    SELECT
+        from_id AS node_a,
+        route->>0 AS node_b,
+        (snrs->>0)::real AS snr,
+        rx_first AS rx_at,
+        NULL::real AS distance_km
+    FROM (
+        SELECT from_id, rx_first, payload->'route' AS route, payload->'snr_towards' AS snrs
+        FROM packet
+        WHERE portnum = 'traceroute'
+          AND rx_first >= (now() - INTERVAL '7 days')
+          AND jsonb_array_length(payload->'route') > 0
+    ) t1
+    WHERE route->>0 IS NOT NULL AND route->>0 != '!ffffffff' AND (snrs->>0) IS NOT NULL
+
+    UNION ALL
+
+    SELECT
+        route->>i AS node_a,
+        route->>(i+1) AS node_b,
+        (snrs->>(i+1))::real AS snr,
+        rx_first AS rx_at,
+        NULL::real AS distance_km
+    FROM (
+        SELECT rx_first, payload->'route' AS route, payload->'snr_towards' AS snrs
+        FROM packet
+        WHERE portnum = 'traceroute'
+          AND rx_first >= (now() - INTERVAL '7 days')
+          AND jsonb_array_length(payload->'route') > 1
+    ) t2,
+    generate_series(0, jsonb_array_length(route) - 2) AS i
+    WHERE route->>i != '!ffffffff' AND route->>(i+1) != '!ffffffff' AND (snrs->>(i+1)) IS NOT NULL
+
+    UNION ALL
+
+    -- 4. Hops directos de vuelta en rutas de traceroute (route_back)
+    SELECT
+        to_id AS node_a,
+        route_back->>0 AS node_b,
+        (snr_back->>0)::real AS snr,
+        rx_first AS rx_at,
+        NULL::real AS distance_km
+    FROM (
+        SELECT to_id, rx_first, payload->'route_back' AS route_back, payload->'snr_back' AS snr_back
+        FROM packet
+        WHERE portnum = 'traceroute'
+          AND rx_first >= (now() - INTERVAL '7 days')
+          AND jsonb_array_length(payload->'route_back') > 0
+    ) tb1
+    WHERE route_back->>0 IS NOT NULL AND route_back->>0 != '!ffffffff' AND (snr_back->>0) IS NOT NULL
+
+    UNION ALL
+
+    SELECT
+        route_back->>j AS node_a,
+        route_back->>(j+1) AS node_b,
+        (snr_back->>(j+1))::real AS snr,
+        rx_first AS rx_at,
+        NULL::real AS distance_km
+    FROM (
+        SELECT rx_first, payload->'route_back' AS route_back, payload->'snr_back' AS snr_back
+        FROM packet
+        WHERE portnum = 'traceroute'
+          AND rx_first >= (now() - INTERVAL '7 days')
+          AND jsonb_array_length(payload->'route_back') > 1
+    ) tb2,
+    generate_series(0, jsonb_array_length(route_back) - 2) AS j
+    WHERE route_back->>j != '!ffffffff' AND route_back->>(j+1) != '!ffffffff' AND (snr_back->>(j+1)) IS NOT NULL
+)
 SELECT
-    r.gateway_id,
-    r.from_id,
+    node_a AS gateway_id,
+    node_b AS from_id,
     count(*)::integer AS packets,
-    round(avg(r.snr)::numeric, 1)::real AS snr_avg,
-    round(min(r.snr)::numeric, 1)::real AS snr_min,
-    round(max(r.snr)::numeric, 1)::real AS snr_max,
-    (array_agg(r.snr ORDER BY r.rx_at DESC))[1] AS snr_last,
-    max(r.rx_at) AS last_rx_at,
-    min(r.rx_at) AS first_rx_at,
-    max(r.distance_km) AS distance_km
-FROM reception r
-WHERE r.direct = true
-  AND r.own = false
-  AND r.rx_at >= (now() - INTERVAL '48 hours')
-GROUP BY r.gateway_id, r.from_id;
+    round(avg(snr)::numeric, 1)::real AS snr_avg,
+    round(min(snr)::numeric, 1)::real AS snr_min,
+    round(max(snr)::numeric, 1)::real AS snr_max,
+    (array_agg(snr ORDER BY rx_at DESC))[1]::real AS snr_last,
+    max(rx_at) AS last_rx_at,
+    min(rx_at) AS first_rx_at,
+    max(distance_km)::real AS distance_km
+FROM raw_links
+WHERE node_a IS NOT NULL AND node_b IS NOT NULL
+  AND node_a != node_b
+GROUP BY node_a, node_b;
 
 -- 8.6 api_direct_receptions (recepciones individuales directas RF de las últimas 48 horas)
 CREATE OR REPLACE VIEW api_direct_receptions AS

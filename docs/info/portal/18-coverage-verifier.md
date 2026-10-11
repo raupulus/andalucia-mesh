@@ -34,7 +34,7 @@
 
 - **Vistas contrato consumidas** (en conexión `ingesta` con rol `portal_lector_ingesta`):
   - `api_nodes`: Metadatos del nodo (`id`, `short_name`, `long_name`, `role`, `hw_model`, `firmware`, `province`, `last_seen`, `is_gateway`, `is_router`).
-  - `api_coverage_links`: Agregado de enlaces directos nodo ↔ gateway (`gateway_id`, `from_id`, `packets`, `snr_avg`, `snr_last`, `last_rx_at`).
+  - `api_coverage_links`: Agregado de enlaces directos RF 100% (`gateway_id`, `from_id`, `packets`, `snr_avg`, `snr_last`, `last_rx_at`, `distance_km`), unificando recepciones directas en gateways, reportes de vecindad (`neighbor`) y saltos en rutas (`traceroute`) en ventana de 7 días.
   - `api_direct_receptions`: Recepciones directas sin agregar (`gateway_id`, `from_id`, `rx_at`, `snr`, `rssi`).
 - **Estructura interna compilada** (`App\Data\Ingest\Cobertura`):
   - `valido`: boolean indicando si la compilación tuvo éxito.

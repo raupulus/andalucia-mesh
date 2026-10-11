@@ -379,10 +379,10 @@ class Cobertura
 
             $fila = [
                 'id' => $destId,
-                'short_name' => $meta['short_name'],
-                'long_name' => $meta['long_name'],
-                'role' => $meta['role'],
-                'clase_rol' => self::claseRol($meta['role']),
+                'short_name' => $meta['short_name'] ?? $destId,
+                'long_name' => $meta['long_name'] ?? $destId,
+                'role' => $meta['role'] ?? 'CLIENT',
+                'clase_rol' => self::claseRol($meta['role'] ?? 'CLIENT'),
                 'province' => $meta['province'] ?: 'General',
                 'clase_provincia' => self::claseProvincia($meta['province'] ?: 'General'),
                 'distancia_texto' => $distanciaTexto,
@@ -690,6 +690,8 @@ class Cobertura
                 ->toArray();
 
             foreach ($filas as $f) {
+                $f['role'] = $f['role'] ?? 'CLIENT';
+                $f['province'] = $f['province'] ?: 'General';
                 $res[$f['id']] = $f;
             }
         } catch (Throwable) {
@@ -1903,8 +1905,12 @@ class Cobertura
     /**
      * Asigna la clase CSS correspondiente al rol del nodo.
      */
-    public static function claseRol(string $rol): string
+    public static function claseRol(?string $rol): string
     {
+        if ($rol === null || trim($rol) === '') {
+            return 'badge-rol-client';
+        }
+
         return match (strtoupper(trim($rol))) {
             'ROUTER' => 'badge-rol-router',
             'ROUTER LATE', 'ROUTER_LATE' => 'badge-rol-router-late',
@@ -1957,8 +1963,12 @@ class Cobertura
     /**
      * Asigna la clase CSS correspondiente a la provincia territorial.
      */
-    public static function claseProvincia(string $provincia): string
+    public static function claseProvincia(?string $provincia): string
     {
+        if ($provincia === null || trim($provincia) === '') {
+            return 'badge-prov-general';
+        }
+
         $p = mb_strtolower(trim($provincia));
 
         return match ($p) {
