@@ -71,6 +71,9 @@ BEGIN
     IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'portal_lector_alertas') THEN
         CREATE ROLE portal_lector_alertas WITH LOGIN ENCRYPTED PASSWORD 'insecure_placeholder_lector_alertas';
     END IF;
+
+    -- Desactivar JIT en el rol lector del portal para optimizar consultas sobre vistas complejas
+    ALTER ROLE portal_lector_ingesta SET jit = off;
 END
 $$;
 

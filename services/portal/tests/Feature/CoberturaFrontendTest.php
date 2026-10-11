@@ -476,5 +476,29 @@ class CoberturaFrontendTest extends TestCase
         $destinosJa01 = array_column($matrizJa01['bloque_bilateral'], 'id');
         $this->assertNotContains('!5f3a3a29', $destinosJa01);
     }
+
+    /**
+     * Comprueba que los enlaces reales directos (Sierra de Líjar CA01 ⇄ CA05 y vecinos legítimos de Rau0)
+     * se mantienen intactos y detectados correctamente.
+     */
+    public function test_presencia_enlaces_reales_rau0_y_sierra_de_lijar(): void
+    {
+        $cobertura = app(Cobertura::class);
+
+        // Enlace mutuo entre repetidores de Sierra de Líjar (CA01 y CA05)
+        $matrizLijar = $cobertura->obtenerMatriz(['!30618df9', '!63760c00'], 'todos');
+        $this->assertTrue($matrizLijar['valido']);
+        $this->assertNotNull($matrizLijar['fila_mutuo']);
+        $this->assertSame('Mutuo', $matrizLijar['fila_mutuo']['cobertura_label']);
+        $this->assertNotNull($matrizLijar['fila_mutuo']['enlaces']['!30618df9']);
+        $this->assertNotNull($matrizLijar['fila_mutuo']['enlaces']['!63760c00']);
+
+        // Vecinos legítimos conocidos de Rau0 (Chipiona) en entorno de referencia
+        $matrizRau0 = $cobertura->obtenerMatriz(['!5f3a3a29'], 'todos');
+        $destinosRau0 = array_column($matrizRau0['bloque_bilateral'], 'id');
+
+        $this->assertContains('!30618df9', $destinosRau0, 'Rau0 debe contener al repetidor CA01');
+        $this->assertContains('!63760c00', $destinosRau0, 'Rau0 debe contener al repetidor CA05');
+    }
 }
 

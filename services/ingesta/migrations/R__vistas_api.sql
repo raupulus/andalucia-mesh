@@ -707,11 +707,13 @@ WHERE p.rx_first >= (now() - INTERVAL '7 days')
 GROUP BY 1, 2, 3;
 
 -- 8.2 api_node_battery_daily (histórico diario de batería)
+DROP VIEW IF EXISTS api_node_battery_daily CASCADE;
 CREATE OR REPLACE VIEW api_node_battery_daily AS
 SELECT
     node_id,
     bucket::date AS day,
     min_level,
+    max_level,
     round((sum_level / NULLIF(readings, 0))::numeric, 1)::real AS avg_level,
     readings::integer,
     readings_below_40::integer
@@ -719,11 +721,13 @@ FROM agg_telemetry_day
 WHERE bucket >= (now() - INTERVAL '7 days');
 
 -- 8.3 api_node_reboots_daily (histórico diario de reinicios)
+DROP VIEW IF EXISTS api_node_reboots_daily CASCADE;
 CREATE OR REPLACE VIEW api_node_reboots_daily AS
 SELECT
     node_id,
     bucket::date AS day,
-    reboots::integer
+    reboots::integer,
+    readings::integer
 FROM agg_telemetry_day
 WHERE bucket >= (now() - INTERVAL '7 days');
 
@@ -753,7 +757,9 @@ WITH raw_links AS (
     WHERE r.direct = true
       AND r.own = false
       AND r.snr IS NOT NULL
-      AND r.snr != -32.0
+      AND r.snr > -32.0
+      AND r.gateway_id != '!ffffffff'
+      AND r.from_id != '!ffffffff'
       AND r.rx_at >= (now() - INTERVAL '7 days')
 
     UNION ALL
@@ -767,29 +773,42 @@ WITH raw_links AS (
         NULL::real AS distance_km
     FROM neighbor n
     WHERE n.snr IS NOT NULL
-      AND n.snr != -32.0
+      AND n.snr > -32.0
+      AND n.node_id != '!ffffffff'
+      AND n.neighbor_id != '!ffffffff'
       AND n.at >= (now() - INTERVAL '7 days')
 
     UNION ALL
 
-    -- 3. Hops directos de ida en respuestas de traceroute (primer salto desde el solicitante to_id hacia route[0])
-    -- En respuestas (RouteDiscovery response), to_id es el solicitante y route[0] el primer repetidor
+    -- 3. Hops directos de ida en rutas de traceroute (primer salto hacia route[0])
+    -- En respuestas (RouteDiscovery response), to_id es el solicitante original y route[0] el primer repetidor.
+    -- En peticiones en tránsito, from_id es el solicitante de la traza.
     SELECT
-        to_id AS node_a,
+        CASE
+            WHEN jsonb_array_length(coalesce(payload->'snr_back', '[]'::jsonb)) > 0
+              OR jsonb_array_length(coalesce(payload->'route_back', '[]'::jsonb)) > 0
+            THEN to_id
+            ELSE from_id
+        END AS node_a,
         route->>0 AS node_b,
         (snrs->>0)::real AS snr,
         rx_first AS rx_at,
         NULL::real AS distance_km
     FROM (
-        SELECT to_id, rx_first, payload->'route' AS route, payload->'snr_towards' AS snrs
+        SELECT from_id, to_id, rx_first, payload->'route' AS route, payload->'snr_towards' AS snrs, payload
         FROM packet
         WHERE portnum = 'traceroute'
           AND rx_first >= (now() - INTERVAL '7 days')
           AND jsonb_array_length(payload->'route') > 0
-          AND (jsonb_array_length(coalesce(payload->'snr_back', '[]'::jsonb)) > 0 OR jsonb_array_length(coalesce(payload->'route_back', '[]'::jsonb)) > 0)
     ) t1
-    WHERE route->>0 IS NOT NULL AND route->>0 != '!ffffffff' AND to_id != '!ffffffff'
-      AND (snrs->>0) IS NOT NULL AND (snrs->>0)::real != -32.0
+    WHERE route->>0 IS NOT NULL AND route->>0 != '!ffffffff'
+      AND CASE
+            WHEN jsonb_array_length(coalesce(payload->'snr_back', '[]'::jsonb)) > 0
+              OR jsonb_array_length(coalesce(payload->'route_back', '[]'::jsonb)) > 0
+            THEN to_id
+            ELSE from_id
+          END != '!ffffffff'
+      AND (snrs->>0) IS NOT NULL AND (snrs->>0)::real > -32.0
 
     UNION ALL
 
@@ -809,7 +828,7 @@ WITH raw_links AS (
     ) t2,
     generate_series(0, jsonb_array_length(route) - 2) AS i
     WHERE route->>i != '!ffffffff' AND route->>(i+1) != '!ffffffff'
-      AND (snrs->>(i+1)) IS NOT NULL AND (snrs->>(i+1))::real != -32.0
+      AND (snrs->>(i+1)) IS NOT NULL AND (snrs->>(i+1))::real > -32.0
 
     UNION ALL
 
@@ -829,7 +848,7 @@ WITH raw_links AS (
           AND jsonb_array_length(payload->'route_back') > 0
     ) tb1
     WHERE route_back->>0 IS NOT NULL AND route_back->>0 != '!ffffffff' AND from_id != '!ffffffff'
-      AND (snr_back->>0) IS NOT NULL AND (snr_back->>0)::real != -32.0
+      AND (snr_back->>0) IS NOT NULL AND (snr_back->>0)::real > -32.0
 
     UNION ALL
 
@@ -849,7 +868,7 @@ WITH raw_links AS (
     ) tb2,
     generate_series(0, jsonb_array_length(route_back) - 2) AS j
     WHERE route_back->>j != '!ffffffff' AND route_back->>(j+1) != '!ffffffff'
-      AND (snr_back->>(j+1)) IS NOT NULL AND (snr_back->>(j+1))::real != -32.0
+      AND (snr_back->>(j+1)) IS NOT NULL AND (snr_back->>(j+1))::real > -32.0
 )
 SELECT
     node_a AS gateway_id,
@@ -865,6 +884,8 @@ SELECT
 FROM raw_links
 WHERE node_a IS NOT NULL AND node_b IS NOT NULL
   AND node_a != node_b
+  AND node_a != '!ffffffff'
+  AND node_b != '!ffffffff'
 GROUP BY node_a, node_b;
 
 -- 8.6 api_direct_receptions (recepciones individuales directas RF de las últimas 48 horas)

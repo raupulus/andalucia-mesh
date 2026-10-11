@@ -729,7 +729,7 @@ class Cobertura
                 })
                 ->where('gateway_id', '!=', '!ffffffff')
                 ->where('from_id', '!=', '!ffffffff')
-                ->where('snr_last', '!=', -32.0)
+                ->where('snr_last', '>', -32.0)
                 ->whereNotNull('snr_last')
                 ->get()
                 ->map(fn ($r) => (array) $r)
