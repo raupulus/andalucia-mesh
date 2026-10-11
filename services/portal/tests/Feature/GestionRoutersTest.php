@@ -284,5 +284,95 @@ class GestionRoutersTest extends TestCase
         $router->refresh();
         $this->assertNull($router->blocked_nodes);
     }
+
+    /**
+     * Comprueba que updateRouterBlockedNode auto-resuelve nombres cuando vienen vacíos.
+     */
+    public function test_actualizar_bloqueado_con_payload_y_autoresolucion(): void
+    {
+        $user = User::factory()->create();
+
+        $router = CoordinatedRouter::create([
+            'node_id' => '!63760c00',
+            'short_name' => 'CA05',
+            'long_name' => 'EA7-CA-05',
+            'role' => 'ROUTER',
+            'province' => 'ES-CA',
+            'status' => CoordinatedRouter::STATUS_MANAGED,
+            'blocked_nodes' => [],
+        ]);
+
+        CoordinatedRouter::create([
+            'node_id' => '!07f5a06a',
+            'short_name' => 'BASE',
+            'long_name' => 'ATLAS BASE 📡☀🔋',
+            'role' => 'CLIENT_BASE',
+            'province' => 'ES-CA',
+            'status' => CoordinatedRouter::STATUS_KNOWN,
+        ]);
+
+        // Añadir nodo bloqueado pasando nombres vacíos para comprobar auto-resolución
+        Livewire::actingAs($user)
+            ->test(GestionRouters::class)
+            ->call('updateRouterBlockedNode', '!63760c00', '!07f5a06a', true, [
+                'short_name' => '',
+                'long_name' => '',
+            ]);
+
+        $router->refresh();
+        $this->assertCount(1, $router->blocked_nodes);
+        $this->assertSame('BASE', $router->blocked_nodes[0]['short_name']);
+        $this->assertSame('BASE', $router->blocked_nodes[0]['shortName']);
+        $this->assertSame('ATLAS BASE 📡☀🔋', $router->blocked_nodes[0]['long_name']);
+        $this->assertSame('ATLAS BASE 📡☀🔋', $router->blocked_nodes[0]['longName']);
+        $this->assertSame('CLIENT_BASE', $router->blocked_nodes[0]['role']);
+    }
+
+    /**
+     * Comprueba que la vista normaliza y auto-sana nodos bloqueados que se guardaron con nombres vacíos en versiones anteriores.
+     */
+    public function test_vista_normaliza_y_autoresuelve_nombres_vacios_en_bloqueados_heredados(): void
+    {
+        $user = User::factory()->create();
+
+        // Router con un nodo bloqueado que tiene cadenas vacías
+        $router = CoordinatedRouter::create([
+            'node_id' => '!63760c00',
+            'short_name' => 'CA05',
+            'long_name' => 'EA7-CA-05',
+            'role' => 'ROUTER',
+            'province' => 'ES-CA',
+            'status' => CoordinatedRouter::STATUS_MANAGED,
+            'blocked_nodes' => [
+                [
+                    'hex' => '!07f5a06a',
+                    'short_name' => '',
+                    'long_name' => '',
+                    'role' => 'CLIENT_BASE',
+                    'added_at' => '2026-10-10T20:20:40+00:00',
+                ],
+            ],
+        ]);
+
+        // Nodo conocido para resolver
+        CoordinatedRouter::create([
+            'node_id' => '!07f5a06a',
+            'short_name' => 'BASE',
+            'long_name' => 'ATLAS BASE 📡☀🔋',
+            'role' => 'CLIENT_BASE',
+            'province' => 'ES-CA',
+            'status' => CoordinatedRouter::STATUS_KNOWN,
+        ]);
+
+        // Al acceder a la página, la vista debe normalizar y auto-sanar el registro en BD
+        $response = $this->actingAs($user)->get('/admin/gestion-routers');
+        $response->assertSuccessful();
+
+        $router->refresh();
+        $this->assertSame('BASE', $router->blocked_nodes[0]['short_name']);
+        $this->assertSame('BASE', $router->blocked_nodes[0]['shortName']);
+        $this->assertSame('ATLAS BASE 📡☀🔋', $router->blocked_nodes[0]['long_name']);
+        $this->assertSame('ATLAS BASE 📡☀🔋', $router->blocked_nodes[0]['longName']);
+    }
 }
 

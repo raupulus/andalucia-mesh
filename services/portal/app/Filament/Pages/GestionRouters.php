@@ -75,7 +75,15 @@ class GestionRouters extends Page
                 $hex = is_array($item) ? ($item['hex'] ?? '') : (string) $item;
                 $sName = is_array($item) ? ($item['short_name'] ?? $item['shortName'] ?? '') : '';
                 $lName = is_array($item) ? ($item['long_name'] ?? $item['longName'] ?? '') : '';
-                $role = is_array($item) ? ($item['role'] ?? 'ROUTER') : 'ROUTER';
+                $role = is_array($item) ? ($item['role'] ?? '') : '';
+
+                // Si falta nombre o coincide exactamente con el hex, resolver identidad
+                if (empty($sName) || empty($lName) || $sName === $hex || $lName === $hex) {
+                    $identity = $this->resolveNodeIdentity($hex, is_array($item) ? $item : null);
+                    $sName = $identity['short_name'];
+                    $lName = $identity['long_name'];
+                    $role = $role ?: $identity['role'];
+                }
 
                 $clean = ltrim($hex, '!');
                 $num = ctype_xdigit($clean) ? (int) hexdec($clean) : 0;
@@ -87,7 +95,7 @@ class GestionRouters extends Page
                     'shortName' => $sName,
                     'long_name' => $lName,
                     'longName' => $lName,
-                    'role' => $role,
+                    'role' => $role ?: 'ROUTER',
                     'added_at' => is_array($item) ? ($item['added_at'] ?? null) : null,
                 ];
             }, $list));
@@ -97,6 +105,27 @@ class GestionRouters extends Page
             $cleanHex = ltrim($r->node_id, '!');
             $decId = ctype_xdigit($cleanHex) ? (int) hexdec($cleanHex) : 0;
 
+            $normalizedFavs = $normalizeList($r->favorite_nodes);
+            $normalizedBlocked = $normalizeList($r->blocked_nodes);
+
+            // Auto-heal: persistir en BD si las listas almacenadas contenían nombres incompletos
+            $needsSave = false;
+            if (is_array($r->favorite_nodes) && json_encode($r->favorite_nodes) !== json_encode($normalizedFavs)) {
+                $r->favorite_nodes = $normalizedFavs;
+                $needsSave = true;
+            }
+            if (is_array($r->blocked_nodes) && json_encode($r->blocked_nodes) !== json_encode($normalizedBlocked)) {
+                $r->blocked_nodes = $normalizedBlocked;
+                $needsSave = true;
+            }
+            if ($needsSave) {
+                try {
+                    $r->save();
+                } catch (\Throwable) {
+                    // Silencioso en lectura si ocurre restricción concurrente
+                }
+            }
+
             return [
                 'node_id' => $r->node_id,
                 'dec_id' => (string) $decId,
@@ -105,8 +134,8 @@ class GestionRouters extends Page
                 'province' => $r->province,
                 'role' => $r->role,
                 'status' => $r->status,
-                'favorite_nodes' => $normalizeList($r->favorite_nodes),
-                'blocked_nodes' => $normalizeList($r->blocked_nodes),
+                'favorite_nodes' => $normalizedFavs,
+                'blocked_nodes' => $normalizedBlocked,
             ];
         })->values()->all();
 
@@ -153,38 +182,88 @@ class GestionRouters extends Page
     }
 
     /**
-     * Resuelve el nombre y rol conocido de un nodo a partir de la base de datos si vienen vacíos.
+     * Resuelve el nombre y rol conocido de un nodo a partir de la base de datos si vienen vacíos o genéricos.
      *
+     * @param  array<string, mixed>|null  $nodeData
      * @return array{short_name: string, long_name: string, role: string}
      */
     protected function resolveNodeIdentity(string $targetHex, ?array $nodeData): array
     {
-        $shortName = $nodeData['short_name'] ?? $nodeData['shortName'] ?? '';
-        $longName = $nodeData['long_name'] ?? $nodeData['longName'] ?? '';
-        $role = $nodeData['role'] ?? '';
+        $shortName = is_array($nodeData) ? ($nodeData['short_name'] ?? $nodeData['shortName'] ?? '') : '';
+        $longName = is_array($nodeData) ? ($nodeData['long_name'] ?? $nodeData['longName'] ?? '') : '';
+        $role = is_array($nodeData) ? ($nodeData['role'] ?? '') : '';
 
-        if (empty($shortName) || empty($longName)) {
-            $known = CoordinatedRouter::where('node_id', $targetHex)->first();
+        $cleanHex = ltrim($targetHex, '!');
+        $fallbackShort = substr($cleanHex, -4);
+
+        $needsShort = empty($shortName) || $shortName === $targetHex || $shortName === $fallbackShort;
+        $needsLong = empty($longName) || $longName === $targetHex || str_starts_with($longName, 'Router ');
+
+        if ($needsShort || $needsLong) {
+            $known = CoordinatedRouter::where('node_id', $targetHex)
+                ->orWhereRaw('LOWER(node_id) = ?', [strtolower($targetHex)])
+                ->first();
             if ($known) {
-                $shortName = $shortName ?: ($known->short_name ?? '');
-                $longName = $longName ?: ($known->long_name ?? '');
-                $role = $role ?: ($known->role ?? 'ROUTER');
-            } else {
+                if ($needsShort && ! empty($known->short_name)) {
+                    $shortName = $known->short_name;
+                    $needsShort = false;
+                }
+                if ($needsLong && ! empty($known->long_name)) {
+                    $longName = $known->long_name;
+                    $needsLong = false;
+                }
+                if (empty($role) && ! empty($known->role)) {
+                    $role = $known->role;
+                }
+            }
+
+            if ($needsShort || $needsLong) {
                 try {
-                    $apiNode = DB::connection('ingesta')->table('api_nodes')->where('id', $targetHex)->first();
+                    $apiNode = DB::connection('ingesta')->table('api_nodes')
+                        ->where('id', $targetHex)
+                        ->orWhereRaw('LOWER(id) = ?', [strtolower($targetHex)])
+                        ->first();
                     if ($apiNode) {
-                        $shortName = $shortName ?: ($apiNode->short_name ?? '');
-                        $longName = $longName ?: ($apiNode->long_name ?? '');
-                        $role = $role ?: ($apiNode->role ?? 'ROUTER');
+                        if ($needsShort && ! empty($apiNode->short_name)) {
+                            $shortName = $apiNode->short_name;
+                            $needsShort = false;
+                        }
+                        if ($needsLong && ! empty($apiNode->long_name)) {
+                            $longName = $apiNode->long_name;
+                            $needsLong = false;
+                        }
+                        if (empty($role) && ! empty($apiNode->role)) {
+                            $role = $apiNode->role;
+                        }
                     }
                 } catch (\Throwable) {
-                    // Ignorar si ingesta no está accesible
+                    try {
+                        $apiNode = DB::connection('ingesta')->table('node')
+                            ->where('id', $targetHex)
+                            ->orWhereRaw('LOWER(id) = ?', [strtolower($targetHex)])
+                            ->first();
+                        if ($apiNode) {
+                            if ($needsShort && ! empty($apiNode->short_name)) {
+                                $shortName = $apiNode->short_name;
+                                $needsShort = false;
+                            }
+                            if ($needsLong && ! empty($apiNode->long_name)) {
+                                $longName = $apiNode->long_name;
+                                $needsLong = false;
+                            }
+                            if (empty($role) && ! empty($apiNode->role)) {
+                                $role = $apiNode->role;
+                            }
+                        }
+                    } catch (\Throwable) {
+                        // Ignorar si ingesta no está accesible
+                    }
                 }
             }
         }
 
         return [
-            'short_name' => $shortName ?: substr(ltrim($targetHex, '!'), -4),
+            'short_name' => $shortName ?: $fallbackShort,
             'long_name' => $longName ?: $targetHex,
             'role' => $role ?: 'ROUTER',
         ];
@@ -215,9 +294,17 @@ class GestionRouters extends Page
         $favs = $router->favorite_nodes ?? [];
         if ($isAdd) {
             $exists = false;
-            foreach ($favs as $f) {
+            foreach ($favs as $idx => $f) {
                 if (strtolower($f['hex'] ?? (string) $f) === strtolower($targetHex)) {
                     $exists = true;
+                    if (empty($f['short_name']) || empty($f['long_name']) || ($f['short_name'] ?? '') === $targetHex) {
+                        $identity = $this->resolveNodeIdentity($targetHex, $nodeData);
+                        $favs[$idx]['short_name'] = $identity['short_name'];
+                        $favs[$idx]['shortName'] = $identity['short_name'];
+                        $favs[$idx]['long_name'] = $identity['long_name'];
+                        $favs[$idx]['longName'] = $identity['long_name'];
+                        $favs[$idx]['role'] = $identity['role'];
+                    }
                     break;
                 }
             }
@@ -270,9 +357,17 @@ class GestionRouters extends Page
         $blocked = $router->blocked_nodes ?? [];
         if ($isAdd) {
             $exists = false;
-            foreach ($blocked as $b) {
+            foreach ($blocked as $idx => $b) {
                 if (strtolower($b['hex'] ?? (string) $b) === strtolower($targetHex)) {
                     $exists = true;
+                    if (empty($b['short_name']) || empty($b['long_name']) || ($b['short_name'] ?? '') === $targetHex) {
+                        $identity = $this->resolveNodeIdentity($targetHex, $nodeData);
+                        $blocked[$idx]['short_name'] = $identity['short_name'];
+                        $blocked[$idx]['shortName'] = $identity['short_name'];
+                        $blocked[$idx]['long_name'] = $identity['long_name'];
+                        $blocked[$idx]['longName'] = $identity['long_name'];
+                        $blocked[$idx]['role'] = $identity['role'];
+                    }
                     break;
                 }
             }
