@@ -220,91 +220,84 @@ class AlertasController extends Controller
     }
 
     /**
-     * Códigos ISO de las 8 provincias andaluzas.
+     * Catálogo de las 8 provincias andaluzas con sus códigos ISO oficiales.
      *
-     * @var list<string>
+     * @var array<string, string>
      */
     public const PROVINCIAS_ANDALUCIA = [
-        'ES-AL', 'ES-CA', 'ES-CO', 'ES-GR', 'ES-H', 'ES-J', 'ES-MA', 'ES-SE',
+        'ES-AL' => 'Almería',
+        'ES-CA' => 'Cádiz',
+        'ES-CO' => 'Córdoba',
+        'ES-GR' => 'Granada',
+        'ES-H' => 'Huelva',
+        'ES-J' => 'Jaén',
+        'ES-MA' => 'Málaga',
+        'ES-SE' => 'Sevilla',
     ];
 
     /**
-     * Catálogo completo de las 52 provincias y ciudades autónomas españolas.
+     * Catálogo de provincias seleccionables en el filtro (exclusivamente las 8 provincias andaluzas).
      *
-     * @return array{andalucia: array<string, string>, resto: array<string, string>}
+     * @return array<string, string>
      */
     public static function catalogoProvincias(): array
     {
-        return [
-            'andalucia' => [
-                'ES-AL' => 'Almería',
-                'ES-CA' => 'Cádiz',
-                'ES-CO' => 'Córdoba',
-                'ES-GR' => 'Granada',
-                'ES-H' => 'Huelva',
-                'ES-J' => 'Jaén',
-                'ES-MA' => 'Málaga',
-                'ES-SE' => 'Sevilla',
-            ],
-            'resto' => [
-                'ES-C' => 'A Coruña',
-                'ES-AB' => 'Albacete',
-                'ES-A' => 'Alicante / Alacant',
-                'ES-O' => 'Asturias',
-                'ES-AV' => 'Ávila',
-                'ES-BA' => 'Badajoz',
-                'ES-B' => 'Barcelona',
-                'ES-BI' => 'Bizkaia',
-                'ES-BU' => 'Burgos',
-                'ES-CC' => 'Cáceres',
-                'ES-S' => 'Cantabria',
-                'ES-CS' => 'Castellón / Castelló',
-                'ES-CE' => 'Ceuta',
-                'ES-CR' => 'Ciudad Real',
-                'ES-CU' => 'Cuenca',
-                'ES-GI' => 'Girona',
-                'ES-SS' => 'Gipuzkoa',
-                'ES-GU' => 'Guadalajara',
-                'ES-HU' => 'Huesca',
-                'ES-PM' => 'Illes Balears',
-                'ES-LE' => 'León',
-                'ES-L' => 'Lleida',
-                'ES-LO' => 'La Rioja',
-                'ES-LU' => 'Lugo',
-                'ES-M' => 'Madrid',
-                'ES-ML' => 'Melilla',
-                'ES-MU' => 'Murcia',
-                'ES-NA' => 'Navarra',
-                'ES-OR' => 'Ourense',
-                'ES-P' => 'Palencia',
-                'ES-GC' => 'Las Palmas',
-                'ES-PO' => 'Pontevedra',
-                'ES-SA' => 'Salamanca',
-                'ES-TF' => 'Santa Cruz de Tenerife',
-                'ES-SG' => 'Segovia',
-                'ES-SO' => 'Soria',
-                'ES-T' => 'Tarragona',
-                'ES-TE' => 'Teruel',
-                'ES-TO' => 'Toledo',
-                'ES-V' => 'Valencia / València',
-                'ES-VA' => 'Valladolid',
-                'ES-VI' => 'Álava / Araba',
-                'ES-ZA' => 'Zamora',
-                'ES-Z' => 'Zaragoza',
-            ],
-        ];
+        return self::PROVINCIAS_ANDALUCIA;
     }
 
     /**
-     * Mapa plano de códigos ISO provinciales a nombres legibles.
+     * Mapa plano de códigos ISO provinciales a nombres legibles para visualización de registros.
      *
      * @return array<string, string>
      */
     public static function catalogoProvinciasPlano(): array
     {
-        $cat = self::catalogoProvincias();
-
-        return array_merge($cat['andalucia'], $cat['resto']);
+        return array_merge(self::PROVINCIAS_ANDALUCIA, [
+            'ES-C' => 'A Coruña',
+            'ES-AB' => 'Albacete',
+            'ES-A' => 'Alicante / Alacant',
+            'ES-O' => 'Asturias',
+            'ES-AV' => 'Ávila',
+            'ES-BA' => 'Badajoz',
+            'ES-B' => 'Barcelona',
+            'ES-BI' => 'Bizkaia',
+            'ES-BU' => 'Burgos',
+            'ES-CC' => 'Cáceres',
+            'ES-S' => 'Cantabria',
+            'ES-CS' => 'Castellón / Castelló',
+            'ES-CE' => 'Ceuta',
+            'ES-CR' => 'Ciudad Real',
+            'ES-CU' => 'Cuenca',
+            'ES-GI' => 'Girona',
+            'ES-SS' => 'Gipuzkoa',
+            'ES-GU' => 'Guadalajara',
+            'ES-HU' => 'Huesca',
+            'ES-PM' => 'Illes Balears',
+            'ES-LE' => 'León',
+            'ES-L' => 'Lleida',
+            'ES-LO' => 'La Rioja',
+            'ES-LU' => 'Lugo',
+            'ES-M' => 'Madrid',
+            'ES-ML' => 'Melilla',
+            'ES-MU' => 'Murcia',
+            'ES-NA' => 'Navarra',
+            'ES-OR' => 'Ourense',
+            'ES-P' => 'Palencia',
+            'ES-GC' => 'Las Palmas',
+            'ES-PO' => 'Pontevedra',
+            'ES-SA' => 'Salamanca',
+            'ES-TF' => 'Santa Cruz de Tenerife',
+            'ES-SG' => 'Segovia',
+            'ES-SO' => 'Soria',
+            'ES-T' => 'Tarragona',
+            'ES-TE' => 'Teruel',
+            'ES-TO' => 'Toledo',
+            'ES-V' => 'Valencia / València',
+            'ES-VA' => 'Valladolid',
+            'ES-VI' => 'Álava / Araba',
+            'ES-ZA' => 'Zamora',
+            'ES-Z' => 'Zaragoza',
+        ]);
     }
 
     /**
@@ -359,33 +352,26 @@ class AlertasController extends Controller
         }
 
         $p = strtolower(trim($param));
+        if (in_array($p, ['andalucia', 'and', 'al-andalus'], true)) {
+            return 'andalucia';
+        }
         if (in_array($p, ['espana', 'es', 'spain', 'all_spain', 'nacional', 'toda_espana'], true)) {
             return 'espana';
         }
-        if (in_array($p, ['todas', 'todo', 'all', 'global', 'todas_ubicaciones'], true)) {
-            return 'todas';
-        }
-        if (in_array($p, ['fuera', 'exterior', 'outside', 'internacional'], true)) {
-            return 'fuera';
-        }
 
         $pUpper = strtoupper($p);
-        $plano = self::catalogoProvinciasPlano();
-        if (isset($plano[$pUpper])) {
+        if (isset(self::PROVINCIAS_ANDALUCIA[$pUpper])) {
             return $pUpper;
         }
 
-        // Aliases históricos
+        // Aliases históricos de provincias andaluzas
         if ($pUpper === 'ES-JA') {
             return 'ES-J';
-        }
-        if ($pUpper === 'ES-IB') {
-            return 'ES-PM';
         }
 
         // Búsqueda por slug del nombre
         $slugParam = Str::slug($param);
-        foreach ($plano as $code => $name) {
+        foreach (self::PROVINCIAS_ANDALUCIA as $code => $name) {
             if (Str::slug($name) === $slugParam || Str::slug($code) === $slugParam) {
                 return $code;
             }
@@ -559,7 +545,24 @@ class AlertasController extends Controller
 
             // Filtrado por ámbito territorial / provincia
             $driver = DB::connection('alertas')->getDriverName();
-            if ($provinciaFiltro === 'espana') {
+            if ($provinciaFiltro === 'andalucia') {
+                // Ámbito autonómico Andalucía: cualquiera de las 8 provincias andaluzas
+                $codigosAndalucia = array_keys(self::PROVINCIAS_ANDALUCIA);
+                $codigosAndaluciaConAlias = array_values(array_unique(array_merge($codigosAndalucia, ['ES-JA'])));
+                $query->where(function ($q) use ($codigosAndaluciaConAlias, $driver) {
+                    $q->whereIn('provincia', $codigosAndaluciaConAlias);
+                    foreach ($codigosAndaluciaConAlias as $c) {
+                        $escaped = str_replace("'", "''", $c);
+                        if ($driver === 'pgsql') {
+                            $q->orWhereRaw("'{$escaped}' = ANY(provincias)");
+                            $q->orWhereRaw("nodo_info->>'provincia' = '{$escaped}'");
+                        } elseif ($driver === 'sqlite') {
+                            $q->orWhere('provincias', 'like', "%{$escaped}%");
+                            $q->orWhere('nodo_info', 'like', "%\"provincia\":\"{$escaped}\"%");
+                        }
+                    }
+                });
+            } elseif ($provinciaFiltro === 'espana') {
                 // Ámbito nacional por defecto: incluye provincias españolas y eventos sin provincia (null),
                 // pero excluye explícitamente nodos marcados como 'FUERA' de España.
                 $query->where(function ($q) use ($driver) {
@@ -574,17 +577,7 @@ class AlertasController extends Controller
                         });
                     }
                 });
-            } elseif ($provinciaFiltro === 'fuera') {
-                // Nodos exteriores / fuera de España
-                $query->where(function ($q) use ($driver) {
-                    $q->where('provincia', 'FUERA');
-                    if ($driver === 'pgsql') {
-                        $q->orWhereRaw("'FUERA' = ANY(provincias)");
-                    } elseif ($driver === 'sqlite') {
-                        $q->orWhere('provincias', 'like', '%FUERA%');
-                    }
-                });
-            } elseif ($provinciaFiltro !== 'todas') {
+            } else {
                 // Provincia individual (ej: ES-CA, ES-SE...)
                 $codigos = self::codigosConAlias($provinciaFiltro);
                 $query->where(function ($q) use ($codigos, $driver) {

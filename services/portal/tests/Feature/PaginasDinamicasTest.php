@@ -42,7 +42,6 @@ class PaginasDinamicasTest extends TestCase
         $responseAndalucia->assertHeaderMissing('Set-Cookie');
     }
 
-
     /**
      * Comprueba que la página de alertas devuelve 200 OK y cero cookies.
      */
@@ -258,7 +257,7 @@ class PaginasDinamicasTest extends TestCase
     }
 
     /**
-     * Comprueba que la página de alertas renderiza el selector de provincias con sus grupos y opciones.
+     * Comprueba que la página de alertas renderiza el selector con Andalucía, Toda España y las 8 provincias andaluzas exclusivamente.
      */
     public function test_pagina_alertas_muestra_selector_de_provincias(): void
     {
@@ -267,14 +266,30 @@ class PaginasDinamicasTest extends TestCase
         $response->assertStatus(200);
         $response->assertHeaderMissing('Set-Cookie');
         $response->assertSee('id="filtro-provincia-select"', false);
-        $response->assertSee('Toda España (por defecto)', false);
-        $response->assertSee('Todas las ubicaciones', false);
-        $response->assertSee('Fuera de España (Exterior)', false);
-        $response->assertSee('Andalucía (8 provincias)', false);
-        $response->assertSee('Resto de España', false);
+        $response->assertSee('🟢⚪🟢 Andalucía', false);
+        $response->assertSee('🇪🇸 Toda España', false);
+        $response->assertDontSee('Toda España (por defecto)', false);
+        $response->assertDontSee('Todas las ubicaciones', false);
+        $response->assertDontSee('Fuera de España', false);
+        $response->assertDontSee('Resto de España', false);
+        $response->assertSee('Provincias de Andalucía', false);
         $response->assertSee('Cádiz (ES-CA)', false);
         $response->assertSee('Sevilla (ES-SE)', false);
-        $response->assertSee('Madrid (ES-M)', false);
+        $response->assertDontSee('Madrid (ES-M)', false);
+        $response->assertDontSee('Barcelona (ES-B)', false);
+    }
+
+    /**
+     * Comprueba que filtrar por el ámbito regional de Andalucía muestra el chip activo correspondiente.
+     */
+    public function test_pagina_alertas_con_filtro_andalucia(): void
+    {
+        $response = $this->get('/alertas?provincia=andalucia');
+
+        $response->assertStatus(200);
+        $response->assertHeaderMissing('Set-Cookie');
+        $response->assertSee('Filtros activos:', false);
+        $response->assertSee('🟢⚪🟢 Andalucía', false);
     }
 
     /**
@@ -291,28 +306,15 @@ class PaginasDinamicasTest extends TestCase
     }
 
     /**
-     * Comprueba el filtro de alertas para nodos ubicados fuera de España.
-     */
-    public function test_pagina_alertas_con_filtro_fuera_espana(): void
-    {
-        $response = $this->get('/alertas?provincia=fuera');
-
-        $response->assertStatus(200);
-        $response->assertHeaderMissing('Set-Cookie');
-        $response->assertSee('Filtros activos:', false);
-        $response->assertSee('Fuera de España (Exterior)', false);
-    }
-
-    /**
      * Comprueba el catálogo y la normalización de códigos y nombres de provincias.
      */
     public function test_catalogo_y_normalizacion_de_provincias(): void
     {
+        $this->assertCount(8, AlertasController::catalogoProvincias());
         $this->assertSame('espana', AlertasController::normalizarProvincia(null));
         $this->assertSame('espana', AlertasController::normalizarProvincia(''));
+        $this->assertSame('andalucia', AlertasController::normalizarProvincia('andalucia'));
         $this->assertSame('espana', AlertasController::normalizarProvincia('espana'));
-        $this->assertSame('todas', AlertasController::normalizarProvincia('todas'));
-        $this->assertSame('fuera', AlertasController::normalizarProvincia('fuera'));
         $this->assertSame('ES-CA', AlertasController::normalizarProvincia('cadiz'));
         $this->assertSame('ES-SE', AlertasController::normalizarProvincia('ES-SE'));
         $this->assertSame('ES-J', AlertasController::normalizarProvincia('ES-JA'));
@@ -349,4 +351,3 @@ class PaginasDinamicasTest extends TestCase
         $response->assertHeaderMissing('Set-Cookie');
     }
 }
-

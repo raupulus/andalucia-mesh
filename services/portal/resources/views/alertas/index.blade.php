@@ -165,33 +165,19 @@
                             📍 {{ __('portal.alerts.province_label') }}
                         </label>
                         <select id="filtro-provincia-select" data-filtro-action="1" style="width: 100%; max-width: 100%; padding: 0.42rem 0.75rem; font-size: 0.85rem; font-weight: 600; background: var(--color-superficie); color: var(--color-texto-1); border: 1px solid var(--color-borde); border-radius: var(--radio-sm); cursor: pointer;">
+                            <option value="{{ $filtroUrl(null, null, null, false, 'andalucia') }}" {{ $provinciaActual === 'andalucia' ? 'selected' : '' }}>
+                                🟢⚪🟢 {{ __('portal.alerts.provinces.andalucia') }}
+                            </option>
                             <option value="{{ $filtroUrl(null, null, null, false, 'espana') }}" {{ ($provinciaActual === 'espana' || empty($provinciaActual)) ? 'selected' : '' }}>
                                 🇪🇸 {{ __('portal.alerts.provinces.all_spain') }}
                             </option>
-                            <option value="{{ $filtroUrl(null, null, null, false, 'todas') }}" {{ $provinciaActual === 'todas' ? 'selected' : '' }}>
-                                🌐 {{ __('portal.alerts.provinces.all_locations') }}
-                            </option>
-                            <option value="{{ $filtroUrl(null, null, null, false, 'fuera') }}" {{ $provinciaActual === 'fuera' ? 'selected' : '' }}>
-                                ✈️ {{ __('portal.alerts.provinces.outside_spain') }}
-                            </option>
-                            @if(!empty($provinciasCatalogo['andalucia']))
-                                <optgroup label="{{ __('portal.alerts.provinces.group_andalucia') }}">
-                                    @foreach($provinciasCatalogo['andalucia'] as $code => $name)
-                                        <option value="{{ $filtroUrl(null, null, null, false, $code) }}" {{ $provinciaActual === $code ? 'selected' : '' }}>
-                                            {{ $name }} ({{ $code }})
-                                        </option>
-                                    @endforeach
-                                </optgroup>
-                            @endif
-                            @if(!empty($provinciasCatalogo['resto']))
-                                <optgroup label="{{ __('portal.alerts.provinces.group_spain') }}">
-                                    @foreach($provinciasCatalogo['resto'] as $code => $name)
-                                        <option value="{{ $filtroUrl(null, null, null, false, $code) }}" {{ $provinciaActual === $code ? 'selected' : '' }}>
-                                            {{ $name }} ({{ $code }})
-                                        </option>
-                                    @endforeach
-                                </optgroup>
-                            @endif
+                            <optgroup label="{{ __('portal.alerts.provinces.group_andalucia') }}">
+                                @foreach($provinciasCatalogo as $code => $name)
+                                    <option value="{{ $filtroUrl(null, null, null, false, $code) }}" {{ $provinciaActual === $code ? 'selected' : '' }}>
+                                        {{ $name }} ({{ $code }})
+                                    </option>
+                                @endforeach
+                            </optgroup>
                         </select>
                     </div>
                 </div>
@@ -264,8 +250,7 @@
                             @if(!empty($provinciaActual) && $provinciaActual !== 'espana')
                                 @php
                                     $textoProvFiltro = match($provinciaActual) {
-                                        'todas' => __('portal.alerts.provinces.all_locations'),
-                                        'fuera' => __('portal.alerts.provinces.outside_spain'),
+                                        'andalucia' => '🟢⚪🟢 ' . __('portal.alerts.provinces.andalucia'),
                                         default => ($catalogoProvinciasPlano[$provinciaActual] ?? $provinciaActual) . ' (' . $provinciaActual . ')',
                                     };
                                 @endphp

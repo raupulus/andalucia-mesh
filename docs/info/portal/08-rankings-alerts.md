@@ -51,7 +51,7 @@ Supervisión pública del estado de routers de infraestructura y repetidores:
 
 1. Resumen de abiertas: chips por riesgo con número (`stats/summary` → `alerts_open.by_risk`) y texto por tipo.
 2. Filtros:
-   - Nivel 1 (Control): Estado (`abierta`, `resuelta`, todas), Severidad/Riesgo (`alto`, `medio`, `bajo`) y Provincia / Ámbito territorial (`?provincia=espana|todas|fuera|ES-XX`). Por defecto aplica el ámbito nacional **"Toda España"** (excluye incidencias de nodos exteriores `FUERA`), con opciones accesibles para "Todas las ubicaciones", "Fuera de España (Exterior)" y cada provincia individual agrupada en optgroups (Andalucía y Resto de España).
+   - Nivel 1 (Control): Estado (`abierta`, `resuelta`, todas), Severidad/Riesgo (`alto`, `medio`, `bajo`) y Provincia / Ámbito territorial (`?provincia=andalucia|espana|ES-XX`). Por defecto aplica el ámbito nacional **"Toda España"** (excluye incidencias de nodos exteriores `FUERA`), con opciones directas para Andalucía (`🟢⚪🟢 Andalucía`) y cada una de las 8 provincias andaluzas en su optgroup.
    - Nivel 2 (Temáticas): Temáticas del problema con selección múltiple acumulativa (`?problemas=bateria,posicion`).
    - Nivel 3 (Activos): Barra con chips desmontables (`✕`), contador de resultados y botón de limpieza rápida. Navegación fluida por AJAX/SPA sincronizada con `history.pushState` y cero cookies (RN-06).
 3. Lista (`GET /alertas` paginado a 15 por página, más recientes primero): chip de riesgo, tipo, regla (nombre del catálogo), mensaje, nodo o "N nodos", provincia con nombre amigable resuelto, abierta/actualizada/resuelta. Navegación por páginas numeradas con retención de filtros.
@@ -99,4 +99,4 @@ Refresco de la lista abierta cada 30 s (solo si el usuario no ha pulsado "Ver m�
 8. **Dado** `/routers?ambito=espana`, **cuando** se carga la vista, **entonces** muestra los repetidores fuera de Andalucía geolocalizados a su provincia real española manteniendo cero cookies (RN-06).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-11
+> Creado: 2026-10-07 · Última revisión: 2026-10-12
