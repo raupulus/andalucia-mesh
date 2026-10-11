@@ -11,6 +11,7 @@
                 width: 100%;
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 color: #1f2937;
+                padding-bottom: 2.5rem;
             }
             .dark .fi-umbrales-admin-page {
                 color: #e5e7eb;
@@ -96,34 +97,6 @@
                 color: #9ca3af;
             }
 
-            /* Botones de acción */
-            .fi-umbrales-btn-save {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.45rem;
-                padding: 0.55rem 1.25rem;
-                border-radius: 0.5rem;
-                background: #007A33;
-                color: #ffffff;
-                font-size: 0.85rem;
-                font-weight: 600;
-                border: none;
-                cursor: pointer;
-                transition: background-color 0.15s ease;
-            }
-            .fi-umbrales-btn-save:hover {
-                background: #005a26;
-            }
-            .fi-umbrales-btn-save:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-            }
-            .dark .fi-umbrales-btn-save {
-                background: #15612F;
-            }
-            .dark .fi-umbrales-btn-save:hover {
-                background: #007A33;
-            }
 
             /* Selector de Pestañas */
             .fi-umbrales-tabs-bar {
@@ -360,13 +333,22 @@
                 margin-top: 0.15rem;
             }
 
+            .fi-umbrales-banner-action {
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                white-space: nowrap;
+            }
+
             /* Pie de página */
             .fi-umbrales-footer {
                 display: flex;
                 align-items: center;
                 justify-content: flex-end;
                 gap: 1rem;
-                padding-top: 1.25rem;
+                padding-top: 1.5rem;
+                padding-bottom: 3.5rem;
+                margin-top: 1.5rem;
                 border-top: 1px solid rgba(148, 163, 184, 0.2);
             }
         </style>
@@ -386,21 +368,16 @@
                     </p>
                 </div>
             </div>
-            <div>
-                <button
-                    type="button"
+            <div class="fi-umbrales-banner-action">
+                <x-filament::button
                     wire:click="save"
                     wire:loading.attr="disabled"
-                    class="fi-umbrales-btn-save fi-icon-btn"
+                    color="primary"
+                    icon="heroicon-m-check"
+                    size="md"
                 >
-                    <span wire:loading.remove wire:target="save">
-                        <x-heroicon-m-check />
-                    </span>
-                    <span wire:loading wire:target="save" style="display: inline-block; animation: spin 1s linear infinite;">
-                        <x-heroicon-m-arrow-path />
-                    </span>
-                    <span>{{ __('admin.alert_thresholds.btn_save') }}</span>
-                </button>
+                    {{ __('admin.alert_thresholds.btn_save') }}
+                </x-filament::button>
             </div>
         </div>
 
@@ -812,20 +789,15 @@
 
         {{-- Barra de Guardar al Pie --}}
         <div class="fi-umbrales-footer">
-            <button
-                type="button"
+            <x-filament::button
                 wire:click="save"
                 wire:loading.attr="disabled"
-                class="fi-umbrales-btn-save fi-icon-btn"
+                color="primary"
+                icon="heroicon-m-check"
+                size="lg"
             >
-                <span wire:loading.remove wire:target="save">
-                    <x-heroicon-m-check />
-                </span>
-                <span wire:loading wire:target="save" style="display: inline-block; animation: spin 1s linear infinite;">
-                    <x-heroicon-m-arrow-path />
-                </span>
-                <span>{{ __('admin.alert_thresholds.btn_save') }}</span>
-            </button>
+                {{ __('admin.alert_thresholds.btn_save') }}
+            </x-filament::button>
         </div>
     </div>
 </x-filament-panels::page>
