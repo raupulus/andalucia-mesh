@@ -77,15 +77,21 @@ class GestionRouters extends Page
                 $lName = is_array($item) ? ($item['long_name'] ?? $item['longName'] ?? '') : '';
                 $role = is_array($item) ? ($item['role'] ?? '') : '';
 
-                // Si falta nombre o coincide exactamente con el hex, resolver identidad
-                if (empty($sName) || empty($lName) || $sName === $hex || $lName === $hex) {
+                $clean = ltrim($hex, '!');
+                $fallbackShort = substr($clean, -4);
+
+                $isGenericShort = empty($sName) || $sName === $hex || strcasecmp($sName, $fallbackShort) === 0;
+                $isGenericLong = empty($lName) || $lName === $hex || str_starts_with($lName, 'Router ') || str_starts_with($lName, 'Meshtastic ');
+                $isGenericRole = empty($role) || $role === 'NODE' || $role === 'MANUAL';
+
+                // Si falta nombre o tiene valores genéricos/provisionales, resolver identidad en base de datos
+                if ($isGenericShort || $isGenericLong || $isGenericRole) {
                     $identity = $this->resolveNodeIdentity($hex, is_array($item) ? $item : null);
                     $sName = $identity['short_name'];
                     $lName = $identity['long_name'];
-                    $role = $role ?: $identity['role'];
+                    $role = $identity['role'];
                 }
 
-                $clean = ltrim($hex, '!');
                 $num = ctype_xdigit($clean) ? (int) hexdec($clean) : 0;
 
                 return [
@@ -196,10 +202,11 @@ class GestionRouters extends Page
         $cleanHex = ltrim($targetHex, '!');
         $fallbackShort = substr($cleanHex, -4);
 
-        $needsShort = empty($shortName) || $shortName === $targetHex || $shortName === $fallbackShort;
-        $needsLong = empty($longName) || $longName === $targetHex || str_starts_with($longName, 'Router ');
+        $needsShort = empty($shortName) || $shortName === $targetHex || strcasecmp($shortName, $fallbackShort) === 0;
+        $needsLong = empty($longName) || $longName === $targetHex || str_starts_with($longName, 'Router ') || str_starts_with($longName, 'Meshtastic ');
+        $needsRole = empty($role) || $role === 'NODE' || $role === 'MANUAL';
 
-        if ($needsShort || $needsLong) {
+        if ($needsShort || $needsLong || $needsRole) {
             $known = CoordinatedRouter::where('node_id', $targetHex)
                 ->orWhereRaw('LOWER(node_id) = ?', [strtolower($targetHex)])
                 ->first();
@@ -212,12 +219,13 @@ class GestionRouters extends Page
                     $longName = $known->long_name;
                     $needsLong = false;
                 }
-                if (empty($role) && ! empty($known->role)) {
+                if ($needsRole && ! empty($known->role) && $known->role !== 'NODE') {
                     $role = $known->role;
+                    $needsRole = false;
                 }
             }
 
-            if ($needsShort || $needsLong) {
+            if ($needsShort || $needsLong || $needsRole) {
                 try {
                     $apiNode = DB::connection('ingesta')->table('api_nodes')
                         ->where('id', $targetHex)
@@ -232,8 +240,9 @@ class GestionRouters extends Page
                             $longName = $apiNode->long_name;
                             $needsLong = false;
                         }
-                        if (empty($role) && ! empty($apiNode->role)) {
+                        if ($needsRole && ! empty($apiNode->role) && $apiNode->role !== 'NODE') {
                             $role = $apiNode->role;
+                            $needsRole = false;
                         }
                     }
                 } catch (\Throwable) {
@@ -251,8 +260,9 @@ class GestionRouters extends Page
                                 $longName = $apiNode->long_name;
                                 $needsLong = false;
                             }
-                            if (empty($role) && ! empty($apiNode->role)) {
+                            if ($needsRole && ! empty($apiNode->role) && $apiNode->role !== 'NODE') {
                                 $role = $apiNode->role;
+                                $needsRole = false;
                             }
                         }
                     } catch (\Throwable) {

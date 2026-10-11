@@ -453,22 +453,31 @@ export function meshAdminComponent() {
                 const itemHex = f.hex || f;
                 let sName = f.shortName || f.short_name || '';
                 let lName = f.longName || f.long_name || '';
-                if (!sName || !lName || sName === itemHex || lName === itemHex) {
-                    const found = (this.portalKnownNodes || []).find((n) => (n.node_id || '').toLowerCase() === (itemHex || '').toLowerCase());
+                let role = f.role || '';
+                const fallbackShort = typeof itemHex === 'string' ? itemHex.substring(1, 5) : '';
+                const isGeneric = !sName || !lName || sName === itemHex || lName === itemHex
+                    || (typeof sName === 'string' && sName.toLowerCase() === fallbackShort.toLowerCase())
+                    || (typeof lName === 'string' && (lName.startsWith('Meshtastic ') || lName.startsWith('Router ')))
+                    || role === 'NODE' || role === 'MANUAL';
+
+                if (isGeneric) {
+                    const found = (this.portalKnownNodes || []).find((n) => (n.node_id || '').toLowerCase() === (itemHex || '').toLowerCase())
+                        || this.getAllAvailableNodes().find((n) => (n.hex || '').toLowerCase() === (itemHex || '').toLowerCase());
                     if (found) {
-                        sName = sName && sName !== itemHex ? sName : (found.short_name || found.shortName || '');
-                        lName = lName && lName !== itemHex ? lName : (found.long_name || found.longName || '');
+                        sName = (found.short_name || found.shortName) || sName;
+                        lName = (found.long_name || found.longName) || lName;
+                        role = (found.role && found.role !== 'NODE') ? found.role : role;
                     }
                 }
                 return {
                     ...(typeof f === 'object' ? f : {}),
                     hex: itemHex,
                     num: f.num || parseNodeNum(itemHex),
-                    shortName: sName || (typeof itemHex === 'string' ? itemHex.substring(1, 5) : ''),
-                    short_name: sName || (typeof itemHex === 'string' ? itemHex.substring(1, 5) : ''),
+                    shortName: sName || fallbackShort,
+                    short_name: sName || fallbackShort,
                     longName: lName || itemHex,
                     long_name: lName || itemHex,
-                    role: f.role || 'ROUTER',
+                    role: (role && role !== 'NODE') ? role : 'ROUTER',
                 };
             });
         },
@@ -484,22 +493,31 @@ export function meshAdminComponent() {
                 const itemHex = b.hex || b;
                 let sName = b.shortName || b.short_name || '';
                 let lName = b.longName || b.long_name || '';
-                if (!sName || !lName || sName === itemHex || lName === itemHex) {
-                    const found = (this.portalKnownNodes || []).find((n) => (n.node_id || '').toLowerCase() === (itemHex || '').toLowerCase());
+                let role = b.role || '';
+                const fallbackShort = typeof itemHex === 'string' ? itemHex.substring(1, 5) : '';
+                const isGeneric = !sName || !lName || sName === itemHex || lName === itemHex
+                    || (typeof sName === 'string' && sName.toLowerCase() === fallbackShort.toLowerCase())
+                    || (typeof lName === 'string' && (lName.startsWith('Meshtastic ') || lName.startsWith('Router ')))
+                    || role === 'NODE' || role === 'MANUAL';
+
+                if (isGeneric) {
+                    const found = (this.portalKnownNodes || []).find((n) => (n.node_id || '').toLowerCase() === (itemHex || '').toLowerCase())
+                        || this.getAllAvailableNodes().find((n) => (n.hex || '').toLowerCase() === (itemHex || '').toLowerCase());
                     if (found) {
-                        sName = sName && sName !== itemHex ? sName : (found.short_name || found.shortName || '');
-                        lName = lName && lName !== itemHex ? lName : (found.long_name || found.longName || '');
+                        sName = (found.short_name || found.shortName) || sName;
+                        lName = (found.long_name || found.longName) || lName;
+                        role = (found.role && found.role !== 'NODE') ? found.role : role;
                     }
                 }
                 return {
                     ...(typeof b === 'object' ? b : {}),
                     hex: itemHex,
                     num: b.num || parseNodeNum(itemHex),
-                    shortName: sName || (typeof itemHex === 'string' ? itemHex.substring(1, 5) : ''),
-                    short_name: sName || (typeof itemHex === 'string' ? itemHex.substring(1, 5) : ''),
+                    shortName: sName || fallbackShort,
+                    short_name: sName || fallbackShort,
                     longName: lName || itemHex,
                     long_name: lName || itemHex,
-                    role: b.role || 'NODE',
+                    role: (role && role !== 'NODE') ? role : 'ROUTER',
                 };
             });
         },
@@ -1815,7 +1833,9 @@ export function meshAdminComponent() {
                     || (this.portalKnownNodes || []).find((n) => (n.node_id || '').toLowerCase() === ignHex.toLowerCase());
                 const sName = (nodeData && (nodeData.shortName || nodeData.short_name)) || (found && (found.shortName || found.short_name)) || ignHex.substring(1, 5);
                 const lName = (nodeData && (nodeData.longName || nodeData.long_name)) || (found && (found.longName || found.long_name)) || ignHex;
-                const rRole = (nodeData && nodeData.role) || (found && found.role) || 'NODE';
+                const rRole = (nodeData && nodeData.role && nodeData.role !== 'NODE')
+                    || (found && found.role && found.role !== 'NODE')
+                    || 'ROUTER';
 
                 nodeData = {
                     hex: ignHex,
@@ -1863,7 +1883,7 @@ export function meshAdminComponent() {
                             short_name: nodeData.shortName || nodeData.short_name || ignHex.substring(1, 5),
                             longName: nodeData.longName || nodeData.long_name || ignHex,
                             long_name: nodeData.longName || nodeData.long_name || ignHex,
-                            role: nodeData.role || 'NODE',
+                            role: (nodeData.role && nodeData.role !== 'NODE') ? nodeData.role : 'ROUTER',
                             added_at: new Date().toISOString(),
                         });
                     }
@@ -1888,7 +1908,7 @@ export function meshAdminComponent() {
                             shortName: nodeData.shortName || nodeData.short_name || '',
                             long_name: nodeData.longName || nodeData.long_name || '',
                             longName: nodeData.longName || nodeData.long_name || '',
-                            role: nodeData.role || 'NODE',
+                            role: (nodeData.role && nodeData.role !== 'NODE') ? nodeData.role : 'ROUTER',
                         };
                         this.$wire.updateRouterBlockedNode(activeRouterHex, ignHex, isAdd, payloadToSync);
                     } catch (lwErr) {
