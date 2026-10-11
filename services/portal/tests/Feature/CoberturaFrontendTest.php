@@ -196,6 +196,8 @@ class CoberturaFrontendTest extends TestCase
         $this->assertStringContainsString('class="separador-bandera-sup"', $html);
         $this->assertStringContainsString('class="footer-bloque-url"', $html);
         $this->assertStringContainsString('class="separador-bandera-inf"', $html);
+        $this->assertStringContainsString('class="distancia-km-pdf"', $html);
+        $this->assertStringContainsString('class="icono-regla-pdf"', $html);
         $this->assertStringContainsString('https://mesh.example.org', $html);
     }
 
@@ -433,4 +435,46 @@ class CoberturaFrontendTest extends TestCase
         $response->assertSee('logo-pdf.png', false);
         $response->assertSee('modal-cargando-cobertura', false);
     }
+
+    /**
+     * Comprueba que los valores centinela de SNR (-32.0 dB) y nodos de difusión (!ffffffff)
+     * quedan estrictamente excluidos de los enlaces procesados.
+     */
+    public function test_exclusion_centinela_snr_y_difusion(): void
+    {
+        $cobertura = app(Cobertura::class);
+        $matriz = $cobertura->obtenerMatriz(['!5f3a3a29'], 'todos');
+
+        $this->assertTrue($matriz['valido']);
+        $todosDestinos = array_column($matriz['bloque_bilateral'], 'id');
+
+        $this->assertNotContains('!ffffffff', $todosDestinos);
+
+        foreach ($matriz['bloque_bilateral'] as $fila) {
+            foreach ($fila['enlaces'] as $enlace) {
+                if ($enlace !== null) {
+                    $this->assertGreaterThan(-32.0, (float) $enlace['snr']);
+                }
+            }
+        }
+    }
+
+    /**
+     * Comprueba que no existe enlace directo fantasma entre nodos alejados sin línea de vista (Rau0 y JA01).
+     */
+    public function test_ausencia_enlace_fantasma_rau0_y_ja01(): void
+    {
+        $cobertura = app(Cobertura::class);
+
+        // Al evaluar Rau0, JA01 no debe figurar como enlace directo
+        $matrizRau0 = $cobertura->obtenerMatriz(['!5f3a3a29'], 'todos');
+        $destinosRau0 = array_column($matrizRau0['bloque_bilateral'], 'id');
+        $this->assertNotContains('!f9b6f070', $destinosRau0);
+
+        // Al evaluar JA01, Rau0 no debe figurar como enlace directo
+        $matrizJa01 = $cobertura->obtenerMatriz(['!f9b6f070'], 'todos');
+        $destinosJa01 = array_column($matrizJa01['bloque_bilateral'], 'id');
+        $this->assertNotContains('!5f3a3a29', $destinosJa01);
+    }
 }
+

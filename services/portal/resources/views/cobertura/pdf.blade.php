@@ -1,3 +1,7 @@
+@php
+    $rulerIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="7" height="7" viewBox="0 0 16 16"><g transform="rotate(45 8 8)"><rect x="1" y="6" width="14" height="4" rx="0.8" fill="#94A3B8" stroke="#CBD5E1" stroke-width="0.5"/><line x1="4" y1="6" x2="4" y2="7.8" stroke="#1F2029" stroke-width="0.6"/><line x1="6.5" y1="6" x2="6.5" y2="8.5" stroke="#1F2029" stroke-width="0.6"/><line x1="9" y1="9" x2="9" y2="7.8" stroke="#1F2029" stroke-width="0.6"/><line x1="11.5" y1="6" x2="11.5" y2="8.5" stroke="#1F2029" stroke-width="0.6"/></g></svg>';
+    $rulerIconBase64 = 'data:image/svg+xml;base64,' . base64_encode($rulerIconSvg);
+@endphp
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -312,6 +316,14 @@
             font-family: 'DejaVu Sans', monospace;
             margin-top: 1px;
             display: block;
+            line-height: 1;
+        }
+
+        .icono-regla-pdf {
+            width: 7px;
+            height: 7px;
+            vertical-align: -1px;
+            margin-right: 1px;
         }
 
         .badge-cob {
@@ -512,7 +524,7 @@
                     @php $fm = $datos['fila_mutuo']; @endphp
                     <tr class="fila-bloque">
                         <td colspan="{{ 5 + count($datos['nodos_evaluados'] ?? []) + 1 }}">
-                            🔄 ENLACE DIRECTO INTER-NODO
+                            <span style="color: #C084FC;">⇄</span> ENLACE DIRECTO INTER-NODO
                         </td>
                     </tr>
                     <tr class="fila-item">
@@ -525,7 +537,7 @@
                         <td>
                             <span class="badge-prov {{ $fm['clase_provincia'] ?? 'badge-prov-cadiz' }}">{{ $fm['province'] ?? 'Cádiz' }}</span>
                             @if(!empty($fm['distancia_texto']))
-                                <span class="distancia-km-pdf">📏 {{ $fm['distancia_texto'] }}</span>
+                                <span class="distancia-km-pdf"><img src="{{ $rulerIconBase64 }}" class="icono-regla-pdf" alt=""> {{ $fm['distancia_texto'] }}</span>
                             @endif
                         </td>
                         <td><span class="badge-cob {{ $fm['cobertura_clase'] ?? 'badge-cob-mutuo' }}">{{ $fm['cobertura_label'] ?? 'Mutuo' }}</span></td>
@@ -551,7 +563,7 @@
                     @php $cantBilat = count($datos['bloque_bilateral']); @endphp
                     <tr class="fila-bloque">
                         <td colspan="{{ 5 + count($datos['nodos_evaluados'] ?? []) + 1 }}">
-                            🟢 {{ $datos['titulo_bloque_comun'] ?? "NODOS CON COBERTURA BILATERAL ({$cantBilat} NODOS)" }}
+                            <span style="color: #67EA94;">●</span> {{ $datos['titulo_bloque_comun'] ?? "NODOS CON COBERTURA BILATERAL ({$cantBilat} NODOS)" }}
                         </td>
                     </tr>
                     @foreach($datos['bloque_bilateral'] as $idx => $fila)
@@ -565,7 +577,7 @@
                             <td>
                                 <span class="badge-prov {{ $fila['clase_provincia'] }}">{{ $fila['province'] }}</span>
                                 @if(!empty($fila['distancia_texto']))
-                                    <span class="distancia-km-pdf">📏 {{ $fila['distancia_texto'] }}</span>
+                                    <span class="distancia-km-pdf"><img src="{{ $rulerIconBase64 }}" class="icono-regla-pdf" alt=""> {{ $fila['distancia_texto'] }}</span>
                                 @endif
                             </td>
                             <td><span class="badge-cob {{ $fila['cobertura_clase'] }}">{{ $fila['cobertura_label'] }}</span></td>
@@ -615,7 +627,7 @@
                                 <td>
                                     <span class="badge-prov {{ $fila['clase_provincia'] }}">{{ $fila['province'] }}</span>
                                     @if(!empty($fila['distancia_texto']))
-                                        <span class="distancia-km-pdf">📏 {{ $fila['distancia_texto'] }}</span>
+                                        <span class="distancia-km-pdf"><img src="{{ $rulerIconBase64 }}" class="icono-regla-pdf" alt=""> {{ $fila['distancia_texto'] }}</span>
                                     @endif
                                 </td>
                                 <td><span class="badge-cob {{ $fila['cobertura_clase'] }}">{{ $fila['cobertura_label'] }}</span></td>

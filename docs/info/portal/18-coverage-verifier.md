@@ -19,7 +19,7 @@
   - Presenta 4 tarjetas KPI en cabecera: Nodos únicos detectados, Enlace mutuo inter-nodo / Mejor enlace SNR, Cobertura bilateral/compartida / Provincias alcanzadas, y Especialización / Routers alcanzados, destacando los enlaces directos 100%.
   - Incluye un modal de espera con *spinner* corporativo con los colores de la marca (verde `#007A33`, verde claro `#67EA94`, azul `#2C2D3C`) mientras el backend procesa la telemetría.
   - Genera informes descargables en:
-    - **PDF de alta fidelidad** (`barryvdh/laravel-dompdf` con extensión PHP `gd`): orientación vertical A4 (portrait), cabecera fija con datos de expedición, subtítulo de enlaces 100% directos y franja con bandera de Andalucía (verde/blanco/verde), distancias en km bajo provincia, pie de página fijo con URL centrada y franja andaluza superior, distintivo de filtro aplicado, KPIs, bloques y leyenda inferior.
+    - **PDF de alta fidelidad** (`barryvdh/laravel-dompdf` con extensión PHP `gd`): orientación vertical A4 (portrait), cabecera fija con datos de expedición, subtítulo de enlaces 100% directos y franja con bandera de Andalucía (verde/blanco/verde), distancias en km bajo provincia con icono vectorial de regla en base64 de alta resolución, pie de página fijo con URL centrada y franja andaluza superior, distintivo de filtro aplicado, KPIs, bloques y leyenda inferior.
     - **Markdown** (`.md`): sintaxis GFM limpia y estructurada, con bloque de aviso metodológico explícito sobre enlaces directos sin multi-hop y distancias en la columna de provincia.
   - Implementa almacenamiento en caché del servidor estricto de 1 hora (3.600 segundos) para la matriz compilada y para los binarios exportados.
   - Cumple estrictamente la regla de negocio RN-06 (cero cookies y cero almacenamiento de datos personales en el front público).
@@ -34,7 +34,7 @@
 
 - **Vistas contrato consumidas** (en conexión `ingesta` con rol `portal_lector_ingesta`):
   - `api_nodes`: Metadatos del nodo (`id`, `short_name`, `long_name`, `role`, `hw_model`, `firmware`, `province`, `last_seen`, `is_gateway`, `is_router`).
-  - `api_coverage_links`: Agregado de enlaces directos RF 100% (`gateway_id`, `from_id`, `packets`, `snr_avg`, `snr_last`, `last_rx_at`, `distance_km`), unificando recepciones directas en gateways, reportes de vecindad (`neighbor`) y saltos en rutas (`traceroute`) en ventana de 7 días.
+  - `api_coverage_links`: Agregado de enlaces directos RF 100% (`gateway_id`, `from_id`, `packets`, `snr_avg`, `snr_last`, `last_rx_at`, `distance_km`), unificando recepciones directas en gateways, reportes de vecindad (`neighbor`) y saltos en rutas de ida y vuelta (`traceroute`) en ventana de 7 días, excluyendo valores centinela de SNR desconocido (`-32.0 dB`) y difusiones (`!ffffffff`).
   - `api_direct_receptions`: Recepciones directas sin agregar (`gateway_id`, `from_id`, `rx_at`, `snr`, `rssi`).
 - **Estructura interna compilada** (`App\Data\Ingest\Cobertura`):
   - `valido`: boolean indicando si la compilación tuvo éxito.
@@ -124,10 +124,12 @@
   - `test_enlaces_100_por_ciento_directos_aviso_y_metodologia`
   - `test_botones_compartir_y_restauracion_exacta_url`
   - `test_normalizacion_de_filtros_y_saneamiento_descargas`
+  - `test_exclusion_centinela_snr_y_difusion`
+  - `test_ausencia_enlace_fantasma_rau0_y_ja01`
 
 ## Pendiente real
 
 - [x] Ninguno. Módulo completamente implementado, probado y verificado.
 
 ---
-> Creado: 2026-10-11 · Última revisión: 2026-10-11
+> Creado: 2026-10-11 · Última revisión: 2026-10-12

@@ -753,6 +753,7 @@ WITH raw_links AS (
     WHERE r.direct = true
       AND r.own = false
       AND r.snr IS NOT NULL
+      AND r.snr != -32.0
       AND r.rx_at >= (now() - INTERVAL '7 days')
 
     UNION ALL
@@ -766,28 +767,33 @@ WITH raw_links AS (
         NULL::real AS distance_km
     FROM neighbor n
     WHERE n.snr IS NOT NULL
+      AND n.snr != -32.0
       AND n.at >= (now() - INTERVAL '7 days')
 
     UNION ALL
 
-    -- 3. Hops directos de ida en rutas de traceroute (0 saltos entre nodos consecutivos)
+    -- 3. Hops directos de ida en respuestas de traceroute (primer salto desde el solicitante to_id hacia route[0])
+    -- En respuestas (RouteDiscovery response), to_id es el solicitante y route[0] el primer repetidor
     SELECT
-        from_id AS node_a,
+        to_id AS node_a,
         route->>0 AS node_b,
         (snrs->>0)::real AS snr,
         rx_first AS rx_at,
         NULL::real AS distance_km
     FROM (
-        SELECT from_id, rx_first, payload->'route' AS route, payload->'snr_towards' AS snrs
+        SELECT to_id, rx_first, payload->'route' AS route, payload->'snr_towards' AS snrs
         FROM packet
         WHERE portnum = 'traceroute'
           AND rx_first >= (now() - INTERVAL '7 days')
           AND jsonb_array_length(payload->'route') > 0
+          AND (jsonb_array_length(coalesce(payload->'snr_back', '[]'::jsonb)) > 0 OR jsonb_array_length(coalesce(payload->'route_back', '[]'::jsonb)) > 0)
     ) t1
-    WHERE route->>0 IS NOT NULL AND route->>0 != '!ffffffff' AND (snrs->>0) IS NOT NULL
+    WHERE route->>0 IS NOT NULL AND route->>0 != '!ffffffff' AND to_id != '!ffffffff'
+      AND (snrs->>0) IS NOT NULL AND (snrs->>0)::real != -32.0
 
     UNION ALL
 
+    -- Saltos intermedios en ruta de ida
     SELECT
         route->>i AS node_a,
         route->>(i+1) AS node_b,
@@ -802,28 +808,32 @@ WITH raw_links AS (
           AND jsonb_array_length(payload->'route') > 1
     ) t2,
     generate_series(0, jsonb_array_length(route) - 2) AS i
-    WHERE route->>i != '!ffffffff' AND route->>(i+1) != '!ffffffff' AND (snrs->>(i+1)) IS NOT NULL
+    WHERE route->>i != '!ffffffff' AND route->>(i+1) != '!ffffffff'
+      AND (snrs->>(i+1)) IS NOT NULL AND (snrs->>(i+1))::real != -32.0
 
     UNION ALL
 
-    -- 4. Hops directos de vuelta en rutas de traceroute (route_back)
+    -- 4. Hops directos de vuelta en rutas de traceroute (primer salto desde el respondedor from_id hacia route_back[0])
+    -- En respuestas, from_id es el respondedor y route_back[0] el primer repetidor de vuelta
     SELECT
-        to_id AS node_a,
+        from_id AS node_a,
         route_back->>0 AS node_b,
         (snr_back->>0)::real AS snr,
         rx_first AS rx_at,
         NULL::real AS distance_km
     FROM (
-        SELECT to_id, rx_first, payload->'route_back' AS route_back, payload->'snr_back' AS snr_back
+        SELECT from_id, rx_first, payload->'route_back' AS route_back, payload->'snr_back' AS snr_back
         FROM packet
         WHERE portnum = 'traceroute'
           AND rx_first >= (now() - INTERVAL '7 days')
           AND jsonb_array_length(payload->'route_back') > 0
     ) tb1
-    WHERE route_back->>0 IS NOT NULL AND route_back->>0 != '!ffffffff' AND (snr_back->>0) IS NOT NULL
+    WHERE route_back->>0 IS NOT NULL AND route_back->>0 != '!ffffffff' AND from_id != '!ffffffff'
+      AND (snr_back->>0) IS NOT NULL AND (snr_back->>0)::real != -32.0
 
     UNION ALL
 
+    -- Saltos intermedios en ruta de vuelta
     SELECT
         route_back->>j AS node_a,
         route_back->>(j+1) AS node_b,
@@ -838,7 +848,8 @@ WITH raw_links AS (
           AND jsonb_array_length(payload->'route_back') > 1
     ) tb2,
     generate_series(0, jsonb_array_length(route_back) - 2) AS j
-    WHERE route_back->>j != '!ffffffff' AND route_back->>(j+1) != '!ffffffff' AND (snr_back->>(j+1)) IS NOT NULL
+    WHERE route_back->>j != '!ffffffff' AND route_back->>(j+1) != '!ffffffff'
+      AND (snr_back->>(j+1)) IS NOT NULL AND (snr_back->>(j+1))::real != -32.0
 )
 SELECT
     node_a AS gateway_id,

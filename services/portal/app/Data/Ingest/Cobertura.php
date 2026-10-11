@@ -243,6 +243,10 @@ class Cobertura
             $packets = (int) ($row['packets'] ?? 1);
             $rxAt = $row['last_rx_at'] ?? now()->toIso8601String();
 
+            if ($gw === '!ffffffff' || $from === '!ffffffff' || $snr <= -32.0 || ! isset($row['snr_last'])) {
+                continue;
+            }
+
             if ($soloPositivo && $snr <= 0) {
                 continue;
             }
@@ -723,6 +727,10 @@ class Cobertura
                     $q->whereIn('gateway_id', $nodos)
                         ->orWhereIn('from_id', $nodos);
                 })
+                ->where('gateway_id', '!=', '!ffffffff')
+                ->where('from_id', '!=', '!ffffffff')
+                ->where('snr_last', '!=', -32.0)
+                ->whereNotNull('snr_last')
                 ->get()
                 ->map(fn ($r) => (array) $r)
                 ->toArray();
