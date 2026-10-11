@@ -106,6 +106,8 @@ SELECT
     n.long_name,
     n.role,
     n.province,
+    n.latitude,
+    n.longitude,
     n.battery_level,
     n.voltage,
     n.battery_at,

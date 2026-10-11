@@ -7,6 +7,8 @@ namespace App\Data\Ingest;
 use App\Data\Fuente;
 use App\Data\Resultado;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class Routers
 {
@@ -35,51 +37,111 @@ class Routers
         ];
 
         return Fuente::recordar('routers', $params, 60, function () use ($province, $sort, $ambito) {
-            $query = DB::connection('ingesta')
-                ->table('api_routers')
-                ->select([
-                    'id',
-                    'short_name',
-                    'long_name',
-                    'role',
-                    'province',
-                    'hw_model',
-                    'battery_level',
-                    'voltage',
-                    'powered',
-                    'battery_at',
-                    'channel_utilization',
-                    'air_util_tx',
-                    'metrics_at',
-                    'last_seen',
-                    'is_gateway',
-                    'last_reboot_at',
+            $connection = DB::connection('ingesta');
+            $schema = Schema::connection('ingesta');
+
+            $hasDirectCoords = false;
+            $hasMapNodes = false;
+            try {
+                $hasDirectCoords = $schema->hasColumn('api_routers', 'latitude');
+                if (! $hasDirectCoords) {
+                    $hasMapNodes = $schema->hasTable('api_map_nodes') || $schema->hasView('api_map_nodes');
+                }
+            } catch (Throwable) {
+                $hasDirectCoords = false;
+                $hasMapNodes = false;
+            }
+
+            $query = $connection->table('api_routers');
+
+            if ($hasDirectCoords) {
+                $query->select([
+                    'api_routers.id',
+                    'api_routers.short_name',
+                    'api_routers.long_name',
+                    'api_routers.role',
+                    'api_routers.province',
+                    'api_routers.latitude',
+                    'api_routers.longitude',
+                    'api_routers.hw_model',
+                    'api_routers.battery_level',
+                    'api_routers.voltage',
+                    'api_routers.powered',
+                    'api_routers.battery_at',
+                    'api_routers.channel_utilization',
+                    'api_routers.air_util_tx',
+                    'api_routers.metrics_at',
+                    'api_routers.last_seen',
+                    'api_routers.is_gateway',
+                    'api_routers.last_reboot_at',
                 ]);
+            } elseif ($hasMapNodes) {
+                $query->leftJoin('api_map_nodes as m', 'api_routers.id', '=', 'm.id')
+                    ->select([
+                        'api_routers.id',
+                        'api_routers.short_name',
+                        'api_routers.long_name',
+                        'api_routers.role',
+                        'api_routers.province',
+                        'api_routers.hw_model',
+                        'api_routers.battery_level',
+                        'api_routers.voltage',
+                        'api_routers.powered',
+                        'api_routers.battery_at',
+                        'api_routers.channel_utilization',
+                        'api_routers.air_util_tx',
+                        'api_routers.metrics_at',
+                        'api_routers.last_seen',
+                        'api_routers.is_gateway',
+                        'api_routers.last_reboot_at',
+                        'm.latitude',
+                        'm.longitude',
+                    ]);
+            } else {
+                $query->select([
+                    'api_routers.id',
+                    'api_routers.short_name',
+                    'api_routers.long_name',
+                    'api_routers.role',
+                    'api_routers.province',
+                    'api_routers.hw_model',
+                    'api_routers.battery_level',
+                    'api_routers.voltage',
+                    'api_routers.powered',
+                    'api_routers.battery_at',
+                    'api_routers.channel_utilization',
+                    'api_routers.air_util_tx',
+                    'api_routers.metrics_at',
+                    'api_routers.last_seen',
+                    'api_routers.is_gateway',
+                    'api_routers.last_reboot_at',
+                ]);
+            }
 
             if ($province !== null) {
-                $query->where('province', $province);
+                $query->where('api_routers.province', $province);
             } elseif ($ambito === 'andalucia') {
-                $query->whereIn('province', self::PROVINCIAS_ANDALUCIA);
+                $query->whereIn('api_routers.province', self::PROVINCIAS_ANDALUCIA);
             } elseif ($ambito === 'espana') {
-                $query->where('province', 'like', 'ES-%')
-                    ->whereNotIn('province', self::PROVINCIAS_ANDALUCIA)
-                    ->where('province', '!=', 'FUERA');
+                $query->where(function ($q) {
+                    $q->whereNotIn('api_routers.province', self::PROVINCIAS_ANDALUCIA)
+                        ->orWhereNull('api_routers.province');
+                });
             } elseif ($ambito === 'ambos' || $ambito === 'global') {
-                $query->where('province', 'like', 'ES-%')
-                    ->where('province', '!=', 'FUERA');
+                // Sin restricción de provincia: incluye Andalucía y resto de la red
             }
 
             switch ($sort) {
                 case 'last_seen_desc':
-                    $query->orderByDesc('last_seen');
+                    $query->orderByDesc('api_routers.last_seen');
                     break;
                 case 'chutil_desc':
-                    $query->orderByDesc('channel_utilization');
+                    $query->orderByDesc('api_routers.channel_utilization');
                     break;
                 case 'battery_asc':
                 default:
                     // Primero los que tienen menor batería, luego los alimentados a red
-                    $query->orderBy('battery_level', 'asc');
+                    $query->orderBy('api_routers.battery_level', 'asc');
                     break;
             }
 
@@ -90,6 +152,8 @@ class Routers
                     'long_name' => $r->long_name,
                     'role' => (string) $r->role,
                     'province' => $r->province,
+                    'latitude' => isset($r->latitude) && $r->latitude !== null ? (float) $r->latitude : null,
+                    'longitude' => isset($r->longitude) && $r->longitude !== null ? (float) $r->longitude : null,
                     'hw_model' => $r->hw_model,
                     'battery_level' => $r->battery_level !== null ? (int) $r->battery_level : null,
                     'voltage' => $r->voltage !== null ? round((float) $r->voltage, 2) : null,

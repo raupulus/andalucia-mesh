@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Data\Ingest\MapaData;
 use App\Data\Ingest\Resumen;
 use App\Data\Ingest\Routers;
 use Carbon\Carbon;
@@ -86,14 +87,120 @@ class RoutersController extends Controller
     ];
 
     /**
+     * Catálogo en memoria de polígonos provinciales de España para georreferenciación inversa.
+     *
+     * @var list<array{code: string, name: string, ine: string, bbox: list<float>, rings: list<list<list<float>>>}>|null
+     */
+    protected static ?array $provinciasGeo = null;
+
+    /**
+     * Resuelve el código y nombre de provincia española a partir de coordenadas GPS.
+     *
+     * @return array{code: string, name: string}|null
+     */
+    public static function resolverProvinciaPorCoordenadas(float $lat, float $lon): ?array
+    {
+        if (self::$provinciasGeo === null) {
+            $path = resource_path('geo/provincias-espana.json');
+            if (file_exists($path)) {
+                $raw = file_get_contents($path);
+                self::$provinciasGeo = $raw ? json_decode($raw, true) : [];
+            } else {
+                self::$provinciasGeo = [];
+            }
+        }
+
+        foreach (self::$provinciasGeo as $p) {
+            $bbox = $p['bbox'];
+            if ($lon < $bbox[0] || $lat < $bbox[1] || $lon > $bbox[2] || $lat > $bbox[3]) {
+                continue;
+            }
+
+            foreach ($p['rings'] as $ring) {
+                $inside = false;
+                $count = count($ring);
+                for ($i = 0, $j = $count - 1; $i < $count; $j = $i++) {
+                    $xi = $ring[$i][0];
+                    $yi = $ring[$i][1];
+                    $xj = $ring[$j][0];
+                    $yj = $ring[$j][1];
+                    $intersect = (($yi > $lat) !== ($yj > $lat)) && ($lon < ($xj - $xi) * ($lat - $yi) / ($yj - $yi) + $xi);
+                    if ($intersect) {
+                        $inside = ! $inside;
+                    }
+                }
+
+                if ($inside) {
+                    return [
+                        'code' => $p['code'],
+                        'name' => $p['name'],
+                    ];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Resuelve el nombre, código normalizado y slug de una provincia.
      *
      * @return array{code: string, name: string, slug: string, is_andalucia: bool}
      */
-    public static function resolverInfoProvincia(?string $provinciaRaw): array
+    public static function resolverInfoProvincia(?string $provinciaRaw, ?float $lat = null, ?float $lon = null): array
     {
         $code = strtoupper(trim((string) $provinciaRaw));
         $esAndaluza = in_array($code, Routers::PROVINCIAS_ANDALUCIA, true);
+
+        // Si ya es una provincia andaluza oficial conocida, devolverla directamente
+        if ($esAndaluza && isset(self::PROVINCIAS_ESPANA[$code])) {
+            $name = self::PROVINCIAS_ESPANA[$code];
+
+            return [
+                'code' => $code,
+                'name' => $name,
+                'slug' => Str::slug($name),
+                'is_andalucia' => true,
+            ];
+        }
+
+        // Si es de otra provincia española conocida por su código ISO
+        if ($code !== 'FUERA' && $code !== '' && isset(self::PROVINCIAS_ESPANA[$code])) {
+            $name = self::PROVINCIAS_ESPANA[$code];
+
+            return [
+                'code' => $code,
+                'name' => $name,
+                'slug' => Str::slug($name),
+                'is_andalucia' => false,
+            ];
+        }
+
+        // Si tiene coordenadas GPS válidas, resolver su provincia geográfica real en España
+        if ($lat !== null && $lon !== null && ($lat !== 0.0 || $lon !== 0.0)) {
+            $geoProv = self::resolverProvinciaPorCoordenadas($lat, $lon);
+            if ($geoProv !== null) {
+                $geoCode = $geoProv['code'];
+                $geoName = self::PROVINCIAS_ESPANA[$geoCode] ?? $geoProv['name'];
+                $esAnd = in_array($geoCode, Routers::PROVINCIAS_ANDALUCIA, true);
+
+                return [
+                    'code' => $geoCode,
+                    'name' => $geoName,
+                    'slug' => Str::slug($geoName),
+                    'is_andalucia' => $esAnd,
+                ];
+            }
+        }
+
+        if ($code === 'FUERA') {
+            return [
+                'code' => 'FUERA',
+                'name' => 'Fuera de España',
+                'slug' => 'fuera',
+                'is_andalucia' => false,
+            ];
+        }
 
         if ($code === '' || $code === 'UNKNOWN') {
             return [
@@ -101,26 +208,6 @@ class RoutersController extends Controller
                 'name' => 'Desconocida',
                 'slug' => 'desconocida',
                 'is_andalucia' => false,
-            ];
-        }
-
-        if ($code === 'FUERA') {
-            return [
-                'code' => 'FUERA',
-                'name' => 'Fuera de Andalucía',
-                'slug' => 'fuera',
-                'is_andalucia' => false,
-            ];
-        }
-
-        if (isset(self::PROVINCIAS_ESPANA[$code])) {
-            $name = self::PROVINCIAS_ESPANA[$code];
-
-            return [
-                'code' => $code,
-                'name' => $name,
-                'slug' => Str::slug($name),
-                'is_andalucia' => $esAndaluza,
             ];
         }
 
@@ -138,8 +225,8 @@ class RoutersController extends Controller
 
         return [
             'code' => $code,
-            'name' => $code,
-            'slug' => Str::slug($code),
+            'name' => self::PROVINCIAS_ESPANA[$code] ?? $code,
+            'slug' => Str::slug(self::PROVINCIAS_ESPANA[$code] ?? $code),
             'is_andalucia' => false,
         ];
     }
@@ -174,6 +261,24 @@ class RoutersController extends Controller
             $conteoEspana = 0;
         }
 
+        // Cargar mapa de coordenadas en caso de necesitar georreferenciación inversa
+        $mapaCoords = [];
+        $cacheNodesPath = public_path(MapaData::CACHE_DIR.'/nodes.json');
+        if (file_exists($cacheNodesPath)) {
+            try {
+                $rawNodes = json_decode((string) file_get_contents($cacheNodesPath), true);
+                if (is_array($rawNodes)) {
+                    foreach ($rawNodes as $mn) {
+                        if (isset($mn['id'], $mn['lat'], $mn['lon'])) {
+                            $mapaCoords[$mn['id']] = ['lat' => (float) $mn['lat'], 'lon' => (float) $mn['lon']];
+                        }
+                    }
+                }
+            } catch (Throwable) {
+                $mapaCoords = [];
+            }
+        }
+
         // 4. Obtener listado de routers según el ámbito activo
         $items = [];
         $totalRouters = 0;
@@ -189,6 +294,9 @@ class RoutersController extends Controller
                 $lastSeenDt = ! empty($r['last_seen']) ? Carbon::parse($r['last_seen']) : null;
                 $minutosDesconectado = $lastSeenDt ? now()->diffInMinutes($lastSeenDt) : 9999;
                 $estaOnline = $minutosDesconectado <= 60;
+
+                $lat = $r['latitude'] ?? ($mapaCoords[$r['id']]['lat'] ?? null);
+                $lon = $r['longitude'] ?? ($mapaCoords[$r['id']]['lon'] ?? null);
 
                 $batteryLevel = $r['battery_level'] !== null ? (int) $r['battery_level'] : null;
                 $powered = (bool) ($r['powered'] ?? false);
@@ -235,6 +343,8 @@ class RoutersController extends Controller
                 }
 
                 $items[] = array_merge($r, [
+                    'latitude' => $lat,
+                    'longitude' => $lon,
                     'esta_online' => $estaOnline,
                     'hace' => $lastSeenDt ? $lastSeenDt->diffForHumans() : __('admin.widgets.routers.offline'),
                     'bateria_color' => $bateriaColor,
@@ -258,7 +368,9 @@ class RoutersController extends Controller
         $ordenAndalucia = array_flip(Routers::PROVINCIAS_ANDALUCIA);
 
         foreach ($items as $r) {
-            $infoProv = self::resolverInfoProvincia($r['province'] ?? null);
+            $lat = $r['latitude'] ?? null;
+            $lon = $r['longitude'] ?? null;
+            $infoProv = self::resolverInfoProvincia($r['province'] ?? null, $lat, $lon);
             $pCode = $infoProv['code'];
 
             if (! isset($gruposProvincia[$pCode])) {

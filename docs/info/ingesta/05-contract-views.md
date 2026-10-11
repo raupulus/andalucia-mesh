@@ -87,6 +87,7 @@ El portal calcula por provincia la media de cada grupo, la saturación ponderada
 | Columna | Tipo | Origen / regla |
 |---|---|---|
 | `id`, `short_name`, `long_name`, `role`, `province` | text | `role` en `INFRA_ROLES` y `last_seen ≥ now() − 7 días` |
+| `latitude`, `longitude` | double precision | Coordenadas GPS del nodo si están disponibles |
 | `battery_level` | smallint | Último valor (> 100 = alimentado) |
 | `voltage` | real | |
 | `battery_at` | timestamptz | |

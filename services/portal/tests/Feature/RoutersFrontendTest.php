@@ -4,10 +4,20 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\CoordinatedRouters\Pages\ListCoordinatedRouters;
+use App\Http\Controllers\RoutersController;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class RoutersFrontendTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Cache::flush();
+        ListCoordinatedRouters::ensureApiRoutersTableExists();
+    }
+
     /**
      * Comprueba que la ruta /routers responde 200 y no emite cookies (RN-06).
      */
@@ -123,5 +133,48 @@ class RoutersFrontendTest extends TestCase
         $response->assertSee('routers-province-notice-reset', false);
         $response->assertSee(__('admin.widgets.routers.filter_by_province'), false);
         $response->assertSee(__('admin.widgets.routers.all_provinces'), false);
+    }
+
+    /**
+     * Comprueba la resolución georreferenciada inversa de provincias españolas a partir de coordenadas GPS.
+     */
+    public function test_geolocalizacion_inversa_resuelve_provincias_espanolas(): void
+    {
+        // Cáceres (Extremadura)
+        $caceres = RoutersController::resolverProvinciaPorCoordenadas(39.4753, -6.3723);
+        $this->assertNotNull($caceres);
+        $this->assertSame('ES-CC', $caceres['code']);
+        $this->assertSame('Cáceres', $caceres['name']);
+
+        // Badajoz (Extremadura)
+        $badajoz = RoutersController::resolverProvinciaPorCoordenadas(38.8794, -6.9706);
+        $this->assertNotNull($badajoz);
+        $this->assertSame('ES-BA', $badajoz['code']);
+        $this->assertSame('Badajoz', $badajoz['name']);
+
+        // Albacete (Castilla-La Mancha)
+        $albacete = RoutersController::resolverProvinciaPorCoordenadas(38.9943, -1.8585);
+        $this->assertNotNull($albacete);
+        $this->assertSame('ES-AB', $albacete['code']);
+        $this->assertSame('Albacete', $albacete['name']);
+
+        // Fuera de España (p. ej. en medio del Atlántico)
+        $fuera = RoutersController::resolverProvinciaPorCoordenadas(30.0, -25.0);
+        $this->assertNull($fuera);
+    }
+
+    /**
+     * Comprueba que los repetidores fuera de Andalucía se geolocalizan e incluyen en el ámbito España.
+     */
+    public function test_routers_nacionales_se_geolocalizan_y_muestran_en_ambito_espana(): void
+    {
+        $response = $this->get('/routers?ambito=espana');
+        $response->assertStatus(200);
+
+        // Badajoz (geolocalizado desde coordenadas de nodo con province FUERA) y Albacete deben aparecer
+        $response->assertSee('Badajoz', false);
+        $response->assertSee('Albacete', false);
+        $response->assertSee('Router Fuera Badajoz', false);
+        $response->assertSee('Router Albacete Los Llanos', false);
     }
 }

@@ -400,20 +400,22 @@ class PanelOperadorTest extends TestCase
         $this->assertNotContains('!b3c4d5e6', $idsAndalucia); // AB01 (Albacete)
         $this->assertNotContains('!a2b3c4d5', $idsAndalucia); // EXT1 (FUERA)
 
-        // 2. Ámbito España: retorna los routers del resto de España (Albacete), excluyendo Andalucía y FUERA
+        // 2. Ámbito España: retorna los routers del resto de la red (Albacete y nodos nacionales), excluyendo Andalucía
         $resEspana = (array) $routersService->obtenerResultado(ambito: 'espana')->datos;
         $itemsEspana = $resEspana['items'] ?? [];
-        $this->assertCount(1, $itemsEspana);
-        $this->assertEquals('!b3c4d5e6', $itemsEspana[0]['id']); // AB01
+        $this->assertCount(2, $itemsEspana);
+        $idsEspana = array_column($itemsEspana, 'id');
+        $this->assertContains('!b3c4d5e6', $idsEspana); // AB01
+        $this->assertContains('!a2b3c4d5', $idsEspana); // EXT1
 
-        // 3. Ámbito Ambos (Andalucía + España acumulados): retorna 9 routers (8 andaluces + Albacete)
+        // 3. Ámbito Ambos (Andalucía + España acumulados): retorna 10 routers (8 andaluces + Albacete + EXT1)
         $resAmbos = (array) $routersService->obtenerResultado(ambito: 'ambos')->datos;
         $itemsAmbos = $resAmbos['items'] ?? [];
-        $this->assertCount(9, $itemsAmbos);
+        $this->assertCount(10, $itemsAmbos);
         $idsAmbos = array_column($itemsAmbos, 'id');
         $this->assertContains('!2a3b4c5d', $idsAmbos); // SE01
         $this->assertContains('!b3c4d5e6', $idsAmbos); // AB01
-        $this->assertNotContains('!a2b3c4d5', $idsAmbos); // EXT1 (FUERA)
+        $this->assertContains('!a2b3c4d5', $idsAmbos); // EXT1
 
         // 4. Widget Routers reacciona al evento ámbito-cambiado
         Livewire::test(RoutersInfraestructuraWidget::class)
@@ -425,11 +427,11 @@ class PanelOperadorTest extends TestCase
             ->assertSet('ambito', 'espana')
             ->assertDontSee('SE01')
             ->assertSee('AB01')
-            ->assertDontSee('EXT1')
+            ->assertSee('EXT1')
             ->dispatch('ambito-cambiado', ambito: 'ambos')
             ->assertSet('ambito', 'ambos')
             ->assertSee('SE01')
             ->assertSee('AB01')
-            ->assertDontSee('EXT1');
+            ->assertSee('EXT1');
     }
 }

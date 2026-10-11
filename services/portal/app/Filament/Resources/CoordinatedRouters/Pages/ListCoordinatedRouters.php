@@ -134,6 +134,8 @@ class ListCoordinatedRouters extends ListRecords
                     $table->string('long_name', 128)->nullable();
                     $table->string('role', 32)->default('ROUTER');
                     $table->string('province', 10)->nullable();
+                    $table->decimal('latitude', 10, 7)->nullable();
+                    $table->decimal('longitude', 10, 7)->nullable();
                     $table->integer('battery_level')->nullable();
                     $table->decimal('voltage', 5, 2)->nullable();
                     $table->timestamp('battery_at')->nullable();
@@ -148,6 +150,13 @@ class ListCoordinatedRouters extends ListRecords
                 });
             } else {
                 throw new \RuntimeException('La vista de contrato api_routers no existe en la base de datos de ingesta. Verifique las migraciones del servicio de ingesta.');
+            }
+        } elseif ($driver === 'sqlite' && $schema->hasTable('api_routers')) {
+            if (! $schema->hasColumn('api_routers', 'latitude')) {
+                $schema->table('api_routers', function (Blueprint $table) {
+                    $table->decimal('latitude', 10, 7)->nullable();
+                    $table->decimal('longitude', 10, 7)->nullable();
+                });
             }
         }
 
@@ -281,6 +290,8 @@ class ListCoordinatedRouters extends ListRecords
                     'long_name' => 'Router Fuera Badajoz',
                     'role' => 'ROUTER',
                     'province' => 'FUERA',
+                    'latitude' => 38.8794,
+                    'longitude' => -6.9706,
                     'battery_level' => 80,
                     'voltage' => 3.90,
                     'channel_utilization' => 5.0,
@@ -296,6 +307,8 @@ class ListCoordinatedRouters extends ListRecords
                     'long_name' => 'Router Albacete Los Llanos',
                     'role' => 'ROUTER',
                     'province' => 'ES-AB',
+                    'latitude' => 38.9943,
+                    'longitude' => -1.8585,
                     'battery_level' => 88,
                     'voltage' => 4.02,
                     'channel_utilization' => 9.5,
