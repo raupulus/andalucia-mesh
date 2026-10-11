@@ -23,8 +23,8 @@ FROM serversideup/php:8.5-fpm-nginx AS final
 
 USER root
 
-# Instalar extensión intl requerida para Filament e IDN
-RUN install-php-extensions intl
+# Instalar extensiones intl y gd (requerida por Dompdf para procesar imágenes PNG)
+RUN install-php-extensions intl gd
 
 # Optimización y variables del entorno de ejecución
 ENV AUTORUN_ENABLED=true \

@@ -19,7 +19,7 @@
   - Presenta 4 tarjetas KPI en cabecera: Nodos únicos detectados, Enlace mutuo inter-nodo / Mejor enlace SNR, Cobertura bilateral/compartida / Provincias alcanzadas, y Especialización / Routers alcanzados, destacando los enlaces directos 100%.
   - Incluye un modal de espera con *spinner* corporativo con los colores de la marca (verde `#007A33`, verde claro `#67EA94`, azul `#2C2D3C`) mientras el backend procesa la telemetría.
   - Genera informes descargables en:
-    - **PDF de alta fidelidad** (`barryvdh/laravel-dompdf`): orientación apaisada A4, cabecera fija con datos de expedición, subtítulo de enlaces 100% directos y franja con bandera de Andalucía (verde/blanco/verde), distancias en km bajo provincia, pie de página fijo con URL centrada y franja andaluza superior, distintivo de filtro aplicado, KPIs, bloques y leyenda inferior.
+    - **PDF de alta fidelidad** (`barryvdh/laravel-dompdf` con extensión PHP `gd`): orientación vertical A4 (portrait), cabecera fija con datos de expedición, subtítulo de enlaces 100% directos y franja con bandera de Andalucía (verde/blanco/verde), distancias en km bajo provincia, pie de página fijo con URL centrada y franja andaluza superior, distintivo de filtro aplicado, KPIs, bloques y leyenda inferior.
     - **Markdown** (`.md`): sintaxis GFM limpia y estructurada, con bloque de aviso metodológico explícito sobre enlaces directos sin multi-hop y distancias en la columna de provincia.
   - Implementa almacenamiento en caché del servidor estricto de 1 hora (3.600 segundos) para la matriz compilada y para los binarios exportados.
   - Cumple estrictamente la regla de negocio RN-06 (cero cookies y cero almacenamiento de datos personales en el front público).
@@ -87,7 +87,7 @@
 ## Dependencias en ambos sentidos
 
 - **Hacia adentro**:
-  - `barryvdh/laravel-dompdf` (generación de documentos PDF).
+  - `barryvdh/laravel-dompdf` (generación de documentos PDF, requiere extensión PHP `gd`).
   - Base de datos `ingest` (conexión `ingesta`, vistas `api_coverage_links`, `api_nodes`).
   - Cache de Laravel (`Illuminate\Support\Facades\Cache`).
 - **Hacia afuera**:
