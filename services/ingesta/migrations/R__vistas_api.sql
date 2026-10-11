@@ -99,6 +99,7 @@ WHERE n.province IS NOT NULL
   AND (n.role IN ({{INFRA_ROLES}}) OR n.role IN ('CLIENT', 'CLIENT_BASE'));
 
 -- 3. api_routers (routers y repetidores activos en los últimos 7 días)
+DROP VIEW IF EXISTS api_routers CASCADE;
 CREATE OR REPLACE VIEW api_routers AS
 SELECT
     n.id,
