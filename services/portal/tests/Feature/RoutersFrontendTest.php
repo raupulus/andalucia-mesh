@@ -109,4 +109,19 @@ class RoutersFrontendTest extends TestCase
         $resPt->assertSee('Saturação TX Repetidores');
         $resPt->assertSee('Repetidores e Nós de Infraestrutura');
     }
+
+    /**
+     * Comprueba que la vista de routers incluye la barra de navegación provincial y sus claves i18n.
+     */
+    public function test_routers_agrupa_por_provincias_y_muestra_navegacion_rapida(): void
+    {
+        $response = $this->get('/routers');
+        $response->assertStatus(200);
+
+        // Claves y clases de navegación provincial
+        $response->assertSee('routers-province-notice', false);
+        $response->assertSee('routers-province-notice-reset', false);
+        $response->assertSee(__('admin.widgets.routers.filter_by_province'), false);
+        $response->assertSee(__('admin.widgets.routers.all_provinces'), false);
+    }
 }

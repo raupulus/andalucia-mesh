@@ -1149,5 +1149,311 @@
             border: 1px solid rgba(245, 158, 11, 0.3);
             color: #fde68a;
         }
+
+        /* ==============================================================================
+         * 4. Navegación Rápida por Provincias y Agrupaciones
+         * ============================================================================== */
+        .routers-province-nav-container {
+            padding: 1.15rem 1.5rem 0.85rem 1.5rem;
+            background: #151620;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+        .routers-province-nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+        .routers-province-nav-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #94a3b8;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .routers-province-nav {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+        .routers-prov-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            background: #1f212f;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            line-height: 1.2;
+        }
+        .routers-prov-pill:hover {
+            color: #ffffff;
+            border-color: rgba(103, 234, 148, 0.45);
+            background: #25283a;
+            transform: translateY(-1px);
+        }
+        .routers-prov-pill.active {
+            background: rgba(0, 122, 51, 0.28);
+            border-color: #67EA94;
+            color: #ffffff;
+            font-weight: 700;
+            box-shadow: 0 0 12px rgba(103, 234, 148, 0.25);
+        }
+        .routers-prov-pill-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.25rem;
+            height: 1.25rem;
+            padding: 0 0.35rem;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            font-family: var(--fuente-mono, monospace);
+            background: rgba(148, 163, 184, 0.18);
+            color: #e2e8f0;
+        }
+        .routers-prov-pill.active .routers-prov-pill-badge {
+            background: #007A33;
+            color: #ffffff;
+        }
+        [data-theme="dark"] .routers-prov-pill.active .routers-prov-pill-badge {
+            background: #67EA94;
+            color: #151620;
+        }
+
+        /* Banner de aviso al filtrar */
+        .routers-province-notice {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            padding: 0.6rem 0.95rem;
+            background: rgba(0, 122, 51, 0.12);
+            border: 1px solid rgba(103, 234, 148, 0.35);
+            border-radius: 0.5rem;
+            color: #e2e8f0;
+            font-size: 0.85rem;
+        }
+        .routers-province-notice-text {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .routers-province-notice-text strong {
+            color: #67EA94;
+            font-weight: 800;
+        }
+        .routers-province-notice-btn {
+            background: transparent;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            color: #cbd5e1;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.375rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .routers-province-notice-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        /* Filas de cabecera de grupo por provincia */
+        .routers-group-header-row {
+            background: #11121a;
+            border-top: 1px solid rgba(148, 163, 184, 0.14);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+        }
+        .routers-group-header-td {
+            padding: 0.85rem 1.25rem;
+        }
+        .routers-group-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .routers-group-header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+        .routers-group-icon {
+            font-size: 1.05rem;
+        }
+        .routers-group-name {
+            font-size: 0.98rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.01em;
+        }
+        .routers-group-badge {
+            font-size: 0.72rem;
+            font-family: var(--fuente-mono, monospace);
+            font-weight: 700;
+            padding: 0.15rem 0.45rem;
+            border-radius: 0.25rem;
+            background: rgba(148, 163, 184, 0.14);
+            color: #94a3b8;
+        }
+        .routers-group-header-stats {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .routers-group-stat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.55rem;
+            border-radius: 9999px;
+            background: rgba(148, 163, 184, 0.1);
+            color: #cbd5e1;
+        }
+        .routers-group-stat-online {
+            background: rgba(34, 197, 94, 0.12);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.25);
+        }
+        .routers-group-stat-alert {
+            background: rgba(239, 68, 68, 0.14);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.28);
+        }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var pills = document.querySelectorAll('.routers-prov-pill');
+            var notice = document.getElementById('routers-province-notice');
+            var noticeTarget = document.getElementById('routers-province-notice-target');
+            var noticeReset = document.getElementById('routers-province-notice-reset');
+            var groupHeaders = document.querySelectorAll('.routers-group-header-row');
+            var routerRows = document.querySelectorAll('.routers-tr');
+
+            function applyProvinceFilter(selectedSlug, updateUrl) {
+                if (!selectedSlug) {
+                    selectedSlug = 'all';
+                }
+
+                // 1. Activar la píldora correspondiente
+                var matchedPill = null;
+                pills.forEach(function (pill) {
+                    var pillSlug = pill.getAttribute('data-province');
+                    if (pillSlug === selectedSlug) {
+                        pill.classList.add('active');
+                        pill.setAttribute('aria-pressed', 'true');
+                        matchedPill = pill;
+                    } else {
+                        pill.classList.remove('active');
+                        pill.setAttribute('aria-pressed', 'false');
+                    }
+                });
+
+                // Si no coincide con ninguna píldora, volver a 'all'
+                if (!matchedPill && selectedSlug !== 'all') {
+                    applyProvinceFilter('all', updateUrl);
+                    return;
+                }
+
+                // 2. Mostrar/ocultar filas y cabeceras
+                if (selectedSlug === 'all') {
+                    groupHeaders.forEach(function (header) {
+                        header.style.display = '';
+                    });
+                    routerRows.forEach(function (row) {
+                        row.style.display = '';
+                    });
+                    if (notice) {
+                        notice.style.display = 'none';
+                    }
+                } else {
+                    groupHeaders.forEach(function (header) {
+                        var hSlug = header.getAttribute('data-province');
+                        header.style.display = (hSlug === selectedSlug) ? '' : 'none';
+                    });
+                    routerRows.forEach(function (row) {
+                        var rSlug = row.getAttribute('data-province');
+                        row.style.display = (rSlug === selectedSlug) ? '' : 'none';
+                    });
+
+                    if (notice && matchedPill) {
+                        var provName = matchedPill.getAttribute('data-province-name') || selectedSlug;
+                        var provCount = matchedPill.getAttribute('data-province-count') || '';
+                        if (noticeTarget) {
+                            noticeTarget.textContent = provName + (provCount ? ' (' + provCount + ')' : '');
+                        }
+                        notice.style.display = 'flex';
+                    }
+                }
+
+                // 3. Actualizar URL con history.replaceState sin recarga y con cero cookies (RN-06)
+                if (updateUrl !== false) {
+                    try {
+                        var url = new URL(window.location.href);
+                        if (selectedSlug === 'all') {
+                            url.searchParams.delete('provincia');
+                        } else {
+                            url.searchParams.set('provincia', selectedSlug);
+                        }
+                        window.history.replaceState({}, '', url.toString());
+                    } catch (e) {
+                        // Navegador sin soporte o modo estricto
+                    }
+                }
+            }
+
+            // Manejar clics en las píldoras
+            pills.forEach(function (pill) {
+                pill.addEventListener('click', function () {
+                    var slug = this.getAttribute('data-province') || 'all';
+                    applyProvinceFilter(slug, true);
+                });
+            });
+
+            // Botón de reset en el banner de aviso
+            if (noticeReset) {
+                noticeReset.addEventListener('click', function () {
+                    applyProvinceFilter('all', true);
+                });
+            }
+
+            // Leer parámetro inicial de la URL (?provincia=...) o hash (#...)
+            try {
+                var initialUrl = new URL(window.location.href);
+                var initialProv = initialUrl.searchParams.get('provincia');
+                if (!initialProv && window.location.hash) {
+                    var hashVal = window.location.hash.replace(/^#/, '').toLowerCase();
+                    if (hashVal) {
+                        initialProv = hashVal;
+                    }
+                }
+
+                if (initialProv) {
+                    applyProvinceFilter(initialProv.toLowerCase(), false);
+                }
+            } catch (e) {}
+        });
+    </script>
 </x-layout>

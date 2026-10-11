@@ -1558,6 +1558,7 @@ class Cobertura
                     $e = $grafo[$evId][$destId];
                     if ($soloPositivo && ($e['snr'] ?? 0) <= 0) {
                         $enlacesFila[$evId] = null;
+
                         continue;
                     }
                     $quienesAlcanzan[] = $evId;

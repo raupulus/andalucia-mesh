@@ -31,6 +31,9 @@ Supervisión pública del estado de routers de infraestructura y repetidores:
    - **Infraestructura / Alimentación:** Porcentaje y desglose de nodos conectados a red eléctrica vs baterías solares.
    - **Tráfico / Gateways:** Ratio de paquetes enrutados y gateways MQTT enlazados.
 3. **Tabla de Routers de Infraestructura:**
+   - **Ordenación y agrupación provincial:** Agrupación con cabeceras por provincia (Andalucía en orden canónico: Almería, Cádiz, Córdoba, Granada, Huelva, Jaén, Málaga y Sevilla; resto de provincias de España por orden alfabético; y repetidores fuera de Andalucía/España al final).
+   - Cabeceras de grupo con nombre de provincia, código ISO, total de repetidores, recuento de activos en línea y avisos en atención.
+   - **Navegación rápida y filtro instantáneo por provincia:** Barra interactiva de píldoras (`.routers-province-nav`) con conteo dinámico, banner de aviso con botón de reinicio y sincronización en tiempo real con la URL (`?provincia=slug` o `#slug`) mediante `history.replaceState` sin recarga ni cookies (RN-06).
    - Listado detallado con indicador visual online/offline (latido en los últimos 45 min).
    - Identificación del nodo (nombre largo, ID hexadecimal, hardware/modelo y provincia).
    - Nivel de batería (barra porcentual coloreada, voltaje o pill verde de "Red eléctrica").
@@ -85,6 +88,7 @@ Refresco de la lista abierta cada 30 s (solo si el usuario no ha pulsado "Ver m�
 4. **Dado** `/alertas?node=!a1b2c3d4`, **cuando** se carga, **entonces** solo salen alertas de ese nodo y el filtro aparece visible y quitable.
 5. **Dado** un lector de pantalla, **cuando** recorre nodos en peligro, **entonces** oye el riesgo en texto ("riesgo alto").
 6. **Dado** `/routers?ambito=andalucia`, **cuando** se carga la vista, **entonces** muestra los KPIs y nodos de infraestructura filtrados sin emitir cookies de sesión (RN-06).
+7. **Dado** `/routers?provincia=es-ca`, **cuando** se carga la vista, **entonces** activa la píldora de Cádiz y muestra únicamente los repetidores de esa provincia manteniendo cero cookies (RN-06).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-09
+> Creado: 2026-10-07 · Última revisión: 2026-10-11
