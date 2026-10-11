@@ -2,6 +2,9 @@
     'url' => null,
     'titulo' => null,
     'texto' => null,
+    'whatsappUrl' => null,
+    'telegramUrl' => null,
+    'emailUrl' => null,
     'align' => 'start', // 'start', 'center', 'end'
 ])
 
@@ -9,9 +12,9 @@
     $targetUrl = $url ?: url()->current();
     $targetTitulo = $titulo ?: config('proyecto.nombre');
     $shareText = $texto ?: ($targetTitulo . ' — ' . config('proyecto.nombre'));
-    $whatsAppUrl = 'https://api.whatsapp.com/send?text=' . urlencode($shareText . ' ' . $targetUrl);
-    $telegramUrl = 'https://t.me/share/url?url=' . urlencode($targetUrl) . '&text=' . urlencode($shareText);
-    $emailUrl = 'mailto:?subject=' . rawurlencode($targetTitulo) . '&body=' . rawurlencode($shareText . "\n\n" . $targetUrl);
+    $finalWhatsAppUrl = $whatsappUrl ?: ('https://api.whatsapp.com/send?text=' . urlencode($shareText . ' ' . $targetUrl));
+    $finalTelegramUrl = $telegramUrl ?: ('https://t.me/share/url?url=' . urlencode($targetUrl) . '&text=' . urlencode($shareText));
+    $finalEmailUrl = $emailUrl ?: ('mailto:?subject=' . rawurlencode($targetTitulo) . '&body=' . rawurlencode($shareText . "\n\n" . $targetUrl));
     $uniqueId = 'share_btn_' . uniqid();
     $justifyContent = match($align) {
         'center' => 'center',
@@ -23,7 +26,7 @@
 <div class="grupo-botones-compartir grupo-compartir-cobertura" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: {{ $justifyContent }}; gap: 0.5rem;" {{ $attributes }}>
     <!-- WhatsApp -->
     <a
-        href="{{ $whatsAppUrl }}"
+        href="{{ $finalWhatsAppUrl }}"
         target="_blank"
         rel="noopener noreferrer"
         class="btn-compartir-red btn-compartir-whatsapp btn-share-whatsapp"
@@ -38,7 +41,7 @@
 
     <!-- Telegram -->
     <a
-        href="{{ $telegramUrl }}"
+        href="{{ $finalTelegramUrl }}"
         target="_blank"
         rel="noopener noreferrer"
         class="btn-compartir-red btn-compartir-telegram btn-share-telegram"
@@ -53,7 +56,7 @@
 
     <!-- Email -->
     <a
-        href="{{ $emailUrl }}"
+        href="{{ $finalEmailUrl }}"
         class="btn-compartir-red btn-compartir-email btn-share-email"
         title="{{ __('portal.share.email_title') }}"
         aria-label="{{ __('portal.share.email_title') }}"
@@ -213,6 +216,15 @@ function copiarFallbackShare(texto, onExito) {
     } finally {
         document.body.removeChild(area);
     }
+}
+
+// Compatibilidad con vistas previas o tests legacy
+function copiarEnlaceCompartir(url) {
+    copiarEnlaceCompartirUniversal(url, null);
+}
+
+function copiarConFallback(texto, onExito) {
+    copiarFallbackShare(texto, onExito);
 }
 </script>
 @endonce

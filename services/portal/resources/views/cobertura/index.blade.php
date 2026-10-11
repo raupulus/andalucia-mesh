@@ -128,63 +128,13 @@
                                 <span>Descargar Markdown</span>
                             </a>
 
-                            <!-- Botones de Compartir -->
-                            <div class="grupo-compartir-cobertura">
-                                <a
-                                    href="{{ $shareWhatsApp ?? '#' }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="btn-share-icon btn-share-whatsapp"
-                                    title="Compartir análisis por WhatsApp"
-                                    aria-label="Compartir en WhatsApp"
-                                >
-                                    <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.63C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.07C9.36 7.07 9.09 7.14 8.86 7.39C8.63 7.64 8 8.23 8 9.44C8 10.65 8.89 11.82 9.01 11.99C9.13 12.16 10.74 14.65 13.23 15.72C15.3 16.61 15.72 16.43 16.17 16.39C16.62 16.35 17.63 15.79 17.84 15.21C18.05 14.63 18.05 14.13 17.99 14.03C17.93 13.93 17.78 13.87 17.55 13.76C17.32 13.65 16.19 13.09 15.98 13.01C15.77 12.93 15.62 12.89 15.47 13.12C15.32 13.35 14.89 13.87 14.76 14.02C14.63 14.17 14.5 14.19 14.28 14.08C14.05 13.97 13.33 13.73 12.47 12.96C11.8 12.36 11.35 11.62 11.22 11.39C11.09 11.16 11.21 11.04 11.32 10.93C11.42 10.83 11.55 10.66 11.66 10.53C11.77 10.4 11.81 10.3 11.89 10.15C11.97 10 11.93 9.87 11.87 9.76C11.81 9.65 11.36 8.54 11.17 8.09C10.99 7.65 10.8 7.71 10.66 7.7C10.53 7.7 10.38 7.69 10.23 7.69C10.08 7.69 9.83 7.75 9.63 7.97C9.43 8.19 8.86 8.72 8.86 9.82C8.86 10.92 9.66 11.98 9.77 12.13C9.88 12.28 11.34 14.52 13.56 15.48C15.42 16.28 15.8 16.12 16.2 16.08C16.6 16.04 17.5 15.54 17.69 15.02C17.88 14.5 17.88 14.05 17.82 13.96C17.76 13.87 17.63 13.82 17.42 13.72Z"/>
-                                    </svg>
-                                    <span>WhatsApp</span>
-                                </a>
-
-                                <a
-                                    href="{{ $shareTelegram ?? '#' }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="btn-share-icon btn-share-telegram"
-                                    title="Compartir análisis por Telegram"
-                                    aria-label="Compartir en Telegram"
-                                >
-                                    <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
-                                    </svg>
-                                    <span>Telegram</span>
-                                </a>
-
-                                <a
-                                    href="{{ $shareEmail ?? '#' }}"
-                                    class="btn-share-icon btn-share-email"
-                                    title="Compartir análisis por Correo electrónico"
-                                    aria-label="Compartir por Correo"
-                                >
-                                    <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                        <polyline points="22,6 12,13 2,6"></polyline>
-                                    </svg>
-                                    <span>Email</span>
-                                </a>
-
-                                <button
-                                    type="button"
-                                    class="btn-share-icon btn-share-copiar"
-                                    onclick="copiarEnlaceCompartir('{{ $urlCompartir ?? '' }}');"
-                                    title="Copiar enlace permanente"
-                                    aria-label="Copiar enlace"
-                                >
-                                    <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                    </svg>
-                                    <span id="texto-btn-copiar">Copiar enlace</span>
-                                </button>
-                            </div>
+                            <!-- Botones de Compartir Reutilizables -->
+                            <x-botones-compartir
+                                :url="$urlCompartir ?? url()->current()"
+                                :whatsapp-url="$shareWhatsApp ?? null"
+                                :telegram-url="$shareTelegram ?? null"
+                                :email-url="$shareEmail ?? null"
+                            />
                         </div>
                     @endif
                 </div>
