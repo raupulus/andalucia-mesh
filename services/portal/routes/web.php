@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AlertasController;
+use App\Http\Controllers\CoberturaController;
 use App\Http\Controllers\ConfiguradorController;
 use App\Http\Controllers\CustomPageController;
 use App\Http\Controllers\DiagnosticoController;
@@ -59,6 +60,12 @@ Route::get('/paginas', [CustomPageController::class, 'index'])->name('paginas.in
 Route::get('/paginas/{slug}', [CustomPageController::class, 'show'])->name('paginas.show');
 Route::get('/sugerencias', [SuggestionController::class, 'create'])->name('sugerencias.create');
 Route::post('/sugerencias', [SuggestionController::class, 'store'])->name('sugerencias.store');
+
+// Verificador y comparador de cobertura («Mi Cobertura»)
+Route::get('/mi-cobertura', [CoberturaController::class, 'index'])->name('cobertura.index');
+Route::get('/mi-cobertura/buscar', [CoberturaController::class, 'buscar'])->name('cobertura.buscar');
+Route::get('/mi-cobertura/pdf', [CoberturaController::class, 'descargarPdf'])->name('cobertura.pdf');
+Route::get('/mi-cobertura/markdown', [CoberturaController::class, 'descargarMarkdown'])->name('cobertura.markdown');
 
 // Textos legales
 Route::prefix('legal')->group(function () {

@@ -9,6 +9,7 @@ use App\Data\Ingest\Routers;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Throwable;
 
 /**
@@ -16,10 +17,133 @@ use Throwable;
  *
  * Muestra el cuadro de supervisión en tiempo real con selector de ámbito
  * territorial (Andalucía, España, Ambos), tarjetas de métricas ejecutivas
- * y tabla detallada de telemetría y salud de cada nodo.
+ * y tabla detallada de telemetría y salud de cada nodo agrupada por provincias.
  */
 class RoutersController extends Controller
 {
+    /**
+     * Catálogo de provincias españolas conforme a ISO 3166-2:ES.
+     *
+     * @var array<string, string>
+     */
+    public const PROVINCIAS_ESPANA = [
+        // 8 provincias andaluzas (orden canónico / alfabético)
+        'ES-AL' => 'Almería',
+        'ES-CA' => 'Cádiz',
+        'ES-CO' => 'Córdoba',
+        'ES-GR' => 'Granada',
+        'ES-H' => 'Huelva',
+        'ES-HU' => 'Huelva',
+        'ES-J' => 'Jaén',
+        'ES-JA' => 'Jaén',
+        'ES-MA' => 'Málaga',
+        'ES-SE' => 'Sevilla',
+        // Resto de España
+        'ES-AB' => 'Albacete',
+        'ES-A' => 'Alicante',
+        'ES-AV' => 'Ávila',
+        'ES-B' => 'Barcelona',
+        'ES-BA' => 'Badajoz',
+        'ES-BI' => 'Bizkaia',
+        'ES-BU' => 'Burgos',
+        'ES-C' => 'A Coruña',
+        'ES-CC' => 'Cáceres',
+        'ES-CE' => 'Ceuta',
+        'ES-CR' => 'Ciudad Real',
+        'ES-CS' => 'Castellón',
+        'ES-CU' => 'Cuenca',
+        'ES-GC' => 'Las Palmas',
+        'ES-GI' => 'Girona',
+        'ES-GU' => 'Guadalajara',
+        'ES-IB' => 'Illes Balears',
+        'ES-PM' => 'Illes Balears',
+        'ES-L' => 'Lleida',
+        'ES-LE' => 'León',
+        'ES-LO' => 'La Rioja',
+        'ES-LU' => 'Lugo',
+        'ES-M' => 'Madrid',
+        'ES-ML' => 'Melilla',
+        'ES-MU' => 'Murcia',
+        'ES-NA' => 'Navarra',
+        'ES-O' => 'Asturias',
+        'ES-OR' => 'Ourense',
+        'ES-P' => 'Palencia',
+        'ES-PO' => 'Pontevedra',
+        'ES-S' => 'Cantabria',
+        'ES-SA' => 'Salamanca',
+        'ES-SG' => 'Segovia',
+        'ES-SO' => 'Soria',
+        'ES-SS' => 'Gipuzkoa',
+        'ES-T' => 'Tarragona',
+        'ES-TE' => 'Teruel',
+        'ES-TF' => 'Santa Cruz de Tenerife',
+        'ES-TO' => 'Toledo',
+        'ES-V' => 'Valencia',
+        'ES-VA' => 'Valladolid',
+        'ES-VI' => 'Álava',
+        'ES-Z' => 'Zaragoza',
+        'ES-ZA' => 'Zamora',
+    ];
+
+    /**
+     * Resuelve el nombre, código normalizado y slug de una provincia.
+     *
+     * @return array{code: string, name: string, slug: string, is_andalucia: bool}
+     */
+    public static function resolverInfoProvincia(?string $provinciaRaw): array
+    {
+        $code = strtoupper(trim((string) $provinciaRaw));
+        $esAndaluza = in_array($code, Routers::PROVINCIAS_ANDALUCIA, true);
+
+        if ($code === '' || $code === 'UNKNOWN') {
+            return [
+                'code' => 'DESCONOCIDA',
+                'name' => 'Desconocida',
+                'slug' => 'desconocida',
+                'is_andalucia' => false,
+            ];
+        }
+
+        if ($code === 'FUERA') {
+            return [
+                'code' => 'FUERA',
+                'name' => 'Fuera de Andalucía',
+                'slug' => 'fuera',
+                'is_andalucia' => false,
+            ];
+        }
+
+        if (isset(self::PROVINCIAS_ESPANA[$code])) {
+            $name = self::PROVINCIAS_ESPANA[$code];
+
+            return [
+                'code' => $code,
+                'name' => $name,
+                'slug' => Str::slug($name),
+                'is_andalucia' => $esAndaluza,
+            ];
+        }
+
+        // Si ya viene con el nombre textual de la provincia (ej. 'Cádiz')
+        foreach (self::PROVINCIAS_ESPANA as $c => $n) {
+            if (mb_strtolower($code) === mb_strtolower($n)) {
+                return [
+                    'code' => $c,
+                    'name' => $n,
+                    'slug' => Str::slug($n),
+                    'is_andalucia' => in_array($c, Routers::PROVINCIAS_ANDALUCIA, true),
+                ];
+            }
+        }
+
+        return [
+            'code' => $code,
+            'name' => $code,
+            'slug' => Str::slug($code),
+            'is_andalucia' => false,
+        ];
+    }
+
     public function __construct(
         protected Routers $routers,
         protected Resumen $resumen,
@@ -129,7 +253,91 @@ class RoutersController extends Controller
             $totalRouters = 0;
         }
 
-        // 5. Métricas de resumen para las 4 tarjetas KPI
+        // 5. Agrupar y ordenar routers por provincia
+        $gruposProvincia = [];
+        $ordenAndalucia = array_flip(Routers::PROVINCIAS_ANDALUCIA);
+
+        foreach ($items as $r) {
+            $infoProv = self::resolverInfoProvincia($r['province'] ?? null);
+            $pCode = $infoProv['code'];
+
+            if (! isset($gruposProvincia[$pCode])) {
+                $gruposProvincia[$pCode] = [
+                    'code' => $infoProv['code'],
+                    'name' => $infoProv['name'],
+                    'slug' => $infoProv['slug'],
+                    'is_andalucia' => $infoProv['is_andalucia'],
+                    'count' => 0,
+                    'online_count' => 0,
+                    'alert_count' => 0,
+                    'routers' => [],
+                ];
+            }
+
+            $r['province_code'] = $infoProv['code'];
+            $r['province_name'] = $infoProv['name'];
+            $r['province_slug'] = $infoProv['slug'];
+            $r['is_andalucia'] = $infoProv['is_andalucia'];
+
+            $gruposProvincia[$pCode]['count']++;
+            if ($r['esta_online']) {
+                $gruposProvincia[$pCode]['online_count']++;
+            }
+            if ($r['bateria_color'] === 'rojo' || $r['chutil_color'] === 'rojo' || $r['tx_color'] === 'rojo') {
+                $gruposProvincia[$pCode]['alert_count']++;
+            }
+            $gruposProvincia[$pCode]['routers'][] = $r;
+        }
+
+        uasort($gruposProvincia, function (array $a, array $b) use ($ordenAndalucia): int {
+            $esAndA = $a['is_andalucia'];
+            $esAndB = $b['is_andalucia'];
+
+            if ($esAndA && ! $esAndB) {
+                return -1;
+            }
+            if (! $esAndA && $esAndB) {
+                return 1;
+            }
+
+            if ($esAndA && $esAndB) {
+                $posA = $ordenAndalucia[$a['code']] ?? 99;
+                $posB = $ordenAndalucia[$b['code']] ?? 99;
+                if ($posA !== $posB) {
+                    return $posA <=> $posB;
+                }
+            }
+
+            $esFueraA = in_array($a['code'], ['FUERA', 'DESCONOCIDA'], true);
+            $esFueraB = in_array($b['code'], ['FUERA', 'DESCONOCIDA'], true);
+
+            if ($esFueraA && ! $esFueraB) {
+                return 1;
+            }
+            if (! $esFueraA && $esFueraB) {
+                return -1;
+            }
+
+            $reemplazos = ['Á' => 'A', 'É' => 'E', 'Í' => 'I', 'Ó' => 'O', 'Ú' => 'U', 'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u'];
+            $nombreA = strtr($a['name'], $reemplazos);
+            $nombreB = strtr($b['name'], $reemplazos);
+
+            return strcasecmp($nombreA, $nombreB);
+        });
+
+        // Aplanar los routers en el orden provincial resultante
+        $itemsOrdenados = [];
+        foreach ($gruposProvincia as $grupo) {
+            foreach ($grupo['routers'] as $routerItem) {
+                $itemsOrdenados[] = $routerItem;
+            }
+        }
+        $items = $itemsOrdenados;
+
+        // Filtro opcional por provincia
+        $filtroProvincia = trim((string) $request->query('provincia', ''));
+
+        // 6. Métricas de resumen para las 4 tarjetas KPI
         $resumenData = null;
         try {
             $resumenData = (array) $this->resumen->obtenerResultado()->datos;
@@ -259,6 +467,8 @@ class RoutersController extends Controller
             'conteoAndalucia' => $conteoAndalucia,
             'conteoEspana' => $conteoEspana,
             'routers' => $items,
+            'routersPorProvincia' => $gruposProvincia,
+            'filtroProvincia' => $filtroProvincia,
             'total' => $totalRouters,
             'enAlerta' => $enAlerta,
             'errorFuente' => $errorFuente,

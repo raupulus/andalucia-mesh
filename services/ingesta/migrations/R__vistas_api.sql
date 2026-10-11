@@ -15,6 +15,8 @@ SELECT
     n.hw_model,
     n.firmware,
     n.province,
+    n.latitude,
+    n.longitude,
     n.last_position_at,
     n.position_precision_m,
     n.border_uncertain,
@@ -732,6 +734,39 @@ FROM packet p
 WHERE p.rx_first >= (now() - INTERVAL '24 hours')
 GROUP BY 1, 2;
 
+-- 8.5 api_coverage_links (resumen de enlaces RF directos de las últimas 48 horas con estadísticas SNR)
+CREATE OR REPLACE VIEW api_coverage_links AS
+SELECT
+    r.gateway_id,
+    r.from_id,
+    count(*)::integer AS packets,
+    round(avg(r.snr)::numeric, 1)::real AS snr_avg,
+    round(min(r.snr)::numeric, 1)::real AS snr_min,
+    round(max(r.snr)::numeric, 1)::real AS snr_max,
+    (array_agg(r.snr ORDER BY r.rx_at DESC))[1] AS snr_last,
+    max(r.rx_at) AS last_rx_at,
+    min(r.rx_at) AS first_rx_at,
+    max(r.distance_km) AS distance_km
+FROM reception r
+WHERE r.direct = true
+  AND r.own = false
+  AND r.rx_at >= (now() - INTERVAL '48 hours')
+GROUP BY r.gateway_id, r.from_id;
+
+-- 8.6 api_direct_receptions (recepciones individuales directas RF de las últimas 48 horas)
+CREATE OR REPLACE VIEW api_direct_receptions AS
+SELECT
+    r.rx_at,
+    r.gateway_id,
+    r.from_id,
+    r.snr,
+    r.rssi,
+    r.distance_km
+FROM reception r
+WHERE r.direct = true
+  AND r.own = false
+  AND r.rx_at >= (now() - INTERVAL '48 hours');
+
 -- ==============================================================================
 -- 9. Asignación de Permisos de Seguridad
 -- portal_lector_ingesta solo puede leer las vistas de contrato api_*
@@ -769,5 +804,8 @@ GRANT SELECT ON
     api_node_intervals,
     api_node_battery_daily,
     api_node_reboots_daily,
-    api_node_packets_24h
+    api_node_packets_24h,
+    api_coverage_links,
+    api_direct_receptions
 TO portal_lector_ingesta;
+

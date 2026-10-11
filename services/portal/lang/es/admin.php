@@ -95,6 +95,12 @@ return [
             'no_connection' => 'Sin conexión',
             'btn_inspect' => 'Diagnóstico →',
             'inspect_title' => 'Abrir diagnóstico profundo en el portal público',
+            'filter_by_province' => 'Filtrar por provincia',
+            'all_provinces' => 'Todas',
+            'showing_province' => 'Mostrando únicamente repetidores de :province',
+            'show_all' => 'Mostrar todas las provincias',
+            'province_header' => 'Provincia',
+            'in_attention_count' => ':count en atención',
         ],
     ],
 

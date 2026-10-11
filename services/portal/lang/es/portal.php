@@ -25,6 +25,7 @@ return [
         'extras' => 'Extras',
         'configurator' => 'Configurador automático',
         'node_check' => 'Revisa tu nodo',
+        'my_coverage' => 'Mi Cobertura',
         'suggestions' => 'Sugerencias',
         'hardware' => 'Hardware',
         'api' => 'API/Websockets',

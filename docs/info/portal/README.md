@@ -31,6 +31,7 @@
 | 06.15 | [`15-hardware-catalog.md`](15-hardware-catalog.md) | Catálogo de hardware recomendado: front interactivo `/hardware`, recorte 1:1 y gestión en `/admin` | Media |
 | 06.16 | [`16-custom-pages.md`](16-custom-pages.md) | Páginas y artículos dinámicos: catálogo `/paginas`, tarjetas horizontales, SEO Article y gestión en `/admin` | Media |
 | 06.17 | [`17-interactive-map.md`](17-interactive-map.md) | Mapa interactivo de nodos y problemas de malla en `/mapa`: Leaflet local, marcadores, modales de diagnóstico, favoritos, búsqueda y caché Nginx/Gzip | Alta |
+| 06.18 | [`18-coverage-verifier.md`](18-coverage-verifier.md) | Verificador y comparador de cobertura RF / Mi Cobertura (`/mi-cobertura`), autocompletado en vivo, filtros SNR, exportación PDF y Markdown | Media |
 | — | [`pages/`](pages/README.md) | Contenido y borrador del texto de cada página pública | — |
 | — | [`DESIGN.md`](../DESIGN.md) | Sistema visual | — |
 
@@ -69,6 +70,7 @@ El portal es la **única pieza** del proyecto con internacionalización y traduc
 | `/bots`, `/firmware` | Público | 06, 07 |
 | `/rankings`, `/routers`, `/alertas`, `/alertas/{id}` | Público | 08 |
 | `/mapa` | Público | 17 |
+| `/mi-cobertura`, `/mi-cobertura/buscar`, `/mi-cobertura/pdf`, `/mi-cobertura/markdown` | Público | 18 |
 | `/revisa-tu-nodo`, `/revisa-tu-nodo/{id}` | Público | 09 |
 | `/sugerencias`, `/faq` | Público | 01, 14 |
 | `/legal/aviso-legal`, `/legal/privacidad`, `/legal/cookies` | Público | 10 |
@@ -208,4 +210,4 @@ Actualización: nueva etiqueta git → `deploy.sh portal`.
 6. Las decisiones de detalle de la API y el panel están en sus módulos (11–14).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-09
+> Creado: 2026-10-07 · Última revisión: 2026-10-11

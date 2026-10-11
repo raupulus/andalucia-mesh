@@ -253,6 +253,8 @@ Roles de solo lectura (únicas lecturas cruzadas permitidas):
 | `api_node_battery_daily` | Nodo × día (7 días) | `node_id`, `day`, `min_level`, `avg_level`, `readings`, `readings_below_40` | Revisa tu nodo |
 | `api_node_reboots_daily` | Nodo × día (7 días) | `node_id`, `day`, `reboots` | Revisa tu nodo |
 | `api_node_packets_24h` | Nodo × portnum (24 horas) | `node_id`, `portnum`, `packets_24h` | Modal de diagnóstico en mapa interactivo y Revisa tu nodo |
+| `api_coverage_links` | Par gateway-nodo directo (48 horas) | `gateway_id`, `from_id`, `packets`, `snr_avg`, `snr_min`, `snr_max`, `snr_last`, `last_rx_at`, `first_rx_at`, `distance_km` | Mi Cobertura (`/mi-cobertura`) |
+| `api_direct_receptions` | Recepción directa individual (48 horas) | `rx_at`, `gateway_id`, `from_id`, `snr`, `rssi`, `distance_km` | Mi Cobertura (`/mi-cobertura`) |
 
 Retención que deben respetar las vistas (política de privacidad, `portal/10-legal-privacy.md`): datos en bruto 30 días (posiciones y telemetría 90), agregados **por nodo** 1 año, agregados sin nodo indefinidos.
 

@@ -297,6 +297,57 @@
                         <p style="font-size: 0.9rem; color: var(--color-texto-2); margin: 0; max-width: 500px;">{{ __('admin.widgets.routers.empty_desc') }}</p>
                     </div>
                 @else
+                    <!-- 1. Barra de navegación y filtro rápido por provincia -->
+                    @if(!empty($routersPorProvincia) && count($routersPorProvincia) > 1)
+                        <div class="routers-province-nav-container">
+                            <div class="routers-province-nav" role="toolbar" aria-label="{{ __('admin.widgets.routers.filter_by_province') }}">
+                                <div class="routers-province-nav-title">
+                                    <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    <span>{{ __('admin.widgets.routers.filter_by_province') }}:</span>
+                                </div>
+                                <div class="routers-province-pills">
+                                    <button
+                                        type="button"
+                                        class="routers-prov-pill active"
+                                        data-province="all"
+                                        aria-pressed="true"
+                                    >
+                                        <span>{{ __('admin.widgets.routers.all_provinces') }}</span>
+                                        <span class="routers-prov-pill-badge">{{ $total }}</span>
+                                    </button>
+                                    @foreach($routersPorProvincia as $pCode => $pData)
+                                        <button
+                                            type="button"
+                                            class="routers-prov-pill"
+                                            data-province="{{ $pData['slug'] }}"
+                                            data-province-code="{{ $pData['code'] }}"
+                                            data-province-name="{{ $pData['name'] }}"
+                                            data-province-count="{{ $pData['count'] }}"
+                                            aria-pressed="false"
+                                        >
+                                            <span>{{ $pData['name'] }}</span>
+                                            <span class="routers-prov-pill-badge">{{ $pData['count'] }}</span>
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- Banner de aviso cuando hay filtro por provincia activo -->
+                            <div id="routers-province-notice" class="routers-province-notice" style="display: none;">
+                                <div class="routers-province-notice-text">
+                                    <span>📍 {{ __('admin.widgets.routers.showing_province') }}:</span>
+                                    <strong id="routers-province-notice-target"></strong>
+                                </div>
+                                <button type="button" id="routers-province-notice-reset" class="routers-province-notice-btn">
+                                    ✕ {{ __('admin.widgets.routers.show_all') }}
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="routers-table-responsive-container">
                         <table class="routers-dashboard-table">
                             <thead>
@@ -311,125 +362,274 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($routers as $r)
-                                    <tr class="routers-tr">
-                                        <!-- Nodo -->
-                                        <td class="routers-td">
-                                            <div style="display: flex; align-items: center; gap: 0.65rem;">
-                                                <span class="routers-status-dot {{ $r['esta_online'] ? 'routers-status-dot-online' : 'routers-status-dot-offline' }}" title="{{ $r['esta_online'] ? __('admin.widgets.routers.online') : __('admin.widgets.routers.offline') }}"></span>
-                                                <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-                                                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--color-texto); line-height: 1.2;">
-                                                        {{ $r['short_name'] }}
+                                @if(!empty($routersPorProvincia))
+                                    @foreach($routersPorProvincia as $pCode => $pData)
+                                        <tr class="routers-group-header-row" data-province="{{ $pData['slug'] }}">
+                                            <td colspan="7" class="routers-group-header-td">
+                                                <div class="routers-group-header-content">
+                                                    <div class="routers-group-header-title">
+                                                        <span class="routers-group-icon">📍</span>
+                                                        <strong class="routers-group-name">{{ $pData['name'] }}</strong>
+                                                        <span class="routers-group-badge">{{ $pData['code'] }}</span>
                                                     </div>
-                                                    @if($r['long_name'])
-                                                        <div class="routers-node-longname">
-                                                            {{ $r['long_name'] }}
-                                                        </div>
-                                                    @endif
-                                                    <div style="font-family: var(--fuente-mono, monospace); font-size: 0.75rem; opacity: 0.65; letter-spacing: 0.04em;">{{ $r['id'] }}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-
-                                        <!-- Hardware / Zona -->
-                                        <td class="routers-td">
-                                            <div style="font-size: 0.85rem; font-weight: 600; color: var(--color-texto);">
-                                                {{ $r['hw_model'] === 'Desconocido' ? __('admin.widgets.routers.unknown') : $r['hw_model'] }}
-                                            </div>
-                                            <div style="font-size: 0.75rem; opacity: 0.75; font-family: var(--fuente-mono, monospace);">
-                                                {{ $r['province'] }} · {{ $r['role'] }}
-                                            </div>
-                                        </td>
-
-                                        <!-- Alimentación y Batería -->
-                                        <td class="routers-td">
-                                            @if($r['powered'])
-                                                <div class="routers-power-badge routers-power-badge-grid">
-                                                    <span>⚡ {{ __('admin.widgets.routers.power_grid_solar') }}</span>
-                                                    @if($r['voltage'])
-                                                        <span style="font-family: var(--fuente-mono, monospace); font-size: 0.7rem; opacity: 0.85;">{{ $r['voltage'] }}V</span>
-                                                    @endif
-                                                </div>
-                                            @elseif($r['battery_level'] !== null)
-                                                <div class="routers-battery-container">
-                                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-family: var(--fuente-mono, monospace); font-weight: 700; margin-bottom: 0.25rem;">
-                                                        <span style="color: {{ $r['battery_level'] < 20 ? '#f87171' : ($r['battery_level'] < 50 ? '#fbbf24' : '#4ade80') }};">🔋 {{ $r['battery_level'] }}%</span>
-                                                        @if($r['voltage'])
-                                                            <span style="font-size: 0.7rem; font-weight: normal; opacity: 0.7;">{{ $r['voltage'] }}V</span>
+                                                    <div class="routers-group-header-stats">
+                                                        <span class="routers-group-stat-pill">
+                                                            <strong>{{ $pData['count'] }}</strong> {{ trans_choice('admin.widgets.routers.routers_badge', $pData['count'], ['count' => $pData['count']]) }}
+                                                        </span>
+                                                        <span class="routers-group-stat-pill routers-group-stat-online">
+                                                            <span class="routers-status-dot routers-status-dot-online"></span>
+                                                            <strong>{{ $pData['online_count'] }}</strong> {{ __('admin.widgets.routers.online') }}
+                                                        </span>
+                                                        @if($pData['alert_count'] > 0)
+                                                            <span class="routers-group-stat-pill routers-group-stat-alert">
+                                                                ⚠️ {{ __('admin.widgets.routers.in_attention_count', ['count' => $pData['alert_count']]) }}
+                                                            </span>
                                                         @endif
                                                     </div>
-                                                    <div class="routers-progress-track">
-                                                        <div class="routers-progress-fill routers-progress-{{ $r['bateria_color'] }}" style="width: {{ min(100, max(5, $r['battery_level'])) }}%;"></div>
-                                                    </div>
                                                 </div>
-                                            @else
-                                                <span style="font-size: 0.85rem; opacity: 0.5; font-family: var(--fuente-mono, monospace);">—</span>
-                                            @endif
-                                        </td>
+                                            </td>
+                                        </tr>
+                                        @foreach($pData['routers'] as $r)
+                                            <tr class="routers-tr" data-province="{{ $pData['slug'] }}">
+                                                <!-- Nodo -->
+                                                <td class="routers-td">
+                                                    <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                                        <span class="routers-status-dot {{ $r['esta_online'] ? 'routers-status-dot-online' : 'routers-status-dot-offline' }}" title="{{ $r['esta_online'] ? __('admin.widgets.routers.online') : __('admin.widgets.routers.offline') }}"></span>
+                                                        <div style="display: flex; flex-direction: column; gap: 0.15rem;">
+                                                            <div style="font-weight: 700; font-size: 0.95rem; color: var(--color-texto); line-height: 1.2;">
+                                                                {{ $r['short_name'] }}
+                                                            </div>
+                                                            @if($r['long_name'])
+                                                                <div class="routers-node-longname">
+                                                                    {{ $r['long_name'] }}
+                                                                </div>
+                                                            @endif
+                                                            <div style="font-family: var(--fuente-mono, monospace); font-size: 0.75rem; opacity: 0.65; letter-spacing: 0.04em;">{{ $r['id'] }}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
 
-                                        <!-- Presión Aire (ChUtil) -->
-                                        <td class="routers-td">
-                                            @if($r['chutil'] !== null)
-                                                <div class="routers-chutil-container">
-                                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-family: var(--fuente-mono, monospace); margin-bottom: 0.25rem;">
-                                                        <span style="font-weight: 700; color: var(--color-texto);">{{ $r['chutil'] }}%</span>
-                                                        <span class="routers-chip-{{ $r['chutil_color'] }}" style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">
-                                                            {{ $r['chutil'] < 20 ? __('admin.widgets.routers.chutil_light') : ($r['chutil'] < 40 ? __('admin.widgets.routers.chutil_moderate') : __('admin.widgets.routers.chutil_heavy')) }}
+                                                <!-- Hardware / Zona -->
+                                                <td class="routers-td">
+                                                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--color-texto);">
+                                                        {{ $r['hw_model'] === 'Desconocido' ? __('admin.widgets.routers.unknown') : $r['hw_model'] }}
+                                                    </div>
+                                                    <div style="font-size: 0.75rem; opacity: 0.75; font-family: var(--fuente-mono, monospace);">
+                                                        {{ $r['province_name'] ?? $r['province'] }} · {{ $r['role'] }}
+                                                    </div>
+                                                </td>
+
+                                                <!-- Alimentación y Batería -->
+                                                <td class="routers-td">
+                                                    @if($r['powered'])
+                                                        <div class="routers-power-badge routers-power-badge-grid">
+                                                            <span>⚡ {{ __('admin.widgets.routers.power_grid_solar') }}</span>
+                                                            @if($r['voltage'])
+                                                                <span style="font-family: var(--fuente-mono, monospace); font-size: 0.7rem; opacity: 0.85;">{{ $r['voltage'] }}V</span>
+                                                            @endif
+                                                        </div>
+                                                    @elseif($r['battery_level'] !== null)
+                                                        <div class="routers-battery-container">
+                                                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-family: var(--fuente-mono, monospace); font-weight: 700; margin-bottom: 0.25rem;">
+                                                                <span style="color: {{ $r['battery_level'] < 20 ? '#f87171' : ($r['battery_level'] < 50 ? '#fbbf24' : '#4ade80') }};">🔋 {{ $r['battery_level'] }}%</span>
+                                                                @if($r['voltage'])
+                                                                    <span style="font-size: 0.7rem; font-weight: normal; opacity: 0.7;">{{ $r['voltage'] }}V</span>
+                                                                @endif
+                                                            </div>
+                                                            <div class="routers-progress-track">
+                                                                <div class="routers-progress-fill routers-progress-{{ $r['bateria_color'] }}" style="width: {{ min(100, max(5, $r['battery_level'])) }}%;"></div>
+                                                            </div>
+                                                        </div>
+                                                    @else
+                                                        <span style="font-size: 0.85rem; opacity: 0.5; font-family: var(--fuente-mono, monospace);">—</span>
+                                                    @endif
+                                                </td>
+
+                                                <!-- Presión Aire (ChUtil) -->
+                                                <td class="routers-td">
+                                                    @if($r['chutil'] !== null)
+                                                        <div class="routers-chutil-container">
+                                                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-family: var(--fuente-mono, monospace); margin-bottom: 0.25rem;">
+                                                                <span style="font-weight: 700; color: var(--color-texto);">{{ $r['chutil'] }}%</span>
+                                                                <span class="routers-chip-{{ $r['chutil_color'] }}" style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">
+                                                                    {{ $r['chutil'] < 20 ? __('admin.widgets.routers.chutil_light') : ($r['chutil'] < 40 ? __('admin.widgets.routers.chutil_moderate') : __('admin.widgets.routers.chutil_heavy')) }}
+                                                                </span>
+                                                            </div>
+                                                            <div class="routers-progress-track">
+                                                                <div class="routers-progress-fill routers-progress-{{ $r['chutil_color'] }}" style="width: {{ min(100, max(5, $r['chutil'])) }}%;"></div>
+                                                            </div>
+                                                        </div>
+                                                    @else
+                                                        <span style="font-size: 0.85rem; opacity: 0.5; font-family: var(--fuente-mono, monospace);">—</span>
+                                                    @endif
+                                                </td>
+
+                                                <!-- Saturación TX -->
+                                                <td class="routers-td" style="font-family: var(--fuente-mono, monospace); font-size: 0.85rem;">
+                                                    @if($airTx = $r['air_tx'])
+                                                        <span class="routers-text-{{ $r['tx_color'] }}" style="font-weight: 700;">
+                                                            {{ $airTx }}% TX
                                                         </span>
-                                                    </div>
-                                                    <div class="routers-progress-track">
-                                                        <div class="routers-progress-fill routers-progress-{{ $r['chutil_color'] }}" style="width: {{ min(100, max(5, $r['chutil'])) }}%;"></div>
+                                                    @else
+                                                        <span style="opacity: 0.5;">—</span>
+                                                    @endif
+                                                </td>
+
+                                                <!-- Último Reporte -->
+                                                <td class="routers-td" style="font-size: 0.85rem;">
+                                                    @php
+                                                        $lsDt = !empty($r['last_seen']) ? \Carbon\Carbon::parse($r['last_seen']) : null;
+                                                    @endphp
+                                                    <span
+                                                        style="{{ $r['esta_online'] ? 'opacity: 0.85;' : 'color: #f87171; font-weight: 700;' }}"
+                                                        @if($lsDt)
+                                                            data-title-fecha-local="{{ $lsDt->toIso8601String() }}"
+                                                            title="{{ $lsDt->timezone(config('proyecto.zona_horaria', 'Europe/Madrid'))->format('Y-m-d H:i:s') }}"
+                                                        @endif
+                                                    >
+                                                        {{ $r['hace'] }}
+                                                    </span>
+                                                </td>
+
+                                                <!-- Acción -->
+                                                <td class="routers-td" style="text-align: right;">
+                                                    <a
+                                                        href="/revisa-tu-nodo/{{ ltrim($r['id'], '!') }}{{ $langQuerySolo }}"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        class="routers-btn-inspect"
+                                                        title="{{ __('admin.widgets.routers.inspect_title') }}"
+                                                        aria-label="{{ __('admin.widgets.routers.inspect_title') }}"
+                                                    >
+                                                        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                                        </svg>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endforeach
+                                @else
+                                    @foreach($routers as $r)
+                                        <tr class="routers-tr">
+                                            <!-- Nodo -->
+                                            <td class="routers-td">
+                                                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                                    <span class="routers-status-dot {{ $r['esta_online'] ? 'routers-status-dot-online' : 'routers-status-dot-offline' }}" title="{{ $r['esta_online'] ? __('admin.widgets.routers.online') : __('admin.widgets.routers.offline') }}"></span>
+                                                    <div style="display: flex; flex-direction: column; gap: 0.15rem;">
+                                                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--color-texto); line-height: 1.2;">
+                                                            {{ $r['short_name'] }}
+                                                        </div>
+                                                        @if($r['long_name'])
+                                                            <div class="routers-node-longname">
+                                                                {{ $r['long_name'] }}
+                                                            </div>
+                                                        @endif
+                                                        <div style="font-family: var(--fuente-mono, monospace); font-size: 0.75rem; opacity: 0.65; letter-spacing: 0.04em;">{{ $r['id'] }}</div>
                                                     </div>
                                                 </div>
-                                            @else
-                                                <span style="font-size: 0.85rem; opacity: 0.5; font-family: var(--fuente-mono, monospace);">—</span>
-                                            @endif
-                                        </td>
+                                            </td>
 
-                                        <!-- Saturación TX -->
-                                        <td class="routers-td" style="font-family: var(--fuente-mono, monospace); font-size: 0.85rem;">
-                                            @if($airTx = $r['air_tx'])
-                                                <span class="routers-text-{{ $r['tx_color'] }}" style="font-weight: 700;">
-                                                    {{ $airTx }}% TX
-                                                </span>
-                                            @else
-                                                <span style="opacity: 0.5;">—</span>
-                                            @endif
-                                        </td>
+                                            <!-- Hardware / Zona -->
+                                            <td class="routers-td">
+                                                <div style="font-size: 0.85rem; font-weight: 600; color: var(--color-texto);">
+                                                    {{ $r['hw_model'] === 'Desconocido' ? __('admin.widgets.routers.unknown') : $r['hw_model'] }}
+                                                </div>
+                                                <div style="font-size: 0.75rem; opacity: 0.75; font-family: var(--fuente-mono, monospace);">
+                                                    {{ $r['province_name'] ?? $r['province'] }} · {{ $r['role'] }}
+                                                </div>
+                                            </td>
 
-                                        <!-- Último Reporte -->
-                                        <td class="routers-td" style="font-size: 0.85rem;">
-                                            @php
-                                                $lsDt = !empty($r['last_seen']) ? \Carbon\Carbon::parse($r['last_seen']) : null;
-                                            @endphp
-                                            <span
-                                                style="{{ $r['esta_online'] ? 'opacity: 0.85;' : 'color: #f87171; font-weight: 700;' }}"
-                                                @if($lsDt)
-                                                    data-title-fecha-local="{{ $lsDt->toIso8601String() }}"
-                                                    title="{{ $lsDt->timezone(config('proyecto.zona_horaria', 'Europe/Madrid'))->format('Y-m-d H:i:s') }}"
+                                            <!-- Alimentación y Batería -->
+                                            <td class="routers-td">
+                                                @if($r['powered'])
+                                                    <div class="routers-power-badge routers-power-badge-grid">
+                                                        <span>⚡ {{ __('admin.widgets.routers.power_grid_solar') }}</span>
+                                                        @if($r['voltage'])
+                                                            <span style="font-family: var(--fuente-mono, monospace); font-size: 0.7rem; opacity: 0.85;">{{ $r['voltage'] }}V</span>
+                                                        @endif
+                                                    </div>
+                                                @elseif($r['battery_level'] !== null)
+                                                    <div class="routers-battery-container">
+                                                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-family: var(--fuente-mono, monospace); font-weight: 700; margin-bottom: 0.25rem;">
+                                                            <span style="color: {{ $r['battery_level'] < 20 ? '#f87171' : ($r['battery_level'] < 50 ? '#fbbf24' : '#4ade80') }};">🔋 {{ $r['battery_level'] }}%</span>
+                                                            @if($r['voltage'])
+                                                                <span style="font-size: 0.7rem; font-weight: normal; opacity: 0.7;">{{ $r['voltage'] }}V</span>
+                                                            @endif
+                                                        </div>
+                                                        <div class="routers-progress-track">
+                                                            <div class="routers-progress-fill routers-progress-{{ $r['bateria_color'] }}" style="width: {{ min(100, max(5, $r['battery_level'])) }}%;"></div>
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <span style="font-size: 0.85rem; opacity: 0.5; font-family: var(--fuente-mono, monospace);">—</span>
                                                 @endif
-                                            >
-                                                {{ $r['hace'] }}
-                                            </span>
-                                        </td>
+                                            </td>
 
-                                        <!-- Acción -->
-                                        <td class="routers-td" style="text-align: right;">
-                                            <a
-                                                href="/revisa-tu-nodo/{{ ltrim($r['id'], '!') }}{{ $langQuerySolo }}"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                class="routers-btn-inspect"
-                                                title="{{ __('admin.widgets.routers.inspect_title') }}"
-                                                aria-label="{{ __('admin.widgets.routers.inspect_title') }}"
-                                            >
-                                                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endforeach
+                                            <!-- Presión Aire (ChUtil) -->
+                                            <td class="routers-td">
+                                                @if($r['chutil'] !== null)
+                                                    <div class="routers-chutil-container">
+                                                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-family: var(--fuente-mono, monospace); margin-bottom: 0.25rem;">
+                                                            <span style="font-weight: 700; color: var(--color-texto);">{{ $r['chutil'] }}%</span>
+                                                            <span class="routers-chip-{{ $r['chutil_color'] }}" style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">
+                                                                {{ $r['chutil'] < 20 ? __('admin.widgets.routers.chutil_light') : ($r['chutil'] < 40 ? __('admin.widgets.routers.chutil_moderate') : __('admin.widgets.routers.chutil_heavy')) }}
+                                                            </span>
+                                                        </div>
+                                                        <div class="routers-progress-track">
+                                                            <div class="routers-progress-fill routers-progress-{{ $r['chutil_color'] }}" style="width: {{ min(100, max(5, $r['chutil'])) }}%;"></div>
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <span style="font-size: 0.85rem; opacity: 0.5; font-family: var(--fuente-mono, monospace);">—</span>
+                                                @endif
+                                            </td>
+
+                                            <!-- Saturación TX -->
+                                            <td class="routers-td" style="font-family: var(--fuente-mono, monospace); font-size: 0.85rem;">
+                                                @if($airTx = $r['air_tx'])
+                                                    <span class="routers-text-{{ $r['tx_color'] }}" style="font-weight: 700;">
+                                                        {{ $airTx }}% TX
+                                                    </span>
+                                                @else
+                                                    <span style="opacity: 0.5;">—</span>
+                                                @endif
+                                            </td>
+
+                                            <!-- Último Reporte -->
+                                            <td class="routers-td" style="font-size: 0.85rem;">
+                                                @php
+                                                    $lsDt = !empty($r['last_seen']) ? \Carbon\Carbon::parse($r['last_seen']) : null;
+                                                @endphp
+                                                <span
+                                                    style="{{ $r['esta_online'] ? 'opacity: 0.85;' : 'color: #f87171; font-weight: 700;' }}"
+                                                    @if($lsDt)
+                                                        data-title-fecha-local="{{ $lsDt->toIso8601String() }}"
+                                                        title="{{ $lsDt->timezone(config('proyecto.zona_horaria', 'Europe/Madrid'))->format('Y-m-d H:i:s') }}"
+                                                    @endif
+                                                >
+                                                    {{ $r['hace'] }}
+                                                </span>
+                                            </td>
+
+                                            <!-- Acción -->
+                                            <td class="routers-td" style="text-align: right;">
+                                                <a
+                                                    href="/revisa-tu-nodo/{{ ltrim($r['id'], '!') }}{{ $langQuerySolo }}"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="routers-btn-inspect"
+                                                    title="{{ __('admin.widgets.routers.inspect_title') }}"
+                                                    aria-label="{{ __('admin.widgets.routers.inspect_title') }}"
+                                                >
+                                                    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                                    </svg>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>

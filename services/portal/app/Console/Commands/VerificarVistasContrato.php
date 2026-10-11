@@ -22,7 +22,7 @@ class VerificarVistasContrato extends Command
      *
      * @var string
      */
-    protected $description = 'Verifica que las 20 vistas de contrato api_* existan en la base de datos de ingesta y contengan las columnas requeridas';
+    protected $description = 'Verifica que las 22 vistas de contrato api_* existan en la base de datos de ingesta y contengan las columnas requeridas';
 
     /**
      * Catálogo de vistas y sus columnas contractuales requeridas.
@@ -50,6 +50,8 @@ class VerificarVistasContrato extends Command
         'api_node_intervals' => ['node_id', 'portnum', 'variant', 'broadcasts', 'median_interval_s'],
         'api_node_battery_daily' => ['node_id', 'day', 'min_level', 'avg_level', 'readings', 'readings_below_40', 'max_level'],
         'api_node_reboots_daily' => ['node_id', 'day', 'reboots', 'readings'],
+        'api_coverage_links' => ['gateway_id', 'from_id', 'packets', 'snr_avg', 'snr_min', 'snr_max', 'snr_last', 'last_rx_at', 'first_rx_at', 'distance_km'],
+        'api_direct_receptions' => ['rx_at', 'gateway_id', 'from_id', 'snr', 'rssi', 'distance_km'],
     ];
 
     /**
@@ -70,28 +72,49 @@ class VerificarVistasContrato extends Command
         $todasCorrectas = true;
         $filasTabla = [];
 
+        $connection = DB::connection('ingesta');
+        $driver = $connection->getDriverName();
+
         foreach ($this->vistasContrato as $nombreVista => $columnasRequeridas) {
-            // Comprobar existencia de la vista
-            $existe = DB::connection('ingesta')
-                ->table('information_schema.views')
-                ->where('table_schema', 'public')
-                ->where('table_name', $nombreVista)
-                ->exists();
+            // Comprobar existencia de la vista según el motor de base de datos
+            if ($driver === 'sqlite') {
+                $existe = $connection
+                    ->table('sqlite_master')
+                    ->whereIn('type', ['view', 'table'])
+                    ->where('name', $nombreVista)
+                    ->exists();
 
-            if (! $existe) {
-                $filasTabla[] = [$nombreVista, 'NO EXISTE', 'Faltan todas'];
-                $todasCorrectas = false;
+                if (! $existe) {
+                    $filasTabla[] = [$nombreVista, 'NO EXISTE', 'Faltan todas'];
+                    $todasCorrectas = false;
 
-                continue;
+                    continue;
+                }
+
+                $pragmaCols = $connection->select("PRAGMA table_info({$nombreVista})");
+                $columnasDb = array_column(array_map(fn ($c) => (array) $c, $pragmaCols), 'name');
+            } else {
+                $existe = $connection
+                    ->table('information_schema.views')
+                    ->where('table_schema', 'public')
+                    ->where('table_name', $nombreVista)
+                    ->exists();
+
+                if (! $existe) {
+                    $filasTabla[] = [$nombreVista, 'NO EXISTE', 'Faltan todas'];
+                    $todasCorrectas = false;
+
+                    continue;
+                }
+
+                // Obtener columnas existentes
+                $columnasDb = $connection
+                    ->table('information_schema.columns')
+                    ->where('table_schema', 'public')
+                    ->where('table_name', $nombreVista)
+                    ->pluck('column_name')
+                    ->toArray();
             }
-
-            // Obtener columnas existentes
-            $columnasDb = DB::connection('ingesta')
-                ->table('information_schema.columns')
-                ->where('table_schema', 'public')
-                ->where('table_name', $nombreVista)
-                ->pluck('column_name')
-                ->toArray();
 
             $faltantes = array_diff($columnasRequeridas, $columnasDb);
 
@@ -106,7 +129,7 @@ class VerificarVistasContrato extends Command
         $this->table(['Vista', 'Estado', 'Columnas Faltantes'], $filasTabla);
 
         if ($todasCorrectas) {
-            $this->info('Todas las 20 vistas de contrato api_* están presentes y completas.');
+            $this->info('Todas las 22 vistas de contrato api_* están presentes y completas.');
 
             return Command::SUCCESS;
         }

@@ -95,6 +95,12 @@ return [
             'no_connection' => 'No connection',
             'btn_inspect' => 'Diagnostics →',
             'inspect_title' => 'Open deep diagnostics on public portal',
+            'filter_by_province' => 'Filter by province',
+            'all_provinces' => 'All',
+            'showing_province' => 'Showing only repeaters from :province',
+            'show_all' => 'Show all provinces',
+            'province_header' => 'Province',
+            'in_attention_count' => ':count in attention',
         ],
     ],
 

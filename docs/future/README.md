@@ -138,6 +138,6 @@ Vistas provinciales independientes (`/provincias/{slug}`) orientadas a proporcio
   - Invalidación automática de caché de vistas al guardar cambios, garantizando actualización inmediata sin caída de rendimiento.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-09
+> Creado: 2026-10-07 · Última revisión: 2026-10-11
 
 

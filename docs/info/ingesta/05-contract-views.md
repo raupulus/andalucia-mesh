@@ -162,6 +162,12 @@ Columnas comunes: `bucket_start` timestamptz, `granularity` text, `subject_id` t
 
 **`api_node_packets_24h`** — desglose de paquetes en las últimas 24 horas por nodo y portnum: `node_id` text, `portnum` text (nombre del portnum o `'other'`), `packets_24h` integer. Origen tabla `packet` con `rx_first >= now() - INTERVAL '24 hours'`, agrupado por emisor y tipo de paquete. Alimenta el modal de diagnóstico interactivo de `/mapa` y la ficha técnica de "Revisa tu nodo".
 
+### Cobertura RF («Mi Cobertura»)
+
+**`api_coverage_links`** — resumen de enlaces directos RF de las últimas 48 horas por par gateway-nodo con estadísticas de señal: `gateway_id` text, `from_id` text, `packets` integer, `snr_avg` real, `snr_min` real, `snr_max` real, `snr_last` real, `last_rx_at` timestamptz, `first_rx_at` timestamptz, `distance_km` real. Origen tabla `reception` con `direct = true`, `own = false` y `rx_at >= now() - INTERVAL '48 hours'`. Alimenta la herramienta de diagnóstico y comparador de cobertura (`/mi-cobertura`).
+
+**`api_direct_receptions`** — recepciones individuales de enlace directo RF en ventana de 48 horas: `rx_at` timestamptz, `gateway_id` text, `from_id` text, `snr` real, `rssi` smallint, `distance_km` real. Origen tabla `reception` con `direct = true` y `own = false`. Permite filtrado granular por umbral de SNR y cálculo exacto de ventanas temporales.
+
 ### Permisos
 
 Al final de `R__vistas_api.sql` (y de cualquier migración que recree vistas):
@@ -224,4 +230,5 @@ Las vistas de esta página. Quitar o renombrar una columna exige cambiar antes `
 - **Dado** el rol lector, **cuando** consulta `api_node_intervals` de un nodo, **entonces** obtiene una fila por tipo (y por variante en telemetría).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-09
+> Creado: 2026-10-07 · Última revisión: 2026-10-11
+

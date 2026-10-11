@@ -47,7 +47,7 @@
 
             <!-- Menú Desplegable Extras (Configurador, Revisa tu nodo, Hardware, API/Websockets, Sugerencias, FAQ) -->
             @php
-                $extrasActivo = request()->is('configurador*') || request()->is('revisa-tu-nodo*') || request()->is('hardware*') || request()->is('api*') || request()->is('sugerencias*') || request()->is('faq*') || request()->is('paginas*');
+                $extrasActivo = request()->is('configurador*') || request()->is('revisa-tu-nodo*') || request()->is('mi-cobertura*') || request()->is('hardware*') || request()->is('api*') || request()->is('sugerencias*') || request()->is('faq*') || request()->is('paginas*');
             @endphp
             <div class="dropdown-extras-wrapper">
                 <button
@@ -84,6 +84,15 @@
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
                         <span>{{ __('portal.nav.node_check') }}</span>
+                    </a>
+                    <a href="/mi-cobertura{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" class="dropdown-extras-item {{ request()->is('mi-cobertura*') ? 'activo' : '' }}" role="menuitem">
+                        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
+                            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                            <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                        </svg>
+                        <span>{{ __('portal.nav.my_coverage') }}</span>
                     </a>
                     <a href="/hardware{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" class="dropdown-extras-item {{ request()->is('hardware*') ? 'activo' : '' }}" role="menuitem">
                         <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
@@ -248,6 +257,15 @@
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                     <span>{{ __('portal.nav.node_check') }}</span>
+                </a>
+                <a href="/mi-cobertura{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-size: 1.05rem; font-weight: 500; color: {{ request()->is('mi-cobertura*') ? 'var(--color-enlace)' : 'var(--color-texto)' }}; padding: 0.65rem 0.5rem; border-radius: var(--radio-sm);">
+                    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">
+                        <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                        <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                    </svg>
+                    <span>{{ __('portal.nav.my_coverage') }}</span>
                 </a>
                 <a href="/hardware{{ $currentLang !== 'es' ? '?lang=' . $currentLang : '' }}" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-size: 1.05rem; font-weight: 500; color: {{ request()->is('hardware*') ? 'var(--color-enlace)' : 'var(--color-texto)' }}; padding: 0.65rem 0.5rem; border-radius: var(--radio-sm);">
                     <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-acento);">

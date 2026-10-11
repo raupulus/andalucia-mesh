@@ -56,7 +56,7 @@ Este documento define las normas operativas, la estructura del proyecto y el pro
         ├── meshconfig/
         ├── potatomesh/          README + adaptador-potato, sync-peers
         ├── ingesta/             README + módulos 01–06
-        ├── portal/              README + módulos 01–17 + pages/
+        ├── portal/              README + módulos 01–18 + pages/
         ├── detector-alertas/    README + módulos 01–03
         ├── bots-webhooks/       README + 01-bot-telegram, 02-bot-discord, 03-webhooks
         └── chat-ws/
@@ -98,7 +98,7 @@ El repositorio contiene muchas aplicaciones independientes. **No se carga toda l
 | `services/adaptador-potato/` | `docs/info/potatomesh/adaptador-potato.md` | Resto |
 | `services/sync-peers/` | `docs/info/potatomesh/sync-peers.md` | Resto |
 | `services/ingesta/` | `docs/info/ingesta/README.md` + el módulo 01–06 afectado | Portal, detector, bots |
-| `services/portal/` (web) | `docs/info/portal/README.md` + módulo 01–10, 15–17 afectado + su página en `docs/info/portal/pages/` + `DESIGN.md` y `COMPONENTS.md` si hay interfaz | Ingesta, detector, bots |
+| `services/portal/` (web) | `docs/info/portal/README.md` + módulo 01–10, 15–18 afectado + su página en `docs/info/portal/pages/` + `DESIGN.md` y `COMPONENTS.md` si hay interfaz | Ingesta, detector, bots |
 | `services/portal/` (API) | `docs/info/portal/11-public-api.md` + el módulo 12 o 13 afectado | Páginas, diseño |
 | `services/portal/` (panel `/admin`) | `docs/info/portal/14-operator-panel.md` | Páginas, API |
 | `services/detector-alertas/` | `docs/info/detector-alertas/README.md` + módulo 01–03 afectado | Portal, bots |
