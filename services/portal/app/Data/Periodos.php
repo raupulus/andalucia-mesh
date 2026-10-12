@@ -59,9 +59,14 @@ class Periodos
                 break;
 
             case '14d':
+                $start = $isCurrent ? $ahora->subDays(13)->startOfDay() : $ahora->subDays(27)->startOfDay();
+                $end = $isCurrent ? $ahora->startOfDay()->addDay() : $ahora->subDays(13)->startOfDay();
+                $ttl = $isCurrent ? 900 : 3600;
+                break;
+
             case 'month':
-                $start = $isCurrent ? $ahora->subDays(14)->startOfDay() : $ahora->subDays(28)->startOfDay();
-                $end = $isCurrent ? $ahora : $ahora->subDays(14)->startOfDay();
+                $start = $isCurrent ? $ahora->startOfMonth() : $ahora->subMonth()->startOfMonth();
+                $end = $start->addMonth();
                 $ttl = $isCurrent ? 900 : 3600;
                 break;
 

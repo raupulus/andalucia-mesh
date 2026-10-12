@@ -99,4 +99,4 @@ Refresco de la lista abierta cada 30 s (solo si el usuario no ha pulsado "Ver m�
 8. **Dado** `/routers?ambito=espana`, **cuando** se carga la vista, **entonces** muestra los repetidores fuera de Andalucía geolocalizados a su provincia real española manteniendo cero cookies (RN-06).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-12
+> Creado: 2026-10-07 · Última revisión: 2026-10-13

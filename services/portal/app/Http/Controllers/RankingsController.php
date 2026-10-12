@@ -41,8 +41,9 @@ class RankingsController extends Controller
         $conteoAndalucia = 0;
         $conteoEspana = 0;
         try {
+            Trafico::ensureApiNodeTrafficTablesExist();
             $rango = Periodos::rango($period, $which);
-            $table = ($period === 'hour' || $period === 'day') ? 'agg_node_hour' : 'agg_node_day';
+            $table = ($period === 'hour') ? 'api_node_traffic_hour' : 'api_node_traffic_day';
             $provinciasAnd = "'".implode("','", Routers::PROVINCIAS_ANDALUCIA)."'";
             $conteos = DB::connection('ingesta')
                 ->table($table)

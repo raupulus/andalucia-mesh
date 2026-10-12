@@ -361,6 +361,27 @@ class TraduccionesTest extends TestCase
      */
     public function test_rankings_filtro_14_dias_y_ambitos(): void
     {
+        \App\Data\Ingest\Trafico::ensureApiNodeTrafficTablesExist();
+        $ahora = now();
+        \Illuminate\Support\Facades\DB::connection('ingesta')->table('api_node_traffic_day')->insert([
+            [
+                'bucket' => $ahora->copy()->subDays(2)->format('Y-m-d H:i:s'),
+                'from_id' => '!30618df9',
+                'province' => 'ES-CA',
+                'portnum' => 'telemetry',
+                'packets' => 15,
+                'airtime_s' => 4.5,
+            ],
+            [
+                'bucket' => $ahora->copy()->subDays(3)->format('Y-m-d H:i:s'),
+                'from_id' => '!63760c00',
+                'province' => 'FUERA',
+                'portnum' => 'position',
+                'packets' => 20,
+                'airtime_s' => 6.2,
+            ],
+        ]);
+
         $response = $this->get('/rankings?period=14d&ambito=andalucia');
         $response->assertStatus(200);
         $response->assertSee('Últimos 14 días');
@@ -368,6 +389,7 @@ class TraduccionesTest extends TestCase
         $response->assertSee('España');
         $response->assertSee('Provincia');
         $response->assertSee('Rol');
+        $response->assertSee('1 nodo');
     }
 
     /**

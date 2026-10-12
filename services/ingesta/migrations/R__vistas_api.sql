@@ -902,6 +902,29 @@ WHERE r.direct = true
   AND r.own = false
   AND r.rx_at >= (now() - INTERVAL '48 hours');
 
+-- 8.7 api_node_traffic_hour y api_node_traffic_day (tráfico agregado horario y diario por nodo, provincia y portnum)
+DROP VIEW IF EXISTS api_node_traffic_hour CASCADE;
+CREATE OR REPLACE VIEW api_node_traffic_hour AS
+SELECT
+    bucket,
+    from_id,
+    province,
+    portnum,
+    packets,
+    airtime_s
+FROM agg_node_hour;
+
+DROP VIEW IF EXISTS api_node_traffic_day CASCADE;
+CREATE OR REPLACE VIEW api_node_traffic_day AS
+SELECT
+    bucket,
+    from_id,
+    province,
+    portnum,
+    packets,
+    airtime_s
+FROM agg_node_day;
+
 -- ==============================================================================
 -- 9. Asignación de Permisos de Seguridad
 -- portal_lector_ingesta solo puede leer las vistas de contrato api_*
@@ -941,6 +964,8 @@ GRANT SELECT ON
     api_node_reboots_daily,
     api_node_packets_24h,
     api_coverage_links,
-    api_direct_receptions
+    api_direct_receptions,
+    api_node_traffic_hour,
+    api_node_traffic_day
 TO portal_lector_ingesta;
 

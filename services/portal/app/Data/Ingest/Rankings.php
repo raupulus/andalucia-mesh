@@ -137,7 +137,8 @@ class Rankings
 
         return Fuente::recordar("rank:{$id}", $params, $rango['ttl'], function () use ($meta, $rango, $limit, $period, $which, $id, $ambito) {
             if ($id === 'network-usage') {
-                $table = ($period === 'hour' || $period === 'day') ? 'agg_node_hour' : 'agg_node_day';
+                Trafico::ensureApiNodeTrafficTablesExist();
+                $table = ($period === 'hour') ? 'api_node_traffic_hour' : 'api_node_traffic_day';
                 $query = DB::connection('ingesta')
                     ->table($table)
                     ->where('bucket', '>=', $rango['from'])
@@ -152,11 +153,15 @@ class Rankings
                     });
                 }
 
+                $airtimeRoundExpr = DB::connection('ingesta')->getDriverName() === 'sqlite'
+                    ? 'round(sum(airtime_s), 2) as total_airtime'
+                    : 'round(sum(airtime_s)::numeric, 2) as total_airtime';
+
                 $filas = $query->select([
                     'from_id as subject_id',
                     DB::raw('sum(airtime_s) as value'),
                     DB::raw('sum(packets) as total_packets'),
-                    DB::raw('round(sum(airtime_s)::numeric, 2) as total_airtime'),
+                    DB::raw($airtimeRoundExpr),
                 ])
                     ->groupBy('from_id')
                     ->orderByDesc('value')

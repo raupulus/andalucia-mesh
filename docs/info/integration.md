@@ -255,6 +255,8 @@ Roles de solo lectura (únicas lecturas cruzadas permitidas):
 | `api_node_packets_24h` | Nodo × portnum (24 horas) | `node_id`, `portnum`, `packets_24h` | Modal de diagnóstico en mapa interactivo y Revisa tu nodo |
 | `api_coverage_links` | Par gateway-nodo directo (7 días) | `gateway_id`, `from_id`, `packets`, `snr_avg`, `snr_min`, `snr_max`, `snr_last`, `last_rx_at`, `first_rx_at`, `distance_km` | Mi Cobertura (`/mi-cobertura`) |
 | `api_direct_receptions` | Recepción directa individual (48 horas) | `rx_at`, `gateway_id`, `from_id`, `snr`, `rssi`, `distance_km` | Mi Cobertura (`/mi-cobertura`) |
+| `api_node_traffic_hour` | Tráfico horario por nodo y portnum (30 días) | `bucket`, `from_id`, `province`, `portnum`, `packets`, `airtime_s` | Rankings y análisis horario (`/rankings`) |
+| `api_node_traffic_day` | Tráfico diario por nodo y portnum (1 año) | `bucket`, `from_id`, `province`, `portnum`, `packets`, `airtime_s` | Rankings y filtros por ámbito territorial (`/rankings`) |
 
 Retención que deben respetar las vistas (política de privacidad, `portal/10-legal-privacy.md`): datos en bruto 30 días (posiciones y telemetría 90), agregados **por nodo** 1 año, agregados sin nodo indefinidos.
 
@@ -400,4 +402,4 @@ services/             portal/, ingesta/, detector-alertas/, bot-telegram/, bot-d
 - Sin secretos ni `.env` reales en git. Commits sin firmas de atribución de herramientas.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-12
+> Creado: 2026-10-07 · Última revisión: 2026-10-13

@@ -163,6 +163,10 @@ Columnas comunes: `bucket_start` timestamptz, `granularity` text, `subject_id` t
 
 **`api_node_packets_24h`** — desglose de paquetes en las últimas 24 horas por nodo y portnum: `node_id` text, `portnum` text (nombre del portnum o `'other'`), `packets_24h` integer. Origen tabla `packet` con `rx_first >= now() - INTERVAL '24 hours'`, agrupado por emisor y tipo de paquete. Alimenta el modal de diagnóstico interactivo de `/mapa` y la ficha técnica de "Revisa tu nodo".
 
+### Tráfico por nodo y ámbito («Rankings»)
+
+**`api_node_traffic_hour`** y **`api_node_traffic_day`** — tráfico agregado horario y diario por nodo, provincia y portnum: `bucket` timestamptz, `from_id` text, `province` text, `portnum` text, `packets` bigint, `airtime_s` double precision. Origen `agg_node_hour` y `agg_node_day`. Permiten consultar de forma segura y eficiente el tráfico agregado de nodos filtrando por ámbito territorial (Andalucía vs resto de España) y ventanas temporales (ej. 14 días), garantizando que `portal_lector_ingesta` no acceda directamente a los agregados continuos internos.
+
 ### Cobertura RF («Mi Cobertura»)
 
 **`api_coverage_links`** — resumen de enlaces directos RF 100% (0 saltos) de los últimos 7 días con estadísticas de señal: `gateway_id` text, `from_id` text, `packets` integer, `snr_avg` real, `snr_min` real, `snr_max` real, `snr_last` real, `last_rx_at` timestamptz, `first_rx_at` timestamptz, `distance_km` real. Unifica recepciones directas en gateways MQTT (`reception.direct = true`), reportes directos de vecindad (`neighbor`) y saltos directos consecutivos de 0 saltos en trazas de ida y vuelta (`traceroute`), con ventana de 7 días. En respuestas `RouteDiscovery`, `to_id` es el nodo solicitante (origen de la traza de ida hacia `route[0]`) y `from_id` es el respondedor (origen de la traza de vuelta hacia `route_back[0]`); en peticiones en tránsito, `from_id` es el solicitante hacia `route[0]`. Se excluyen los valores centinela de SNR desconocido `snr <= -32.0` (Meshtastic `UNK_SNR = -128` / 4.0) y direcciones de difusión `!ffffffff`. Alimenta la herramienta de diagnóstico y comparador de cobertura (`/mi-cobertura`).
@@ -231,5 +235,5 @@ Las vistas de esta página. Quitar o renombrar una columna exige cambiar antes `
 - **Dado** el rol lector, **cuando** consulta `api_node_intervals` de un nodo, **entonces** obtiene una fila por tipo (y por variante en telemetría).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-12
+> Creado: 2026-10-07 · Última revisión: 2026-10-13
 
