@@ -525,7 +525,8 @@ class GestionRoutersTest extends TestCase
         $response->assertSee('Router Actual');
         $response->assertSee('onUnicastInputChange', false);
         $response->assertSee('unicastSuggestions', false);
-        $response->assertSee('max-w-xl mx-auto mb-8', false);
+        $response->assertSee('fi-ra-unicast-search-wrapper', false);
+        $response->assertSee(':disabled="!hasActiveRouter()"', false);
     }
 
     /**

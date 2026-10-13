@@ -2436,6 +2436,20 @@ export function meshAdminComponent() {
         },
 
         /**
+         * Comprueba si hay un router activo seleccionado válidamente en la Opción A o en la Opción B.
+         *
+         * @returns {boolean}
+         */
+        hasActiveRouter() {
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                return Boolean(targetNum && targetNum > 0);
+            } catch {
+                return false;
+            }
+        },
+
+        /**
          * Asigna el ID del router actualmente seleccionado (en Opción A o B) al campo de petición unicast.
          */
         setUnicastTargetToActiveRouter() {

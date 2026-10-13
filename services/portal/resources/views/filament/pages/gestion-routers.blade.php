@@ -338,11 +338,41 @@
                 border-radius: 0.625rem;
             }
 
+            /* Barra de búsqueda centrada para petición a nodo */
+            .fi-ra-unicast-search-wrapper {
+                max-width: 460px;
+                margin-left: auto;
+                margin-right: auto;
+                margin-bottom: 2.25rem;
+                width: 100%;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .fi-ra-unicast-search-wrapper .fi-ra-label {
+                text-align: center;
+                margin-bottom: 0.5rem;
+                width: 100%;
+                display: block;
+            }
+            .fi-ra-unicast-input-group {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .fi-ra-unicast-input-group .fi-ra-suggestions-container {
+                flex: 1 1 auto;
+                min-width: 0;
+                width: auto;
+            }
             .fi-ra-btn-current-router {
                 display: inline-flex;
                 align-items: center;
                 gap: 0.4rem;
-                padding: 0.65rem 1rem;
+                padding: 0.65rem 0.95rem;
                 font-size: 0.825rem;
                 font-weight: 600;
                 border-radius: 0.5rem;
@@ -355,20 +385,41 @@
                 flex-shrink: 0;
                 box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
             }
-            .fi-ra-btn-current-router:hover {
+            .fi-ra-btn-current-router:hover:not(:disabled) {
                 background: linear-gradient(135deg, #008f3c 0%, #1a7438 100%);
                 box-shadow: 0 4px 12px rgba(0, 122, 51, 0.35);
                 transform: translateY(-1px);
             }
-            .fi-ra-btn-current-router:active {
+            .fi-ra-btn-current-router:active:not(:disabled) {
                 transform: translateY(0);
+            }
+            .fi-ra-btn-current-router:disabled {
+                opacity: 0.45;
+                cursor: not-allowed;
+                box-shadow: none !important;
+                transform: none !important;
+                filter: grayscale(0.6);
             }
             .dark .fi-ra-btn-current-router {
                 background: linear-gradient(135deg, #007A33 0%, #15612F 100%);
                 border-color: #67EA94;
             }
-            .dark .fi-ra-btn-current-router:hover {
+            .dark .fi-ra-btn-current-router:hover:not(:disabled) {
                 box-shadow: 0 4px 14px rgba(103, 234, 148, 0.3);
+            }
+            .dark .fi-ra-btn-current-router:disabled {
+                opacity: 0.35;
+                filter: grayscale(0.8);
+            }
+            .fi-ra-unicast-hint {
+                margin-top: 0.5rem;
+                text-align: center;
+                font-size: 0.75rem;
+                color: #64748B;
+                width: 100%;
+            }
+            .dark .fi-ra-unicast-hint {
+                color: #94A3B8;
             }
 
             /* Ficha de nodo conectado */
@@ -2618,24 +2669,25 @@
                     </div>
 
                     {{-- Barra de búsqueda más estrecha, centrada y separada de los botones inferiores --}}
-                    <div class="max-w-xl mx-auto mb-8">
-                        <label class="fi-ra-label text-center block mb-2 font-medium">
+                    <div class="fi-ra-unicast-search-wrapper" style="max-width: 460px; margin-left: auto; margin-right: auto; margin-bottom: 2.25rem; width: 100%; display: flex; flex-direction: column; align-items: center;">
+                        <label class="fi-ra-label" style="text-align: center; margin-bottom: 0.5rem; width: 100%; display: block;">
                             {{ __('admin.gestion_routers.unicast_target_label') }}
                         </label>
 
-                        <div class="flex items-center gap-2">
-                            {{-- Botón verde "Router Actual" a la izquierda --}}
+                        <div class="fi-ra-unicast-input-group" style="display: flex; align-items: center; gap: 0.5rem; width: 100%;">
+                            {{-- Botón verde "Router Actual" a la izquierda (habilitado solo si hay router en Opción A o B) --}}
                             <button type="button"
                                     @click="setUnicastTargetToActiveRouter()"
+                                    :disabled="!hasActiveRouter()"
                                     class="fi-ra-btn-current-router"
-                                    title="Escribir el ID del router seleccionado actualmente (Opción A o B)">
+                                    :title="hasActiveRouter() ? `Copiar ${getActiveRouterHex()} como destinatario` : 'Selecciona primero un router en la Opción A o B'">
                                 <span>📡</span>
                                 <span>Router Actual</span>
                             </button>
 
                             {{-- Campo de búsqueda con autocompletado entre todos los nodos --}}
-                            <div class="fi-ra-suggestions-container flex-1" @click.outside="showUnicastSuggestions = false">
-                                <div class="relative flex items-center">
+                            <div class="fi-ra-suggestions-container" style="flex: 1 1 auto; min-width: 0; width: auto;" @click.outside="showUnicastSuggestions = false">
+                                <div class="relative flex items-center" style="position: relative; display: flex; align-items: center; width: 100%;">
                                     <input type="text"
                                            x-model="unicastTargetInput"
                                            @input="onUnicastInputChange()"
@@ -2645,9 +2697,10 @@
                                            @keydown.enter.prevent="if (unicastHighlightIndex >= 0 && unicastSuggestions[unicastHighlightIndex]) { selectUnicastNodeCandidate(unicastSuggestions[unicastHighlightIndex]); }"
                                            @keydown.escape.prevent="showUnicastSuggestions = false"
                                            :placeholder="getActiveRouterHex() ? `Por defecto: ${getActiveRouterHex()} o busca por nombre` : 'Introduce !hex, decimal o busca por nombre'"
-                                           class="fi-ra-input font-mono w-full" />
+                                           class="fi-ra-input font-mono w-full"
+                                           style="width: 100%;" />
                                     <template x-if="unicastSearchingRemote">
-                                        <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                        <div style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); pointer-events: none;">
                                             <div class="fi-ra-spinner-mini"></div>
                                         </div>
                                     </template>
@@ -2692,16 +2745,16 @@
                         </div>
 
                         {{-- Ayuda / Indicador del destinatario actual --}}
-                        <div class="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">
+                        <div class="fi-ra-unicast-hint" style="margin-top: 0.5rem; text-align: center; font-size: 0.75rem; width: 100%;">
                             <template x-if="unicastTargetInput && unicastTargetInput.trim()">
-                                <span>Destino: <strong class="font-mono text-emerald-600 dark:text-emerald-400" x-text="unicastTargetInput.trim()"></strong></span>
+                                <span>Destino fijado: <strong class="font-mono text-emerald-600 dark:text-emerald-400" x-text="unicastTargetInput.trim()"></strong></span>
                             </template>
                             <template x-if="!unicastTargetInput || !unicastTargetInput.trim()">
                                 <span>
-                                    <template x-if="getActiveRouterHex()">
+                                    <template x-if="hasActiveRouter()">
                                         <span>Sin valor escrito: se enviará por defecto al router actual (<strong class="font-mono text-emerald-600 dark:text-emerald-400" x-text="getActiveRouterHex()"></strong>).</span>
                                     </template>
-                                    <template x-if="!getActiveRouterHex()">
+                                    <template x-if="!hasActiveRouter()">
                                         <span>Indica un nodo destino o selecciona un router en la barra superior.</span>
                                     </template>
                                 </span>
