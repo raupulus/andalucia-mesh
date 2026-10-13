@@ -144,6 +144,17 @@ export function parseNodeNum(input) {
 }
 
 /**
+ * Normaliza una cadena de texto eliminando acentos y diacríticos en minúsculas.
+ *
+ * @param {string} str
+ * @returns {string}
+ */
+export function stripAccents(str) {
+    if (!str) return '';
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+/**
  * Componente reactivo Alpine.js para la consola de gestión de routers.
  */
 export function meshAdminComponent() {
@@ -175,6 +186,12 @@ export function meshAdminComponent() {
         selectedRouterRole: '',
         selectedRouterStatus: '',
         manualNodeInput: '',
+        showManualSuggestions: false,
+        manualSuggestions: [],
+        manualHighlightIndex: -1,
+        manualSearchingRemote: false,
+        manualSearchTimer: null,
+        remoteManualResults: [],
 
         // Pestaña activa
         activeTab: 'roles',               // 'roles' | 'favoritos' | 'bloqueados' | 'sondeo' | 'unicast' | 'mantenimiento'
@@ -1249,6 +1266,7 @@ export function meshAdminComponent() {
 
             // Sincronizar el input manual y el destino unicast
             this.manualNodeInput = this.selectedRouterHex;
+            this.showManualSuggestions = false;
             this.unicastTargetInput = this.selectedRouterHex;
             this.log('info', `Router seleccionado: ${this.selectedRouterName || this.selectedRouterHex}`);
             this.checkRouterStatusInRadio();
@@ -1256,30 +1274,226 @@ export function meshAdminComponent() {
         },
 
         /**
-         * Maneja cambios cuando el operador escribe o pega directamente un ID manual.
+         * Maneja cambios cuando el operador escribe o pega directamente en el campo manual.
+         * Despliega sugerencias en vivo de nodos existentes coincidentes por alias, nombre o ID.
          */
         onManualInputChange() {
-            const clean = (this.manualNodeInput || '').trim();
-            if (!clean) {
-                if (!this.selectedRouterNodeNum) {
+            const raw = (this.manualNodeInput || '').trim();
+            if (!raw) {
+                this.showManualSuggestions = false;
+                this.manualSuggestions = [];
+                if (this.selectedTargetMode === 'manual') {
                     this.selectedRouterHex = '';
                     this.selectedRouterName = '';
+                    this.selectedRouterNodeNum = '';
+                    this.selectedRouterProvince = '';
+                    this.selectedRouterRole = '';
+                    this.selectedRouterStatus = '';
+                    this.unicastTargetInput = '';
                 }
                 return;
             }
+
+            this.showManualSuggestions = true;
+            this.manualHighlightIndex = -1;
+            this.updateManualSuggestions();
+
+            // Si es un ID hexadecimal de 8 caracteres completo (ej. !3b4c5d6e) o decimal completo (>7 dígitos),
+            // auto-seleccionar si coincide exactamente con un nodo conocido sin forzar "Nodo Manual !0000..."
+            const isFullHex = /^!?([0-9a-fA-F]{8})$/.test(raw);
+            const isFullDec = /^\d{8,10}$/.test(raw);
+            if (isFullHex || isFullDec) {
+                const cleanHex = raw.startsWith('!') ? raw : (isFullHex ? `!${raw}` : numToHex(Number(raw)));
+                const matched = this.manualSuggestions.find(s => s.hex.toLowerCase() === cleanHex.toLowerCase());
+                if (matched) {
+                    this.selectManualNodeCandidate(matched, false);
+                }
+            }
+
+            // Búsqueda asíncrona remota con debounce hacia /mi-cobertura/buscar
+            clearTimeout(this.manualSearchTimer);
+            if (raw.length >= 2) {
+                this.manualSearchTimer = setTimeout(async () => {
+                    try {
+                        this.manualSearchingRemote = true;
+                        const resp = await fetch('/mi-cobertura/buscar?q=' + encodeURIComponent(raw));
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            if (Array.isArray(data) && data.length > 0) {
+                                this.remoteManualResults = data;
+                                this.updateManualSuggestions();
+                            }
+                        }
+                    } catch {
+                        // En caso de corte de red, opera con el catálogo local
+                    } finally {
+                        this.manualSearchingRemote = false;
+                    }
+                }, 180);
+            }
+        },
+
+        /**
+         * Actualiza el listado reactivo de sugerencias de nodos según lo escrito por el usuario.
+         */
+        updateManualSuggestions() {
+            const raw = (this.manualNodeInput || '').trim();
+            if (!raw) {
+                this.manualSuggestions = [];
+                return;
+            }
+
+            const q = stripAccents(raw);
+            const cleanQ = q.replace(/^!/, '');
+            const map = new Map();
+
+            // 1. Nodos de catálogo de la plataforma y de la sesión local de radio
+            const localNodes = this.getAllAvailableNodes();
+            for (const n of localNodes) {
+                const hexKey = (n.hex || '').toLowerCase().replace(/^!/, '');
+                const sName = stripAccents(n.shortName || '');
+                const lName = stripAccents(n.longName || '');
+                const prov = stripAccents(n.province || '');
+                const decStr = String(n.num || '');
+
+                const matches = hexKey.includes(cleanQ) ||
+                                sName.includes(q) ||
+                                lName.includes(q) ||
+                                prov.includes(q) ||
+                                decStr.startsWith(q);
+
+                if (matches) {
+                    map.set(hexKey, {
+                        hex: n.hex.startsWith('!') ? n.hex : `!${n.hex}`,
+                        num: n.num,
+                        shortName: n.shortName || '',
+                        longName: n.longName || '',
+                        province: n.province || '',
+                        role: n.role || 'ROUTER',
+                        status: n.status || 'known',
+                    });
+                }
+            }
+
+            // 2. Resultados remotos recibidos por la API /mi-cobertura/buscar
+            if (Array.isArray(this.remoteManualResults)) {
+                for (const r of this.remoteManualResults) {
+                    const rHex = (r.id || '').toLowerCase().replace(/^!/, '');
+                    if (!map.has(rHex)) {
+                        const num = parseNodeNum(r.id);
+                        map.set(rHex, {
+                            hex: r.id.startsWith('!') ? r.id : `!${r.id}`,
+                            num: num,
+                            shortName: r.short_name || '',
+                            longName: r.long_name || '',
+                            province: r.province || '',
+                            role: r.role || 'CLIENT',
+                            status: 'known',
+                        });
+                    }
+                }
+            }
+
+            const results = Array.from(map.values());
+
+            // 3. Si el término introducido es un Node ID completo válido que no conste en BD,
+            // ofrecer la opción de usarlo como nodo manual personalizado
+            const isFullHex = /^!?([0-9a-fA-F]{8})$/.test(raw);
+            const isFullDec = /^\d{8,10}$/.test(raw) && Number(raw) > 0;
+            if (isFullHex || isFullDec) {
+                const manualNum = parseNodeNum(raw);
+                const manualHex = numToHex(manualNum);
+                const cleanManualHex = manualHex.toLowerCase().replace(/^!/, '');
+                if (!map.has(cleanManualHex)) {
+                    results.push({
+                        hex: manualHex,
+                        num: manualNum,
+                        shortName: manualHex.substring(manualHex.length - 4),
+                        longName: `Nodo Personalizado ${manualHex}`,
+                        province: '-',
+                        role: 'MANUAL',
+                        status: 'known',
+                        isCustom: true,
+                    });
+                }
+            }
+
+            this.manualSuggestions = results.slice(0, 10);
+        },
+
+        /**
+         * Confirma la selección del nodo al pulsar Enter o desenfocar el campo manual.
+         */
+        onManualInputCommit() {
+            const clean = (this.manualNodeInput || '').trim();
+            if (!clean) return;
+
+            if (this.manualSuggestions && this.manualSuggestions.length > 0) {
+                const exact = this.manualSuggestions.find(
+                    (s) => s.hex.toLowerCase() === clean.toLowerCase() ||
+                           (s.shortName && s.shortName.toLowerCase() === clean.toLowerCase())
+                );
+                if (exact) {
+                    this.selectManualNodeCandidate(exact);
+                    return;
+                }
+            }
+
             const num = parseNodeNum(clean);
             if (num > 0) {
-                this.selectedTargetMode = 'manual';
-                this.selectedRouterNodeNum = String(num);
-                this.selectedRouterHex = numToHex(num);
-                this.selectedRouterName = `Nodo Manual ${this.selectedRouterHex}`;
-                this.selectedRouterProvince = '';
-                this.selectedRouterRole = '';
-                this.selectedRouterStatus = '';
-                this.unicastTargetInput = this.selectedRouterHex;
-                this.checkRouterStatusInRadio();
-                this.loadRouterConfig(this.selectedRouterHex);
+                const hex = numToHex(num);
+                this.selectManualNodeCandidate({
+                    hex: hex,
+                    num: num,
+                    shortName: hex.substring(hex.length - 4),
+                    longName: `Nodo Manual ${hex}`,
+                    province: '',
+                    role: 'MANUAL',
+                    status: 'known',
+                    isCustom: true,
+                });
             }
+        },
+
+        /**
+         * Selecciona un nodo candidato del desplegable de sugerencias.
+         *
+         * @param {Object} item
+         * @param {boolean} [closeSuggestions=true]
+         */
+        selectManualNodeCandidate(item, closeSuggestions = true) {
+            if (!item) return;
+            this.manualNodeInput = item.hex;
+            if (closeSuggestions) {
+                this.showManualSuggestions = false;
+            }
+            this.selectedTargetMode = 'manual';
+            this.selectedRouterNodeNum = String(item.num);
+            this.selectedRouterHex = item.hex;
+            this.selectedRouterName = item.shortName
+                ? `${item.shortName} · ${item.longName || item.hex}`
+                : (item.longName || `Nodo ${item.hex}`);
+            this.selectedRouterProvince = item.province || '';
+            this.selectedRouterRole = item.role || '';
+            this.selectedRouterStatus = item.status || 'known';
+            this.unicastTargetInput = item.hex;
+
+            // Sincronizar el select de la Opción A si el router está en la lista oficial
+            const selectEl = document.querySelector('select[data-router-select]');
+            if (selectEl) {
+                const opt = Array.from(selectEl.options).find(
+                    (o) => o.dataset.hex && o.dataset.hex.toLowerCase() === item.hex.toLowerCase()
+                );
+                if (opt) {
+                    selectEl.value = opt.value;
+                } else {
+                    selectEl.value = '';
+                }
+            }
+
+            this.checkRouterStatusInRadio();
+            this.loadRouterConfig(this.selectedRouterHex);
+            this.log('info', `🎯 Router objetivo seleccionado: ${this.selectedRouterName} (${this.selectedRouterHex})`);
         },
 
         /**

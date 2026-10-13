@@ -482,4 +482,32 @@ class GestionRoutersTest extends TestCase
         $this->assertSame($initialCount, CoordinatedRouter::count());
         $this->assertNull(CoordinatedRouter::where('node_id', '!deadbeef')->first());
     }
+
+    /**
+     * Comprueba que la vista inyecta el catálogo de nodos conocidos y el markup del selector predictivo.
+     */
+    public function test_vista_incluye_catalogo_nodos_conocidos_para_sugerencias_predictivas(): void
+    {
+        $user = User::factory()->create();
+
+        CoordinatedRouter::create([
+            'node_id' => '!11223344',
+            'short_name' => 'CA01',
+            'long_name' => 'Router Cadiz Costa',
+            'role' => 'ROUTER',
+            'province' => 'ES-CA',
+            'latitude' => 36.7583,
+            'longitude' => -5.3672,
+            'status' => CoordinatedRouter::STATUS_MANAGED,
+        ]);
+
+        $response = $this->actingAs($user)->get('/admin/gestion-routers');
+
+        $response->assertSuccessful();
+        $response->assertSee('window.portalKnownNodes', false);
+        $response->assertSee('data-router-select', false);
+        $response->assertSee('fi-ra-suggestions-dropdown', false);
+        $response->assertSee('CA01');
+    }
 }
+

@@ -576,6 +576,147 @@
                 border-radius: 0.45rem;
             }
 
+            /* Sugerencias predictivas flotantes para búsqueda manual */
+            .fi-ra-suggestions-container {
+                position: relative;
+                width: 100%;
+            }
+            .fi-ra-suggestions-dropdown {
+                position: absolute;
+                top: calc(100% + 4px);
+                left: 0;
+                right: 0;
+                z-index: 50;
+                max-height: 280px;
+                overflow-y: auto;
+                background: #FFFFFF;
+                border: 1px solid #CBD5E1;
+                border-radius: 0.5rem;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+                list-style: none;
+                margin: 0;
+                padding: 0.25rem 0;
+            }
+            .dark .fi-ra-suggestions-dropdown {
+                background: #1E293B;
+                border-color: #334155;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            }
+            .fi-ra-suggestion-item {
+                padding: 0.5rem 0.75rem;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 0.5rem;
+                font-size: 0.825rem;
+                transition: background-color 0.15s ease;
+            }
+            .fi-ra-suggestion-item:hover,
+            .fi-ra-suggestion-item.active {
+                background-color: #F1F5F9;
+            }
+            .dark .fi-ra-suggestion-item:hover,
+            .dark .fi-ra-suggestion-item.active {
+                background-color: #334155;
+            }
+            .fi-ra-suggestion-main {
+                display: flex;
+                flex-direction: column;
+                min-width: 0;
+            }
+            .fi-ra-suggestion-title {
+                font-weight: 600;
+                color: #1E293B;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .dark .fi-ra-suggestion-title {
+                color: #F1F5F9;
+            }
+            .fi-ra-suggestion-hex {
+                font-family: monospace;
+                font-size: 0.75rem;
+                color: #059669;
+                font-weight: 700;
+                margin-left: 0.35rem;
+            }
+            .dark .fi-ra-suggestion-hex {
+                color: #34D399;
+            }
+            .fi-ra-suggestion-desc {
+                font-size: 0.75rem;
+                color: #64748B;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .dark .fi-ra-suggestion-desc {
+                color: #94A3B8;
+            }
+            .fi-ra-suggestion-badges {
+                display: flex;
+                align-items: center;
+                gap: 0.35rem;
+                flex-shrink: 0;
+            }
+            .fi-ra-badge-role {
+                font-size: 0.7rem;
+                padding: 0.15rem 0.4rem;
+                border-radius: 0.25rem;
+                background: #E0E7FF;
+                color: #3730A3;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+            .dark .fi-ra-badge-role {
+                background: rgba(99, 102, 241, 0.2);
+                color: #A5B4FC;
+            }
+            .fi-ra-badge-prov {
+                font-size: 0.7rem;
+                padding: 0.15rem 0.4rem;
+                border-radius: 0.25rem;
+                background: #ECFDF5;
+                color: #065F46;
+                font-weight: 600;
+            }
+            .dark .fi-ra-badge-prov {
+                background: rgba(16, 185, 129, 0.2);
+                color: #6EE7B7;
+            }
+            .fi-ra-badge-custom {
+                font-size: 0.7rem;
+                padding: 0.15rem 0.4rem;
+                border-radius: 0.25rem;
+                background: #FEF3C7;
+                color: #92400E;
+                font-weight: 600;
+            }
+            .dark .fi-ra-badge-custom {
+                background: rgba(245, 158, 11, 0.2);
+                color: #FCD34D;
+            }
+            .fi-ra-suggestion-empty {
+                padding: 0.75rem;
+                text-align: center;
+                color: #64748B;
+                font-size: 0.8rem;
+            }
+            .dark .fi-ra-suggestion-empty {
+                color: #94A3B8;
+            }
+            .fi-ra-spinner-mini {
+                width: 1rem;
+                height: 1rem;
+                border: 2px solid rgba(0, 122, 51, 0.2);
+                border-top-color: #007A33;
+                border-radius: 50%;
+                animation: fi-ra-spin 0.6s linear infinite;
+            }
+            @keyframes fi-ra-spin { to { transform: rotate(360deg); } }
+
             /* Barra de Pestañas elegante y oxigenada */
             .fi-ra-tabs-nav {
                 display: flex;
@@ -1659,7 +1800,7 @@
             <div class="fi-ra-form-grid fi-ra-form-grid-2">
                 <div class="fi-ra-form-group">
                     <label class="fi-ra-label">{{ __('admin.gestion_routers.select_router_label') }}</label>
-                    <select @change="onRouterSelectChange($event)" class="fi-ra-select">
+                    <select data-router-select @change="onRouterSelectChange($event)" class="fi-ra-select">
                         <option value="">{{ __('admin.gestion_routers.select_placeholder') }}</option>
                         <optgroup label="{{ __('admin.gestion_routers.andalucia_optgroup') }}">
                             @foreach($routers as $r)
@@ -1678,16 +1819,70 @@
 
                 <div class="fi-ra-form-group">
                     <label class="fi-ra-label">{{ __('admin.gestion_routers.manual_node_label') }}</label>
-                    <input type="text" x-model="manualNodeInput" @input="onManualInputChange()" placeholder="{{ __('admin.gestion_routers.manual_node_placeholder') }}" class="fi-ra-input font-mono" />
+                    <div class="fi-ra-suggestions-container" @click.outside="showManualSuggestions = false">
+                        <div class="relative flex items-center">
+                            <input type="text"
+                                   x-model="manualNodeInput"
+                                   @input="onManualInputChange()"
+                                   @focus="if (manualNodeInput && manualNodeInput.trim()) { showManualSuggestions = true; updateManualSuggestions(); }"
+                                   @keydown.arrow-down.prevent="if (manualSuggestions.length > 0) { manualHighlightIndex = (manualHighlightIndex + 1) % manualSuggestions.length; }"
+                                   @keydown.arrow-up.prevent="if (manualSuggestions.length > 0) { manualHighlightIndex = (manualHighlightIndex - 1 + manualSuggestions.length) % manualSuggestions.length; }"
+                                   @keydown.enter.prevent="if (manualHighlightIndex >= 0 && manualSuggestions[manualHighlightIndex]) { selectManualNodeCandidate(manualSuggestions[manualHighlightIndex]); } else { onManualInputCommit(); }"
+                                   @keydown.escape.prevent="showManualSuggestions = false"
+                                   placeholder="{{ __('admin.gestion_routers.manual_node_placeholder') }}"
+                                   class="fi-ra-input font-mono w-full" />
+                            <template x-if="manualSearchingRemote">
+                                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                    <div class="fi-ra-spinner-mini"></div>
+                                </div>
+                            </template>
+                        </div>
+
+                        {{-- Menú de Sugerencias Predictivas Flotantes --}}
+                        <ul x-show="showManualSuggestions && (manualSuggestions.length > 0 || (manualNodeInput && manualNodeInput.trim().length >= 2))"
+                            x-transition
+                            class="fi-ra-suggestions-dropdown">
+                            <template x-for="(sug, sIdx) in manualSuggestions" :key="sug.hex">
+                                <li class="fi-ra-suggestion-item"
+                                    :class="{ 'active': sIdx === manualHighlightIndex }"
+                                    @mouseenter="manualHighlightIndex = sIdx"
+                                    @mousedown.prevent="selectManualNodeCandidate(sug)">
+                                    <div class="fi-ra-suggestion-main">
+                                        <div class="fi-ra-suggestion-title">
+                                            <span x-text="sug.shortName || sug.hex"></span>
+                                            <span class="fi-ra-suggestion-hex" x-text="sug.hex"></span>
+                                        </div>
+                                        <div class="fi-ra-suggestion-desc" x-text="sug.longName || sug.hex"></div>
+                                    </div>
+                                    <div class="fi-ra-suggestion-badges">
+                                        <template x-if="sug.province && sug.province !== '-'">
+                                            <span class="fi-ra-badge-prov" x-text="sug.province"></span>
+                                        </template>
+                                        <template x-if="sug.role">
+                                            <span class="fi-ra-badge-role" x-text="sug.role"></span>
+                                        </template>
+                                        <template x-if="sug.isCustom">
+                                            <span class="fi-ra-badge-custom">Manual</span>
+                                        </template>
+                                    </div>
+                                </li>
+                            </template>
+                            <template x-if="manualSuggestions.length === 0 && !manualSearchingRemote">
+                                <li class="fi-ra-suggestion-empty">
+                                    <span>No se encontraron nodos coincidentes con "<strong x-text="manualNodeInput"></strong>"</span>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
             {{-- Ficha destacada del router seleccionado --}}
-            <div x-show="selectedRouterHex || manualNodeInput" class="fi-ra-router-summary">
+            <div x-show="selectedRouterHex" class="fi-ra-router-summary">
                 <div>
-                    <div class="fi-ra-router-name" x-text="selectedRouterName || (manualNodeInput ? `Nodo Manual ${manualNodeInput}` : 'Router Seleccionado')"></div>
+                    <div class="fi-ra-router-name" x-text="selectedRouterName || 'Router Seleccionado'"></div>
                     <div class="fi-ra-router-meta-row">
-                        <span>ID LoRa: <strong class="font-mono text-emerald-700 dark:text-emerald-400" x-text="selectedRouterHex || manualNodeInput"></strong></span>
+                        <span>ID LoRa: <strong class="font-mono text-emerald-700 dark:text-emerald-400" x-text="selectedRouterHex"></strong></span>
                         <template x-if="selectedRouterProvince">
                             <span x-text="`· Provincia: ${selectedRouterProvince}`"></span>
                         </template>
@@ -1716,7 +1911,7 @@
                             🔒 Enlace Verificado
                         </span>
                     </template>
-                    <template x-if="!targetHasPublicKeyInLocalRadio() && (selectedRouterHex || manualNodeInput)">
+                    <template x-if="!targetHasPublicKeyInLocalRadio() && selectedRouterHex">
                         <span class="fi-ra-badge fi-ra-badge-known" title="Transmisión directa por radioenlace LoRa.">
                             📡 Enlace LoRa Directo
                         </span>
@@ -1725,7 +1920,7 @@
             </div>
 
             {{-- Aviso cuando no hay ningún router seleccionado todavía --}}
-            <div x-show="!selectedRouterHex && !manualNodeInput" class="p-3 rounded-lg text-xs" style="background-color: rgba(148, 163, 184, 0.08); border: 1px dashed rgba(148, 163, 184, 0.3); color: #64748B;">
+            <div x-show="!selectedRouterHex" class="p-3 rounded-lg text-xs" style="background-color: rgba(148, 163, 184, 0.08); border: 1px dashed rgba(148, 163, 184, 0.3); color: #64748B;">
                 <span>💡 {{ __('admin.gestion_routers.target_none_selected') }}</span>
             </div>
         </div>

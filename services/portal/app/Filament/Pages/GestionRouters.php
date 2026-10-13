@@ -203,32 +203,60 @@ class GestionRouters extends Page
         $allKnownNodes = $formattedRouters;
         try {
             $schema = Schema::connection('ingesta');
-            $tableName = null;
+            $tablesToQuery = [];
+            if ($schema->hasView('api_routers') || $schema->hasTable('api_routers')) {
+                $tablesToQuery[] = 'api_routers';
+            }
             if ($schema->hasView('api_nodes') || $schema->hasTable('api_nodes')) {
-                $tableName = 'api_nodes';
-            } elseif ($schema->hasView('api_routers') || $schema->hasTable('api_routers')) {
-                $tableName = 'api_routers';
+                $tablesToQuery[] = 'api_nodes';
             }
 
-            if ($tableName) {
-                $ingestaNodes = DB::connection('ingesta')->table($tableName)->select(['id', 'short_name', 'long_name', 'role', 'province'])->get();
+            $validProvinces = ['ES-AL', 'ES-CA', 'ES-CO', 'ES-GR', 'ES-H', 'ES-J', 'ES-MA', 'ES-SE', 'AL', 'CA', 'CO', 'GR', 'H', 'J', 'MA', 'SE'];
+            foreach ($tablesToQuery as $tName) {
                 $existingIds = array_map('strtolower', array_column($allKnownNodes, 'node_id'));
+                $cols = array_intersect(['id', 'short_name', 'long_name', 'role', 'province', 'latitude', 'longitude'], $schema->getColumnListing($tName));
+                $ingestaNodes = DB::connection('ingesta')->table($tName)
+                    ->select($cols)
+                    ->limit(300)
+                    ->get();
                 foreach ($ingestaNodes as $in) {
-                    if (! in_array(strtolower($in->id), $existingIds, true)) {
-                        $cleanHex = ltrim($in->id, '!');
-                        $decId = ctype_xdigit($cleanHex) ? (string) hexdec($cleanHex) : '0';
-                        $allKnownNodes[] = [
-                            'node_id' => $in->id,
-                            'dec_id' => $decId,
-                            'short_name' => $in->short_name ?? '',
-                            'long_name' => $in->long_name ?? '',
-                            'province' => $in->province ?? '',
-                            'role' => $in->role ?? 'CLIENT',
-                            'status' => 'known',
-                            'favorite_nodes' => [],
-                            'blocked_nodes' => [],
-                        ];
+                    if (in_array(strtolower($in->id), $existingIds, true)) {
+                        continue;
                     }
+
+                    // Descartar registros que no pertenezcan a Andalucía
+                    $prov = strtoupper(trim($in->province ?? ''));
+                    if (! empty($prov) && ! in_array($prov, $validProvinces, true)) {
+                        continue;
+                    }
+
+                    // Si cuenta con coordenadas, asegurar que caigan dentro de Andalucía
+                    if (isset($in->latitude, $in->longitude) && $in->latitude !== null && $in->longitude !== null) {
+                        if (! CoordinatedRouter::isWithinAndaluciaBounds((float) $in->latitude, (float) $in->longitude)) {
+                            continue;
+                        }
+                    }
+
+                    // Descartar nombres genéricos autogenerados de ruido
+                    $lName = trim($in->long_name ?? '');
+                    if (! empty($lName) && preg_match('/^(Router|Meshtastic)\s+[0-9a-fA-F]+$/i', $lName)) {
+                        continue;
+                    }
+
+                    $cleanHex = ltrim($in->id, '!');
+                    $decId = ctype_xdigit($cleanHex) ? (string) hexdec($cleanHex) : '0';
+                    $allKnownNodes[] = [
+                        'node_id' => $in->id,
+                        'dec_id' => $decId,
+                        'short_name' => $in->short_name ?? '',
+                        'long_name' => $in->long_name ?? '',
+                        'province' => $in->province ?? '',
+                        'role' => $in->role ?? 'CLIENT',
+                        'status' => 'known',
+                        'favorite_nodes' => [],
+                        'blocked_nodes' => [],
+                    ];
+                    $existingIds[] = strtolower($in->id);
                 }
             }
         } catch (\Throwable) {
