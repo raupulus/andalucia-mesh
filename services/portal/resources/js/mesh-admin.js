@@ -498,6 +498,23 @@ export function meshAdminComponent() {
         },
 
         /**
+         * Comprueba si un ID hex corresponde a un router coordinado oficial de Andalucía.
+         * @param {string} hex
+         * @returns {boolean}
+         */
+        isCoordinatedRouter(hex) {
+            if (!hex) return false;
+            const clean = hex.toLowerCase().replace(/^!/, '');
+            if (window.portalRouters && Array.isArray(window.portalRouters)) {
+                return window.portalRouters.some((r) => {
+                    const rClean = (r.node_id || '').toLowerCase().replace(/^!/, '');
+                    return rClean === clean;
+                });
+            }
+            return false;
+        },
+
+        /**
          * Retorna la lista de favoritos configurados para el router activo.
          */
         getActiveRouterFavorites() {
@@ -1087,8 +1104,9 @@ export function meshAdminComponent() {
                         const pkNotice = hasPk ? ' [PKI disponible]' : '';
                         this.log('rx', `NodeInfo de ${fromHex}: "${user.longName}" (${user.shortName}) [HW: ${user.hwModel}]${pkNotice}`);
 
-                        // Actualizar configuración en vivo si tiene nombres válidos
-                        if (user.longName || user.shortName) {
+                        // Actualizar configuración en vivo si es un router coordinado o el router activo seleccionado
+                        const isCoordOrActive = this.isCoordinatedRouter(fromHex) || (this.getActiveRouterHex() || '').toLowerCase() === fromHex.toLowerCase();
+                        if (isCoordOrActive && (user.longName || user.shortName)) {
                             this.updateRouterConfigItem(fromHex, {
                                 long_name: user.longName || '',
                                 short_name: user.shortName || '',
@@ -1108,7 +1126,8 @@ export function meshAdminComponent() {
                         const lon = (pos.longitudeI / 1e7).toFixed(5);
                         this.log('rx', `Posición de ${fromHex}: Lat ${lat}, Lon ${lon} (Alt: ${pos.altitude || 0}m)`);
 
-                        if (pos.latitudeI && pos.longitudeI) {
+                        const isCoordOrActivePos = this.isCoordinatedRouter(fromHex) || (this.getActiveRouterHex() || '').toLowerCase() === fromHex.toLowerCase();
+                        if (isCoordOrActivePos && pos.latitudeI && pos.longitudeI) {
                             const numLat = Number((pos.latitudeI / 1e7).toFixed(7));
                             const numLon = Number((pos.longitudeI / 1e7).toFixed(7));
                             const alt = pos.altitude || 0;
@@ -2340,7 +2359,9 @@ export function meshAdminComponent() {
                 console.warn('Error guardando snm_router_configs:', e);
             }
 
-            if (persist && window.Livewire && this.$wire && typeof this.$wire.updateRouterNodeConfig === 'function') {
+            const isCoordinated = this.isCoordinatedRouter(routerHex);
+            const isActive = activeHex && activeHex.toLowerCase() === key;
+            if (persist && (isCoordinated || isActive) && window.Livewire && this.$wire && typeof this.$wire.updateRouterNodeConfig === 'function') {
                 try {
                     this.$wire.updateRouterNodeConfig(routerHex, updated);
                 } catch (lwErr) {

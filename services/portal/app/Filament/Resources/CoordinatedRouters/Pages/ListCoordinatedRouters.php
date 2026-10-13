@@ -63,6 +63,19 @@ class ListCoordinatedRouters extends ListRecords
                                 continue;
                             }
 
+                            // Descarte estricto de routers sin coordenadas GPS válidas dentro del territorio andaluz
+                            $lat = $n->latitude !== null ? (float) $n->latitude : null;
+                            $lon = $n->longitude !== null ? (float) $n->longitude : null;
+                            if (! CoordinatedRouter::isWithinAndaluciaBounds($lat, $lon)) {
+                                continue;
+                            }
+
+                            // Descarte de nombres genéricos o ruido autogenerado
+                            $lName = trim((string) ($n->long_name ?? ''));
+                            if (empty($lName) || preg_match('/^(Router|Meshtastic)\s+[0-9a-fA-F]+$/i', $lName)) {
+                                continue;
+                            }
+
                             $nodeId = (string) $n->id;
                             $router = CoordinatedRouter::where('node_id', $nodeId)->first();
 
@@ -73,6 +86,8 @@ class ListCoordinatedRouters extends ListRecords
                                     'short_name' => $n->short_name,
                                     'long_name' => $n->long_name,
                                     'province' => $prov,
+                                    'latitude' => $lat,
+                                    'longitude' => $lon,
                                     'role' => (string) $n->role,
                                     'status' => CoordinatedRouter::STATUS_NEW,
                                     'hw_model' => $n->hw_model,
@@ -86,6 +101,8 @@ class ListCoordinatedRouters extends ListRecords
                                     'short_name' => $n->short_name,
                                     'long_name' => $n->long_name,
                                     'province' => $prov,
+                                    'latitude' => $lat,
+                                    'longitude' => $lon,
                                     'role' => (string) $n->role,
                                     'hw_model' => $n->hw_model,
                                     'is_gateway' => (bool) $n->is_gateway,
@@ -170,6 +187,8 @@ class ListCoordinatedRouters extends ListRecords
                     'long_name' => 'Router Sevilla Aljarafe',
                     'role' => 'ROUTER',
                     'province' => 'ES-SE',
+                    'latitude' => 37.3886,
+                    'longitude' => -6.0024,
                     'battery_level' => 95,
                     'voltage' => 4.12,
                     'channel_utilization' => 14.5,
@@ -185,6 +204,8 @@ class ListCoordinatedRouters extends ListRecords
                     'long_name' => 'Router Cádiz Sierra Grazalema',
                     'role' => 'ROUTER',
                     'province' => 'ES-CA',
+                    'latitude' => 36.7583,
+                    'longitude' => -5.3672,
                     'battery_level' => 101,
                     'voltage' => 5.00,
                     'channel_utilization' => 8.2,
@@ -200,6 +221,8 @@ class ListCoordinatedRouters extends ListRecords
                     'long_name' => 'Repetidor Málaga Gibralfaro',
                     'role' => 'REPEATER',
                     'province' => 'ES-MA',
+                    'latitude' => 36.7213,
+                    'longitude' => -4.4214,
                     'battery_level' => 88,
                     'voltage' => 3.98,
                     'channel_utilization' => 22.1,
@@ -215,6 +238,8 @@ class ListCoordinatedRouters extends ListRecords
                     'long_name' => 'Router Granada Sierra Nevada',
                     'role' => 'ROUTER',
                     'province' => 'ES-GR',
+                    'latitude' => 37.0542,
+                    'longitude' => -3.3934,
                     'battery_level' => 76,
                     'voltage' => 3.85,
                     'channel_utilization' => 12.0,
@@ -230,6 +255,8 @@ class ListCoordinatedRouters extends ListRecords
                     'long_name' => 'Router Córdoba Medina Azahara',
                     'role' => 'ROUTER_LATE',
                     'province' => 'ES-CO',
+                    'latitude' => 37.8860,
+                    'longitude' => -4.7794,
                     'battery_level' => 101,
                     'voltage' => 5.00,
                     'channel_utilization' => 16.3,
@@ -245,6 +272,8 @@ class ListCoordinatedRouters extends ListRecords
                     'long_name' => 'Router Huelva Punta Umbría',
                     'role' => 'ROUTER',
                     'province' => 'ES-H',
+                    'latitude' => 37.1824,
+                    'longitude' => -6.9660,
                     'battery_level' => 65,
                     'voltage' => 3.75,
                     'channel_utilization' => 9.8,
@@ -260,6 +289,8 @@ class ListCoordinatedRouters extends ListRecords
                     'long_name' => 'Router Jaén Santa Catalina',
                     'role' => 'ROUTER',
                     'province' => 'ES-J',
+                    'latitude' => 37.7692,
+                    'longitude' => -3.7903,
                     'battery_level' => 90,
                     'voltage' => 4.05,
                     'channel_utilization' => 11.2,
@@ -275,6 +306,8 @@ class ListCoordinatedRouters extends ListRecords
                     'long_name' => 'Router Almería Cabo de Gata',
                     'role' => 'ROUTER',
                     'province' => 'ES-AL',
+                    'latitude' => 36.7823,
+                    'longitude' => -2.2425,
                     'battery_level' => 82,
                     'voltage' => 3.92,
                     'channel_utilization' => 15.0,
@@ -319,6 +352,22 @@ class ListCoordinatedRouters extends ListRecords
                     'last_seen' => $now->toDateTimeString(),
                 ],
             ]);
+        } elseif ($driver === 'sqlite') {
+            $coords = [
+                '!2a3b4c5d' => ['latitude' => 37.3886, 'longitude' => -6.0024],
+                '!3b4c5d6e' => ['latitude' => 36.7583, 'longitude' => -5.3672],
+                '!4c5d6e7f' => ['latitude' => 36.7213, 'longitude' => -4.4214],
+                '!5d6e7f80' => ['latitude' => 37.0542, 'longitude' => -3.3934],
+                '!6e7f8091' => ['latitude' => 37.8860, 'longitude' => -4.7794],
+                '!7f8091a2' => ['latitude' => 37.1824, 'longitude' => -6.9660],
+                '!8091a2b3' => ['latitude' => 37.7692, 'longitude' => -3.7903],
+                '!91a2b3c4' => ['latitude' => 36.7823, 'longitude' => -2.2425],
+                '!a2b3c4d5' => ['latitude' => 38.8794, 'longitude' => -6.9706],
+                '!b3c4d5e6' => ['latitude' => 38.9943, 'longitude' => -1.8585],
+            ];
+            foreach ($coords as $nodeId => $c) {
+                $connection->table('api_routers')->where('id', $nodeId)->whereNull('latitude')->update($c);
+            }
         }
     }
 }

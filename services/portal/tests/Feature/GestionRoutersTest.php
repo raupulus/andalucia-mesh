@@ -52,23 +52,51 @@ class GestionRoutersTest extends TestCase
     {
         $user = User::factory()->create();
 
-        // Router en Cádiz (Andalucía)
+        // Router en Cádiz (Andalucía) con coordenadas válidas dentro del territorio andaluz
         $routerAndaluz = CoordinatedRouter::create([
             'node_id' => '!11223344',
             'short_name' => 'CAD1',
             'long_name' => 'Router Sanlúcar de Barrameda',
             'role' => 'ROUTER',
             'province' => 'ES-CA',
+            'latitude' => 36.7583,
+            'longitude' => -5.3672,
             'status' => CoordinatedRouter::STATUS_MANAGED,
         ]);
 
-        // Router en Madrid (Fuera de Andalucía)
+        // Router en Madrid (Fuera de Andalucía por provincia)
         $routerMad = CoordinatedRouter::create([
             'node_id' => '!99887766',
             'short_name' => 'MAD1',
             'long_name' => 'Router Sierra de Guadarrama',
             'role' => 'ROUTER',
             'province' => 'ES-M',
+            'latitude' => 40.4168,
+            'longitude' => -3.7038,
+            'status' => CoordinatedRouter::STATUS_KNOWN,
+        ]);
+
+        // Router marcado como Andalucía pero con coordenadas fuera de los límites de Andalucía
+        $routerFueraLimites = CoordinatedRouter::create([
+            'node_id' => '!22334455',
+            'short_name' => 'EXT1',
+            'long_name' => 'Router Fuera Limites',
+            'role' => 'ROUTER',
+            'province' => 'ES-CA',
+            'latitude' => 39.8500, // Fuera de Andalucía (> 38.80)
+            'longitude' => -5.3672,
+            'status' => CoordinatedRouter::STATUS_KNOWN,
+        ]);
+
+        // Router con nombre de ruido genérico autogenerado
+        $routerRuido = CoordinatedRouter::create([
+            'node_id' => '!a9be2173',
+            'short_name' => '2173',
+            'long_name' => 'Router a9be2173',
+            'role' => 'ROUTER',
+            'province' => 'ES-CA',
+            'latitude' => 36.7583,
+            'longitude' => -5.3672,
             'status' => CoordinatedRouter::STATUS_KNOWN,
         ]);
 
@@ -79,6 +107,9 @@ class GestionRoutersTest extends TestCase
         $response->assertSee('!11223344');
         $response->assertDontSee('MAD1');
         $response->assertDontSee('!99887766');
+        $response->assertDontSee('EXT1');
+        $response->assertDontSee('!22334455');
+        $response->assertDontSee('!a9be2173');
     }
 
     /**
@@ -94,6 +125,8 @@ class GestionRoutersTest extends TestCase
             'long_name' => 'Router Aljarafe',
             'role' => 'ROUTER',
             'province' => 'ES-SE',
+            'latitude' => 37.3886,
+            'longitude' => -6.0024,
             'status' => CoordinatedRouter::STATUS_MANAGED,
         ]);
 
@@ -343,6 +376,8 @@ class GestionRoutersTest extends TestCase
             'long_name' => 'EA7-CA-05',
             'role' => 'ROUTER',
             'province' => 'ES-CA',
+            'latitude' => 36.7583,
+            'longitude' => -5.3672,
             'status' => CoordinatedRouter::STATUS_MANAGED,
             'blocked_nodes' => [
                 [
@@ -362,6 +397,8 @@ class GestionRoutersTest extends TestCase
             'long_name' => 'ATLAS BASE 📡☀🔋',
             'role' => 'CLIENT_BASE',
             'province' => 'ES-CA',
+            'latitude' => 36.7583,
+            'longitude' => -5.3672,
             'status' => CoordinatedRouter::STATUS_KNOWN,
         ]);
 
@@ -424,5 +461,25 @@ class GestionRoutersTest extends TestCase
         $this->assertTrue($router->node_config['environment_measurement_enabled']);
         $this->assertSame('EA7-CA-01 Sierra', $router->long_name);
         $this->assertSame('CA01', $router->short_name);
+    }
+
+    /**
+     * Comprueba que enviar telemetría o favoritos para un nodo no registrado no crea routers fantasmas en BD.
+     */
+    public function test_actualizar_config_o_favoritos_no_crea_routers_fantasmas(): void
+    {
+        $user = User::factory()->create();
+
+        $initialCount = CoordinatedRouter::count();
+
+        Livewire::actingAs($user)
+            ->test(GestionRouters::class)
+            ->call('updateRouterNodeConfig', '!deadbeef', ['long_name' => 'Phantom Router', 'latitude' => 36.7, 'longitude' => -5.4])
+            ->call('updateRouterFavoriteNode', '!deadbeef', '!11223344', true)
+            ->call('updateRouterBlockedNode', '!deadbeef', '!11223344', true)
+            ->assertSuccessful();
+
+        $this->assertSame($initialCount, CoordinatedRouter::count());
+        $this->assertNull(CoordinatedRouter::where('node_id', '!deadbeef')->first());
     }
 }

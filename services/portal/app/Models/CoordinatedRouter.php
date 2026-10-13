@@ -77,6 +77,9 @@ class CoordinatedRouter extends Model
         'short_name',
         'long_name',
         'province',
+        'latitude',
+        'longitude',
+        'altitude',
         'role',
         'status',
         'approved',
@@ -97,6 +100,9 @@ class CoordinatedRouter extends Model
     protected function casts(): array
     {
         return [
+            'latitude' => 'float',
+            'longitude' => 'float',
+            'altitude' => 'integer',
             'status' => 'string',
             'approved' => 'boolean',
             'is_gateway' => 'boolean',
@@ -264,5 +270,86 @@ class CoordinatedRouter extends Model
     public function getStatusLabelAttribute(): string
     {
         return self::STATUSES[$this->status] ?? $this->status;
+    }
+
+    /**
+     * Valida si unas coordenadas geográficas caen estrictamente dentro del territorio de Andalucía.
+     * Bounding box oficial: Latitud [35.90, 38.80], Longitud [-7.60, -1.60], excluyendo (0, 0).
+     */
+    public static function isWithinAndaluciaBounds(?float $lat, ?float $lon): bool
+    {
+        if ($lat === null || $lon === null) {
+            return false;
+        }
+
+        if ($lat == 0.0 && $lon == 0.0) {
+            return false;
+        }
+
+        return ($lat >= 35.90 && $lat <= 38.80 && $lon >= -7.60 && $lon <= -1.60);
+    }
+
+    /**
+     * Scope para filtrar routers de Andalucía que cuenten con coordenadas GPS válidas dentro del territorio.
+     *
+     * @param  Builder<CoordinatedRouter>  $query
+     * @return Builder<CoordinatedRouter>
+     */
+    public function scopeWithGpsInAndalucia(Builder $query): Builder
+    {
+        return $query->whereIn('province', array_keys(self::PROVINCES))
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->where('latitude', '!=', 0)
+            ->where('longitude', '!=', 0)
+            ->whereBetween('latitude', [35.90, 38.80])
+            ->whereBetween('longitude', [-7.60, -1.60]);
+    }
+
+    /**
+     * Determina si este router cuenta con coordenadas GPS válidas dentro de Andalucía.
+     */
+    public function hasValidGpsInAndalucia(): bool
+    {
+        $lat = $this->latitude;
+        $lon = $this->longitude;
+
+        if (($lat === null || $lon === null) && ! empty($this->node_config)) {
+            $cfg = $this->node_config;
+            $pos = isset($cfg['position']) && is_array($cfg['position']) ? $cfg['position'] : $cfg;
+            if ($lat === null) {
+                if (isset($pos['latitude']) && is_numeric($pos['latitude'])) {
+                    $lat = (float) $pos['latitude'];
+                } elseif (isset($pos['latitude_i']) && is_numeric($pos['latitude_i'])) {
+                    $lat = ((float) $pos['latitude_i']) / 1e7;
+                }
+            }
+            if ($lon === null) {
+                if (isset($pos['longitude']) && is_numeric($pos['longitude'])) {
+                    $lon = (float) $pos['longitude'];
+                } elseif (isset($pos['longitude_i']) && is_numeric($pos['longitude_i'])) {
+                    $lon = ((float) $pos['longitude_i']) / 1e7;
+                }
+            }
+        }
+
+        return self::isWithinAndaluciaBounds(
+            $lat !== null ? (float) $lat : null,
+            $lon !== null ? (float) $lon : null
+        );
+    }
+
+    /**
+     * Determina si el nombre del router corresponde a un patrón genérico de ruido autogenerado
+     * (por ejemplo 'Router a9be2173' o 'Meshtastic 849a').
+     */
+    public function isNoiseName(): bool
+    {
+        $name = trim($this->long_name ?? '');
+        if (empty($name)) {
+            return true;
+        }
+
+        return (bool) preg_match('/^(Router|Meshtastic)\s+[0-9a-fA-F]+$/i', $name);
     }
 }

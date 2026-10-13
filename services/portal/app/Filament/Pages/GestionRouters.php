@@ -66,6 +66,56 @@ class GestionRouters extends Page
             ->orderBy('short_name')
             ->get();
 
+        // Hidratar coordenadas desde ingesta (api_routers o api_nodes) si faltan en coordinated_routers
+        try {
+            $schema = Schema::connection('ingesta');
+            $sourceTable = null;
+            if ($schema->hasView('api_routers') || $schema->hasTable('api_routers')) {
+                $sourceTable = 'api_routers';
+            } elseif ($schema->hasView('api_nodes') || $schema->hasTable('api_nodes')) {
+                $sourceTable = 'api_nodes';
+            }
+
+            if ($sourceTable) {
+                $missingCoords = $routers->filter(fn (CoordinatedRouter $r): bool => $r->latitude === null || $r->longitude === null);
+                if ($missingCoords->isNotEmpty()) {
+                    $ingestaCoords = DB::connection('ingesta')->table($sourceTable)
+                        ->whereIn('id', $missingCoords->pluck('node_id')->all())
+                        ->select(['id', 'latitude', 'longitude'])
+                        ->get()
+                        ->keyBy('id');
+
+                    foreach ($missingCoords as $r) {
+                        if (isset($ingestaCoords[$r->node_id])) {
+                            $row = $ingestaCoords[$r->node_id];
+                            if ($row->latitude !== null && $row->longitude !== null) {
+                                $r->latitude = (float) $row->latitude;
+                                $r->longitude = (float) $row->longitude;
+                                try {
+                                    $r->save();
+                                } catch (\Throwable) {
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable) {
+        }
+
+        // Filtrar estrictamente: solo routers de Andalucía con GPS dentro del territorio andaluz y sin ruido genérico
+        $routers = $routers->filter(function (CoordinatedRouter $r): bool {
+            if (! $r->hasValidGpsInAndalucia()) {
+                return false;
+            }
+
+            if ($r->isNoiseName()) {
+                return false;
+            }
+
+            return true;
+        })->values();
+
         $normalizeList = function (?array $list): array {
             if (! is_array($list)) {
                 return [];
@@ -138,6 +188,9 @@ class GestionRouters extends Page
                 'short_name' => $r->short_name,
                 'long_name' => $r->long_name,
                 'province' => $r->province,
+                'latitude' => $r->latitude,
+                'longitude' => $r->longitude,
+                'altitude' => $r->altitude,
                 'role' => $r->role,
                 'status' => $r->status,
                 'favorite_nodes' => $normalizedFavs,
@@ -291,15 +344,7 @@ class GestionRouters extends Page
             ->orWhereRaw('LOWER(node_id) = ?', [strtolower($routerId)])
             ->first();
         if (! $router) {
-            $cleanHex = ltrim($routerId, '!');
-            $router = CoordinatedRouter::create([
-                'node_id' => $routerId,
-                'short_name' => substr($cleanHex, -4),
-                'long_name' => 'Router '.$cleanHex,
-                'province' => 'ES-CA',
-                'role' => 'ROUTER',
-                'status' => 'known',
-            ]);
+            return;
         }
 
         $favs = $router->favorite_nodes ?? [];
@@ -354,15 +399,7 @@ class GestionRouters extends Page
             ->orWhereRaw('LOWER(node_id) = ?', [strtolower($routerId)])
             ->first();
         if (! $router) {
-            $cleanHex = ltrim($routerId, '!');
-            $router = CoordinatedRouter::create([
-                'node_id' => $routerId,
-                'short_name' => substr($cleanHex, -4),
-                'long_name' => 'Router '.$cleanHex,
-                'province' => 'ES-CA',
-                'role' => 'ROUTER',
-                'status' => 'known',
-            ]);
+            return;
         }
 
         $blocked = $router->blocked_nodes ?? [];
@@ -461,15 +498,7 @@ class GestionRouters extends Page
             ->orWhereRaw('LOWER(node_id) = ?', [strtolower($routerId)])
             ->first();
         if (! $router) {
-            $cleanHex = ltrim($routerId, '!');
-            $router = CoordinatedRouter::create([
-                'node_id' => $routerId,
-                'short_name' => substr($cleanHex, -4),
-                'long_name' => 'Router '.$cleanHex,
-                'province' => 'ES-CA',
-                'role' => 'ROUTER',
-                'status' => 'known',
-            ]);
+            return;
         }
 
         $current = $router->node_config ?? [];
@@ -487,6 +516,22 @@ class GestionRouters extends Page
         }
         if (! empty($configData['long_name'])) {
             $router->long_name = (string) $configData['long_name'];
+        }
+
+        if (isset($configData['latitude']) && is_numeric($configData['latitude'])) {
+            $lat = (float) $configData['latitude'];
+            if ($lat !== 0.0) {
+                $router->latitude = $lat;
+            }
+        }
+        if (isset($configData['longitude']) && is_numeric($configData['longitude'])) {
+            $lon = (float) $configData['longitude'];
+            if ($lon !== 0.0) {
+                $router->longitude = $lon;
+            }
+        }
+        if (isset($configData['altitude']) && is_numeric($configData['altitude'])) {
+            $router->altitude = (int) $configData['altitude'];
         }
 
         $router->node_config = $updated;
