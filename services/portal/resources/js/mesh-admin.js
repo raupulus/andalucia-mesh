@@ -1166,12 +1166,52 @@ export function meshAdminComponent() {
                 if (port === PortNum.TELEMETRY_APP) {
                     try {
                         const telem = fromBinary(TelemetrySchema, rawBytes);
-                        const dev = telem.deviceMetrics;
-                        if (dev) {
-                            const bat = dev.batteryLevel !== undefined ? `Batería: ${dev.batteryLevel}%` : '';
-                            const volt = dev.voltage !== undefined ? `Voltaje: ${dev.voltage.toFixed(2)}V` : '';
-                            const chUtil = dev.channelUtilization !== undefined ? `ChUtil: ${dev.channelUtilization.toFixed(1)}%` : '';
-                            this.log('rx', `Telemetría de ${fromHex}: ${[bat, volt, chUtil].filter(Boolean).join(' | ')}`);
+                        const vCase = telem.variant?.case;
+                        const vVal = telem.variant?.value;
+
+                        if (vCase === 'deviceMetrics' && vVal) {
+                            const bat = vVal.batteryLevel !== undefined ? `Batería: ${vVal.batteryLevel}%` : '';
+                            const volt = vVal.voltage !== undefined ? `Voltaje: ${vVal.voltage.toFixed(2)}V` : '';
+                            const chUtil = vVal.channelUtilization !== undefined ? `ChUtil: ${vVal.channelUtilization.toFixed(1)}%` : '';
+                            const airTx = vVal.airUtilTx !== undefined ? `AirTX: ${vVal.airUtilTx.toFixed(1)}%` : '';
+                            const uptime = vVal.uptimeSeconds !== undefined ? `Uptime: ${Math.floor(vVal.uptimeSeconds / 3600)}h` : '';
+                            const details = [bat, volt, chUtil, airTx, uptime].filter(Boolean).join(' | ');
+
+                            this.log('rx', `🔋 Telemetría de ${fromHex}: ${details || 'Sin métricas'}`);
+
+                            // Si es el router seleccionado, actualizar su telemetría en configForm
+                            if (this.selectedRouterHex && fromHex.toLowerCase() === this.selectedRouterHex.toLowerCase()) {
+                                this.updateRouterConfigItem(fromHex, {
+                                    last_battery_level: vVal.batteryLevel,
+                                    last_voltage: vVal.voltage,
+                                    last_channel_utilization: vVal.channelUtilization,
+                                    last_air_util_tx: vVal.airUtilTx,
+                                });
+                            }
+                            return;
+                        }
+
+                        if (vCase === 'environmentMetrics' && vVal) {
+                            const temp = vVal.temperature !== undefined ? `Temp: ${vVal.temperature.toFixed(1)}°C` : '';
+                            const hum = vVal.relativeHumidity !== undefined ? `Humedad: ${vVal.relativeHumidity.toFixed(0)}%` : '';
+                            const press = vVal.barometricPressure !== undefined ? `Presión: ${vVal.barometricPressure.toFixed(1)}hPa` : '';
+                            const details = [temp, hum, press].filter(Boolean).join(' | ');
+
+                            this.log('rx', `🌡️ Telemetría Ambiental de ${fromHex}: ${details || 'Sin métricas'}`);
+                            return;
+                        }
+
+                        if (vCase === 'powerMetrics' && vVal) {
+                            const ch1 = vVal.ch1Voltage !== undefined ? `CH1: ${vVal.ch1Voltage.toFixed(2)}V` : '';
+                            const ch2 = vVal.ch2Voltage !== undefined ? `CH2: ${vVal.ch2Voltage.toFixed(2)}V` : '';
+                            this.log('rx', `⚡ Métricas de Potencia de ${fromHex}: ${[ch1, ch2].filter(Boolean).join(' | ')}`);
+                            return;
+                        }
+
+                        if (vCase === 'airQualityMetrics' && vVal) {
+                            const pm25 = vVal.pm25Standard !== undefined ? `PM2.5: ${vVal.pm25Standard}` : '';
+                            const co2 = vVal.co2 !== undefined ? `CO2: ${vVal.co2}ppm` : '';
+                            this.log('rx', `🍃 Calidad del Aire de ${fromHex}: ${[pm25, co2].filter(Boolean).join(' | ')}`);
                             return;
                         }
                     } catch {
@@ -2329,9 +2369,12 @@ export function meshAdminComponent() {
                     label = 'Anuncio broadcast de Telemetría';
                     const telemMsg = create(TelemetrySchema, {
                         time: Math.trunc(Date.now() / 1000),
-                        deviceMetrics: {
-                            batteryLevel: 100,
-                            voltage: 4.2,
+                        variant: {
+                            case: 'deviceMetrics',
+                            value: {
+                                batteryLevel: 100,
+                                voltage: 4.2,
+                            },
                         },
                     });
                     payload = toBinary(TelemetrySchema, telemMsg);
@@ -2449,8 +2492,23 @@ export function meshAdminComponent() {
                         payloadBytes = toBinary(PositionSchema, posMsg);
                     } else if (reqType === 'telemetry') {
                         portnum = PortNum.TELEMETRY_APP;
-                        label = 'Telemetría';
-                        const telemMsg = create(TelemetrySchema, {});
+                        label = 'Telemetría (Batería y Radio)';
+                        const telemMsg = create(TelemetrySchema, {
+                            variant: {
+                                case: 'deviceMetrics',
+                                value: {},
+                            },
+                        });
+                        payloadBytes = toBinary(TelemetrySchema, telemMsg);
+                    } else if (reqType === 'environment') {
+                        portnum = PortNum.TELEMETRY_APP;
+                        label = 'Telemetría Ambiental (Sensores)';
+                        const telemMsg = create(TelemetrySchema, {
+                            variant: {
+                                case: 'environmentMetrics',
+                                value: {},
+                            },
+                        });
                         payloadBytes = toBinary(TelemetrySchema, telemMsg);
                     } else {
                         throw new Error(`Petición no reconocida: ${reqType}`);

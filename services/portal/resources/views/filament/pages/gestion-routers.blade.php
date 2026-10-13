@@ -1017,10 +1017,16 @@
                 .fi-ra-action-grid-4 {
                     grid-template-columns: repeat(2, 1fr);
                 }
+                .fi-ra-action-grid-5 {
+                    grid-template-columns: repeat(2, 1fr);
+                }
             }
             @media (min-width: 1024px) {
                 .fi-ra-action-grid-4 {
                     grid-template-columns: repeat(4, 1fr);
+                }
+                .fi-ra-action-grid-5 {
+                    grid-template-columns: repeat(5, 1fr);
                 }
             }
 
@@ -2560,7 +2566,7 @@
                         <input type="text" x-model="unicastTargetInput" :placeholder="selectedRouterHex ? `Por defecto router actual: ${selectedRouterHex}` : 'Introduce !hex o decimal'" class="fi-ra-input font-mono" />
                     </div>
 
-                    <div class="fi-ra-action-grid fi-ra-action-grid-4">
+                    <div class="fi-ra-action-grid fi-ra-action-grid-5">
                         <button type="button" @click="sendUnicastRequest('nodeinfo')" :disabled="unicastSending || orderActive || tracerouteActive || connectionStatus !== 'connected'" class="fi-ra-action-card">
                             <div class="fi-ra-action-icon">ℹ️</div>
                             <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_req_nodeinfo') }}</div>
@@ -2576,7 +2582,13 @@
                         <button type="button" @click="sendUnicastRequest('telemetry')" :disabled="unicastSending || orderActive || tracerouteActive || connectionStatus !== 'connected'" class="fi-ra-action-card">
                             <div class="fi-ra-action-icon">🔋</div>
                             <div class="fi-ra-action-title">{{ __('admin.gestion_routers.btn_req_telemetry') }}</div>
-                            <div class="fi-ra-action-desc">Métricas de batería y uso de radio.</div>
+                            <div class="fi-ra-action-desc">Batería, voltaje y presión del canal (ChUtil).</div>
+                        </button>
+
+                        <button type="button" @click="sendUnicastRequest('environment')" :disabled="unicastSending || orderActive || tracerouteActive || connectionStatus !== 'connected'" class="fi-ra-action-card">
+                            <div class="fi-ra-action-icon">🌡️</div>
+                            <div class="fi-ra-action-title">Telemetría Ambiental</div>
+                            <div class="fi-ra-action-desc">Temperatura, humedad y presión atmosférica.</div>
                         </button>
 
                         <button type="button" @click="sendUnicastRequest('traceroute')" :disabled="unicastSending || orderActive || tracerouteActive || connectionStatus !== 'connected'" class="fi-ra-action-card">
