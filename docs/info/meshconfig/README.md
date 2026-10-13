@@ -104,7 +104,7 @@
 - [x] Tarjeta de conexión directa dedicada en Modo Avanzado (Workbench) para Web Serial, Bluetooth y HTTP con sincronización de estado, lectura en vivo, comparador Diff y volcado.
 - [x] Aislamiento de identidad del nodo local propio frente a volcados de `NodeDB` (`TR-18`) y normalización canónica de enums Protobuf para diff exacto.
 - [x] Flujo de conexión en 2 etapas en el Asistente (Paso 4): detección de identidad del nodo, botón explícito «🚀 Programar Nodo Ahora», reporte en vivo de progreso, serialización oficial Protobuf `ChannelSetSchema`, resumen visual de canales y opción de limpieza de canales sobrantes.
-- [x] Conexión WiFi/HTTP local robusta con normalización de esquema (URL), advertencia de Mixed Content en HTTPS, máquina de estados anti-parpadeo y persistencia de host en localStorage (`TR-21`).
+- [x] Conexión WiFi/HTTP local robusta con normalización de esquema (URL), persistencia y sincronización reactiva de método y host en reload/localStorage, advertencia de Mixed Content en HTTPS, alineación superior de formulario y máquina de estados anti-parpadeo (`TR-21`).
 
 ---
 > Creado: 2026-10-08 · Última revisión: 2026-10-14

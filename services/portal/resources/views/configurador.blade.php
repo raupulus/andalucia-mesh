@@ -434,7 +434,7 @@
                         <div id="workbenchStatusPill" class="badge-tag">🔌 {{ __('portal.configurator.disconnected') }}</div>
                     </div>
                     <div class="card-body">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; align-items: end;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; align-items: start;">
                             <div class="field-group">
                                 <label for="transportSelectWorkbench" class="field-label">Método de conexión directa</label>
                                 <select id="transportSelectWorkbench" class="form-select">
@@ -453,16 +453,19 @@
                                     ⚠️ <strong>Atención (Mixed Content):</strong> Estás accediendo mediante HTTPS. Tu navegador bloqueará las conexiones directas a IPs HTTP locales por seguridad. Para conectar por WiFi a un nodo local HTTP, accede al portal por HTTP o utiliza conexión por USB Serial o Bluetooth.
                                 </div>
                             </div>
-                            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                                <button id="btnConnectWorkbench" type="button" class="btn btn-primary" onclick="conectarDispositivo('workbench')">
-                                    ⚡ Conectar al nodo
-                                </button>
-                                <button id="btnDisconnectWorkbench" type="button" class="btn btn-secondary" disabled onclick="desconectarDispositivo()">
-                                    Desconectar
-                                </button>
-                                <button id="btnDownloadLiveHeader" type="button" class="btn btn-secondary" disabled onclick="descargarConfiguracionNodo()">
-                                    📥 Leer del nodo
-                                </button>
+                            <div class="field-group">
+                                <label class="field-label" style="visibility: hidden; user-select: none;" aria-hidden="true">&nbsp;</label>
+                                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                                    <button id="btnConnectWorkbench" type="button" class="btn btn-primary" onclick="conectarDispositivo('workbench')">
+                                        ⚡ Conectar al nodo
+                                    </button>
+                                    <button id="btnDisconnectWorkbench" type="button" class="btn btn-secondary" disabled onclick="desconectarDispositivo()">
+                                        Desconectar
+                                    </button>
+                                    <button id="btnDownloadLiveHeader" type="button" class="btn btn-secondary" disabled onclick="descargarConfiguracionNodo()">
+                                        📥 Leer del nodo
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div style="margin-top: 0.85rem; font-size: 0.85rem; color: var(--color-texto-2); line-height: 1.45;">

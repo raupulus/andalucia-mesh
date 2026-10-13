@@ -11527,12 +11527,18 @@ function N_() {
 		a && (a.value = e.target.value);
 	}), a?.addEventListener("input", (e) => {
 		i && (i.value = e.target.value);
-	}), document.getElementById("transportSelect")?.addEventListener("change", (e) => {
-		let t = e.target.value === "http", n = document.getElementById("httpIpGroup");
-		n && (n.style.display = t ? "flex" : "none"), r(t);
-	}), document.getElementById("transportSelectWorkbench")?.addEventListener("change", (e) => {
-		let t = e.target.value === "http", n = document.getElementById("httpIpGroupWorkbench");
-		n && (n.style.display = t ? "flex" : "none"), r(t);
+	});
+	let s = (e) => {
+		if (!e) return;
+		let t = document.getElementById("transportSelect"), n = document.getElementById("transportSelectWorkbench");
+		t && t.value !== e && (t.value = e), n && n.value !== e && (n.value = e);
+		let i = e === "http", a = document.getElementById("httpIpGroup"), o = document.getElementById("httpIpGroupWorkbench");
+		a && (a.style.display = i ? "flex" : "none"), o && (o.style.display = i ? "flex" : "none"), r(i), typeof window < "u" && window.localStorage && localStorage.setItem("snm_last_transport", e);
+	}, c = document.getElementById("transportSelect"), l = document.getElementById("transportSelectWorkbench"), u = typeof window < "u" && window.localStorage && localStorage.getItem("snm_last_transport") || "", d = l && l.value || c && c.value;
+	s(d && d !== "serial" ? d : u || d || "serial"), c?.addEventListener("change", (e) => {
+		s(e.target.value);
+	}), l?.addEventListener("change", (e) => {
+		s(e.target.value);
 	}), document.getElementById("chkMqtt")?.addEventListener("change", m_), document.getElementById("chkMqttMap")?.addEventListener("change", m_), m_(), $("Configurador de Andalucía Mesh iniciado con preset SFNarrow.");
 }
 document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", N_) : N_();

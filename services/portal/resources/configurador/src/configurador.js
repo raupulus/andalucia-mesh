@@ -1637,18 +1637,46 @@ function iniciarConfigurador() {
     if (inputAsst) inputAsst.value = e.target.value;
   });
 
-  document.getElementById("transportSelect")?.addEventListener("change", (e) => {
-    const isHttp = e.target.value === "http";
-    const httpGroup = document.getElementById("httpIpGroup");
-    if (httpGroup) httpGroup.style.display = isHttp ? "flex" : "none";
-    actualizarAdvertenciaMixedContent(isHttp);
+  // Sincronización y persistencia de método de transporte (Serial, BLE, HTTP)
+  const sincronizarMetodoTransporte = (tipo) => {
+    if (!tipo) return;
+    const selAsst = document.getElementById("transportSelect");
+    const selWb = document.getElementById("transportSelectWorkbench");
+    if (selAsst && selAsst.value !== tipo) selAsst.value = tipo;
+    if (selWb && selWb.value !== tipo) selWb.value = tipo;
+
+    const esHttp = tipo === "http";
+    const httpGroupAsst = document.getElementById("httpIpGroup");
+    const httpGroupWb = document.getElementById("httpIpGroupWorkbench");
+    if (httpGroupAsst) httpGroupAsst.style.display = esHttp ? "flex" : "none";
+    if (httpGroupWb) httpGroupWb.style.display = esHttp ? "flex" : "none";
+
+    actualizarAdvertenciaMixedContent(esHttp);
+
+    if (typeof window !== "undefined" && window.localStorage) {
+      localStorage.setItem("snm_last_transport", tipo);
+    }
+  };
+
+  const selAsst = document.getElementById("transportSelect");
+  const selWb = document.getElementById("transportSelectWorkbench");
+  const storedTransport = (typeof window !== "undefined" && window.localStorage)
+    ? (localStorage.getItem("snm_last_transport") || "")
+    : "";
+  // Priorizar el valor presente en el DOM si el navegador lo restauró al recargar, o el guardado en localStorage
+  const domTransport = (selWb && selWb.value) || (selAsst && selAsst.value);
+  const initialTransport = (domTransport && domTransport !== "serial")
+    ? domTransport
+    : (storedTransport || domTransport || "serial");
+
+  sincronizarMetodoTransporte(initialTransport);
+
+  selAsst?.addEventListener("change", (e) => {
+    sincronizarMetodoTransporte(e.target.value);
   });
 
-  document.getElementById("transportSelectWorkbench")?.addEventListener("change", (e) => {
-    const isHttp = e.target.value === "http";
-    const httpGroup = document.getElementById("httpIpGroupWorkbench");
-    if (httpGroup) httpGroup.style.display = isHttp ? "flex" : "none";
-    actualizarAdvertenciaMixedContent(isHttp);
+  selWb?.addEventListener("change", (e) => {
+    sincronizarMetodoTransporte(e.target.value);
   });
 
   document.getElementById("chkMqtt")?.addEventListener("change", actualizarConfiguracion);
