@@ -106,6 +106,7 @@ class GestionRoutersTest extends TestCase
             ->assertSee(__('admin.gestion_routers.tab_poll'))
             ->assertSee(__('admin.gestion_routers.tab_unicast'))
             ->assertSee(__('admin.gestion_routers.tab_maintenance'))
+            ->assertSee(__('admin.gestion_routers.tab_config'))
             ->assertSee('SEV1')
             ->assertSee('!aabbccdd');
     }
@@ -373,5 +374,55 @@ class GestionRoutersTest extends TestCase
         $this->assertSame('BASE', $router->blocked_nodes[0]['shortName']);
         $this->assertSame('ATLAS BASE 📡☀🔋', $router->blocked_nodes[0]['long_name']);
         $this->assertSame('ATLAS BASE 📡☀🔋', $router->blocked_nodes[0]['longName']);
+    }
+
+    /**
+     * Comprueba que updateRouterNodeConfig persiste la configuración del nodo en base de datos.
+     */
+    public function test_actualizar_configuracion_de_router_mediante_livewire(): void
+    {
+        $user = User::factory()->create();
+
+        $router = CoordinatedRouter::create([
+            'node_id' => '!5f3a3a29',
+            'short_name' => 'CA01',
+            'long_name' => 'EA7-CA-01',
+            'role' => 'ROUTER',
+            'province' => 'ES-CA',
+            'status' => CoordinatedRouter::STATUS_MANAGED,
+        ]);
+
+        $configData = [
+            'latitude' => 36.73451,
+            'longitude' => -6.43212,
+            'altitude' => 125,
+            'adc_multiplier_override' => 3.25,
+            'tx_power' => 27,
+            'node_info_broadcast_secs' => 10800,
+            'device_update_interval' => 1800,
+            'environment_update_interval' => 3600,
+            'environment_measurement_enabled' => true,
+            'long_name' => 'EA7-CA-01 Sierra',
+            'short_name' => 'CA01',
+        ];
+
+        Livewire::actingAs($user)
+            ->test(GestionRouters::class)
+            ->call('updateRouterNodeConfig', '!5f3a3a29', $configData)
+            ->assertSuccessful();
+
+        $router->refresh();
+        $this->assertNotNull($router->node_config);
+        $this->assertSame(36.73451, $router->node_config['latitude']);
+        $this->assertSame(-6.43212, $router->node_config['longitude']);
+        $this->assertSame(125, $router->node_config['altitude']);
+        $this->assertSame(3.25, $router->node_config['adc_multiplier_override']);
+        $this->assertSame(27, $router->node_config['tx_power']);
+        $this->assertSame(10800, $router->node_config['node_info_broadcast_secs']);
+        $this->assertSame(1800, $router->node_config['device_update_interval']);
+        $this->assertSame(3600, $router->node_config['environment_update_interval']);
+        $this->assertTrue($router->node_config['environment_measurement_enabled']);
+        $this->assertSame('EA7-CA-01 Sierra', $router->long_name);
+        $this->assertSame('CA01', $router->short_name);
     }
 }

@@ -26,8 +26,16 @@ import { TransportWebSerial } from "@meshtastic/transport-web-serial";
 import { TransportWebBluetooth } from "@meshtastic/transport-web-bluetooth";
 import { TransportHTTP } from "@meshtastic/transport-http";
 
-const { AdminMessageSchema } = Protobuf.Admin;
-const { ConfigSchema, Config_DeviceConfigSchema, Config_DeviceConfig_Role } = Protobuf.Config;
+const { AdminMessageSchema, AdminMessage_ConfigType, AdminMessage_ModuleConfigType } = Protobuf.Admin;
+const {
+    ConfigSchema,
+    Config_DeviceConfigSchema,
+    Config_DeviceConfig_Role,
+    Config_PowerConfigSchema,
+    Config_LoRaConfigSchema,
+    Config_PositionConfigSchema,
+} = Protobuf.Config;
+const { ModuleConfigSchema, ModuleConfig_TelemetryConfigSchema } = Protobuf.ModuleConfig;
 const { UserSchema, PositionSchema, RouteDiscoverySchema, RoutingSchema, Routing_Error, MeshPacketSchema, ToRadioSchema } = Protobuf.Mesh;
 const { TelemetrySchema } = Protobuf.Telemetry;
 const { PortNum } = Protobuf.Portnums;
@@ -202,6 +210,33 @@ export function meshAdminComponent() {
         rebootSeconds: 10,
         rebootSending: false,
 
+        // Datos del formulario de Configuración remota
+        configForm: {
+            long_name: '',
+            short_name: '',
+            latitude: '',
+            longitude: '',
+            altitude: '',
+            adc_multiplier_override: '',
+            tx_power: 30,
+            node_info_broadcast_secs: 10800,
+            device_update_interval: 1800,
+            environment_update_interval: 1800,
+            environment_measurement_enabled: false,
+            last_detected_at: null,
+        },
+        configSaving: {
+            owner: false,
+            position: false,
+            adc: false,
+            tx_power: false,
+            node_info: false,
+            device_metrics: false,
+            environment: false,
+            fetching: false,
+        },
+        routerConfigs: {},
+
         // Consola de actividad y paquetes
         logs: [],
         logFilter: 'all',                 // 'all' | 'tx' | 'rx' | 'ack' | 'error'
@@ -292,8 +327,27 @@ export function meshAdminComponent() {
                             this.routerFavorites[r.node_id] = mappedFavs;
                             this.routerBlocked[hexKey] = mappedBlocked;
                             this.routerBlocked[r.node_id] = mappedBlocked;
+
+                            if (r.node_config && typeof r.node_config === 'object') {
+                                this.routerConfigs[hexKey] = { ...r.node_config };
+                                this.routerConfigs[r.node_id] = this.routerConfigs[hexKey];
+                            }
                         }
                     }
+                }
+
+                // Cargar configuraciones cacheadas en localStorage
+                try {
+                    if (window.localStorage) {
+                        const storedConfigs = JSON.parse(localStorage.getItem('snm_router_configs') || '{}');
+                        for (const [k, v] of Object.entries(storedConfigs)) {
+                            const kLower = k.toLowerCase();
+                            this.routerConfigs[kLower] = { ...(this.routerConfigs[kLower] || {}), ...v };
+                            this.routerConfigs[k] = this.routerConfigs[kLower];
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Error cargando snm_router_configs de localStorage:', e);
                 }
 
                 // 2. Cargar catálogo completo de nodos para búsqueda
@@ -362,6 +416,7 @@ export function meshAdminComponent() {
                 // Silencioso si localStorage está restringido
             }
 
+            this.loadRouterConfig(this.getActiveRouterHex());
             this.log('info', 'Consola de Gestión Remota de Routers inicializada.');
         },
 
@@ -954,6 +1009,60 @@ export function meshAdminComponent() {
                             }
                         }
 
+                        // Decodificar y almacenar configuraciones detectadas en vivo
+                        if (variant === 'getOwnerResponse') {
+                            const u = adminMsg.payloadVariant.value;
+                            const partial = {};
+                            if (u.longName) partial.long_name = u.longName;
+                            if (u.shortName) partial.short_name = u.shortName;
+                            if (Object.keys(partial).length > 0) {
+                                this.updateRouterConfigItem(fromHex, partial);
+                                this.log('rx', `📋 Identidad detectada de ${fromHex}: "${u.longName}" (${u.shortName})`);
+                            }
+                        } else if (variant === 'getConfigResponse') {
+                            const cfg = adminMsg.payloadVariant.value;
+                            const cfgCase = cfg.payloadVariant?.case;
+                            if (cfgCase === 'power') {
+                                const pwr = cfg.payloadVariant.value;
+                                if (pwr.adcMultiplierOverride) {
+                                    this.updateRouterConfigItem(fromHex, { adc_multiplier_override: pwr.adcMultiplierOverride });
+                                    this.log('rx', `📋 PowerConfig detectado de ${fromHex}: ADC Multiplier = ${pwr.adcMultiplierOverride}`);
+                                }
+                            } else if (cfgCase === 'lora') {
+                                const lora = cfg.payloadVariant.value;
+                                if (lora.txPower !== undefined && lora.txPower > 0) {
+                                    this.updateRouterConfigItem(fromHex, { tx_power: lora.txPower });
+                                    this.log('rx', `📋 LoRaConfig detectado de ${fromHex}: Potencia TX = ${lora.txPower} dBm`);
+                                }
+                            } else if (cfgCase === 'device') {
+                                const dev = cfg.payloadVariant.value;
+                                if (dev.nodeInfoBroadcastSecs !== undefined && dev.nodeInfoBroadcastSecs > 0) {
+                                    this.updateRouterConfigItem(fromHex, { node_info_broadcast_secs: dev.nodeInfoBroadcastSecs });
+                                    this.log('rx', `📋 DeviceConfig detectado de ${fromHex}: NodeInfo Interval = ${dev.nodeInfoBroadcastSecs}s`);
+                                }
+                            }
+                        } else if (variant === 'getModuleConfigResponse') {
+                            const modCfg = adminMsg.payloadVariant.value;
+                            const modCase = modCfg.payloadVariant?.case;
+                            if (modCase === 'telemetry') {
+                                const telem = modCfg.payloadVariant.value;
+                                const partial = {};
+                                if (telem.deviceUpdateInterval !== undefined && telem.deviceUpdateInterval > 0) {
+                                    partial.device_update_interval = telem.deviceUpdateInterval;
+                                }
+                                if (telem.environmentUpdateInterval !== undefined && telem.environmentUpdateInterval > 0) {
+                                    partial.environment_update_interval = telem.environmentUpdateInterval;
+                                }
+                                if (telem.environmentMeasurementEnabled !== undefined) {
+                                    partial.environment_measurement_enabled = Boolean(telem.environmentMeasurementEnabled);
+                                }
+                                if (Object.keys(partial).length > 0) {
+                                    this.updateRouterConfigItem(fromHex, partial);
+                                    this.log('rx', `📋 Telemetría remota detectada de ${fromHex}: Device ${telem.deviceUpdateInterval || '-'}s | Env ${telem.environmentUpdateInterval || '-'}s (${telem.environmentMeasurementEnabled ? 'ON' : 'OFF'})`);
+                                }
+                            }
+                        }
+
                         this.log('rx', `Respuesta ADMIN de ${fromHex}: caso '${variant}' [ID: ${packet.id}]`);
                     } catch {
                         this.log('rx', `Paquete ADMIN recibido de ${fromHex} (${rawBytes.length} bytes)`);
@@ -977,6 +1086,14 @@ export function meshAdminComponent() {
                         };
                         const pkNotice = hasPk ? ' [PKI disponible]' : '';
                         this.log('rx', `NodeInfo de ${fromHex}: "${user.longName}" (${user.shortName}) [HW: ${user.hwModel}]${pkNotice}`);
+
+                        // Actualizar configuración en vivo si tiene nombres válidos
+                        if (user.longName || user.shortName) {
+                            this.updateRouterConfigItem(fromHex, {
+                                long_name: user.longName || '',
+                                short_name: user.shortName || '',
+                            });
+                        }
                     } catch {
                         this.log('rx', `NodeInfo recibido de ${fromHex}`);
                     }
@@ -990,6 +1107,19 @@ export function meshAdminComponent() {
                         const lat = (pos.latitudeI / 1e7).toFixed(5);
                         const lon = (pos.longitudeI / 1e7).toFixed(5);
                         this.log('rx', `Posición de ${fromHex}: Lat ${lat}, Lon ${lon} (Alt: ${pos.altitude || 0}m)`);
+
+                        if (pos.latitudeI && pos.longitudeI) {
+                            const numLat = Number((pos.latitudeI / 1e7).toFixed(7));
+                            const numLon = Number((pos.longitudeI / 1e7).toFixed(7));
+                            const alt = pos.altitude || 0;
+                            if (numLat !== 0 || numLon !== 0) {
+                                this.updateRouterConfigItem(fromHex, {
+                                    latitude: numLat,
+                                    longitude: numLon,
+                                    altitude: alt,
+                                });
+                            }
+                        }
                     } catch {
                         this.log('rx', `Posición recibida de ${fromHex}`);
                     }
@@ -1103,6 +1233,7 @@ export function meshAdminComponent() {
             this.unicastTargetInput = this.selectedRouterHex;
             this.log('info', `Router seleccionado: ${this.selectedRouterName || this.selectedRouterHex}`);
             this.checkRouterStatusInRadio();
+            this.loadRouterConfig(this.selectedRouterHex);
         },
 
         /**
@@ -1128,6 +1259,7 @@ export function meshAdminComponent() {
                 this.selectedRouterStatus = '';
                 this.unicastTargetInput = this.selectedRouterHex;
                 this.checkRouterStatusInRadio();
+                this.loadRouterConfig(this.selectedRouterHex);
             }
         },
 
@@ -2145,6 +2277,524 @@ export function meshAdminComponent() {
                 console.error('Error al reiniciar router:', err);
             } finally {
                 this.rebootSending = false;
+            }
+        },
+
+        /**
+         * Carga la configuración del router en el formulario reactivo de configuración.
+         *
+         * @param {string} routerHex
+         */
+        loadRouterConfig(routerHex) {
+            if (!routerHex) return;
+            const key = routerHex.toLowerCase();
+            const stored = this.routerConfigs[key] || this.routerConfigs[routerHex] || {};
+
+            const known = (this.portalKnownNodes || []).find((n) => (n.node_id || '').toLowerCase() === key);
+
+            this.configForm = {
+                long_name: stored.long_name !== undefined ? stored.long_name : (known?.long_name || this.selectedRouterName || ''),
+                short_name: stored.short_name !== undefined ? stored.short_name : (known?.short_name || ''),
+                latitude: stored.latitude !== undefined ? stored.latitude : (known?.latitude || ''),
+                longitude: stored.longitude !== undefined ? stored.longitude : (known?.longitude || ''),
+                altitude: stored.altitude !== undefined ? stored.altitude : (known?.altitude || ''),
+                adc_multiplier_override: stored.adc_multiplier_override !== undefined ? stored.adc_multiplier_override : '',
+                tx_power: stored.tx_power !== undefined ? stored.tx_power : 30,
+                node_info_broadcast_secs: stored.node_info_broadcast_secs !== undefined ? stored.node_info_broadcast_secs : 10800,
+                device_update_interval: stored.device_update_interval !== undefined ? stored.device_update_interval : 1800,
+                environment_update_interval: stored.environment_update_interval !== undefined ? stored.environment_update_interval : 1800,
+                environment_measurement_enabled: stored.environment_measurement_enabled !== undefined ? Boolean(stored.environment_measurement_enabled) : false,
+                last_detected_at: stored.last_detected_at || null,
+            };
+        },
+
+        /**
+         * Actualiza una o varias claves de configuración para un router y lo sincroniza reactivamente.
+         *
+         * @param {string} routerHex
+         * @param {Object} partialData
+         * @param {boolean} [persist=true]
+         */
+        updateRouterConfigItem(routerHex, partialData, persist = true) {
+            if (!routerHex) return;
+            const key = routerHex.toLowerCase();
+            const current = this.routerConfigs[key] || this.routerConfigs[routerHex] || {};
+            const updated = {
+                ...current,
+                ...partialData,
+                last_detected_at: new Date().toISOString(),
+            };
+            this.routerConfigs[key] = updated;
+            this.routerConfigs[routerHex] = updated;
+
+            const activeHex = this.getActiveRouterHex();
+            if (activeHex && activeHex.toLowerCase() === key) {
+                Object.assign(this.configForm, updated);
+            }
+
+            try {
+                if (typeof window !== 'undefined' && window.localStorage) {
+                    localStorage.setItem('snm_router_configs', JSON.stringify(this.routerConfigs));
+                }
+            } catch (e) {
+                console.warn('Error guardando snm_router_configs:', e);
+            }
+
+            if (persist && window.Livewire && this.$wire && typeof this.$wire.updateRouterNodeConfig === 'function') {
+                try {
+                    this.$wire.updateRouterNodeConfig(routerHex, updated);
+                } catch (lwErr) {
+                    console.warn('Error sincronizando config en Livewire:', lwErr);
+                }
+            }
+        },
+
+        /**
+         * Solicita por radio LoRa la configuración actual del router remoto.
+         */
+        async fetchRemoteNodeConfig() {
+            if (this.connectionStatus !== 'connected' || !this._device) {
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
+                return;
+            }
+
+            this.configSaving.fetching = true;
+            let targetHex = '';
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                targetHex = numToHex(targetNum);
+                this.log('tx', `🔍 Consultando configuración remota de ${targetHex}...`);
+
+                // 1. Owner
+                const msgOwner = create(AdminMessageSchema, {
+                    payloadVariant: { case: 'getOwnerRequest', value: true },
+                });
+                await this.sendAdminMessageToTarget(targetNum, msgOwner, 'Consultar Identidad (Owner)');
+
+                // 2. Power
+                const msgPower = create(AdminMessageSchema, {
+                    payloadVariant: { case: 'getConfigRequest', value: AdminMessage_ConfigType.POWER_CONFIG },
+                });
+                await this.sendAdminMessageToTarget(targetNum, msgPower, 'Consultar Config Power');
+
+                // 3. LoRa
+                const msgLora = create(AdminMessageSchema, {
+                    payloadVariant: { case: 'getConfigRequest', value: AdminMessage_ConfigType.LORA_CONFIG },
+                });
+                await this.sendAdminMessageToTarget(targetNum, msgLora, 'Consultar Config LoRa');
+
+                // 4. Device
+                const msgDev = create(AdminMessageSchema, {
+                    payloadVariant: { case: 'getConfigRequest', value: AdminMessage_ConfigType.DEVICE_CONFIG },
+                });
+                await this.sendAdminMessageToTarget(targetNum, msgDev, 'Consultar Config Device');
+
+                // 5. Telemetría
+                const msgTelem = create(AdminMessageSchema, {
+                    payloadVariant: { case: 'getModuleConfigRequest', value: AdminMessage_ModuleConfigType.TELEMETRY_CONFIG },
+                });
+                await this.sendAdminMessageToTarget(targetNum, msgTelem, 'Consultar Config Telemetría');
+
+                this.setNotification('success', `Consultas enviadas a ${targetHex}. Las respuestas actualizarán los valores automáticamente.`);
+            } catch (err) {
+                const errMsg = formatMeshtasticError(err, targetHex);
+                this.setNotification('error', `Error consultando configuración: ${errMsg}`);
+                this.log('error', `❌ Error consultando configuración de ${targetHex}: ${errMsg}`);
+            } finally {
+                this.configSaving.fetching = false;
+            }
+        },
+
+        /**
+         * Guarda de forma independiente la posición geográfica fija del router.
+         */
+        async saveRouterPosition() {
+            if (this.connectionStatus !== 'connected' || !this._device) {
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
+                return;
+            }
+
+            this.configSaving.position = true;
+            let targetHex = '';
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                targetHex = numToHex(targetNum);
+
+                const lat = parseFloat(this.configForm.latitude);
+                const lon = parseFloat(this.configForm.longitude);
+                const alt = parseInt(this.configForm.altitude, 10) || 0;
+
+                if (isNaN(lat) || lat < -90 || lat > 90) {
+                    throw new Error('Latitud no válida (debe estar entre -90 y 90 grados).');
+                }
+                if (isNaN(lon) || lon < -180 || lon > 180) {
+                    throw new Error('Longitud no válida (debe estar entre -180 y 180 grados).');
+                }
+
+                const pos = create(PositionSchema, {
+                    latitudeI: Math.round(lat * 1e7),
+                    longitudeI: Math.round(lon * 1e7),
+                    altitude: alt,
+                });
+
+                const adminMsg = create(AdminMessageSchema, {
+                    payloadVariant: {
+                        case: 'setFixedPosition',
+                        value: pos,
+                    },
+                });
+
+                const label = `Posición Fija (${lat.toFixed(5)}, ${lon.toFixed(5)}, ${alt}m)`;
+                await this.sendAdminMessageToTarget(targetNum, adminMsg, label);
+
+                this.updateRouterConfigItem(targetHex, {
+                    latitude: lat,
+                    longitude: lon,
+                    altitude: alt,
+                });
+
+                this.setNotification('success', `Posición fija guardada con éxito en ${targetHex}.`);
+            } catch (err) {
+                const errMsg = formatMeshtasticError(err, targetHex);
+                this.setNotification('error', `Error guardando posición: ${errMsg}`);
+                this.log('error', `❌ Error guardando posición en ${targetHex}: ${errMsg}`);
+            } finally {
+                this.configSaving.position = false;
+            }
+        },
+
+        /**
+         * Guarda de forma independiente el multiplicador ADC para la batería.
+         */
+        async saveRouterAdcMultiplier() {
+            if (this.connectionStatus !== 'connected' || !this._device) {
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
+                return;
+            }
+
+            this.configSaving.adc = true;
+            let targetHex = '';
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                targetHex = numToHex(targetNum);
+
+                const mult = parseFloat(this.configForm.adc_multiplier_override);
+                if (isNaN(mult) || mult < 0 || mult > 100) {
+                    throw new Error('El multiplicador ADC debe ser un valor decimal válido entre 0 y 100 (ej. 3.20 ó 5.15).');
+                }
+
+                const powerCfg = create(Config_PowerConfigSchema, {
+                    adcMultiplierOverride: mult,
+                });
+
+                const adminMsg = create(AdminMessageSchema, {
+                    payloadVariant: {
+                        case: 'setConfig',
+                        value: create(ConfigSchema, {
+                            payloadVariant: {
+                                case: 'power',
+                                value: powerCfg,
+                            },
+                        }),
+                    },
+                });
+
+                const label = `Multiplicador ADC (${mult})`;
+                await this.sendAdminMessageToTarget(targetNum, adminMsg, label);
+
+                this.updateRouterConfigItem(targetHex, {
+                    adc_multiplier_override: mult,
+                });
+
+                this.setNotification('success', `Multiplicador ADC guardado con éxito en ${targetHex}.`);
+            } catch (err) {
+                const errMsg = formatMeshtasticError(err, targetHex);
+                this.setNotification('error', `Error guardando multiplicador ADC: ${errMsg}`);
+                this.log('error', `❌ Error guardando ADC en ${targetHex}: ${errMsg}`);
+            } finally {
+                this.configSaving.adc = false;
+            }
+        },
+
+        /**
+         * Guarda de forma independiente el nombre largo y nombre corto del router.
+         */
+        async saveRouterOwner() {
+            if (this.connectionStatus !== 'connected' || !this._device) {
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
+                return;
+            }
+
+            this.configSaving.owner = true;
+            let targetHex = '';
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                targetHex = numToHex(targetNum);
+
+                const lName = (this.configForm.long_name || '').trim();
+                let sName = (this.configForm.short_name || '').trim();
+
+                if (!lName) {
+                    throw new Error('El nombre largo no puede estar en blanco.');
+                }
+                if (!sName) {
+                    throw new Error('El nombre corto no puede estar en blanco.');
+                }
+                if (sName.length > 4) {
+                    sName = sName.substring(0, 4);
+                    this.configForm.short_name = sName;
+                }
+
+                const user = create(UserSchema, {
+                    longName: lName,
+                    shortName: sName,
+                    isLicensed: false,
+                });
+
+                const adminMsg = create(AdminMessageSchema, {
+                    payloadVariant: {
+                        case: 'setOwner',
+                        value: user,
+                    },
+                });
+
+                const label = `Identidad (${lName} / ${sName})`;
+                await this.sendAdminMessageToTarget(targetNum, adminMsg, label);
+
+                this.updateRouterConfigItem(targetHex, {
+                    long_name: lName,
+                    short_name: sName,
+                });
+
+                if (this.selectedRouterHex && this.selectedRouterHex.toLowerCase() === targetHex.toLowerCase()) {
+                    this.selectedRouterName = lName;
+                }
+
+                this.setNotification('success', `Identidad guardada con éxito en ${targetHex}.`);
+            } catch (err) {
+                const errMsg = formatMeshtasticError(err, targetHex);
+                this.setNotification('error', `Error guardando identidad: ${errMsg}`);
+                this.log('error', `❌ Error guardando identidad en ${targetHex}: ${errMsg}`);
+            } finally {
+                this.configSaving.owner = false;
+            }
+        },
+
+        /**
+         * Guarda de forma independiente la potencia de transmisión LoRa (TX power).
+         */
+        async saveRouterTxPower() {
+            if (this.connectionStatus !== 'connected' || !this._device) {
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
+                return;
+            }
+
+            this.configSaving.tx_power = true;
+            let targetHex = '';
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                targetHex = numToHex(targetNum);
+
+                const pwr = parseInt(this.configForm.tx_power, 10);
+                if (isNaN(pwr) || pwr < 1 || pwr > 30) {
+                    throw new Error('La potencia TX debe ser un número entero entre 1 y 30 dBm.');
+                }
+
+                const loraCfg = create(Config_LoRaConfigSchema, {
+                    txPower: pwr,
+                });
+
+                const adminMsg = create(AdminMessageSchema, {
+                    payloadVariant: {
+                        case: 'setConfig',
+                        value: create(ConfigSchema, {
+                            payloadVariant: {
+                                case: 'lora',
+                                value: loraCfg,
+                            },
+                        }),
+                    },
+                });
+
+                const label = `Potencia TX (${pwr} dBm)`;
+                await this.sendAdminMessageToTarget(targetNum, adminMsg, label);
+
+                this.updateRouterConfigItem(targetHex, {
+                    tx_power: pwr,
+                });
+
+                this.setNotification('success', `Potencia TX guardada con éxito en ${targetHex}.`);
+            } catch (err) {
+                const errMsg = formatMeshtasticError(err, targetHex);
+                this.setNotification('error', `Error guardando potencia TX: ${errMsg}`);
+                this.log('error', `❌ Error guardando potencia TX en ${targetHex}: ${errMsg}`);
+            } finally {
+                this.configSaving.tx_power = false;
+            }
+        },
+
+        /**
+         * Guarda de forma independiente el intervalo de difusión de NodeInfo.
+         */
+        async saveRouterNodeInfoInterval() {
+            if (this.connectionStatus !== 'connected' || !this._device) {
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
+                return;
+            }
+
+            this.configSaving.node_info = true;
+            let targetHex = '';
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                targetHex = numToHex(targetNum);
+
+                const secs = parseInt(this.configForm.node_info_broadcast_secs, 10);
+                if (isNaN(secs) || secs < 60 || secs > 86400) {
+                    throw new Error('El intervalo de NodeInfo debe estar entre 60 y 86400 segundos.');
+                }
+
+                const devCfg = create(Config_DeviceConfigSchema, {
+                    nodeInfoBroadcastSecs: secs,
+                });
+
+                const adminMsg = create(AdminMessageSchema, {
+                    payloadVariant: {
+                        case: 'setConfig',
+                        value: create(ConfigSchema, {
+                            payloadVariant: {
+                                case: 'device',
+                                value: devCfg,
+                            },
+                        }),
+                    },
+                });
+
+                const label = `Intervalo NodeInfo (${secs}s)`;
+                await this.sendAdminMessageToTarget(targetNum, adminMsg, label);
+
+                this.updateRouterConfigItem(targetHex, {
+                    node_info_broadcast_secs: secs,
+                });
+
+                this.setNotification('success', `Intervalo de NodeInfo guardado con éxito en ${targetHex}.`);
+            } catch (err) {
+                const errMsg = formatMeshtasticError(err, targetHex);
+                this.setNotification('error', `Error guardando intervalo de NodeInfo: ${errMsg}`);
+                this.log('error', `❌ Error guardando NodeInfo en ${targetHex}: ${errMsg}`);
+            } finally {
+                this.configSaving.node_info = false;
+            }
+        },
+
+        /**
+         * Guarda de forma independiente el intervalo de métricas del dispositivo (batería/telemetría).
+         */
+        async saveRouterDeviceMetricsInterval() {
+            if (this.connectionStatus !== 'connected' || !this._device) {
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
+                return;
+            }
+
+            this.configSaving.device_metrics = true;
+            let targetHex = '';
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                targetHex = numToHex(targetNum);
+
+                const secs = parseInt(this.configForm.device_update_interval, 10);
+                if (isNaN(secs) || secs < 60 || secs > 86400) {
+                    throw new Error('El intervalo de métricas debe estar entre 60 y 86400 segundos.');
+                }
+
+                const telemCfg = create(ModuleConfig_TelemetryConfigSchema, {
+                    deviceUpdateInterval: secs,
+                    environmentUpdateInterval: parseInt(this.configForm.environment_update_interval, 10) || 1800,
+                    environmentMeasurementEnabled: Boolean(this.configForm.environment_measurement_enabled),
+                });
+
+                const adminMsg = create(AdminMessageSchema, {
+                    payloadVariant: {
+                        case: 'setModuleConfig',
+                        value: create(ModuleConfigSchema, {
+                            payloadVariant: {
+                                case: 'telemetry',
+                                value: telemCfg,
+                            },
+                        }),
+                    },
+                });
+
+                const label = `Métricas Dispositivo (${secs}s)`;
+                await this.sendAdminMessageToTarget(targetNum, adminMsg, label);
+
+                this.updateRouterConfigItem(targetHex, {
+                    device_update_interval: secs,
+                });
+
+                this.setNotification('success', `Intervalo de métricas guardado con éxito en ${targetHex}.`);
+            } catch (err) {
+                const errMsg = formatMeshtasticError(err, targetHex);
+                this.setNotification('error', `Error guardando intervalo de métricas: ${errMsg}`);
+                this.log('error', `❌ Error guardando métricas en ${targetHex}: ${errMsg}`);
+            } finally {
+                this.configSaving.device_metrics = false;
+            }
+        },
+
+        /**
+         * Guarda de forma independiente las mediciones ambientales (sensores de entorno e intervalo).
+         */
+        async saveRouterEnvironment() {
+            if (this.connectionStatus !== 'connected' || !this._device) {
+                this.setNotification('warning', 'Debes conectar primero tu nodo Meshtastic local.');
+                return;
+            }
+
+            this.configSaving.environment = true;
+            let targetHex = '';
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                targetHex = numToHex(targetNum);
+
+                const secs = parseInt(this.configForm.environment_update_interval, 10);
+                if (isNaN(secs) || secs < 60 || secs > 86400) {
+                    throw new Error('El intervalo de mediciones ambientales debe estar entre 60 y 86400 segundos.');
+                }
+                const enabled = Boolean(this.configForm.environment_measurement_enabled);
+
+                const telemCfg = create(ModuleConfig_TelemetryConfigSchema, {
+                    deviceUpdateInterval: parseInt(this.configForm.device_update_interval, 10) || 1800,
+                    environmentUpdateInterval: secs,
+                    environmentMeasurementEnabled: enabled,
+                });
+
+                const adminMsg = create(AdminMessageSchema, {
+                    payloadVariant: {
+                        case: 'setModuleConfig',
+                        value: create(ModuleConfigSchema, {
+                            payloadVariant: {
+                                case: 'telemetry',
+                                value: telemCfg,
+                            },
+                        }),
+                    },
+                });
+
+                const label = `Medición Ambiental (${enabled ? 'Activa' : 'Inactiva'}, ${secs}s)`;
+                await this.sendAdminMessageToTarget(targetNum, adminMsg, label);
+
+                this.updateRouterConfigItem(targetHex, {
+                    environment_update_interval: secs,
+                    environment_measurement_enabled: enabled,
+                });
+
+                this.setNotification('success', `Mediciones ambientales guardadas con éxito en ${targetHex}.`);
+            } catch (err) {
+                const errMsg = formatMeshtasticError(err, targetHex);
+                this.setNotification('error', `Error guardando mediciones ambientales: ${errMsg}`);
+                this.log('error', `❌ Error guardando ambiente en ${targetHex}: ${errMsg}`);
+            } finally {
+                this.configSaving.environment = false;
             }
         },
 

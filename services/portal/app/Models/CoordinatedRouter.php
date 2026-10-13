@@ -84,6 +84,7 @@ class CoordinatedRouter extends Model
         'hw_model',
         'favorite_nodes',
         'blocked_nodes',
+        'node_config',
         'notes',
         'last_seen_at',
     ];
@@ -101,6 +102,7 @@ class CoordinatedRouter extends Model
             'is_gateway' => 'boolean',
             'favorite_nodes' => 'array',
             'blocked_nodes' => 'array',
+            'node_config' => 'array',
             'last_seen_at' => 'datetime',
         ];
     }

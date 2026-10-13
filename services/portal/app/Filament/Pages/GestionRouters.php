@@ -142,6 +142,7 @@ class GestionRouters extends Page
                 'status' => $r->status,
                 'favorite_nodes' => $normalizedFavs,
                 'blocked_nodes' => $normalizedBlocked,
+                'node_config' => $r->node_config ?? [],
             ];
         })->values()->all();
 
@@ -447,5 +448,48 @@ class GestionRouters extends Page
     public function clearRouterBlockedNodes(string $routerId): void
     {
         $this->clearRouterBlocked($routerId);
+    }
+
+    /**
+     * Persiste la configuración detectada o enviada para el router indicado.
+     *
+     * @param  array<string, mixed>  $configData
+     */
+    public function updateRouterNodeConfig(string $routerId, array $configData): void
+    {
+        $router = CoordinatedRouter::where('node_id', $routerId)
+            ->orWhereRaw('LOWER(node_id) = ?', [strtolower($routerId)])
+            ->first();
+        if (! $router) {
+            $cleanHex = ltrim($routerId, '!');
+            $router = CoordinatedRouter::create([
+                'node_id' => $routerId,
+                'short_name' => substr($cleanHex, -4),
+                'long_name' => 'Router '.$cleanHex,
+                'province' => 'ES-CA',
+                'role' => 'ROUTER',
+                'status' => 'known',
+            ]);
+        }
+
+        $current = $router->node_config ?? [];
+        $cleanConfig = [];
+        foreach ($configData as $k => $v) {
+            if ($v !== null && $v !== '') {
+                $cleanConfig[$k] = $v;
+            }
+        }
+        $updated = array_merge($current, $cleanConfig);
+        $updated['updated_at'] = now()->toIso8601String();
+
+        if (! empty($configData['short_name'])) {
+            $router->short_name = (string) $configData['short_name'];
+        }
+        if (! empty($configData['long_name'])) {
+            $router->long_name = (string) $configData['long_name'];
+        }
+
+        $router->node_config = $updated;
+        $router->save();
     }
 }

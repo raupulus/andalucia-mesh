@@ -1389,6 +1389,11 @@
                     <span>⚙️</span>
                     <span>{{ __('admin.gestion_routers.tab_maintenance') }}</span>
                 </button>
+
+                <button type="button" @click="activeTab = 'configuracion'" :class="activeTab === 'configuracion' ? 'active' : ''" class="fi-ra-tab-button">
+                    <span>🛠️</span>
+                    <span>{{ __('admin.gestion_routers.tab_config') }}</span>
+                </button>
             </div>
 
             {{-- Contenido de las pestañas --}}
@@ -2073,6 +2078,301 @@
                         <div x-show="connectionStatus === 'connected' && !selectedRouterNodeNum && !manualNodeInput" class="text-xs flex items-center gap-1.5 text-amber-800 dark:text-amber-300 font-medium">
                             <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
                         </div>
+                    </div>
+                </div>
+
+                {{-- PESTAÑA 7: CONFIGURACIÓN REMOTA --}}
+                <div x-show="activeTab === 'configuracion'" class="space-y-6">
+                    <div class="flex items-start justify-between flex-wrap gap-4">
+                        <div>
+                            <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <span>🛠️</span> {{ __('admin.gestion_routers.config_title') }}
+                            </h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed max-w-3xl">
+                                {{ __('admin.gestion_routers.config_desc') }}
+                            </p>
+                        </div>
+
+                        {{-- Barra de acción superior: Consultar configuración e indicador de estado --}}
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <template x-if="configForm.last_detected_at">
+                                <div class="text-xs font-mono text-gray-500 dark:text-gray-400 flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
+                                    <span>🕒</span>
+                                    <span>{{ __('admin.gestion_routers.config_last_sync') }}</span>
+                                    <strong class="text-gray-800 dark:text-gray-200" x-text="new Date(configForm.last_detected_at).toLocaleTimeString()"></strong>
+                                </div>
+                            </template>
+
+                            <button type="button" @click="fetchRemoteNodeConfig()" :disabled="configSaving.fetching || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm" title="{{ __('admin.gestion_routers.btn_fetch_config_desc') }}">
+                                <span x-show="!configSaving.fetching">🔍 {{ __('admin.gestion_routers.btn_fetch_config') }}</span>
+                                <span x-show="configSaving.fetching">⏳ {{ __('admin.gestion_routers.fetching_config') }}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Banner si no hay conexión o no hay router seleccionado --}}
+                    <div x-show="connectionStatus !== 'connected'" class="p-3.5 rounded-xl border border-amber-500/30 bg-amber-50/80 dark:bg-amber-950/40 text-xs flex items-center gap-2 text-amber-800 dark:text-amber-300 font-medium">
+                        <span>⚠️</span> <span>{{ __('admin.gestion_routers.connect_prompt_hint') }}</span>
+                    </div>
+                    <div x-show="connectionStatus === 'connected' && !getActiveRouterHex()" class="p-3.5 rounded-xl border border-amber-500/30 bg-amber-50/80 dark:bg-amber-950/40 text-xs flex items-center gap-2 text-amber-800 dark:text-amber-300 font-medium">
+                        <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
+                    </div>
+
+                    {{-- Grid de 7 configuraciones independientes --}}
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                        {{-- 1. Posición Fija (Coordenadas) --}}
+                        <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 flex flex-col justify-between gap-4 shadow-sm hover:border-emerald-500/50 transition-all">
+                            <div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                        <span>📍</span> {{ __('admin.gestion_routers.config_position_title') }}
+                                    </h4>
+                                    <span class="text-xs text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded">GPS / Fijo</span>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                    {{ __('admin.gestion_routers.config_position_desc') }}
+                                </p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+                                    <div class="fi-ra-form-group">
+                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_lat_label') }}</label>
+                                        <input type="number" step="0.0000001" min="-90" max="90" x-model="configForm.latitude" placeholder="36.7345" class="fi-ra-input font-mono text-xs" />
+                                    </div>
+                                    <div class="fi-ra-form-group">
+                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_lon_label') }}</label>
+                                        <input type="number" step="0.0000001" min="-180" max="180" x-model="configForm.longitude" placeholder="-6.4321" class="fi-ra-input font-mono text-xs" />
+                                    </div>
+                                    <div class="fi-ra-form-group">
+                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_alt_label') }}</label>
+                                        <input type="number" step="1" x-model="configForm.altitude" placeholder="120" class="fi-ra-input font-mono text-xs" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex justify-end">
+                                <button type="button" @click="saveRouterPosition()" :disabled="configSaving.position || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm">
+                                    <span x-show="!configSaving.position">💾 {{ __('admin.gestion_routers.btn_save_position') }}</span>
+                                    <span x-show="configSaving.position">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- 2. Multiplicador ADC para la Batería --}}
+                        <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 flex flex-col justify-between gap-4 shadow-sm hover:border-emerald-500/50 transition-all">
+                            <div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                        <span>🔋</span> {{ __('admin.gestion_routers.config_adc_title') }}
+                                    </h4>
+                                    <span class="text-xs text-amber-700 dark:text-amber-400 font-semibold bg-amber-500/10 px-2 py-0.5 rounded">PowerConfig</span>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                    {{ __('admin.gestion_routers.config_adc_desc') }}
+                                </p>
+
+                                <div class="mt-4">
+                                    <div class="fi-ra-form-group">
+                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_adc_label') }}</label>
+                                        <input type="number" step="0.01" min="0" max="100" x-model="configForm.adc_multiplier_override" placeholder="Ej: 3.20 ó 5.15" class="fi-ra-input font-mono text-xs" />
+                                    </div>
+                                    <div class="text-[0.7rem] text-gray-400 mt-1">
+                                        Calibra el voltaje reportado en telemetría ante divisores resistivos no estándar de placas solares o baterías LiFePO4 / 18650.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex justify-end">
+                                <button type="button" @click="saveRouterAdcMultiplier()" :disabled="configSaving.adc || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm">
+                                    <span x-show="!configSaving.adc">💾 {{ __('admin.gestion_routers.btn_save_adc') }}</span>
+                                    <span x-show="configSaving.adc">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- 3. Identidad (Nombre Largo y Nombre Corto) --}}
+                        <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 flex flex-col justify-between gap-4 shadow-sm hover:border-emerald-500/50 transition-all">
+                            <div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                        <span>🏷️</span> {{ __('admin.gestion_routers.config_owner_title') }}
+                                    </h4>
+                                    <span class="text-xs text-blue-700 dark:text-blue-400 font-semibold bg-blue-500/10 px-2 py-0.5 rounded">User / Owner</span>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                    {{ __('admin.gestion_routers.config_owner_desc') }}
+                                </p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+                                    <div class="fi-ra-form-group sm:col-span-2">
+                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_long_name_label') }}</label>
+                                        <input type="text" maxlength="32" x-model="configForm.long_name" placeholder="Ej: Router Sierra CA01" class="fi-ra-input text-xs" />
+                                    </div>
+                                    <div class="fi-ra-form-group">
+                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_short_name_label') }}</label>
+                                        <input type="text" maxlength="4" x-model="configForm.short_name" placeholder="CA01" class="fi-ra-input font-mono uppercase text-xs text-center" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex justify-end">
+                                <button type="button" @click="saveRouterOwner()" :disabled="configSaving.owner || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm">
+                                    <span x-show="!configSaving.owner">💾 {{ __('admin.gestion_routers.btn_save_owner') }}</span>
+                                    <span x-show="configSaving.owner">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- 4. Transmit Power TX (LoRa) --}}
+                        <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 flex flex-col justify-between gap-4 shadow-sm hover:border-emerald-500/50 transition-all">
+                            <div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                        <span>📡</span> {{ __('admin.gestion_routers.config_tx_title') }}
+                                    </h4>
+                                    <span class="text-xs text-purple-700 dark:text-purple-400 font-semibold bg-purple-500/10 px-2 py-0.5 rounded">LoRaConfig</span>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                    {{ __('admin.gestion_routers.config_tx_desc') }}
+                                </p>
+
+                                <div class="mt-4">
+                                    <div class="fi-ra-form-group">
+                                        <div class="flex items-center justify-between">
+                                            <label class="fi-ra-label">{{ __('admin.gestion_routers.config_tx_label') }}</label>
+                                            <span class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400" x-text="`${configForm.tx_power || 30} dBm`"></span>
+                                        </div>
+                                        <input type="range" min="1" max="30" step="1" x-model="configForm.tx_power" class="w-full accent-emerald-600 cursor-pointer" />
+                                        <div class="flex justify-between text-[0.7rem] text-gray-400">
+                                            <span>1 dBm (Mín)</span>
+                                            <span>20 dBm (SX1262 STD)</span>
+                                            <span>30 dBm (PA 1W Máx)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex justify-end">
+                                <button type="button" @click="saveRouterTxPower()" :disabled="configSaving.tx_power || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm">
+                                    <span x-show="!configSaving.tx_power">💾 {{ __('admin.gestion_routers.btn_save_tx') }}</span>
+                                    <span x-show="configSaving.tx_power">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- 5. NodeInfo Broadcast Interval --}}
+                        <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 flex flex-col justify-between gap-4 shadow-sm hover:border-emerald-500/50 transition-all">
+                            <div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                        <span>⏱️</span> {{ __('admin.gestion_routers.config_node_info_title') }}
+                                    </h4>
+                                    <span class="text-xs text-indigo-700 dark:text-indigo-400 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded">DeviceConfig</span>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                    {{ __('admin.gestion_routers.config_node_info_desc') }}
+                                </p>
+
+                                <div class="mt-4">
+                                    <div class="fi-ra-form-group">
+                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_node_info_label') }}</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="number" min="60" max="86400" step="60" x-model="configForm.node_info_broadcast_secs" placeholder="10800" class="fi-ra-input font-mono text-xs" />
+                                            <span class="text-xs text-gray-400 font-mono" x-text="`(${(configForm.node_info_broadcast_secs / 3600).toFixed(1)} h)`"></span>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-1.5 mt-2 flex-wrap">
+                                        <button type="button" @click="configForm.node_info_broadcast_secs = 3600" class="text-[0.7rem] px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40">1h (3600s)</button>
+                                        <button type="button" @click="configForm.node_info_broadcast_secs = 10800" class="text-[0.7rem] px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 font-bold">3h (10800s - Rec.)</button>
+                                        <button type="button" @click="configForm.node_info_broadcast_secs = 21600" class="text-[0.7rem] px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40">6h (21600s)</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex justify-end">
+                                <button type="button" @click="saveRouterNodeInfoInterval()" :disabled="configSaving.node_info || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm">
+                                    <span x-show="!configSaving.node_info">💾 {{ __('admin.gestion_routers.btn_save_node_info') }}</span>
+                                    <span x-show="configSaving.node_info">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- 6. Device Metrics Interval --}}
+                        <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 flex flex-col justify-between gap-4 shadow-sm hover:border-emerald-500/50 transition-all">
+                            <div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                        <span>📊</span> {{ __('admin.gestion_routers.config_device_metrics_title') }}
+                                    </h4>
+                                    <span class="text-xs text-teal-700 dark:text-teal-400 font-semibold bg-teal-500/10 px-2 py-0.5 rounded">TelemetryModule</span>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                    {{ __('admin.gestion_routers.config_device_metrics_desc') }}
+                                </p>
+
+                                <div class="mt-4">
+                                    <div class="fi-ra-form-group">
+                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_device_metrics_label') }}</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="number" min="60" max="86400" step="60" x-model="configForm.device_update_interval" placeholder="1800" class="fi-ra-input font-mono text-xs" />
+                                            <span class="text-xs text-gray-400 font-mono" x-text="`(${Math.round(configForm.device_update_interval / 60)} min)`"></span>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-1.5 mt-2 flex-wrap">
+                                        <button type="button" @click="configForm.device_update_interval = 900" class="text-[0.7rem] px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40">15m (900s)</button>
+                                        <button type="button" @click="configForm.device_update_interval = 1800" class="text-[0.7rem] px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 font-bold">30m (1800s - Rec.)</button>
+                                        <button type="button" @click="configForm.device_update_interval = 3600" class="text-[0.7rem] px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40">1h (3600s)</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex justify-end">
+                                <button type="button" @click="saveRouterDeviceMetricsInterval()" :disabled="configSaving.device_metrics || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm">
+                                    <span x-show="!configSaving.device_metrics">💾 {{ __('admin.gestion_routers.btn_save_device_metrics') }}</span>
+                                    <span x-show="configSaving.device_metrics">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- 7. Mediciones Ambientales (Environment Measurements) --}}
+                        <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 flex flex-col justify-between gap-4 shadow-sm hover:border-emerald-500/50 transition-all lg:col-span-2">
+                            <div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                        <span>🌡️</span> {{ __('admin.gestion_routers.config_env_title') }}
+                                    </h4>
+                                    <span class="text-xs text-rose-700 dark:text-rose-400 font-semibold bg-rose-500/10 px-2 py-0.5 rounded">Environment Sensors</span>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                    {{ __('admin.gestion_routers.config_env_desc') }}
+                                </p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 items-center">
+                                    <div class="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700">
+                                        <input type="checkbox" id="envEnabled" x-model="configForm.environment_measurement_enabled" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 accent-emerald-600 cursor-pointer" />
+                                        <label for="envEnabled" class="text-xs font-semibold text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+                                            {{ __('admin.gestion_routers.config_env_enabled_label') }}
+                                        </label>
+                                    </div>
+
+                                    <div class="fi-ra-form-group">
+                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_env_interval_label') }}</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="number" min="60" max="86400" step="60" x-model="configForm.environment_update_interval" placeholder="1800" class="fi-ra-input font-mono text-xs" />
+                                            <span class="text-xs text-gray-400 font-mono" x-text="`(${Math.round(configForm.environment_update_interval / 60)} min)`"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex justify-end">
+                                <button type="button" @click="saveRouterEnvironment()" :disabled="configSaving.environment || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm">
+                                    <span x-show="!configSaving.environment">💾 {{ __('admin.gestion_routers.btn_save_env') }}</span>
+                                    <span x-show="configSaving.environment">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
