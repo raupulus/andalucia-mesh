@@ -417,9 +417,12 @@ class PanelOperadorTest extends TestCase
         $this->assertContains('!b3c4d5e6', $idsAmbos); // AB01
         $this->assertContains('!a2b3c4d5', $idsAmbos); // EXT1
 
-        // 4. Widget Routers reacciona al evento ámbito-cambiado
+        // 4. Widget Routers reacciona al evento ámbito-cambiado y renderiza el componente tabla unificado
         Livewire::test(RoutersInfraestructuraWidget::class)
             ->assertSet('ambito', 'andalucia')
+            ->assertSee('routers-dashboard-table')
+            ->assertSee('routers-prov-pill')
+            ->assertSee('routers-group-header-row')
             ->assertSee('SE01')
             ->assertDontSee('AB01')
             ->assertDontSee('EXT1')

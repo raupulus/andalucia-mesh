@@ -236,30 +236,33 @@ class RoutersController extends Controller
         protected Resumen $resumen,
     ) {}
 
-    public function index(Request $request): View
-    {
-        // 1. Resolver ámbito territorial (por defecto Andalucía)
-        $ambito = (string) $request->query('ambito', 'andalucia');
+    /**
+     * Prepara la colección de routers y su agrupación provincial para la tabla de supervisión.
+     * Compartido entre el controlador público y el widget del cuadro de mandos de administración.
+     *
+     * @return array{
+     *     routers: array<int, array<string, mixed>>,
+     *     routersPorProvincia: array<string, array<string, mixed>>,
+     *     total: int,
+     *     enAlerta: int,
+     *     errorFuente: ?string,
+     *     ambito: string,
+     * }
+     */
+    public static function prepararDatosSupervision(
+        string $ambito = 'andalucia',
+        string $sort = 'battery_asc',
+        ?Routers $routersService = null,
+    ): array {
         if (! in_array($ambito, ['andalucia', 'espana', 'ambos'], true)) {
             $ambito = 'andalucia';
         }
 
-        // 2. Resolver ordenación (por defecto menor batería primero)
-        $sort = (string) $request->query('sort', 'battery_asc');
         if (! in_array($sort, ['battery_asc', 'last_seen_desc', 'chutil_desc'], true)) {
             $sort = 'battery_asc';
         }
 
-        // 3. Recuentos para el selector de ámbito
-        $conteoAndalucia = 0;
-        $conteoEspana = 0;
-        try {
-            $conteoAndalucia = (int) ($this->routers->obtenerResultado(ambito: 'andalucia')->datos['count'] ?? 0);
-            $conteoEspana = (int) ($this->routers->obtenerResultado(ambito: 'espana')->datos['count'] ?? 0);
-        } catch (Throwable) {
-            $conteoAndalucia = 0;
-            $conteoEspana = 0;
-        }
+        $routersService = $routersService ?? app(Routers::class);
 
         // Cargar mapa de coordenadas en caso de necesitar georreferenciación inversa
         $mapaCoords = [];
@@ -279,14 +282,14 @@ class RoutersController extends Controller
             }
         }
 
-        // 4. Obtener listado de routers según el ámbito activo
+        // Obtener listado de routers según el ámbito activo
         $items = [];
         $totalRouters = 0;
         $enAlerta = 0;
         $errorFuente = null;
 
         try {
-            $resRouters = $this->routers->obtenerResultado(sort: $sort, ambito: $ambito);
+            $resRouters = $routersService->obtenerResultado(sort: $sort, ambito: $ambito);
             $rawItems = $resRouters->datos['items'] ?? [];
             $totalRouters = count($rawItems);
 
@@ -363,7 +366,7 @@ class RoutersController extends Controller
             $totalRouters = 0;
         }
 
-        // 5. Agrupar y ordenar routers por provincia
+        // Agrupar y ordenar routers por provincia
         $gruposProvincia = [];
         $ordenAndalucia = array_flip(Routers::PROVINCIAS_ANDALUCIA);
 
@@ -444,7 +447,49 @@ class RoutersController extends Controller
                 $itemsOrdenados[] = $routerItem;
             }
         }
-        $items = $itemsOrdenados;
+
+        return [
+            'routers' => $itemsOrdenados,
+            'routersPorProvincia' => $gruposProvincia,
+            'total' => $totalRouters,
+            'enAlerta' => $enAlerta,
+            'errorFuente' => $errorFuente,
+            'ambito' => $ambito,
+        ];
+    }
+
+    public function index(Request $request): View
+    {
+        // 1. Resolver ámbito territorial (por defecto Andalucía)
+        $ambito = (string) $request->query('ambito', 'andalucia');
+        if (! in_array($ambito, ['andalucia', 'espana', 'ambos'], true)) {
+            $ambito = 'andalucia';
+        }
+
+        // 2. Resolver ordenación (por defecto menor batería primero)
+        $sort = (string) $request->query('sort', 'battery_asc');
+        if (! in_array($sort, ['battery_asc', 'last_seen_desc', 'chutil_desc'], true)) {
+            $sort = 'battery_asc';
+        }
+
+        // 3. Recuentos para el selector de ámbito
+        $conteoAndalucia = 0;
+        $conteoEspana = 0;
+        try {
+            $conteoAndalucia = (int) ($this->routers->obtenerResultado(ambito: 'andalucia')->datos['count'] ?? 0);
+            $conteoEspana = (int) ($this->routers->obtenerResultado(ambito: 'espana')->datos['count'] ?? 0);
+        } catch (Throwable) {
+            $conteoAndalucia = 0;
+            $conteoEspana = 0;
+        }
+
+        // 4. Preparar datos consolidados de routers y agrupación provincial
+        $datosSupervision = self::prepararDatosSupervision($ambito, $sort, $this->routers);
+        $items = $datosSupervision['routers'];
+        $gruposProvincia = $datosSupervision['routersPorProvincia'];
+        $totalRouters = $datosSupervision['total'];
+        $enAlerta = $datosSupervision['enAlerta'];
+        $errorFuente = $datosSupervision['errorFuente'];
 
         // Filtro opcional por provincia
         $filtroProvincia = trim((string) $request->query('provincia', ''));

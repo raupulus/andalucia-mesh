@@ -49,9 +49,11 @@ El panel recibe a los operadores con un centro de control operativo estructurado
    - **Tráfico y Pasarelas:** Nodos activos 24h, total de paquetes por hora procesados y número de gateways publicando en el broker MQTT.
 
 3. **RoutersInfraestructuraWidget (Monitor de repetidores y nodos clave):**
-   - Tabla interactiva conectada a la vista de contrato `api_routers` de Ingesta (con degradación segura en caché y manejo de caídas vía `Fuente::recordar`), filtrada según el ámbito activo mediante `Routers::obtenerResultado(..., ambito: $this->ambito)`.
-   - Cabecera con badge dinámico indicando el número de routers y el contexto territorial activo (`· Andalucía` / `· España` / `· Andalucía + España`).
-   - Muestra para cada router en columnas optimizadas (`Nodo`, `Dispositivo`, `Energía`, `Presión (CHUTIL)`, `Saturación TX`, `Último Reporte`, `Acción`): nombre corto destacado con nombre largo en línea inferior estilizado en verde adaptativo según tema (`#007A33` claro / `#67EA94` oscuro) para evitar amontonamiento, identificador (`!hex`), modelo de hardware y provincia/rol, estado de energía (`⚡ Red/Solar` con voltaje o barra estrecha porcentual con código de color dinámico), nivel de presión local ChUtil con barra compacta, saturación TX, tiempo desde el último contacto y botón de solo icono verde con acceso directo a `/revisa-tu-nodo/{id}`.
+   - Renderiza el componente unificado `<x-tabla-routers>` (compartido de forma idéntica con la página pública `/routers`), garantizando coherencia visual y funcional absoluta.
+   - Datos obtenidos mediante el método estático compartido `RoutersController::prepararDatosSupervision($this->ambito, 'battery_asc')`, conectado a la vista de contrato `api_routers` de Ingesta (con degradación segura en caché y manejo de caídas vía `Fuente::recordar`), georreferenciación inversa de coordenadas GPS para nodos nacionales y agrupación provincial canónica.
+   - Cabecera con badge dinámico indicando el número de routers y el contexto territorial activo (`· Andalucía` / `· España` / `· Andalucía + España`), y píldora de atención si existen alertas activas.
+   - Barra interactiva de píldoras de navegación rápida por provincia (`.routers-province-nav`), banner de aviso con botón de reinicio y soporte de reactividad Livewire (`wire:poll.30s`) mediante delegación de eventos en `document`.
+   - Agrupación por provincias con filas de cabecera provincial y columnas optimizadas (`Nodo`, `Dispositivo`, `Energía`, `Presión (CHUTIL)`, `Saturación TX`, `Último Reporte`, `Acción`): nombre corto destacado con nombre largo estilizado en verde adaptativo según tema (`#007A33` claro / `#67EA94` oscuro), identificador (`!hex`), modelo de hardware y provincia/rol, estado de energía (`⚡ Red/Solar` con voltaje o barra estrecha porcentual con código de color dinámico), nivel de presión local ChUtil con barra compacta, saturación TX, tiempo desde el último contacto y botón de solo icono verde con acceso directo a `/revisa-tu-nodo/{id}`.
 
 4. **EstadoServiciosWidget (Salud de la plataforma y microservicios):**
    - Supervisión periódica (cada minuto por `portal-tareas`, con botón de forzado manual `comprobarAhora`).
@@ -308,4 +310,5 @@ Gestión y publicación de páginas y artículos divulgativos (base `portal`, ta
 Alta y baja de gateways en Mosquitto y edición de textos del portal. Cada una exige definir cómo el portal entrega la configuración al otro servicio sin escribir en su base.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-11
+> Creado: 2026-10-07 · Última revisión: 2026-10-13
+

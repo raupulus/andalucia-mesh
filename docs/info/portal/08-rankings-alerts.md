@@ -33,7 +33,9 @@ Supervisión pública del estado de routers de infraestructura y repetidores:
    - **Saturación TX:** Pico y media de tiempo de transmisión al aire de los routers.
    - **Infraestructura / Alimentación:** Porcentaje y desglose de nodos conectados a red eléctrica vs baterías solares.
    - **Tráfico / Gateways:** Ratio de paquetes enrutados y gateways MQTT enlazados.
-3. **Tabla de Routers de Infraestructura:**
+3. **Tabla de Routers de Infraestructura (`x-tabla-routers`):**
+   - Implementada mediante el componente reutilizable unificado `<x-tabla-routers>` (`tabla-routers.blade.php`), compartido de forma idéntica con el widget `RoutersInfraestructuraWidget` del panel de operadores (`/admin`).
+   - Alimentado mediante el método estático común `RoutersController::prepararDatosSupervision($ambito, $sort)`.
    - **Ordenación y agrupación provincial:** Agrupación con cabeceras por provincia (Andalucía en orden canónico: Almería, Cádiz, Córdoba, Granada, Huelva, Jaén, Málaga y Sevilla; resto de provincias de España por orden alfabético; y repetidores fuera de Andalucía/España al final).
    - **Georreferenciación inversa nacional:** Los repetidores fuera de Andalucía (almacenados como `FUERA` en Ingesta al restringirse su clasificación a Andalucía) se georreferencian a su provincia española correspondiente a partir de sus coordenadas GPS mediante polígonos vectoriales oficiales (`provincias-espana.json`), permitiendo su visualización y supervisión agrupada en los ámbitos `espana` y `ambos`.
    - Cabeceras de grupo con nombre de provincia, código ISO, total de repetidores, recuento de activos en línea y avisos en atención.

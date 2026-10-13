@@ -101,5 +101,25 @@ Catálogo de componentes reutilizables de interfaz de usuario de Andalucía Mesh
   - Feedback visual inmediato e interactivo tras copiar (`✓ Copiado` con transición y reversión automática tras 2.2 segundos).
   - Accesibilidad WCAG AAA: contraste de textos, atributos `title` y `aria-label` localizados con i18n (`portal.share.*`).
 
+### `x-tabla-routers` (`tabla-routers.blade.php`)
+- **Propósito:** Componente unificado y reactivo de supervisión de repetidores y nodos de infraestructura de la red, utilizado de forma idéntica en la vista pública `/routers` y en el widget del cuadro de mandos de administración (`RoutersInfraestructuraWidget` en `/admin`).
+- **Composición y características:**
+  - Cabecera con título, insignia de total según ámbito (`andalucia`, `espana`, `ambos`), y píldora de atención si existen alertas activas.
+  - Barra de herramientas con píldoras de navegación rápida por provincia (`all_provinces`, provincias individuales) con recuentos dinámicos.
+  - Banner informativo de filtrado activo con botón de restablecimiento rápido.
+  - Tabla completa agrupada por provincias con filas de cabecera provincial (recuentos, nodos online, alertas) y filas de repetidor (estado online/offline, nombre corto/largo/ID, modelo hardware y rol, alimentación/batería con barras de progreso cromáticas, presión de canal ChUtil, saturación TX, último reporte con marca temporal local y botón de inspección diagnóstica `/revisa-tu-nodo/{id}`).
+  - Delegación de eventos en `document` para filtrado reactivo compatible tanto con renderizado estático/SPA como con ciclos de vida Livewire (`wire:poll.30s`, `morph.updated`).
+  - Actualización limpia de URL mediante `history.replaceState` preservando cero cookies (cumplimiento estricto RN-06).
+- **Propiedades:**
+  - `routers` (array, opcional): colección plana ordenada de routers.
+  - `routersPorProvincia` (array, opcional): mapa indexado de routers agrupados por provincia.
+  - `total` (int): total de repetidores.
+  - `enAlerta` (int): número de routers con parámetros en nivel de atención.
+  - `errorFuente` (string|null): mensaje de indisponibilidad de datos si procede.
+  - `ambito` (string): `'andalucia'`, `'espana'` o `'ambos'`.
+  - `filtroProvincia` (string, opcional): provincia seleccionada inicialmente.
+  - `langQuerySolo` (string, opcional): parámetro de idioma para el enlace de inspección.
+
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-11
+> Creado: 2026-10-07 · Última revisión: 2026-10-13
+
