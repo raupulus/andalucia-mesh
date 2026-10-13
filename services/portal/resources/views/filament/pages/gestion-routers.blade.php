@@ -1841,18 +1841,41 @@
                     <label class="fi-ra-label">{{ __('admin.gestion_routers.select_router_label') }}</label>
                     <select data-router-select @change="onRouterSelectChange($event)" class="fi-ra-select">
                         <option value="">{{ __('admin.gestion_routers.select_placeholder') }}</option>
-                        <optgroup label="{{ __('admin.gestion_routers.andalucia_optgroup') }}">
-                            @foreach($routers as $r)
-                                <option value="{{ $r['dec_id'] }}"
-                                        data-hex="{{ $r['node_id'] }}"
-                                        data-name="{{ $r['short_name'] }} · {{ $r['long_name'] }}"
-                                        data-province="{{ $r['province'] }}"
-                                        data-role="{{ $r['role'] }}"
-                                        data-status="{{ $r['status'] }}">
-                                    [{{ $r['province'] }}] {{ $r['short_name'] }} ({{ $r['node_id'] }}) · {{ $r['long_name'] }} [{{ $r['role'] }}]
-                                </option>
-                            @endforeach
-                        </optgroup>
+                        @php
+                            $renderGroups = $groupedRouters ?? [];
+                            if (empty($renderGroups) && !empty($routers)) {
+                                $pNames = \App\Models\CoordinatedRouter::PROVINCES;
+                                foreach ($pNames as $iso => $name) {
+                                    $renderGroups["{$name} ({$iso})"] = [];
+                                }
+                                foreach ($routers as $r) {
+                                    $rawP = strtoupper(trim((string) ($r['province'] ?? '')));
+                                    if (! str_starts_with($rawP, 'ES-') && isset($pNames['ES-'.$rawP])) {
+                                        $rawP = 'ES-'.$rawP;
+                                    }
+                                    if (isset($pNames[$rawP])) {
+                                        $renderGroups["{$pNames[$rawP]} ({$rawP})"][] = $r;
+                                    } else {
+                                        $renderGroups[$rawP ?: 'Otras Provincias'][] = $r;
+                                    }
+                                }
+                                $renderGroups = array_filter($renderGroups, fn ($list) => count($list) > 0);
+                            }
+                        @endphp
+                        @foreach($renderGroups as $provGroupLabel => $provRouters)
+                            <optgroup label="{{ $provGroupLabel }}">
+                                @foreach($provRouters as $r)
+                                    <option value="{{ $r['dec_id'] }}"
+                                            data-hex="{{ $r['node_id'] }}"
+                                            data-name="{{ $r['short_name'] }} · {{ $r['long_name'] }}"
+                                            data-province="{{ $r['province'] }}"
+                                            data-role="{{ $r['role'] }}"
+                                            data-status="{{ $r['status'] }}">
+                                        [{{ $r['province'] }}] {{ $r['short_name'] }} ({{ $r['node_id'] }}) · {{ $r['long_name'] }} [{{ $r['role'] }}]
+                                    </option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
                     </select>
                 </div>
 

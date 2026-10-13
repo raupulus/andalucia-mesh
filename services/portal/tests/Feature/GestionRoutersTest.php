@@ -527,5 +527,43 @@ class GestionRoutersTest extends TestCase
         $response->assertSee('unicastSuggestions', false);
         $response->assertSee('max-w-xl mx-auto mb-8', false);
     }
+
+    /**
+     * Comprueba que el selector de routers agrupa los nodos por provincia en optgroups.
+     */
+    public function test_selector_agrupa_routers_por_provincia(): void
+    {
+        $user = User::factory()->create();
+
+        CoordinatedRouter::create([
+            'node_id' => '!11111111',
+            'short_name' => 'CA01',
+            'long_name' => 'Router Cadiz',
+            'role' => 'ROUTER',
+            'province' => 'ES-CA',
+            'latitude' => 36.7583,
+            'longitude' => -5.3672,
+            'status' => CoordinatedRouter::STATUS_MANAGED,
+        ]);
+
+        CoordinatedRouter::create([
+            'node_id' => '!22222222',
+            'short_name' => 'SE01',
+            'long_name' => 'Router Sevilla',
+            'role' => 'ROUTER',
+            'province' => 'ES-SE',
+            'latitude' => 37.3886,
+            'longitude' => -6.0024,
+            'status' => CoordinatedRouter::STATUS_MANAGED,
+        ]);
+
+        $response = $this->actingAs($user)->get('/admin/gestion-routers');
+
+        $response->assertSuccessful();
+        $response->assertSee('<optgroup label="Cádiz (ES-CA)">', false);
+        $response->assertSee('<optgroup label="Sevilla (ES-SE)">', false);
+        $response->assertSee('CA01');
+        $response->assertSee('SE01');
+    }
 }
 

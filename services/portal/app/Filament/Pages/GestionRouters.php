@@ -263,8 +263,37 @@ class GestionRouters extends Page
             // Continuar con los routers coordinados si ingesta no está disponible
         }
 
+        // Agrupar routers coordinados por provincia oficial de Andalucía
+        $provinceNames = CoordinatedRouter::PROVINCES;
+        $groupedRouters = [];
+
+        // Inicializar grupos en orden alfabético canónico de Andalucía
+        foreach ($provinceNames as $iso => $name) {
+            $groupKey = "{$name} ({$iso})";
+            $groupedRouters[$groupKey] = [];
+        }
+
+        foreach ($formattedRouters as $r) {
+            $rawProv = strtoupper(trim((string) ($r['province'] ?? '')));
+            if (! str_starts_with($rawProv, 'ES-') && isset($provinceNames['ES-'.$rawProv])) {
+                $rawProv = 'ES-'.$rawProv;
+            }
+
+            if (isset($provinceNames[$rawProv])) {
+                $groupKey = "{$provinceNames[$rawProv]} ({$rawProv})";
+                $groupedRouters[$groupKey][] = $r;
+            } else {
+                $otherKey = $rawProv ? "Otras ({$rawProv})" : 'Otras Provincias';
+                $groupedRouters[$otherKey][] = $r;
+            }
+        }
+
+        // Eliminar grupos vacíos para presentar únicamente las provincias con routers activos
+        $groupedRouters = array_filter($groupedRouters, fn ($list) => count($list) > 0);
+
         return [
             'routers' => $formattedRouters,
+            'groupedRouters' => $groupedRouters,
             'allKnownNodes' => $allKnownNodes,
         ];
     }
