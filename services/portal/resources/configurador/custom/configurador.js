@@ -10695,6 +10695,7 @@ var Q = {
 	potenciaTx: 27,
 	provincia: "",
 	nodoConectado: !1,
+	conectando: !1,
 	dispositivo: null,
 	transporte: null,
 	myNodeNum: null,
@@ -10988,18 +10989,19 @@ function y_() {
 	});
 }
 function b_(e) {
-	Q.nodoConectado = e;
-	let t = document.getElementById("statusPill");
-	t && (t.textContent = e ? "⚡ Conectado" : "🔌 Desconectado", t.style.background = e ? "var(--color-correcto-fondo)" : "", t.style.color = e ? "var(--color-correcto-texto)" : "");
-	let n = document.getElementById("workbenchStatusPill");
-	n && (n.textContent = e ? "⚡ Conectado" : "🔌 Desconectado", n.style.background = e ? "var(--color-correcto-fondo)" : "", n.style.color = e ? "var(--color-correcto-texto)" : "");
-	let r = document.getElementById("btnConnectDirect"), i = document.getElementById("btnDisconnectDirect"), a = document.getElementById("connectedNodeCard"), o = document.getElementById("btnProgramDirect"), s = document.getElementById("connectedNodeName"), c = document.getElementById("connectedNodeId"), l = document.getElementById("directStatusFeedback");
-	if (r && (r.disabled = e, r.textContent = e ? "✓ Conectado" : "🔌 Conectar al Nodo"), i && (i.disabled = !e), a && (a.style.display = e ? "flex" : "none"), o && (o.disabled = !e), e) {
+	let t = e === "connecting", n = e === !0 || e === "connected";
+	Q.nodoConectado = n, Q.conectando = t;
+	let r = document.getElementById("statusPill");
+	r && (t ? (r.textContent = "⏳ Conectando...", r.style.background = "rgba(234, 179, 8, 0.15)", r.style.color = "var(--color-aviso-texto, #ca8a04)", r.style.borderColor = "var(--color-aviso-texto, #ca8a04)") : n ? (r.textContent = "⚡ Conectado", r.style.background = "var(--color-correcto-fondo)", r.style.color = "var(--color-correcto-texto)", r.style.borderColor = "var(--color-correcto-texto)") : (r.textContent = "🔌 Desconectado", r.style.background = "", r.style.color = "", r.style.borderColor = ""));
+	let i = document.getElementById("workbenchStatusPill");
+	i && (t ? (i.textContent = "⏳ Conectando...", i.style.background = "rgba(234, 179, 8, 0.15)", i.style.color = "var(--color-aviso-texto, #ca8a04)", i.style.borderColor = "var(--color-aviso-texto, #ca8a04)") : n ? (i.textContent = "⚡ Conectado", i.style.background = "var(--color-correcto-fondo)", i.style.color = "var(--color-correcto-texto)", i.style.borderColor = "var(--color-correcto-texto)") : (i.textContent = "🔌 Desconectado", i.style.background = "", i.style.color = "", i.style.borderColor = ""));
+	let a = document.getElementById("btnConnectDirect"), o = document.getElementById("btnDisconnectDirect"), s = document.getElementById("connectedNodeCard"), c = document.getElementById("btnProgramDirect"), l = document.getElementById("connectedNodeName"), u = document.getElementById("connectedNodeId"), d = document.getElementById("directStatusFeedback");
+	if (a && (a.disabled = t || n, a.textContent = t ? "⏳ Conectando..." : n ? "✓ Conectado" : "🔌 Conectar al Nodo"), o && (o.disabled = !n && !t), s && (s.style.display = n ? "flex" : "none"), c && (c.disabled = !n), n) {
 		let e = Q.myNodeNum === null ? "!desconocido" : "!" + Q.myNodeNum.toString(16).padStart(8, "0");
-		s && (s.textContent = Q.ownerName || "Nodo Meshtastic"), c && (c.textContent = e), l && !l.dataset.isProgramming && (l.innerHTML = `💡 Nodo conectado (<strong>${C_(Q.ownerName || "Meshtastic")}</strong>). Pulsa en <strong>🚀 Programar Nodo Ahora</strong> para volcar los ajustes de Andalucía Mesh y reiniciar el nodo automáticamente.`);
-	} else l && !l.dataset.isProgramming && (l.innerHTML = "💡 <em>Conecta tu nodo por cable USB Serial o Bluetooth para volcar los ajustes. Ningún parámetro se alterará en el dispositivo hasta que pulses en <strong>Programar Nodo Ahora</strong>. El nodo se reiniciará automáticamente tras aplicar los cambios.</em>");
-	let u = document.getElementById("btnConnectWorkbench"), d = document.getElementById("btnDisconnectWorkbench"), f = document.getElementById("btnDownloadLive"), p = document.getElementById("btnDownloadLiveHeader"), m = document.getElementById("btnUploadConfig");
-	u && (u.disabled = e), d && (d.disabled = !e), f && (f.disabled = !e), p && (p.disabled = !e), m && (m.disabled = !e);
+		l && (l.textContent = Q.ownerName || "Nodo Meshtastic"), u && (u.textContent = e), d && !d.dataset.isProgramming && (d.innerHTML = `💡 Nodo conectado (<strong>${C_(Q.ownerName || "Meshtastic")}</strong>). Pulsa en <strong>🚀 Programar Nodo Ahora</strong> para volcar los ajustes de Andalucía Mesh y reiniciar el nodo automáticamente.`);
+	} else t ? d && !d.dataset.isProgramming && (d.innerHTML = "⏳ <em>Estableciendo comunicación con el nodo... Por favor espera.</em>") : d && !d.dataset.isProgramming && (d.innerHTML = "💡 <em>Conecta tu nodo por cable USB Serial, Bluetooth o WiFi local para volcar los ajustes. Ningún parámetro se alterará en el dispositivo hasta que pulses en <strong>Programar Nodo Ahora</strong>. El nodo se reiniciará automáticamente tras aplicar los cambios.</em>");
+	let f = document.getElementById("btnConnectWorkbench"), p = document.getElementById("btnDisconnectWorkbench"), m = document.getElementById("btnDownloadLive"), ee = document.getElementById("btnDownloadLiveHeader"), te = document.getElementById("btnUploadConfig");
+	f && (f.disabled = t || n, f.textContent = t ? "⏳ Conectando..." : n ? "✓ Conectado" : "⚡ Conectar al nodo"), p && (p.disabled = !n && !t), m && (m.disabled = !n), ee && (ee.disabled = !n), te && (te.disabled = !n);
 }
 function x_() {
 	let e = Array.from(Q.channelMap.values()).sort((e, t) => (e.index ?? 0) - (t.index ?? 0)), t = Q.myNodeNum === null ? null : u_.get(Q.myNodeNum), n = Q.ownerName || t?.longName || "Nodo Meshtastic", r = Q.ownerShort || t?.shortName || "MESH", i = Q.isUnmessagable === void 0 ? !!t?.isUnmessagable : Q.isUnmessagable, { config: a, moduleConfig: o, channels: s } = d_(Q.configSections, Q.moduleConfigSections, e), c = {
@@ -11044,6 +11046,7 @@ function C_(e) {
 	return String(e).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 async function w_(e = "assistant") {
+	if (Q.conectando || Q.nodoConectado) return;
 	let t = e === "workbench" || Q.modo === "workbench", n = t ? "transportSelectWorkbench" : "transportSelect", r = document.getElementById(n)?.value || "serial";
 	if (r === "serial" && !("serial" in navigator)) {
 		let e = "Web Serial API no está soportada en este navegador. Para conectar directamente por cable USB, utiliza Google Chrome, Microsoft Edge, Brave u Opera en tu ordenador.";
@@ -11055,28 +11058,49 @@ async function w_(e = "assistant") {
 		alert(e), $(`Error de compatibilidad: ${e}`);
 		return;
 	}
-	let i = document.getElementById(t ? "btnConnectWorkbench" : "btnConnectDirect");
-	i && (i.disabled = !0);
+	b_("connecting");
+	let i = "";
 	try {
 		$(`Iniciando conexión directa por ${r.toUpperCase()}...`);
 		let e;
 		if (r === "serial") e = await df.create(115200);
 		else if (r === "bluetooth") e = await pf.create();
 		else if (r === "http") {
-			let n = t ? "httpIpInputWorkbench" : "httpIpInput";
-			e = new vf(document.getElementById(n)?.value.trim() || "meshtastic.local", !1);
+			let n = t ? "httpIpInputWorkbench" : "httpIpInput", r = (document.getElementById(n)?.value || "").trim();
+			r ||= "meshtastic.local";
+			let a = !1, o = r;
+			/^https:\/\//i.test(o) ? (a = !0, o = o.replace(/^https:\/\//i, "")) : /^http:\/\//i.test(o) && (a = !1, o = o.replace(/^http:\/\//i, "")), o = o.replace(/\/.*$/, "").trim(), i = `${a ? "https" : "http"}://${o}`, typeof window < "u" && window.location.protocol === "https:" && !a && $("⚠️ Advertencia: El portal está bajo HTTPS. Los navegadores bloquean peticiones HTTP a IPs locales (Mixed Content). Si la conexión falla, accede al portal por HTTP o utiliza USB Serial / Bluetooth."), typeof window < "u" && window.localStorage && localStorage.setItem("snm_last_http_host", o);
+			let s = t ? "httpIpInput" : "httpIpInputWorkbench", c = document.getElementById(s);
+			c && (c.value = o), e = new vf(i);
 		}
 		Q.transporte = e;
 		let n = new uf(e);
-		Q.dispositivo = n, Q.nodoConectado = !0, u_.clear(), Q.myNodeNum = null, Q.myNodeInfo = null, Q.ownerName = "", Q.ownerShort = "", Q.isUnmessagable = !1, Q.configSections = {}, Q.moduleConfigSections = {}, Q.channelMap.clear(), n.events.onDeviceStatus.subscribe((e) => {
-			$(`Estado del enlace local: ${e}`), (e === 2 || e === "disconnected" || e === "DeviceDisconnected") && b_(!1);
+		Q.dispositivo = n, u_.clear(), Q.myNodeNum = null, Q.myNodeInfo = null, Q.ownerName = "", Q.ownerShort = "", Q.isUnmessagable = !1, Q.configSections = {}, Q.moduleConfigSections = {}, Q.channelMap.clear();
+		let a = {
+			1: "Reiniciando (DeviceRestarting)",
+			2: "Desconectado (DeviceDisconnected)",
+			3: "Conectando (DeviceConnecting)",
+			4: "Reconectando (DeviceReconnecting)",
+			5: "Conectado (DeviceConnected)",
+			6: "Configurando (DeviceConfiguring)",
+			7: "Configurado (DeviceConfigured)"
+		};
+		n.events.onDeviceStatus.subscribe((e) => {
+			if ($(`Estado del enlace local: ${a[e] || e}`), e === 5 || e === 6 || e === 7 || e === "connected" || e === "configured" || e === "DeviceConnected" || e === "DeviceConfigured") Q.nodoConectado || (b_("connected"), $("✓ Conexión establecida con éxito con el nodo Meshtastic."));
+			else if (e === 2 || e === "disconnected" || e === "DeviceDisconnected") {
+				if (Q.nodoConectado) $("Dispositivo local desconectado."), T_();
+				else if (Q.conectando) {
+					let e = r === "http" ? `No se pudo conectar al nodo por WiFi (${i}). Verifica que la IP sea correcta, que el nodo esté encendido y en la misma red local.` : `Fallo al establecer comunicación con el dispositivo (${r}).`;
+					$(`❌ ${e}`), alert(e), T_();
+				}
+			}
 		}), n.events.onMyNodeInfo.subscribe((e) => {
 			if (e) {
 				if (Q.myNodeNum = e.myNodeNum >>> 0, Q.myNodeInfo = e, $(`Nodo local identificado: !${Q.myNodeNum.toString(16).padStart(8, "0")}`), u_.has(Q.myNodeNum)) {
 					let e = u_.get(Q.myNodeNum);
 					e?.longName && (Q.ownerName = e.longName), e?.shortName && (Q.ownerShort = e.shortName), e?.isUnmessagable !== void 0 && (Q.isUnmessagable = !!e.isUnmessagable);
 				}
-				b_(!0), x_();
+				Q.nodoConectado || (b_("connected"), $("✓ Conexión confirmada por respuesta del nodo.")), x_();
 			}
 		}), n.events.onNodeInfoPacket.subscribe((e) => {
 			if (!e) return;
@@ -11118,7 +11142,18 @@ async function w_(e = "assistant") {
 				}
 				x_();
 			}
-		}), b_(!0), $("✓ Conexión establecida con éxito con el nodo Meshtastic."), $("Solicitando configuración al dispositivo...");
+		}), $("Esperando respuesta del dispositivo..."), await new Promise((e, t) => {
+			let a = r === "http" ? 12e3 : 8e3, o = !1, s = setTimeout(() => {
+				o || (o = !0, Q.nodoConectado ? e() : t(/* @__PURE__ */ Error(r === "http" ? `Tiempo de espera agotado al conectar por WiFi (${i}). Comprueba la IP y la red.` : `Tiempo de espera agotado al conectar por ${r}.`)));
+			}, a), c = () => {
+				Q.nodoConectado && !o && (o = !0, clearTimeout(s), e());
+			};
+			n.events.onDeviceStatus.subscribe((e) => {
+				e === 5 || e === 6 || e === 7 || e === "connected" || e === "configured" || e === "DeviceConnected" || e === "DeviceConfigured" ? c() : (e === 2 || e === "disconnected" || e === "DeviceDisconnected") && !o && !Q.nodoConectado && (o = !0, clearTimeout(s), t(/* @__PURE__ */ Error(r === "http" ? `El nodo en ${i} no responde o cerró la conexión.` : "El dispositivo se desconectó durante el enlace.")));
+			}), n.events.onMyNodeInfo.subscribe((e) => {
+				e && !o && c();
+			});
+		}), $("Solicitando configuración al dispositivo...");
 		try {
 			await n.configure();
 		} catch (e) {
@@ -11130,21 +11165,21 @@ async function w_(e = "assistant") {
 		for (let e = 0; e < 8; e++) try {
 			await n.getChannel(e);
 		} catch {}
-		b_(!0), $("✓ Parámetros iniciales leídos. Dispositivo listo para configurar.");
+		b_("connected"), $("✓ Parámetros iniciales leídos. Dispositivo listo para configurar.");
 	} catch (e) {
-		b_(!1), $(`Error de conexión: ${e.message}`), alert(`No se pudo conectar al dispositivo: ${e.message}`);
+		await T_(), $(`Error de conexión: ${e.message}`), alert(`No se pudo conectar al dispositivo: ${e.message}`);
 	}
 }
 async function T_() {
-	if (Q.dispositivo || Q.transporte) try {
+	if (Q.conectando = !1, Q.nodoConectado = !1, Q.dispositivo || Q.transporte) try {
 		Q.dispositivo ? await Q.dispositivo.disconnect() : Q.transporte && await Q.transporte.disconnect();
 	} catch (e) {
 		$(`Aviso al desconectar: ${e.message}`);
 	}
-	Q.transporte = null, Q.dispositivo = null, Q.nodoConectado = !1, b_(!1), $("Dispositivo desconectado.");
+	Q.transporte = null, Q.dispositivo = null, b_("disconnected"), $("Dispositivo desconectado.");
 }
 async function E_() {
-	if (!Q.dispositivo || !Q.nodoConectado) alert("Debes conectar tu nodo primero por cable USB Serial o Bluetooth para leer su configuración."), $("Intento de lectura sin dispositivo conectado.");
+	if (!Q.dispositivo || !Q.nodoConectado) alert("Debes conectar tu nodo primero por cable USB Serial, Bluetooth o WiFi (HTTP) para leer su configuración."), $("Intento de lectura sin dispositivo conectado.");
 	else {
 		$("Solicitando parámetros actualizados al dispositivo...");
 		try {
@@ -11166,7 +11201,7 @@ function D_() {
 }
 async function O_() {
 	if (!Q.dispositivo || !Q.nodoConectado) {
-		alert("Conecta tu nodo por cable USB Serial o Bluetooth para volcar los cambios.");
+		alert("Conecta tu nodo por cable USB Serial, Bluetooth o WiFi (HTTP) para volcar los cambios.");
 		return;
 	}
 	let e = document.getElementById("desiredYamlTextarea")?.value.trim();
@@ -11295,7 +11330,7 @@ async function O_() {
 }
 async function k_() {
 	if (!Q.dispositivo || !Q.nodoConectado) {
-		alert("Primero debes conectar tu nodo Meshtastic por cable USB Serial o Bluetooth.");
+		alert("Primero debes conectar tu nodo Meshtastic por cable USB Serial, Bluetooth o WiFi (HTTP).");
 		return;
 	}
 	let { configDoc: e } = f_(), t = document.getElementById("btnProgramDirect"), n = document.getElementById("directStatusFeedback");
@@ -11483,12 +11518,21 @@ function N_() {
 	}).observe(document.documentElement, {
 		attributes: !0,
 		attributeFilter: ["data-theme", "data-tema"]
-	}), document.getElementById("themeToggleBtn")?.addEventListener("click", M_), document.getElementById("tabAssistantMode")?.addEventListener("click", () => j_("asistente")), document.getElementById("tabWorkbenchMode")?.addEventListener("click", () => j_("workbench")), document.getElementById("transportSelect")?.addEventListener("change", (e) => {
+	}), document.getElementById("themeToggleBtn")?.addEventListener("click", M_), document.getElementById("tabAssistantMode")?.addEventListener("click", () => j_("asistente")), document.getElementById("tabWorkbenchMode")?.addEventListener("click", () => j_("workbench"));
+	let n = typeof window < "u" && window.location.protocol === "https:", r = (e) => {
+		let t = document.getElementById("httpMixedContentWarning"), r = document.getElementById("httpMixedContentWarningWorkbench");
+		t && (t.style.display = e && n ? "block" : "none"), r && (r.style.display = e && n ? "block" : "none");
+	}, i = document.getElementById("httpIpInput"), a = document.getElementById("httpIpInputWorkbench"), o = typeof window < "u" && window.localStorage && localStorage.getItem("snm_last_http_host") || "";
+	o && (i && (i.value = o), a && (a.value = o)), i?.addEventListener("input", (e) => {
+		a && (a.value = e.target.value);
+	}), a?.addEventListener("input", (e) => {
+		i && (i.value = e.target.value);
+	}), document.getElementById("transportSelect")?.addEventListener("change", (e) => {
 		let t = e.target.value === "http", n = document.getElementById("httpIpGroup");
-		n && (n.style.display = t ? "flex" : "none");
+		n && (n.style.display = t ? "flex" : "none"), r(t);
 	}), document.getElementById("transportSelectWorkbench")?.addEventListener("change", (e) => {
 		let t = e.target.value === "http", n = document.getElementById("httpIpGroupWorkbench");
-		n && (n.style.display = t ? "flex" : "none");
+		n && (n.style.display = t ? "flex" : "none"), r(t);
 	}), document.getElementById("chkMqtt")?.addEventListener("change", m_), document.getElementById("chkMqttMap")?.addEventListener("change", m_), m_(), $("Configurador de Andalucía Mesh iniciado con preset SFNarrow.");
 }
 document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", N_) : N_();

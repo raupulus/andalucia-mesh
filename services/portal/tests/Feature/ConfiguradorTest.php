@@ -225,4 +225,23 @@ class ConfiguradorTest extends TestCase
         $response->assertSee('id="channelsSummaryBox"', false);
         $response->assertSee('id="channelsSummaryList"', false);
     }
+
+    public function test_configurador_soporta_conexion_http_con_campos_y_advertencia_mixed_content(): void
+    {
+        $response = $this->get('/configurador');
+
+        $response->assertStatus(200);
+        $response->assertSee('id="transportSelect"', false);
+        $response->assertSee('id="httpIpGroup"', false);
+        $response->assertSee('id="httpIpInput"', false);
+        $response->assertSee('id="httpMixedContentWarning"', false);
+        $response->assertSee('id="httpIpGroupWorkbench"', false);
+        $response->assertSee('id="httpIpInputWorkbench"', false);
+        $response->assertSee('id="httpMixedContentWarningWorkbench"', false);
+        $response->assertSee('Mixed Content');
+
+        $js = $this->get('/configurador/configurador.js');
+        $js->assertStatus(200);
+        $js->assertSee('snm_last_http_host');
+    }
 }

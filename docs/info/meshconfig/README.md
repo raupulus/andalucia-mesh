@@ -68,6 +68,7 @@
 - **Resolución de assets relativos en `/configurador` (`TR-16`):** Al embeber la herramienta bajo `/configurador` sin barra final, los enlaces `./styles.css` resuelven contra `/` en el cliente. El portal inyecta `<base href="/configurador/">` y reescribe las rutas a absolutas (`/configurador/...`), con redirecciones defensivas en rutas de raíz.
 - **Shims de Node en bundles de cliente (`TR-17`):** Librerías internas de `@meshtastic/core` como el formateador de logs invocan `process?.version` o `process.cwd()`. En entornos de navegador sin Node, esto lanza `ReferenceError: process is not defined` abortando el módulo. Requiere `nodeShimsPlugin`, `define` en Vite, banner de inicialización y declaración en el HTML.
 - **Suplantación de identidad por volcado NodeDB (`TR-18`):** Al invocar `device.configure()`, el firmware Meshtastic envía la lista completa de nodos vecinos por serie (`nodeInfo`), disparando `onUserPacket` para cada uno. Si el cliente no filtra por `myNodeNum`, el nombre del nodo conectado (`owner`/`owner_short`) se sobreescribe con el último vecino volcado. Solución: indexar `nodeInfoMap` por `node.num >>> 0` y rechazar en `onUserPacket` paquetes con `packet.from !== estado.myNodeNum && packet.from !== 0`. Asimismo, los enums numéricos Protobuf en Live YAML se normalizan a cadenas canónicas para evitar falsos positivos en el diff.
+- **Normalización de URL y ciclo de vida en `TransportHTTP` (`TR-21`):** Al instanciar `new TransportHTTP(host)` pasando una IP o host plano (como `192.168.1.100`), la ausencia de esquema `http://` hace que las llamadas `fetch()` se interpreten relativas a `<base href="/configurador/">`, disparando 404 en el servidor web. Además, declarar `connected = true` inmediatamente tras construir el transporte provoca que la UI parpadee entre conectado y desconectado ante cualquier fallo en las peticiones de polling en segundo plano, dejando el transporte en bucle infinito si no se desconecta explícitamente en el catch. Solución: normalizar `targetUrl = (isTls ? 'https' : 'http') + '://' + cleanHost`, mantener estado intermedio `'connecting'`, confirmar conexión solo tras evento afirmativo (`DeviceConnected` o `onMyNodeInfo`), limpiar con `desconectarDispositivo()` ante fallos o timeout de seguridad (12s), y advertir preventivamente de bloqueo Mixed Content si el portal se carga bajo HTTPS.
 
 ## Tests que lo cubren
 - `services/portal/tests/Feature/ConfiguradorTest.php`:
@@ -88,6 +89,7 @@
   - `test_configurador_contiene_opciones_ampliadas_telemetria_y_posicion`
   - `test_configurador_modo_avanzado_contiene_panel_conexion_directa`
   - `test_configurador_paso4_contiene_flujo_programacion_y_resumen_canales`
+  - `test_configurador_soporta_conexion_http_con_campos_y_advertencia_mixed_content`
 
 ## Pendiente real
 - [x] Contenedor Docker compilado y corriendo en local (puerto 8420).
@@ -102,6 +104,7 @@
 - [x] Tarjeta de conexión directa dedicada en Modo Avanzado (Workbench) para Web Serial, Bluetooth y HTTP con sincronización de estado, lectura en vivo, comparador Diff y volcado.
 - [x] Aislamiento de identidad del nodo local propio frente a volcados de `NodeDB` (`TR-18`) y normalización canónica de enums Protobuf para diff exacto.
 - [x] Flujo de conexión en 2 etapas en el Asistente (Paso 4): detección de identidad del nodo, botón explícito «🚀 Programar Nodo Ahora», reporte en vivo de progreso, serialización oficial Protobuf `ChannelSetSchema`, resumen visual de canales y opción de limpieza de canales sobrantes.
+- [x] Conexión WiFi/HTTP local robusta con normalización de esquema (URL), advertencia de Mixed Content en HTTPS, máquina de estados anti-parpadeo y persistencia de host en localStorage (`TR-21`).
 
 ---
-> Creado: 2026-10-08 · Última revisión: 2026-10-09
+> Creado: 2026-10-08 · Última revisión: 2026-10-14

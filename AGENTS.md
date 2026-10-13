@@ -56,7 +56,7 @@ Este documento define las normas operativas, la estructura del proyecto y el pro
         ├── meshconfig/
         ├── potatomesh/          README + adaptador-potato, sync-peers
         ├── ingesta/             README + módulos 01–06
-        ├── portal/              README + módulos 01–18 + pages/
+        ├── portal/              README + módulos 01–19 + pages/
         ├── detector-alertas/    README + módulos 01–03
         ├── bots-webhooks/       README + 01-bot-telegram, 02-bot-discord, 03-webhooks
         └── chat-ws/
@@ -98,7 +98,7 @@ El repositorio contiene muchas aplicaciones independientes. **No se carga toda l
 | `services/adaptador-potato/` | `docs/info/potatomesh/adaptador-potato.md` | Resto |
 | `services/sync-peers/` | `docs/info/potatomesh/sync-peers.md` | Resto |
 | `services/ingesta/` | `docs/info/ingesta/README.md` + el módulo 01–06 afectado | Portal, detector, bots |
-| `services/portal/` (web) | `docs/info/portal/README.md` + módulo 01–10, 15–18 afectado + su página en `docs/info/portal/pages/` + `DESIGN.md` y `COMPONENTS.md` si hay interfaz | Ingesta, detector, bots |
+| `services/portal/` (web) | `docs/info/portal/README.md` + módulo 01–10, 15–19 afectado + su página en `docs/info/portal/pages/` + `DESIGN.md` y `COMPONENTS.md` si hay interfaz | Ingesta, detector, bots |
 | `services/portal/` (API) | `docs/info/portal/11-public-api.md` + el módulo 12 o 13 afectado | Páginas, diseño |
 | `services/portal/` (panel `/admin`) | `docs/info/portal/14-operator-panel.md` | Páginas, API |
 | `services/detector-alertas/` | `docs/info/detector-alertas/README.md` + módulo 01–03 afectado | Portal, bots |
@@ -130,7 +130,7 @@ El repositorio contiene muchas aplicaciones independientes. **No se carga toda l
 | `mosquitto/`, `meshview/`, `meshconfig/`, `chat-ws/` | Una ficha por pieza |
 | `potatomesh/` | Instancia (`README`), `adaptador-potato.md`, `sync-peers.md` |
 | `ingesta/` | Ficha + entrada y descifrado, decodificación y deduplicación, provincias y registros, persistencia y retención, vistas contrato, flujo `decoded` |
-| `portal/` | Ficha + módulos web (01–10, 15–17), API (11–13), panel (14) y `pages/` (contenido de cada página pública) |
+| `portal/` | Ficha + módulos web (01–10, 15–19), API (11–13), panel (14) y `pages/` (contenido de cada página pública) |
 | `detector-alertas/` | Ficha + motor de reglas, catálogo de reglas, socket y persistencia |
 | `bots-webhooks/` | Núcleo común (`README`) + Telegram, Discord y webhooks |
 
@@ -269,6 +269,7 @@ El repositorio contiene muchas aplicaciones independientes. **No se carga toda l
 | `TR-18` | Portal / MeshConfig / Suplantación de Identidad por volcado NodeDB | Al invocar `device.configure()` por Web Serial o BLE, el nodo Meshtastic vuelca por puerto serie todas las entradas cacheadas en su `NodeDB`. Para cada vecino, `@meshtastic/core` dispara `onUserPacket` y `onNodeInfoPacket`. Si el cliente actualiza el nombre del propietario (`owner`/`owner_short`) incondicionalmente sin verificar `packet.from`, la identidad del nodo propio es sobreescrita aleatoriamente por el último vecino volcado. | Indexar un `nodeInfoMap` por `node.num >>> 0`, resolver la identidad del nodo propio solo cuando `packet.from === estado.myNodeNum` o `packet.from === 0` (local), e ignorar cualquier paquete de usuario proveniente de nodos vecinos. Además, normalizar los enums numéricos Protobuf en el Live YAML para evitar falsos positivos en el diff. |
 | `TR-19` | Adaptador Potato / Ingesta / Protobuf / Enum Role y config_pb2 | El enum `Role` de Meshtastic se encuentra definido en `meshtastic.protobuf.config_pb2.Config.DeviceConfig.Role`, no en `mesh_pb2`. Intentar acceder mediante `mesh_pb2.Config` lanza `AttributeError`. Además, en Protobuf `Role.CLIENT == 0`, por lo que una comprobación booleana `if user.role:` evalúa a `False` para cualquier nodo cliente estándar, asignando `None` y provocando que PotatoMesh mantenga su rol por defecto `CLIENT_HIDDEN`. Adicionalmente, `MapReport` está en `mqtt_pb2` con portnum 73 (`MAP_REPORT_APP`), no en `mesh_pb2` ni en portnum 72. | Importar siempre `config_pb2` y `mqtt_pb2`, resolver roles con `config_pb2.Config.DeviceConfig.Role.Name(user.role)` dentro de un bloque `try/except (ValueError, TypeError)` con fallback `"CLIENT"`, y mapear portnum 73 para `mqtt_pb2.MapReport`. |
 | `TR-20` | Detector / Persistencia / PostgreSQL / Alertas abiertas tras reinicio | Si el detector de alertas se reinicia sin restaurar en memoria (`ciclo.alertas_abiertas`) las alertas activas de PostgreSQL, al reevaluarse una regla genera un nuevo ULID e intenta insertarlo. La tabla `alerta` tiene un índice único parcial `alerta_clave_abierta (regla, nodo) WHERE estado = 'abierta'`. La inserción falla con `duplicate key value violates unique constraint`, y si la persistencia marca la conexión como caída o reintenta indefinidamente en cabeza de cola (`cola_contingencia[0]`), la cola queda permanentemente bloqueada (Head-of-Line blocking), dejando de guardar alertas en DB mientras el socket UNIX las sigue emitiendo a los bots, lo que genera enlaces públicos con error HTTP 404 al no existir el ID en DB. | 1. Restaurar en arranque `ciclo.alertas_abiertas` desde `SELECT * FROM alerta WHERE estado = 'abierta'`. 2. En `_persistir_transicion_db`, comprobar si ya existe una alerta abierta para la clave y reutilizar su ID original antes de insertar. 3. Diferenciar errores de conexión de errores de datos SQL (`PostgresError`), descartando elementos no recuperables en el drenaje para no bloquear la cola. 4. En el Portal, soportar fallback de búsqueda por `transicion_id` en `AlertasController@show`. |
+| `TR-21` | Portal / MeshConfig / TransportHTTP / Normalización de URL y Parpadeo de Estado | Al conectar a un nodo por WiFi en `/configurador` mediante `new TransportHTTP(host)`, pasar una IP o host plano sin esquema (`192.168.1.100`) hace que el navegador evalúe las peticiones de polling de forma relativa a `<base href="/configurador/">`, generando 404. Si además se fuerza prematuramente `connected = true` antes de la respuesta afirmativa de la radio, los errores de polling emiten `DeviceDisconnected`, alternando la UI cíclicamente entre conectado y desconectado ("parpadeo"), y dejando el bucle de polling huérfano en segundo plano si no se invoca `disconnect()` en el catch. Asimismo, en accesos bajo HTTPS los navegadores bloquean la conexión HTTP por Mixed Content. | Normalizar la URL anteponiendo `http://` o `https://` y eliminando rutas espurias, mantener el estado intermedio `'connecting'` en la UI, transicionar a conectado únicamente tras `DeviceConnected` o `onMyNodeInfo`, limpiar siempre mediante `disconnect()` ante fallos o timeout de seguridad (12s), persistir el último host en `localStorage` y advertir preventivamente en la UI si el portal se carga bajo HTTPS (Mixed Content). |
 
 
 

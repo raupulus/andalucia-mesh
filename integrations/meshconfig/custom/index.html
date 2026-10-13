@@ -357,6 +357,12 @@
                   <div id="httpIpGroup" style="display: none;" class="field-group">
                     <label for="httpIpInput" class="field-label">Dirección IP o Host del nodo</label>
                     <input id="httpIpInput" type="text" class="form-control" placeholder="192.168.1.100 o meshtastic.local" />
+                    <span class="field-hint" style="font-size: 0.8rem; color: var(--color-texto-2); margin-top: 0.35rem; display: block;">
+                      💡 Introduce la IP local del nodo (ej. 192.168.1.100) o su nombre mDNS (meshtastic.local). El nodo debe estar encendido y en la misma red WiFi.
+                    </span>
+                    <div id="httpMixedContentWarning" style="display: none; margin-top: 0.5rem; padding: 0.6rem 0.75rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radio-sm); font-size: 0.8rem; color: var(--color-error-texto, #ef4444); line-height: 1.4;">
+                      ⚠️ <strong>Atención (Mixed Content):</strong> Estás accediendo mediante HTTPS. Tu navegador bloqueará las conexiones directas a IPs HTTP locales por seguridad. Para conectar por WiFi a un nodo local HTTP, accede al portal por HTTP o utiliza conexión por USB Serial o Bluetooth.
+                    </div>
                   </div>
 
                   <div style="display: flex; gap: 0.75rem;">
@@ -404,6 +410,12 @@
               <div id="httpIpGroupWorkbench" style="display: none;" class="field-group">
                 <label for="httpIpInputWorkbench" class="field-label">Dirección IP o Host del nodo</label>
                 <input id="httpIpInputWorkbench" type="text" class="form-control" placeholder="192.168.1.100 o meshtastic.local" />
+                <span class="field-hint" style="font-size: 0.8rem; color: var(--color-texto-2); margin-top: 0.35rem; display: block;">
+                  💡 Introduce la IP local del nodo (ej. 192.168.1.100) o su nombre mDNS (meshtastic.local). El nodo debe estar encendido y en la misma red WiFi.
+                </span>
+                <div id="httpMixedContentWarningWorkbench" style="display: none; margin-top: 0.5rem; padding: 0.6rem 0.75rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radio-sm); font-size: 0.8rem; color: var(--color-error-texto, #ef4444); line-height: 1.4;">
+                  ⚠️ <strong>Atención (Mixed Content):</strong> Estás accediendo mediante HTTPS. Tu navegador bloqueará las conexiones directas a IPs HTTP locales por seguridad. Para conectar por WiFi a un nodo local HTTP, accede al portal por HTTP o utiliza conexión por USB Serial o Bluetooth.
+                </div>
               </div>
               <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
                 <button id="btnConnectWorkbench" type="button" class="btn btn-primary" onclick="conectarDispositivo('workbench')">

@@ -55,6 +55,7 @@ const estado = {
   potenciaTx: 27,
   provincia: "",
   nodoConectado: false,
+  conectando: false,
   dispositivo: null,
   transporte: null,
   myNodeNum: null,
@@ -535,21 +536,51 @@ export function copiarComandosCli() {
 }
 
 // --- Sincronización de interfaz de conexión ---
-function actualizarUiEstadoConexion(conectado) {
-  estado.nodoConectado = conectado;
+function actualizarUiEstadoConexion(estadoConexion) {
+  const isConnecting = estadoConexion === "connecting";
+  const isConnected = estadoConexion === true || estadoConexion === "connected";
+
+  estado.nodoConectado = isConnected;
+  estado.conectando = isConnecting;
 
   const statusPill = document.getElementById("statusPill");
   if (statusPill) {
-    statusPill.textContent = conectado ? "⚡ Conectado" : "🔌 Desconectado";
-    statusPill.style.background = conectado ? "var(--color-correcto-fondo)" : "";
-    statusPill.style.color = conectado ? "var(--color-correcto-texto)" : "";
+    if (isConnecting) {
+      statusPill.textContent = "⏳ Conectando...";
+      statusPill.style.background = "rgba(234, 179, 8, 0.15)";
+      statusPill.style.color = "var(--color-aviso-texto, #ca8a04)";
+      statusPill.style.borderColor = "var(--color-aviso-texto, #ca8a04)";
+    } else if (isConnected) {
+      statusPill.textContent = "⚡ Conectado";
+      statusPill.style.background = "var(--color-correcto-fondo)";
+      statusPill.style.color = "var(--color-correcto-texto)";
+      statusPill.style.borderColor = "var(--color-correcto-texto)";
+    } else {
+      statusPill.textContent = "🔌 Desconectado";
+      statusPill.style.background = "";
+      statusPill.style.color = "";
+      statusPill.style.borderColor = "";
+    }
   }
 
   const wbStatusPill = document.getElementById("workbenchStatusPill");
   if (wbStatusPill) {
-    wbStatusPill.textContent = conectado ? "⚡ Conectado" : "🔌 Desconectado";
-    wbStatusPill.style.background = conectado ? "var(--color-correcto-fondo)" : "";
-    wbStatusPill.style.color = conectado ? "var(--color-correcto-texto)" : "";
+    if (isConnecting) {
+      wbStatusPill.textContent = "⏳ Conectando...";
+      wbStatusPill.style.background = "rgba(234, 179, 8, 0.15)";
+      wbStatusPill.style.color = "var(--color-aviso-texto, #ca8a04)";
+      wbStatusPill.style.borderColor = "var(--color-aviso-texto, #ca8a04)";
+    } else if (isConnected) {
+      wbStatusPill.textContent = "⚡ Conectado";
+      wbStatusPill.style.background = "var(--color-correcto-fondo)";
+      wbStatusPill.style.color = "var(--color-correcto-texto)";
+      wbStatusPill.style.borderColor = "var(--color-correcto-texto)";
+    } else {
+      wbStatusPill.textContent = "🔌 Desconectado";
+      wbStatusPill.style.background = "";
+      wbStatusPill.style.color = "";
+      wbStatusPill.style.borderColor = "";
+    }
   }
 
   const btnConnectDirect = document.getElementById("btnConnectDirect");
@@ -561,28 +592,34 @@ function actualizarUiEstadoConexion(conectado) {
   const feedbackEl = document.getElementById("directStatusFeedback");
 
   if (btnConnectDirect) {
-    btnConnectDirect.disabled = conectado;
-    btnConnectDirect.textContent = conectado ? "✓ Conectado" : "🔌 Conectar al Nodo";
+    btnConnectDirect.disabled = isConnecting || isConnected;
+    btnConnectDirect.textContent = isConnecting ? "⏳ Conectando..." : (isConnected ? "✓ Conectado" : "🔌 Conectar al Nodo");
   }
-  if (btnDisconnectDirect) btnDisconnectDirect.disabled = !conectado;
+  if (btnDisconnectDirect) {
+    btnDisconnectDirect.disabled = !isConnected && !isConnecting;
+  }
 
   if (connectedNodeCard) {
-    connectedNodeCard.style.display = conectado ? "flex" : "none";
+    connectedNodeCard.style.display = isConnected ? "flex" : "none";
   }
   if (btnProgramDirect) {
-    btnProgramDirect.disabled = !conectado;
+    btnProgramDirect.disabled = !isConnected;
   }
 
-  if (conectado) {
+  if (isConnected) {
     const hex = estado.myNodeNum !== null ? "!" + estado.myNodeNum.toString(16).padStart(8, "0") : "!desconocido";
     if (nodeNameEl) nodeNameEl.textContent = estado.ownerName || "Nodo Meshtastic";
     if (nodeIdEl) nodeIdEl.textContent = hex;
     if (feedbackEl && !feedbackEl.dataset.isProgramming) {
       feedbackEl.innerHTML = `💡 Nodo conectado (<strong>${escapeHtml(estado.ownerName || "Meshtastic")}</strong>). Pulsa en <strong>🚀 Programar Nodo Ahora</strong> para volcar los ajustes de Andalucía Mesh y reiniciar el nodo automáticamente.`;
     }
+  } else if (isConnecting) {
+    if (feedbackEl && !feedbackEl.dataset.isProgramming) {
+      feedbackEl.innerHTML = `⏳ <em>Estableciendo comunicación con el nodo... Por favor espera.</em>`;
+    }
   } else {
     if (feedbackEl && !feedbackEl.dataset.isProgramming) {
-      feedbackEl.innerHTML = `💡 <em>Conecta tu nodo por cable USB Serial o Bluetooth para volcar los ajustes. Ningún parámetro se alterará en el dispositivo hasta que pulses en <strong>Programar Nodo Ahora</strong>. El nodo se reiniciará automáticamente tras aplicar los cambios.</em>`;
+      feedbackEl.innerHTML = `💡 <em>Conecta tu nodo por cable USB Serial, Bluetooth o WiFi local para volcar los ajustes. Ningún parámetro se alterará en el dispositivo hasta que pulses en <strong>Programar Nodo Ahora</strong>. El nodo se reiniciará automáticamente tras aplicar los cambios.</em>`;
     }
   }
 
@@ -592,11 +629,16 @@ function actualizarUiEstadoConexion(conectado) {
   const btnDownloadLiveHeader = document.getElementById("btnDownloadLiveHeader");
   const btnUploadConfig = document.getElementById("btnUploadConfig");
 
-  if (btnConnectWb) btnConnectWb.disabled = conectado;
-  if (btnDisconnectWb) btnDisconnectWb.disabled = !conectado;
-  if (btnDownloadLive) btnDownloadLive.disabled = !conectado;
-  if (btnDownloadLiveHeader) btnDownloadLiveHeader.disabled = !conectado;
-  if (btnUploadConfig) btnUploadConfig.disabled = !conectado;
+  if (btnConnectWb) {
+    btnConnectWb.disabled = isConnecting || isConnected;
+    btnConnectWb.textContent = isConnecting ? "⏳ Conectando..." : (isConnected ? "✓ Conectado" : "⚡ Conectar al nodo");
+  }
+  if (btnDisconnectWb) {
+    btnDisconnectWb.disabled = !isConnected && !isConnecting;
+  }
+  if (btnDownloadLive) btnDownloadLive.disabled = !isConnected;
+  if (btnDownloadLiveHeader) btnDownloadLiveHeader.disabled = !isConnected;
+  if (btnUploadConfig) btnUploadConfig.disabled = !isConnected;
 }
 
 // --- Regenerar vista previa YAML del nodo conectado ---
@@ -699,6 +741,10 @@ function escapeHtml(str) {
 
 // --- Conexión directa al nodo y programación ---
 export async function conectarDispositivo(origen = "assistant") {
+  if (estado.conectando || estado.nodoConectado) {
+    return;
+  }
+
   const isWorkbench = origen === "workbench" || estado.modo === "workbench";
   const selectId = isWorkbench ? "transportSelectWorkbench" : "transportSelect";
   const tipoTransporte = document.getElementById(selectId)?.value || "serial";
@@ -717,9 +763,9 @@ export async function conectarDispositivo(origen = "assistant") {
     return;
   }
 
-  const btnConnect = document.getElementById(isWorkbench ? "btnConnectWorkbench" : "btnConnectDirect");
-  if (btnConnect) btnConnect.disabled = true;
+  actualizarUiEstadoConexion("connecting");
 
+  let targetUrl = "";
   try {
     logActividad(`Iniciando conexión directa por ${tipoTransporte.toUpperCase()}...`);
 
@@ -730,14 +776,45 @@ export async function conectarDispositivo(origen = "assistant") {
       transport = await TransportWebBluetooth.create();
     } else if (tipoTransporte === "http") {
       const inputId = isWorkbench ? "httpIpInputWorkbench" : "httpIpInput";
-      const host = document.getElementById(inputId)?.value.trim() || "meshtastic.local";
-      transport = new TransportHTTP(host, false);
+      let rawHost = (document.getElementById(inputId)?.value || "").trim();
+      if (!rawHost) {
+        rawHost = "meshtastic.local";
+      }
+
+      // Determinar protocolo y limpiar dirección
+      let isTls = false;
+      let cleanHost = rawHost;
+      if (/^https:\/\//i.test(cleanHost)) {
+        isTls = true;
+        cleanHost = cleanHost.replace(/^https:\/\//i, "");
+      } else if (/^http:\/\//i.test(cleanHost)) {
+        isTls = false;
+        cleanHost = cleanHost.replace(/^http:\/\//i, "");
+      }
+      // Quitar rutas o barras finales conservando el puerto
+      cleanHost = cleanHost.replace(/\/.*$/, "").trim();
+
+      targetUrl = `${isTls ? "https" : "http"}://${cleanHost}`;
+
+      // Advertencia preventiva si se carga el portal por HTTPS y el nodo usa HTTP (Mixed Content)
+      if (typeof window !== "undefined" && window.location.protocol === "https:" && !isTls) {
+        logActividad("⚠️ Advertencia: El portal está bajo HTTPS. Los navegadores bloquean peticiones HTTP a IPs locales (Mixed Content). Si la conexión falla, accede al portal por HTTP o utiliza USB Serial / Bluetooth.");
+      }
+
+      // Guardar último host en localStorage y sincronizar ambos campos
+      if (typeof window !== "undefined" && window.localStorage) {
+        localStorage.setItem("snm_last_http_host", cleanHost);
+      }
+      const otherInputId = isWorkbench ? "httpIpInput" : "httpIpInputWorkbench";
+      const otherInput = document.getElementById(otherInputId);
+      if (otherInput) otherInput.value = cleanHost;
+
+      transport = new TransportHTTP(targetUrl);
     }
 
     estado.transporte = transport;
     const device = new MeshDevice(transport);
     estado.dispositivo = device;
-    estado.nodoConectado = true;
 
     // Limpiar caché de secciones previas y mapa de nodos
     nodeInfoMap.clear();
@@ -750,11 +827,39 @@ export async function conectarDispositivo(origen = "assistant") {
     estado.moduleConfigSections = {};
     estado.channelMap.clear();
 
+    const statusNames = {
+      1: "Reiniciando (DeviceRestarting)",
+      2: "Desconectado (DeviceDisconnected)",
+      3: "Conectando (DeviceConnecting)",
+      4: "Reconectando (DeviceReconnecting)",
+      5: "Conectado (DeviceConnected)",
+      6: "Configurando (DeviceConfiguring)",
+      7: "Configurado (DeviceConfigured)",
+    };
+
     // Suscripción a eventos del dispositivo
     device.events.onDeviceStatus.subscribe((status) => {
-      logActividad(`Estado del enlace local: ${status}`);
-      if (status === 2 || status === "disconnected" || status === "DeviceDisconnected") {
-        actualizarUiEstadoConexion(false);
+      const statusText = statusNames[status] || status;
+      logActividad(`Estado del enlace local: ${statusText}`);
+
+      // 5 = DeviceConnected, 6 = DeviceConfiguring, 7 = DeviceConfigured
+      if (status === 5 || status === 6 || status === 7 || status === "connected" || status === "configured" || status === "DeviceConnected" || status === "DeviceConfigured") {
+        if (!estado.nodoConectado) {
+          actualizarUiEstadoConexion("connected");
+          logActividad("✓ Conexión establecida con éxito con el nodo Meshtastic.");
+        }
+      } else if (status === 2 || status === "disconnected" || status === "DeviceDisconnected") {
+        if (estado.nodoConectado) {
+          logActividad("Dispositivo local desconectado.");
+          desconectarDispositivo();
+        } else if (estado.conectando) {
+          const failMsg = tipoTransporte === "http"
+            ? `No se pudo conectar al nodo por WiFi (${targetUrl}). Verifica que la IP sea correcta, que el nodo esté encendido y en la misma red local.`
+            : `Fallo al establecer comunicación con el dispositivo (${tipoTransporte}).`;
+          logActividad(`❌ ${failMsg}`);
+          alert(failMsg);
+          desconectarDispositivo();
+        }
       }
     });
 
@@ -772,7 +877,10 @@ export async function conectarDispositivo(origen = "assistant") {
           if (u?.shortName) estado.ownerShort = u.shortName;
           if (u?.isUnmessagable !== undefined) estado.isUnmessagable = Boolean(u.isUnmessagable);
         }
-        actualizarUiEstadoConexion(true);
+        if (!estado.nodoConectado) {
+          actualizarUiEstadoConexion("connected");
+          logActividad("✓ Conexión confirmada por respuesta del nodo.");
+        }
         regenerarYamlLive();
       }
     });
@@ -851,8 +959,58 @@ export async function conectarDispositivo(origen = "assistant") {
       }
     });
 
-    actualizarUiEstadoConexion(true);
-    logActividad("✓ Conexión establecida con éxito con el nodo Meshtastic.");
+    // Esperar a confirmación de enlace con timeout de seguridad
+    logActividad("Esperando respuesta del dispositivo...");
+    await new Promise((resolve, reject) => {
+      const timeoutMs = tipoTransporte === "http" ? 12000 : 8000;
+      let resolved = false;
+
+      const timer = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          if (estado.nodoConectado) {
+            resolve();
+          } else {
+            reject(new Error(
+              tipoTransporte === "http"
+                ? `Tiempo de espera agotado al conectar por WiFi (${targetUrl}). Comprueba la IP y la red.`
+                : `Tiempo de espera agotado al conectar por ${tipoTransporte}.`
+            ));
+          }
+        }
+      }, timeoutMs);
+
+      const checkSub = () => {
+        if (estado.nodoConectado && !resolved) {
+          resolved = true;
+          clearTimeout(timer);
+          resolve();
+        }
+      };
+
+      device.events.onDeviceStatus.subscribe((s) => {
+        if (s === 5 || s === 6 || s === 7 || s === "connected" || s === "configured" || s === "DeviceConnected" || s === "DeviceConfigured") {
+          checkSub();
+        } else if (s === 2 || s === "disconnected" || s === "DeviceDisconnected") {
+          if (!resolved && !estado.nodoConectado) {
+            resolved = true;
+            clearTimeout(timer);
+            reject(new Error(
+              tipoTransporte === "http"
+                ? `El nodo en ${targetUrl} no responde o cerró la conexión.`
+                : "El dispositivo se desconectó durante el enlace."
+            ));
+          }
+        }
+      });
+
+      device.events.onMyNodeInfo.subscribe((info) => {
+        if (info && !resolved) {
+          checkSub();
+        }
+      });
+    });
+
     logActividad("Solicitando configuración al dispositivo...");
 
     // Handshake inicial para volcar ajustes completos
@@ -872,16 +1030,18 @@ export async function conectarDispositivo(origen = "assistant") {
       } catch (_) {}
     }
 
-    actualizarUiEstadoConexion(true);
+    actualizarUiEstadoConexion("connected");
     logActividad("✓ Parámetros iniciales leídos. Dispositivo listo para configurar.");
   } catch (e) {
-    actualizarUiEstadoConexion(false);
+    await desconectarDispositivo();
     logActividad(`Error de conexión: ${e.message}`);
     alert(`No se pudo conectar al dispositivo: ${e.message}`);
   }
 }
 
 export async function desconectarDispositivo() {
+  estado.conectando = false;
+  estado.nodoConectado = false;
   if (estado.dispositivo || estado.transporte) {
     try {
       if (estado.dispositivo) {
@@ -895,15 +1055,14 @@ export async function desconectarDispositivo() {
   }
   estado.transporte = null;
   estado.dispositivo = null;
-  estado.nodoConectado = false;
-  actualizarUiEstadoConexion(false);
+  actualizarUiEstadoConexion("disconnected");
   logActividad("Dispositivo desconectado.");
 }
 
 // --- Operaciones de Workbench (Modo Avanzado) ---
 export async function descargarConfiguracionNodo() {
   if (!estado.dispositivo || !estado.nodoConectado) {
-    alert("Debes conectar tu nodo primero por cable USB Serial o Bluetooth para leer su configuración.");
+    alert("Debes conectar tu nodo primero por cable USB Serial, Bluetooth o WiFi (HTTP) para leer su configuración.");
     logActividad("Intento de lectura sin dispositivo conectado.");
     return;
   }
@@ -940,7 +1099,7 @@ export function copiarLiveADeseado() {
 
 export async function aplicarDeseadoANodo() {
   if (!estado.dispositivo || !estado.nodoConectado) {
-    alert("Conecta tu nodo por cable USB Serial o Bluetooth para volcar los cambios.");
+    alert("Conecta tu nodo por cable USB Serial, Bluetooth o WiFi (HTTP) para volcar los cambios.");
     return;
   }
 
@@ -1121,7 +1280,7 @@ export async function aplicarDeseadoANodo() {
 // --- Programación directa desde el Asistente (Paso 4) ---
 export async function programarNodoDesdeAsistente() {
   if (!estado.dispositivo || !estado.nodoConectado) {
-    alert("Primero debes conectar tu nodo Meshtastic por cable USB Serial o Bluetooth.");
+    alert("Primero debes conectar tu nodo Meshtastic por cable USB Serial, Bluetooth o WiFi (HTTP).");
     return;
   }
 
@@ -1453,16 +1612,43 @@ function iniciarConfigurador() {
   document.getElementById("tabAssistantMode")?.addEventListener("click", () => setModo("asistente"));
   document.getElementById("tabWorkbenchMode")?.addEventListener("click", () => setModo("workbench"));
 
+  // Restaurar y sincronizar campos de IP / Host HTTP
+  const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+  const actualizarAdvertenciaMixedContent = (esHttp) => {
+    const warnAsst = document.getElementById("httpMixedContentWarning");
+    const warnWb = document.getElementById("httpMixedContentWarningWorkbench");
+    if (warnAsst) warnAsst.style.display = (esHttp && isHttps) ? "block" : "none";
+    if (warnWb) warnWb.style.display = (esHttp && isHttps) ? "block" : "none";
+  };
+
+  const inputAsst = document.getElementById("httpIpInput");
+  const inputWb = document.getElementById("httpIpInputWorkbench");
+  const storedHost = (typeof window !== "undefined" && window.localStorage)
+    ? (localStorage.getItem("snm_last_http_host") || "")
+    : "";
+  if (storedHost) {
+    if (inputAsst) inputAsst.value = storedHost;
+    if (inputWb) inputWb.value = storedHost;
+  }
+  inputAsst?.addEventListener("input", (e) => {
+    if (inputWb) inputWb.value = e.target.value;
+  });
+  inputWb?.addEventListener("input", (e) => {
+    if (inputAsst) inputAsst.value = e.target.value;
+  });
+
   document.getElementById("transportSelect")?.addEventListener("change", (e) => {
     const isHttp = e.target.value === "http";
     const httpGroup = document.getElementById("httpIpGroup");
     if (httpGroup) httpGroup.style.display = isHttp ? "flex" : "none";
+    actualizarAdvertenciaMixedContent(isHttp);
   });
 
   document.getElementById("transportSelectWorkbench")?.addEventListener("change", (e) => {
     const isHttp = e.target.value === "http";
     const httpGroup = document.getElementById("httpIpGroupWorkbench");
     if (httpGroup) httpGroup.style.display = isHttp ? "flex" : "none";
+    actualizarAdvertenciaMixedContent(isHttp);
   });
 
   document.getElementById("chkMqtt")?.addEventListener("change", actualizarConfiguracion);
