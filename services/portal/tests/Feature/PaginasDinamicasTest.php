@@ -345,9 +345,21 @@ class PaginasDinamicasTest extends TestCase
         $responseVacio->assertStatus(200);
         $responseVacio->assertJson([]);
 
-        // Con query suficiente responde JSON
-        $response = $this->get('/revisa-tu-nodo/buscar?q=CA01');
+        // Con query suficiente responde JSON con nodos coincidentes
+        $response = $this->get('/revisa-tu-nodo/buscar?q=al01');
         $response->assertStatus(200);
         $response->assertHeaderMissing('Set-Cookie');
+        $items = $response->json();
+        $this->assertIsArray($items);
+        $this->assertNotEmpty($items);
+        $this->assertSame('!91a2b3c4', $items[0]['id']);
+        $this->assertSame('AL01', $items[0]['short_name']);
+
+        // Búsqueda por formulario en la vista HTML
+        $responseHtml = $this->get('/revisa-tu-nodo?buscar=al01');
+        $responseHtml->assertStatus(200);
+        $responseHtml->assertSee('AL01');
+        $responseHtml->assertSee('!91a2b3c4');
+        $responseHtml->assertSee('Resultados para &quot;al01&quot; (1)', false);
     }
 }

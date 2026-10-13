@@ -34,6 +34,9 @@ class Diagnostico
         return Fuente::recordar('buscar_nodos', $params, 60, function () use ($termino, $limit) {
             $like = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $termino).'%';
 
+            $driver = DB::connection('ingesta')->getDriverName();
+            $likeOp = $driver === 'pgsql' ? 'ilike' : 'like';
+
             $items = DB::connection('ingesta')
                 ->table('api_nodes')
                 ->select([
@@ -48,10 +51,10 @@ class Diagnostico
                     'is_gateway',
                     'is_router',
                 ])
-                ->where(function ($q) use ($like) {
-                    $q->where('id', 'ilike', $like)
-                        ->orWhere('short_name', 'ilike', $like)
-                        ->orWhere('long_name', 'ilike', $like);
+                ->where(function ($q) use ($like, $likeOp) {
+                    $q->where('id', $likeOp, $like)
+                        ->orWhere('short_name', $likeOp, $like)
+                        ->orWhere('long_name', $likeOp, $like);
                 })
                 ->orderByDesc('last_seen')
                 ->limit($limit)

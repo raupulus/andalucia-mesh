@@ -368,6 +368,48 @@ class ListCoordinatedRouters extends ListRecords
             foreach ($coords as $nodeId => $c) {
                 $connection->table('api_routers')->where('id', $nodeId)->whereNull('latitude')->update($c);
             }
+
+            if (Schema::connection('ingesta')->hasTable('api_nodes')) {
+                $ingestaSchema = Schema::connection('ingesta');
+                $hasLat = $ingestaSchema->hasColumn('api_nodes', 'latitude');
+                $hasHopsMin = $ingestaSchema->hasColumn('api_nodes', 'hops_min_last');
+                $hasFirstSeen = $ingestaSchema->hasColumn('api_nodes', 'first_seen');
+                $hasNodeInfoAt = $ingestaSchema->hasColumn('api_nodes', 'nodeinfo_at');
+
+                $routers = $connection->table('api_routers')->get();
+                $nowStr = Carbon::now()->toDateTimeString();
+                foreach ($routers as $r) {
+                    if (! $connection->table('api_nodes')->where('id', $r->id)->exists()) {
+                        $row = [
+                            'id' => $r->id,
+                            'short_name' => $r->short_name,
+                            'long_name' => $r->long_name,
+                            'role' => $r->role ?? 'ROUTER',
+                            'hw_model' => $r->hw_model ?? 'HELTEC_V3',
+                            'firmware' => '2.5.6',
+                            'province' => $r->province,
+                            'hop_start_last' => 3,
+                            'is_gateway' => (bool) ($r->is_gateway ?? false),
+                            'is_router' => true,
+                            'last_seen' => $r->last_seen ?? $nowStr,
+                        ];
+                        if ($hasLat) {
+                            $row['latitude'] = $r->latitude ?? null;
+                            $row['longitude'] = $r->longitude ?? null;
+                        }
+                        if ($hasHopsMin) {
+                            $row['hops_min_last'] = 1;
+                        }
+                        if ($hasFirstSeen) {
+                            $row['first_seen'] = $r->last_seen ?? $nowStr;
+                        }
+                        if ($hasNodeInfoAt) {
+                            $row['nodeinfo_at'] = $r->last_seen ?? $nowStr;
+                        }
+                        $connection->table('api_nodes')->insert($row);
+                    }
+                }
+            }
         }
     }
 }

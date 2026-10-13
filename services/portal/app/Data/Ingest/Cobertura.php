@@ -73,11 +73,14 @@ class Cobertura
 
         // Buscar en base de datos de ingesta si está disponible (priorizando nodos activos recientemente)
         try {
+            $driver = DB::connection('ingesta')->getDriverName();
+            $likeOp = $driver === 'pgsql' ? 'ilike' : 'like';
+
             $row = DB::connection('ingesta')
                 ->table('api_nodes')
-                ->where(function ($q) use ($term) {
-                    $q->where('short_name', 'ilike', $term)
-                        ->orWhere('long_name', 'ilike', $term);
+                ->where(function ($q) use ($term, $likeOp) {
+                    $q->where('short_name', $likeOp, $term)
+                        ->orWhere('long_name', $likeOp, $term);
                 })
                 ->orderByDesc('last_seen')
                 ->first();
@@ -117,6 +120,9 @@ class Cobertura
             $like = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $termino).'%';
 
             try {
+                $driver = DB::connection('ingesta')->getDriverName();
+                $likeOp = $driver === 'pgsql' ? 'ilike' : 'like';
+
                 $items = DB::connection('ingesta')
                     ->table('api_nodes')
                     ->select([
@@ -133,10 +139,10 @@ class Cobertura
                         'is_gateway',
                         'is_router',
                     ])
-                    ->where(function ($q) use ($like) {
-                        $q->where('id', 'ilike', $like)
-                            ->orWhere('short_name', 'ilike', $like)
-                            ->orWhere('long_name', 'ilike', $like);
+                    ->where(function ($q) use ($like, $likeOp) {
+                        $q->where('id', $likeOp, $like)
+                            ->orWhere('short_name', $likeOp, $like)
+                            ->orWhere('long_name', $likeOp, $like);
                     })
                     ->orderByDesc('last_seen')
                     ->limit($limit)

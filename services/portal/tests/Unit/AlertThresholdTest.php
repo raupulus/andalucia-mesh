@@ -132,6 +132,8 @@ class AlertThresholdTest extends TestCase
             $table->string('hw_model')->nullable();
             $table->string('firmware')->nullable();
             $table->string('province')->nullable();
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
             $table->string('last_seen')->nullable();
             $table->integer('hop_start_last')->nullable();
             $table->boolean('is_gateway')->default(false);

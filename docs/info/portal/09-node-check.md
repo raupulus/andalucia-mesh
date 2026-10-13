@@ -37,6 +37,8 @@ Que cualquiera sepa en un minuto si su nodo perjudica a la malla y qué cambiar,
 ## Contratos propios
 
 - Rutas `revisa-tu-nodo` (`GET`, opcional `q`), `revisa-tu-nodo/buscar` (`GET`, parámetro `q` para autocompletado en JSON) y `revisa-tu-nodo/{id}` (id normalizado como en la API; uno no válido → `404`).
+- **Compatibilidad de motor de base de datos:** El operador de búsqueda en `api_nodes` adapta su sintaxis de forma dinámica según el driver activo (`ILIKE` en PostgreSQL de producción para coincidencia insensible a mayúsculas/minúsculas sobre `id`, `short_name` y `long_name`, y `LIKE` en SQLite para entornos de desarrollo y test, previniendo errores de sintaxis).
+- **Sincronización en desarrollo local:** En entornos SQLite, la tabla `api_nodes` se puebla y sincroniza automáticamente con los routers de infraestructura (`api_routers`) junto a tablas auxiliares (`api_node_intervals`, `api_node_battery_daily`, `api_node_reboots_daily`), garantizando que cualquier router visible en el portal pueda ser buscado y auditado de inmediato.
 - `lang/es/diagnostico.php`: título por `check` (`telemetry-interval`, `environment-interval`, `nodeinfo-interval`, `position-interval`, `battery-low-sustained`, `reboots`, `hops`, `role`, `channel-busy`).
 - Anclas de `/configura-tu-nodo` (`03-node-setup-guide.md`).
 
@@ -57,4 +59,4 @@ Que cualquiera sepa en un minuto si su nodo perjudica a la malla y qué cambiar,
 6. **Dado** la página de resultado, **cuando** se inspeccionan cabeceras, **entonces** `X-Robots-Tag: noindex` y ninguna cookie.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-11
+> Creado: 2026-10-07 · Última revisión: 2026-10-14
