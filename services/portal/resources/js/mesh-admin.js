@@ -273,6 +273,7 @@ export function meshAdminComponent() {
         adminSessionTimes: {},           // Marcas de tiempo de emisión de SessionKey: { [nodeNum]: timestampMs }
         _sessionKeyWaiters: {},           // Resolvers para ensureSessionKey
         _adminAckWaiters: {},             // Resolvers para confirmaciones remotas de órdenes (hasta 60s)
+        _sentPackets: {},                 // Registro de paquetes transmitidos para asociar errores de enrutamiento a su destino real
         _nodeInfoCount: 0,                // Contador de nodos recibidos de la radio local
         _pkNodeCount: 0,                  // Contador de nodos con clave pública de 32 bytes
         _nodeInfoSummaryTimer: null,      // Temporizador para resumen de NodeDB
@@ -952,24 +953,29 @@ export function meshAdminComponent() {
                             const errCode = routing.variant.value;
                             const reqId = decoded.requestId || packet.id;
                             const isLoopbackLocal = (fromHex === this.localNode.hexId && toHex === this.localNode.hexId);
+                            const sent = this._sentPackets?.[reqId];
+                            const destTargetHex = sent?.targetHex || (toHex !== this.localNode.hexId ? toHex : (this.selectedRouterHex || 'desconocido'));
 
-                            // Notificar waiters de órdenes administrativas pendientes si no es un loopback local
-                            if (!isLoopbackLocal) {
+                            // Notificar waiters de órdenes administrativas pendientes
+                            if (errCode !== Routing_Error.NONE) {
                                 if (this._adminAckWaiters[reqId]) {
-                                    if (errCode === Routing_Error.NONE) {
-                                        this._adminAckWaiters[reqId].resolve(reqId);
-                                    } else {
-                                        this._adminAckWaiters[reqId].reject({ error: errCode, id: reqId, fromHex });
-                                    }
+                                    this._adminAckWaiters[reqId].reject({ error: errCode, id: reqId, fromHex, targetHex: destTargetHex });
                                 } else {
                                     // Comprobar si coincide por targetNum
                                     for (const [wId, waiter] of Object.entries(this._adminAckWaiters)) {
+                                        if (waiter.targetNum === fromNum || (sent && waiter.targetNum === sent.targetNum)) {
+                                            waiter.reject({ error: errCode, id: reqId, fromHex, targetHex: destTargetHex });
+                                            break;
+                                        }
+                                    }
+                                }
+                            } else if (!isLoopbackLocal) {
+                                if (this._adminAckWaiters[reqId]) {
+                                    this._adminAckWaiters[reqId].resolve(reqId);
+                                } else {
+                                    for (const [wId, waiter] of Object.entries(this._adminAckWaiters)) {
                                         if (waiter.targetNum === fromNum) {
-                                            if (errCode === Routing_Error.NONE) {
-                                                waiter.resolve(reqId);
-                                            } else {
-                                                waiter.reject({ error: errCode, id: reqId, fromHex });
-                                            }
+                                            waiter.resolve(reqId);
                                             break;
                                         }
                                     }
@@ -986,14 +992,23 @@ export function meshAdminComponent() {
                                     this.log('ack', `✅ Confirmación ACK de ${fromHex} hacia ${toHex} (ReqID: ${reqId}) ${meta ? `[${meta}]` : ''}`);
                                 }
                             } else if (errCode === 39 || errCode === Routing_Error.PKI_UNKNOWN_PUBKEY) {
-                                this.log('error', `❌ El nodo ${toHex} no responde por radio LoRa o no está en cobertura de tu antena (ReqID: ${reqId})`);
+                                if (isLoopbackLocal) {
+                                    this.log('error', `❌ El router ${destTargetHex} no responde por radio LoRa o no está en la memoria de claves públicas de tu antena (ReqID: ${reqId})`);
+                                } else {
+                                    this.log('error', `❌ El router ${destTargetHex} no responde por radio LoRa o no está en cobertura de tu antena (ReqID: ${reqId})`);
+                                }
                             } else if (errCode === 36 || errCode === 53 || errCode === Routing_Error.ADMIN_BAD_SESSION_KEY) {
                                 delete this.adminSessions[fromNum];
                                 delete this.adminSessionTimes[fromNum];
+                                if (sent?.targetNum) {
+                                    delete this.adminSessions[sent.targetNum];
+                                    delete this.adminSessionTimes[sent.targetNum];
+                                }
                                 this.log('error', `❌ Rechazo [ADMIN_BAD_SESSION_KEY] de ${fromHex}: Pase de sesión administrativo caducado o no válido. Clave invalidada para renovación.`);
                             } else {
                                 const desc = ROUTING_ERROR_DESCRIPTIONS[errCode] || `Código ${errCode}`;
-                                this.log('error', `❌ Rechazo de enrutamiento [${desc}] de ${fromHex} (ReqID: ${reqId}) ${meta ? `[${meta}]` : ''}`);
+                                const targetDesc = destTargetHex && destTargetHex !== fromHex ? ` hacia ${destTargetHex}` : '';
+                                this.log('error', `❌ Rechazo de enrutamiento [${desc}] de ${fromHex}${targetDesc} (ReqID: ${reqId}) ${meta ? `[${meta}]` : ''}`);
                             }
                         } else if (routing.variant?.case === 'routeReply') {
                             this.log('rx', `Respuesta de ruta (routeReply) recibida de ${fromHex} hacia ${toHex}`);
@@ -1744,6 +1759,14 @@ export function meshAdminComponent() {
             const isBroadcast = destinationNum === Constants.broadcastNum;
             const randId = packetId || this._device.generateRandId();
             const fromNum = this.localNode.nodeNum || this._device.myNodeInfo?.myNodeNum || 0;
+
+            this._sentPackets = this._sentPackets || {};
+            this._sentPackets[randId] = {
+                targetNum: destinationNum,
+                targetHex: numToHex(destinationNum),
+                portNum: portNum,
+                timestamp: Date.now(),
+            };
 
             const meshPacket = create(MeshPacketSchema, {
                 id: randId,
