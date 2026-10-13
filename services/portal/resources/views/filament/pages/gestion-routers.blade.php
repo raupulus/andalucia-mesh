@@ -338,6 +338,39 @@
                 border-radius: 0.625rem;
             }
 
+            .fi-ra-btn-current-router {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                padding: 0.65rem 1rem;
+                font-size: 0.825rem;
+                font-weight: 600;
+                border-radius: 0.5rem;
+                background: linear-gradient(135deg, #007A33 0%, #15612F 100%);
+                color: #FFFFFF;
+                border: 1px solid #00662A;
+                cursor: pointer;
+                transition: all 0.15s ease;
+                white-space: nowrap;
+                flex-shrink: 0;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            }
+            .fi-ra-btn-current-router:hover {
+                background: linear-gradient(135deg, #008f3c 0%, #1a7438 100%);
+                box-shadow: 0 4px 12px rgba(0, 122, 51, 0.35);
+                transform: translateY(-1px);
+            }
+            .fi-ra-btn-current-router:active {
+                transform: translateY(0);
+            }
+            .dark .fi-ra-btn-current-router {
+                background: linear-gradient(135deg, #007A33 0%, #15612F 100%);
+                border-color: #67EA94;
+            }
+            .dark .fi-ra-btn-current-router:hover {
+                box-shadow: 0 4px 14px rgba(103, 234, 148, 0.3);
+            }
+
             /* Ficha de nodo conectado */
             .fi-ra-node-banner {
                 background: linear-gradient(135deg, rgba(0, 122, 51, 0.08) 0%, rgba(103, 234, 148, 0.06) 100%);
@@ -2561,9 +2594,96 @@
                         </p>
                     </div>
 
-                    <div class="fi-ra-form-group">
-                        <label class="fi-ra-label">{{ __('admin.gestion_routers.unicast_target_label') }}</label>
-                        <input type="text" x-model="unicastTargetInput" :placeholder="selectedRouterHex ? `Por defecto router actual: ${selectedRouterHex}` : 'Introduce !hex o decimal'" class="fi-ra-input font-mono" />
+                    {{-- Barra de búsqueda más estrecha, centrada y separada de los botones inferiores --}}
+                    <div class="max-w-xl mx-auto mb-8">
+                        <label class="fi-ra-label text-center block mb-2 font-medium">
+                            {{ __('admin.gestion_routers.unicast_target_label') }}
+                        </label>
+
+                        <div class="flex items-center gap-2">
+                            {{-- Botón verde "Router Actual" a la izquierda --}}
+                            <button type="button"
+                                    @click="setUnicastTargetToActiveRouter()"
+                                    class="fi-ra-btn-current-router"
+                                    title="Escribir el ID del router seleccionado actualmente (Opción A o B)">
+                                <span>📡</span>
+                                <span>Router Actual</span>
+                            </button>
+
+                            {{-- Campo de búsqueda con autocompletado entre todos los nodos --}}
+                            <div class="fi-ra-suggestions-container flex-1" @click.outside="showUnicastSuggestions = false">
+                                <div class="relative flex items-center">
+                                    <input type="text"
+                                           x-model="unicastTargetInput"
+                                           @input="onUnicastInputChange()"
+                                           @focus="if (unicastTargetInput && unicastTargetInput.trim()) { showUnicastSuggestions = true; updateUnicastSuggestions(); }"
+                                           @keydown.arrow-down.prevent="if (unicastSuggestions.length > 0) { unicastHighlightIndex = (unicastHighlightIndex + 1) % unicastSuggestions.length; }"
+                                           @keydown.arrow-up.prevent="if (unicastSuggestions.length > 0) { unicastHighlightIndex = (unicastHighlightIndex - 1 + unicastSuggestions.length) % unicastSuggestions.length; }"
+                                           @keydown.enter.prevent="if (unicastHighlightIndex >= 0 && unicastSuggestions[unicastHighlightIndex]) { selectUnicastNodeCandidate(unicastSuggestions[unicastHighlightIndex]); }"
+                                           @keydown.escape.prevent="showUnicastSuggestions = false"
+                                           :placeholder="getActiveRouterHex() ? `Por defecto: ${getActiveRouterHex()} o busca por nombre` : 'Introduce !hex, decimal o busca por nombre'"
+                                           class="fi-ra-input font-mono w-full" />
+                                    <template x-if="unicastSearchingRemote">
+                                        <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                            <div class="fi-ra-spinner-mini"></div>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                {{-- Menú de Sugerencias Predictivas Flotantes --}}
+                                <ul x-show="showUnicastSuggestions && (unicastSuggestions.length > 0 || (unicastTargetInput && unicastTargetInput.trim().length >= 2))"
+                                    x-transition
+                                    class="fi-ra-suggestions-dropdown">
+                                    <template x-for="(sug, sIdx) in unicastSuggestions" :key="sug.hex">
+                                        <li class="fi-ra-suggestion-item"
+                                            :class="{ 'active': sIdx === unicastHighlightIndex }"
+                                            @mouseenter="unicastHighlightIndex = sIdx"
+                                            @mousedown.prevent="selectUnicastNodeCandidate(sug)">
+                                            <div class="fi-ra-suggestion-main">
+                                                <div class="fi-ra-suggestion-title">
+                                                    <span x-text="sug.shortName || sug.hex"></span>
+                                                    <span class="fi-ra-suggestion-hex" x-text="sug.hex"></span>
+                                                </div>
+                                                <div class="fi-ra-suggestion-desc" x-text="sug.longName || sug.hex"></div>
+                                            </div>
+                                            <div class="fi-ra-suggestion-badges">
+                                                <template x-if="sug.province && sug.province !== '-'">
+                                                    <span class="fi-ra-badge-prov" x-text="sug.province"></span>
+                                                </template>
+                                                <template x-if="sug.role">
+                                                    <span class="fi-ra-badge-role" x-text="sug.role"></span>
+                                                </template>
+                                                <template x-if="sug.isCustom">
+                                                    <span class="fi-ra-badge-custom">Manual</span>
+                                                </template>
+                                            </div>
+                                        </li>
+                                    </template>
+                                    <template x-if="unicastSuggestions.length === 0 && !unicastSearchingRemote">
+                                        <li class="fi-ra-suggestion-empty">
+                                            <span>No se encontraron nodos coincidentes con "<strong x-text="unicastTargetInput"></strong>"</span>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
+
+                        {{-- Ayuda / Indicador del destinatario actual --}}
+                        <div class="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">
+                            <template x-if="unicastTargetInput && unicastTargetInput.trim()">
+                                <span>Destino: <strong class="font-mono text-emerald-600 dark:text-emerald-400" x-text="unicastTargetInput.trim()"></strong></span>
+                            </template>
+                            <template x-if="!unicastTargetInput || !unicastTargetInput.trim()">
+                                <span>
+                                    <template x-if="getActiveRouterHex()">
+                                        <span>Sin valor escrito: se enviará por defecto al router actual (<strong class="font-mono text-emerald-600 dark:text-emerald-400" x-text="getActiveRouterHex()"></strong>).</span>
+                                    </template>
+                                    <template x-if="!getActiveRouterHex()">
+                                        <span>Indica un nodo destino o selecciona un router en la barra superior.</span>
+                                    </template>
+                                </span>
+                            </template>
+                        </div>
                     </div>
 
                     <div class="fi-ra-action-grid fi-ra-action-grid-5">

@@ -509,5 +509,23 @@ class GestionRoutersTest extends TestCase
         $response->assertSee('fi-ra-suggestions-dropdown', false);
         $response->assertSee('CA01');
     }
+
+    /**
+     * Comprueba que la pestaña de petición a un nodo incluye el botón verde de Router Actual y sugerencias predictivas.
+     */
+    public function test_peticion_a_nodo_incluye_boton_router_actual_y_buscador_predictivo(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/admin/gestion-routers');
+
+        $response->assertSuccessful();
+        $response->assertSee('fi-ra-btn-current-router', false);
+        $response->assertSee('setUnicastTargetToActiveRouter', false);
+        $response->assertSee('Router Actual');
+        $response->assertSee('onUnicastInputChange', false);
+        $response->assertSee('unicastSuggestions', false);
+        $response->assertSee('max-w-xl mx-auto mb-8', false);
+    }
 }
 

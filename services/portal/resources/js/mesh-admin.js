@@ -222,6 +222,12 @@ export function meshAdminComponent() {
         pollSending: false,
         unicastSending: false,
         unicastTargetInput: '',
+        showUnicastSuggestions: false,
+        unicastSuggestions: [],
+        unicastHighlightIndex: -1,
+        unicastSearchingRemote: false,
+        unicastSearchTimer: null,
+        remoteUnicastResults: [],
 
         // Datos de mantenimiento / reinicio
         rebootSeconds: 10,
@@ -2430,6 +2436,181 @@ export function meshAdminComponent() {
         },
 
         /**
+         * Asigna el ID del router actualmente seleccionado (en Opción A o B) al campo de petición unicast.
+         */
+        setUnicastTargetToActiveRouter() {
+            let activeHex = '';
+            try {
+                const targetNum = this.resolveTargetNodeNum();
+                activeHex = numToHex(targetNum);
+            } catch {
+                activeHex = this.selectedRouterHex || (this.manualNodeInput ? this.manualNodeInput.trim() : '');
+            }
+
+            if (activeHex && activeHex !== '!00000000') {
+                this.unicastTargetInput = activeHex.startsWith('!') ? activeHex : `!${activeHex}`;
+                this.showUnicastSuggestions = false;
+                this.unicastSuggestions = [];
+                this.setNotification('info', `Destinatario establecido al router actual: ${this.unicastTargetInput}`);
+                this.log('info', `🎯 Destinatario unicast fijado al router actual: ${this.unicastTargetInput}`);
+            } else {
+                this.setNotification('warning', 'Selecciona primero un router en la Opción A (desplegable) o en la Opción B (búsqueda manual).');
+            }
+        },
+
+        /**
+         * Maneja cambios cuando el operador escribe en el campo de destinatario unicast.
+         * Despliega sugerencias predictivas de todos los nodos conocidos y catálogo.
+         */
+        onUnicastInputChange() {
+            const raw = (this.unicastTargetInput || '').trim();
+            if (!raw) {
+                this.showUnicastSuggestions = false;
+                this.unicastSuggestions = [];
+                return;
+            }
+
+            this.showUnicastSuggestions = true;
+            this.unicastHighlightIndex = -1;
+            this.updateUnicastSuggestions();
+
+            // Si es un ID hexadecimal o decimal completo, auto-seleccionar si coincide exactamente
+            const isFullHex = /^!?([0-9a-fA-F]{8})$/.test(raw);
+            const isFullDec = /^\d{8,10}$/.test(raw);
+            if (isFullHex || isFullDec) {
+                const cleanHex = raw.startsWith('!') ? raw : (isFullHex ? `!${raw}` : numToHex(Number(raw)));
+                const matched = this.unicastSuggestions.find(s => s.hex.toLowerCase() === cleanHex.toLowerCase());
+                if (matched) {
+                    this.selectUnicastNodeCandidate(matched, false);
+                }
+            }
+
+            // Búsqueda asíncrona remota con debounce a /mi-cobertura/buscar
+            clearTimeout(this.unicastSearchTimer);
+            if (raw.length >= 2) {
+                this.unicastSearchTimer = setTimeout(async () => {
+                    try {
+                        this.unicastSearchingRemote = true;
+                        const resp = await fetch('/mi-cobertura/buscar?q=' + encodeURIComponent(raw));
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            if (Array.isArray(data) && data.length > 0) {
+                                this.remoteUnicastResults = data;
+                                this.updateUnicastSuggestions();
+                            }
+                        }
+                    } catch {
+                        // Silencioso ante fallos de red
+                    } finally {
+                        this.unicastSearchingRemote = false;
+                    }
+                }, 180);
+            }
+        },
+
+        /**
+         * Actualiza el listado de sugerencias predictivas para el destinatario de la petición unicast.
+         */
+        updateUnicastSuggestions() {
+            const raw = (this.unicastTargetInput || '').trim();
+            if (!raw) {
+                this.unicastSuggestions = [];
+                return;
+            }
+
+            const q = stripAccents(raw);
+            const cleanQ = q.replace(/^!/, '');
+            const map = new Map();
+
+            // 1. Nodos de catálogo de la plataforma y de la sesión local de radio
+            const localNodes = this.getAllAvailableNodes();
+            for (const n of localNodes) {
+                const hexKey = (n.hex || '').toLowerCase().replace(/^!/, '');
+                const sName = stripAccents(n.shortName || '');
+                const lName = stripAccents(n.longName || '');
+                const prov = stripAccents(n.province || '');
+                const decStr = String(n.num || '');
+
+                const matches = hexKey.includes(cleanQ) ||
+                                sName.includes(q) ||
+                                lName.includes(q) ||
+                                prov.includes(q) ||
+                                decStr.startsWith(q);
+
+                if (matches) {
+                    map.set(hexKey, {
+                        hex: n.hex.startsWith('!') ? n.hex : `!${n.hex}`,
+                        num: n.num,
+                        shortName: n.shortName || '',
+                        longName: n.longName || '',
+                        province: n.province || '',
+                        role: n.role || 'ROUTER',
+                        status: n.status || 'known',
+                    });
+                }
+            }
+
+            // 2. Resultados remotos recibidos por la API /mi-cobertura/buscar
+            if (Array.isArray(this.remoteUnicastResults)) {
+                for (const r of this.remoteUnicastResults) {
+                    const rHex = (r.id || '').toLowerCase().replace(/^!/, '');
+                    if (!map.has(rHex)) {
+                        const num = parseNodeNum(r.id);
+                        map.set(rHex, {
+                            hex: r.id.startsWith('!') ? r.id : `!${r.id}`,
+                            num: num,
+                            shortName: r.short_name || '',
+                            longName: r.long_name || '',
+                            province: r.province || '',
+                            role: r.role || 'CLIENT',
+                            status: 'known',
+                        });
+                    }
+                }
+            }
+
+            const results = Array.from(map.values());
+
+            // 3. Si el término es un Node ID completo válido que no conste en BD, ofrecer opción manual
+            const isFullHex = /^!?([0-9a-fA-F]{8})$/.test(raw);
+            const isFullDec = /^\d{8,10}$/.test(raw) && Number(raw) > 0;
+            if (isFullHex || isFullDec) {
+                const manualNum = parseNodeNum(raw);
+                const manualHex = numToHex(manualNum);
+                const manualKey = manualHex.toLowerCase().replace(/^!/, '');
+                if (!map.has(manualKey)) {
+                    results.unshift({
+                        hex: manualHex,
+                        num: manualNum,
+                        shortName: manualHex.substring(manualHex.length - 4),
+                        longName: `Nodo Manual ${manualHex}`,
+                        province: '',
+                        role: 'MANUAL',
+                        status: 'known',
+                        isCustom: true,
+                    });
+                }
+            }
+
+            this.unicastSuggestions = results.slice(0, 15);
+        },
+
+        /**
+         * Selecciona un nodo candidato del desplegable de sugerencias para peticiones unicast.
+         *
+         * @param {Object} item
+         * @param {boolean} [closeSuggestions=true]
+         */
+        selectUnicastNodeCandidate(item, closeSuggestions = true) {
+            if (!item) return;
+            this.unicastTargetInput = item.hex;
+            if (closeSuggestions) {
+                this.showUnicastSuggestions = false;
+            }
+            this.log('info', `🎯 Destinatario unicast fijado: ${item.shortName || item.hex} (${item.hex})`);
+        },
+
+        /**
          * Envía una petición unicast a un único nodo específico.
          */
         async sendUnicastRequest(reqType) {
@@ -2442,8 +2623,18 @@ export function meshAdminComponent() {
             let targetHex = '';
             try {
                 let targetNum;
-                if (this.unicastTargetInput.trim()) {
-                    targetNum = parseNodeNum(this.unicastTargetInput);
+                const rawTarget = (this.unicastTargetInput || '').trim();
+                if (rawTarget) {
+                    const matched = this.getAllAvailableNodes().find(n =>
+                        (n.hex && n.hex.toLowerCase() === rawTarget.toLowerCase()) ||
+                        (n.shortName && n.shortName.toLowerCase() === rawTarget.toLowerCase()) ||
+                        (n.longName && n.longName.toLowerCase() === rawTarget.toLowerCase())
+                    );
+                    if (matched) {
+                        targetNum = matched.num;
+                    } else {
+                        targetNum = parseNodeNum(rawTarget);
+                    }
                 } else {
                     targetNum = this.resolveTargetNodeNum();
                 }
