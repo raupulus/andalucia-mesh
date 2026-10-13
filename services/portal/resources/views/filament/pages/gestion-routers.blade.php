@@ -1093,6 +1093,397 @@
             .dark .fi-ra-step-desc {
                 color: #C7C8D4;
             }
+
+            /* Pestaña Configuración Remota de Routers */
+            .fi-ra-config-pane {
+                display: flex;
+                flex-direction: column;
+                gap: 1.75rem;
+            }
+            .fi-ra-config-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 1.25rem;
+            }
+            .fi-ra-config-title {
+                font-size: 1.05rem;
+                font-weight: 800;
+                color: #2C2D3C;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin: 0;
+            }
+            .dark .fi-ra-config-title {
+                color: #F0F0F5;
+            }
+            .fi-ra-config-desc {
+                font-size: 0.8125rem;
+                color: #515267;
+                margin-top: 0.35rem;
+                line-height: 1.5;
+                max-width: 50rem;
+                margin-bottom: 0;
+            }
+            .dark .fi-ra-config-desc {
+                color: #C7C8D4;
+            }
+            .fi-ra-config-actions {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                flex-wrap: wrap;
+            }
+            .fi-ra-config-last-sync {
+                font-size: 0.775rem;
+                font-family: 'Ubuntu Mono', monospace;
+                color: #515267;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                background-color: #F1F2F6;
+                padding: 0.45rem 0.85rem;
+                border-radius: 0.5rem;
+                border: 1px solid #E0E1EB;
+            }
+            .dark .fi-ra-config-last-sync {
+                color: #C7C8D4;
+                background-color: #1A1B23;
+                border-color: #353644;
+            }
+
+            .fi-ra-prompt-banner {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.85rem 1.15rem;
+                border-radius: 0.75rem;
+                font-size: 0.8125rem;
+                font-weight: 600;
+                background-color: rgba(245, 158, 11, 0.1);
+                border: 1.5px solid rgba(245, 158, 11, 0.35);
+                color: #92400E;
+            }
+            .dark .fi-ra-prompt-banner {
+                background-color: rgba(245, 158, 11, 0.15);
+                border-color: rgba(245, 158, 11, 0.4);
+                color: #FCD34D;
+            }
+
+            /* Rejilla de Tarjetas de Configuración */
+            .fi-ra-config-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            @media (min-width: 1024px) {
+                .fi-ra-config-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 1.75rem;
+                }
+            }
+            .fi-ra-config-card {
+                background-color: #FFFFFF;
+                border: 1.5px solid #E0E1EB;
+                border-radius: 1rem;
+                padding: 1.5rem 1.65rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                gap: 1.25rem;
+                box-shadow: 0 2px 8px rgba(44, 45, 60, 0.03);
+                transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+            .dark .fi-ra-config-card {
+                background-color: #1F2029;
+                border-color: #3D3E4D;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+            .fi-ra-config-card:hover {
+                border-color: #007A33;
+                box-shadow: 0 6px 16px rgba(0, 122, 51, 0.08);
+            }
+            .dark .fi-ra-config-card:hover {
+                border-color: #67EA94;
+                box-shadow: 0 6px 16px rgba(103, 234, 148, 0.12);
+            }
+            .fi-ra-config-card-full {
+                grid-column: 1 / -1;
+            }
+
+            .fi-ra-config-card-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 0.75rem;
+                margin-bottom: 0.35rem;
+            }
+            .fi-ra-config-card-title {
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: #2C2D3C;
+                display: flex;
+                align-items: center;
+                gap: 0.45rem;
+                margin: 0;
+            }
+            .dark .fi-ra-config-card-title {
+                color: #F0F0F5;
+            }
+            .fi-ra-config-card-desc {
+                font-size: 0.7875rem;
+                color: #515267;
+                line-height: 1.45;
+                margin: 0;
+            }
+            .dark .fi-ra-config-card-desc {
+                color: #C7C8D4;
+            }
+
+            .fi-ra-config-card-body {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                margin-top: 1rem;
+                flex: 1;
+            }
+
+            .fi-ra-config-subgrid-3 {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 0.85rem;
+            }
+            @media (min-width: 640px) {
+                .fi-ra-config-subgrid-3 {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+            }
+
+            .fi-ra-config-subgrid-owner {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 0.85rem;
+            }
+            @media (min-width: 640px) {
+                .fi-ra-config-subgrid-owner {
+                    grid-template-columns: 2fr 1fr;
+                }
+            }
+
+            .fi-ra-config-subgrid-env {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                align-items: center;
+            }
+            @media (min-width: 640px) {
+                .fi-ra-config-subgrid-env {
+                    grid-template-columns: 1fr 1fr;
+                }
+            }
+
+            .fi-ra-config-card-footer {
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                padding-top: 1.15rem;
+                border-top: 1px solid #E0E1EB;
+                margin-top: auto;
+            }
+            .dark .fi-ra-config-card-footer {
+                border-top-color: #353644;
+            }
+
+            .fi-ra-preset-group {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                flex-wrap: wrap;
+                margin-top: 0.45rem;
+            }
+            .fi-ra-preset-pill {
+                padding: 0.3rem 0.65rem;
+                font-size: 0.725rem;
+                font-weight: 600;
+                border-radius: 0.4rem;
+                border: 1px solid #D5D7E2;
+                background-color: #F8F9FA;
+                color: #515267;
+                cursor: pointer;
+                transition: all 0.15s ease;
+            }
+            .dark .fi-ra-preset-pill {
+                border-color: #3D3E4D;
+                background-color: #181920;
+                color: #C7C8D4;
+            }
+            .fi-ra-preset-pill:hover {
+                background-color: #E8F5E9;
+                border-color: #007A33;
+                color: #007A33;
+            }
+            .dark .fi-ra-preset-pill:hover {
+                background-color: rgba(103, 234, 148, 0.15);
+                border-color: #67EA94;
+                color: #67EA94;
+            }
+            .fi-ra-preset-pill-active {
+                background-color: rgba(0, 122, 51, 0.12);
+                border-color: #007A33;
+                color: #007A33;
+                font-weight: 700;
+            }
+            .dark .fi-ra-preset-pill-active {
+                background-color: rgba(103, 234, 148, 0.2);
+                border-color: #67EA94;
+                color: #67EA94;
+            }
+
+            .fi-ra-checkbox-box {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.85rem 1rem;
+                border-radius: 0.625rem;
+                border: 1.5px solid #E0E1EB;
+                background-color: #F8F9FA;
+                cursor: pointer;
+                transition: all 0.15s ease;
+            }
+            .dark .fi-ra-checkbox-box {
+                border-color: #3D3E4D;
+                background-color: #181920;
+            }
+            .fi-ra-checkbox-box:hover {
+                border-color: #007A33;
+            }
+            .dark .fi-ra-checkbox-box:hover {
+                border-color: #67EA94;
+            }
+            .fi-ra-checkbox-box input[type="checkbox"] {
+                width: 1.15rem;
+                height: 1.15rem;
+                accent-color: #007A33;
+                cursor: pointer;
+            }
+            .fi-ra-checkbox-label {
+                font-size: 0.8125rem;
+                font-weight: 600;
+                color: #2C2D3C;
+                cursor: pointer;
+                user-select: none;
+            }
+            .dark .fi-ra-checkbox-label {
+                color: #F0F0F5;
+            }
+
+            .fi-ra-range-slider {
+                width: 100%;
+                accent-color: #007A33;
+                cursor: pointer;
+                margin: 0.5rem 0;
+            }
+            .fi-ra-range-labels {
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.7rem;
+                color: #8D8EA6;
+            }
+            .dark .fi-ra-range-labels {
+                color: #7E819B;
+            }
+            .fi-ra-config-tx-val {
+                font-family: 'Ubuntu Mono', monospace;
+                font-size: 0.875rem;
+                font-weight: 800;
+                color: #007A33;
+            }
+            .dark .fi-ra-config-tx-val {
+                color: #67EA94;
+            }
+
+            .fi-ra-config-badge {
+                font-size: 0.725rem;
+                font-weight: 700;
+                padding: 0.25rem 0.6rem;
+                border-radius: 0.375rem;
+                line-height: 1.2;
+                white-space: nowrap;
+            }
+            .fi-ra-config-badge-emerald {
+                background-color: rgba(16, 185, 129, 0.12);
+                color: #065F46;
+                border: 1px solid rgba(16, 185, 129, 0.3);
+            }
+            .dark .fi-ra-config-badge-emerald {
+                color: #67EA94;
+                border-color: rgba(103, 234, 148, 0.35);
+            }
+            .fi-ra-config-badge-amber {
+                background-color: rgba(245, 158, 11, 0.12);
+                color: #92400E;
+                border: 1px solid rgba(245, 158, 11, 0.3);
+            }
+            .dark .fi-ra-config-badge-amber {
+                color: #FCD34D;
+                border-color: rgba(245, 158, 11, 0.35);
+            }
+            .fi-ra-config-badge-blue {
+                background-color: rgba(59, 130, 246, 0.12);
+                color: #1E40AF;
+                border: 1px solid rgba(59, 130, 246, 0.3);
+            }
+            .dark .fi-ra-config-badge-blue {
+                color: #93C5FD;
+                border-color: rgba(59, 130, 246, 0.35);
+            }
+            .fi-ra-config-badge-purple {
+                background-color: rgba(168, 85, 247, 0.12);
+                color: #6B21A8;
+                border: 1px solid rgba(168, 85, 247, 0.3);
+            }
+            .dark .fi-ra-config-badge-purple {
+                color: #D8B4FE;
+                border-color: rgba(168, 85, 247, 0.35);
+            }
+            .fi-ra-config-badge-indigo {
+                background-color: rgba(99, 102, 241, 0.12);
+                color: #3730A3;
+                border: 1px solid rgba(99, 102, 241, 0.3);
+            }
+            .dark .fi-ra-config-badge-indigo {
+                color: #A5B4FC;
+                border-color: rgba(99, 102, 241, 0.35);
+            }
+            .fi-ra-config-badge-teal {
+                background-color: rgba(20, 184, 166, 0.12);
+                color: #115E59;
+                border: 1px solid rgba(20, 184, 166, 0.3);
+            }
+            .dark .fi-ra-config-badge-teal {
+                color: #5EEAD4;
+                border-color: rgba(20, 184, 166, 0.35);
+            }
+            .fi-ra-config-badge-rose {
+                background-color: rgba(244, 63, 94, 0.12);
+                color: #9F1239;
+                border: 1px solid rgba(244, 63, 94, 0.3);
+            }
+            .dark .fi-ra-config-badge-rose {
+                color: #FDA4AF;
+                border-color: rgba(244, 63, 94, 0.35);
+            }
+            .fi-ra-config-help {
+                font-size: 0.75rem;
+                color: #8D8EA6;
+                line-height: 1.4;
+                margin-top: 0.35rem;
+            }
+            .dark .fi-ra-config-help {
+                color: #7E819B;
+            }
         </style>
 
         {{-- Aviso destacado de compatibilidad obligatoria de navegador (Google Chrome o Edge) --}}
@@ -2082,24 +2473,24 @@
                 </div>
 
                 {{-- PESTAÑA 7: CONFIGURACIÓN REMOTA --}}
-                <div x-show="activeTab === 'configuracion'" class="space-y-6">
-                    <div class="flex items-start justify-between flex-wrap gap-4">
+                <div x-show="activeTab === 'configuracion'" class="fi-ra-config-pane">
+                    <div class="fi-ra-config-header">
                         <div>
-                            <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                            <h3 class="fi-ra-config-title">
                                 <span>🛠️</span> {{ __('admin.gestion_routers.config_title') }}
                             </h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed max-w-3xl">
+                            <p class="fi-ra-config-desc">
                                 {{ __('admin.gestion_routers.config_desc') }}
                             </p>
                         </div>
 
                         {{-- Barra de acción superior: Consultar configuración e indicador de estado --}}
-                        <div class="flex items-center gap-3 flex-wrap">
+                        <div class="fi-ra-config-actions">
                             <template x-if="configForm.last_detected_at">
-                                <div class="text-xs font-mono text-gray-500 dark:text-gray-400 flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <div class="fi-ra-config-last-sync">
                                     <span>🕒</span>
                                     <span>{{ __('admin.gestion_routers.config_last_sync') }}</span>
-                                    <strong class="text-gray-800 dark:text-gray-200" x-text="new Date(configForm.last_detected_at).toLocaleTimeString()"></strong>
+                                    <strong style="color: #2C2D3C;" class="dark:text-gray-200" x-text="new Date(configForm.last_detected_at).toLocaleTimeString()"></strong>
                                 </div>
                             </template>
 
@@ -2111,46 +2502,48 @@
                     </div>
 
                     {{-- Banner si no hay conexión o no hay router seleccionado --}}
-                    <div x-show="connectionStatus !== 'connected'" class="p-3.5 rounded-xl border border-amber-500/30 bg-amber-50/80 dark:bg-amber-950/40 text-xs flex items-center gap-2 text-amber-800 dark:text-amber-300 font-medium">
+                    <div x-show="connectionStatus !== 'connected'" class="fi-ra-prompt-banner">
                         <span>⚠️</span> <span>{{ __('admin.gestion_routers.connect_prompt_hint') }}</span>
                     </div>
-                    <div x-show="connectionStatus === 'connected' && !getActiveRouterHex()" class="p-3.5 rounded-xl border border-amber-500/30 bg-amber-50/80 dark:bg-amber-950/40 text-xs flex items-center gap-2 text-amber-800 dark:text-amber-300 font-medium">
+                    <div x-show="connectionStatus === 'connected' && !getActiveRouterHex()" class="fi-ra-prompt-banner">
                         <span>⚠️</span> <span>{{ __('admin.gestion_routers.select_prompt_hint') }}</span>
                     </div>
 
                     {{-- Grid de 7 configuraciones independientes --}}
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="fi-ra-config-grid">
 
                         {{-- 1. Posición Fija (Coordenadas) --}}
-                        <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 flex flex-col justify-between gap-4 shadow-sm hover:border-emerald-500/50 transition-all">
+                        <div class="fi-ra-config-card">
                             <div>
-                                <div class="flex items-center justify-between gap-2">
-                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <div class="fi-ra-config-card-header">
+                                    <h4 class="fi-ra-config-card-title">
                                         <span>📍</span> {{ __('admin.gestion_routers.config_position_title') }}
                                     </h4>
-                                    <span class="text-xs text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded">GPS / Fijo</span>
+                                    <span class="fi-ra-config-badge fi-ra-config-badge-emerald">GPS / Fijo</span>
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                <p class="fi-ra-config-card-desc">
                                     {{ __('admin.gestion_routers.config_position_desc') }}
                                 </p>
 
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-                                    <div class="fi-ra-form-group">
-                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_lat_label') }}</label>
-                                        <input type="number" step="0.0000001" min="-90" max="90" x-model="configForm.latitude" placeholder="36.7345" class="fi-ra-input font-mono text-xs" />
-                                    </div>
-                                    <div class="fi-ra-form-group">
-                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_lon_label') }}</label>
-                                        <input type="number" step="0.0000001" min="-180" max="180" x-model="configForm.longitude" placeholder="-6.4321" class="fi-ra-input font-mono text-xs" />
-                                    </div>
-                                    <div class="fi-ra-form-group">
-                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_alt_label') }}</label>
-                                        <input type="number" step="1" x-model="configForm.altitude" placeholder="120" class="fi-ra-input font-mono text-xs" />
+                                <div class="fi-ra-config-card-body">
+                                    <div class="fi-ra-config-subgrid-3">
+                                        <div class="fi-ra-form-group">
+                                            <label class="fi-ra-label">{{ __('admin.gestion_routers.config_lat_label') }}</label>
+                                            <input type="number" step="0.0000001" min="-90" max="90" x-model="configForm.latitude" placeholder="36.7345" class="fi-ra-input" style="font-family: monospace; font-size: 0.8125rem;" />
+                                        </div>
+                                        <div class="fi-ra-form-group">
+                                            <label class="fi-ra-label">{{ __('admin.gestion_routers.config_lon_label') }}</label>
+                                            <input type="number" step="0.0000001" min="-180" max="180" x-model="configForm.longitude" placeholder="-6.4321" class="fi-ra-input" style="font-family: monospace; font-size: 0.8125rem;" />
+                                        </div>
+                                        <div class="fi-ra-form-group">
+                                            <label class="fi-ra-label">{{ __('admin.gestion_routers.config_alt_label') }}</label>
+                                            <input type="number" step="1" x-model="configForm.altitude" placeholder="120" class="fi-ra-input" style="font-family: monospace; font-size: 0.8125rem;" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex justify-end">
+                            <div class="fi-ra-config-card-footer">
                                 <button type="button" @click="saveRouterPosition()" :disabled="configSaving.position || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm">
                                     <span x-show="!configSaving.position">💾 {{ __('admin.gestion_routers.btn_save_position') }}</span>
                                     <span x-show="configSaving.position">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
@@ -2159,30 +2552,30 @@
                         </div>
 
                         {{-- 2. Multiplicador ADC para la Batería --}}
-                        <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 flex flex-col justify-between gap-4 shadow-sm hover:border-emerald-500/50 transition-all">
+                        <div class="fi-ra-config-card">
                             <div>
-                                <div class="flex items-center justify-between gap-2">
-                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <div class="fi-ra-config-card-header">
+                                    <h4 class="fi-ra-config-card-title">
                                         <span>🔋</span> {{ __('admin.gestion_routers.config_adc_title') }}
                                     </h4>
-                                    <span class="text-xs text-amber-700 dark:text-amber-400 font-semibold bg-amber-500/10 px-2 py-0.5 rounded">PowerConfig</span>
+                                    <span class="fi-ra-config-badge fi-ra-config-badge-amber">PowerConfig</span>
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                <p class="fi-ra-config-card-desc">
                                     {{ __('admin.gestion_routers.config_adc_desc') }}
                                 </p>
 
-                                <div class="mt-4">
+                                <div class="fi-ra-config-card-body">
                                     <div class="fi-ra-form-group">
                                         <label class="fi-ra-label">{{ __('admin.gestion_routers.config_adc_label') }}</label>
-                                        <input type="number" step="0.01" min="0" max="100" x-model="configForm.adc_multiplier_override" placeholder="Ej: 3.20 ó 5.15" class="fi-ra-input font-mono text-xs" />
+                                        <input type="number" step="0.01" min="0" max="100" x-model="configForm.adc_multiplier_override" placeholder="Ej: 3.20 ó 5.15" class="fi-ra-input" style="font-family: monospace; font-size: 0.8125rem;" />
                                     </div>
-                                    <div class="text-[0.7rem] text-gray-400 mt-1">
+                                    <div class="fi-ra-config-help">
                                         Calibra el voltaje reportado en telemetría ante divisores resistivos no estándar de placas solares o baterías LiFePO4 / 18650.
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex justify-end">
+                            <div class="fi-ra-config-card-footer">
                                 <button type="button" @click="saveRouterAdcMultiplier()" :disabled="configSaving.adc || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm">
                                     <span x-show="!configSaving.adc">💾 {{ __('admin.gestion_routers.btn_save_adc') }}</span>
                                     <span x-show="configSaving.adc">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
@@ -2191,31 +2584,33 @@
                         </div>
 
                         {{-- 3. Identidad (Nombre Largo y Nombre Corto) --}}
-                        <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 flex flex-col justify-between gap-4 shadow-sm hover:border-emerald-500/50 transition-all">
+                        <div class="fi-ra-config-card">
                             <div>
-                                <div class="flex items-center justify-between gap-2">
-                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <div class="fi-ra-config-card-header">
+                                    <h4 class="fi-ra-config-card-title">
                                         <span>🏷️</span> {{ __('admin.gestion_routers.config_owner_title') }}
                                     </h4>
-                                    <span class="text-xs text-blue-700 dark:text-blue-400 font-semibold bg-blue-500/10 px-2 py-0.5 rounded">User / Owner</span>
+                                    <span class="fi-ra-config-badge fi-ra-config-badge-blue">User / Owner</span>
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                <p class="fi-ra-config-card-desc">
                                     {{ __('admin.gestion_routers.config_owner_desc') }}
                                 </p>
 
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-                                    <div class="fi-ra-form-group sm:col-span-2">
-                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_long_name_label') }}</label>
-                                        <input type="text" maxlength="32" x-model="configForm.long_name" placeholder="Ej: Router Sierra CA01" class="fi-ra-input text-xs" />
-                                    </div>
-                                    <div class="fi-ra-form-group">
-                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_short_name_label') }}</label>
-                                        <input type="text" maxlength="4" x-model="configForm.short_name" placeholder="CA01" class="fi-ra-input font-mono uppercase text-xs text-center" />
+                                <div class="fi-ra-config-card-body">
+                                    <div class="fi-ra-config-subgrid-owner">
+                                        <div class="fi-ra-form-group">
+                                            <label class="fi-ra-label">{{ __('admin.gestion_routers.config_long_name_label') }}</label>
+                                            <input type="text" maxlength="32" x-model="configForm.long_name" placeholder="Ej: Router Sierra CA01" class="fi-ra-input" style="font-size: 0.8125rem;" />
+                                        </div>
+                                        <div class="fi-ra-form-group">
+                                            <label class="fi-ra-label">{{ __('admin.gestion_routers.config_short_name_label') }}</label>
+                                            <input type="text" maxlength="4" x-model="configForm.short_name" placeholder="CA01" class="fi-ra-input" style="font-family: monospace; text-transform: uppercase; text-align: center; font-size: 0.8125rem;" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex justify-end">
+                            <div class="fi-ra-config-card-footer">
                                 <button type="button" @click="saveRouterOwner()" :disabled="configSaving.owner || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm">
                                     <span x-show="!configSaving.owner">💾 {{ __('admin.gestion_routers.btn_save_owner') }}</span>
                                     <span x-show="configSaving.owner">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
@@ -2224,26 +2619,26 @@
                         </div>
 
                         {{-- 4. Transmit Power TX (LoRa) --}}
-                        <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 flex flex-col justify-between gap-4 shadow-sm hover:border-emerald-500/50 transition-all">
+                        <div class="fi-ra-config-card">
                             <div>
-                                <div class="flex items-center justify-between gap-2">
-                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <div class="fi-ra-config-card-header">
+                                    <h4 class="fi-ra-config-card-title">
                                         <span>📡</span> {{ __('admin.gestion_routers.config_tx_title') }}
                                     </h4>
-                                    <span class="text-xs text-purple-700 dark:text-purple-400 font-semibold bg-purple-500/10 px-2 py-0.5 rounded">LoRaConfig</span>
+                                    <span class="fi-ra-config-badge fi-ra-config-badge-purple">LoRaConfig</span>
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                <p class="fi-ra-config-card-desc">
                                     {{ __('admin.gestion_routers.config_tx_desc') }}
                                 </p>
 
-                                <div class="mt-4">
+                                <div class="fi-ra-config-card-body">
                                     <div class="fi-ra-form-group">
-                                        <div class="flex items-center justify-between">
+                                        <div style="display: flex; align-items: center; justify-content: space-between;">
                                             <label class="fi-ra-label">{{ __('admin.gestion_routers.config_tx_label') }}</label>
-                                            <span class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400" x-text="`${configForm.tx_power || 30} dBm`"></span>
+                                            <span class="fi-ra-config-tx-val" x-text="`${configForm.tx_power || 30} dBm`"></span>
                                         </div>
-                                        <input type="range" min="1" max="30" step="1" x-model="configForm.tx_power" class="w-full accent-emerald-600 cursor-pointer" />
-                                        <div class="flex justify-between text-[0.7rem] text-gray-400">
+                                        <input type="range" min="1" max="30" step="1" x-model="configForm.tx_power" class="fi-ra-range-slider" />
+                                        <div class="fi-ra-range-labels">
                                             <span>1 dBm (Mín)</span>
                                             <span>20 dBm (SX1262 STD)</span>
                                             <span>30 dBm (PA 1W Máx)</span>
@@ -2252,7 +2647,7 @@
                                 </div>
                             </div>
 
-                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex justify-end">
+                            <div class="fi-ra-config-card-footer">
                                 <button type="button" @click="saveRouterTxPower()" :disabled="configSaving.tx_power || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm">
                                     <span x-show="!configSaving.tx_power">💾 {{ __('admin.gestion_routers.btn_save_tx') }}</span>
                                     <span x-show="configSaving.tx_power">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
@@ -2261,35 +2656,35 @@
                         </div>
 
                         {{-- 5. NodeInfo Broadcast Interval --}}
-                        <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 flex flex-col justify-between gap-4 shadow-sm hover:border-emerald-500/50 transition-all">
+                        <div class="fi-ra-config-card">
                             <div>
-                                <div class="flex items-center justify-between gap-2">
-                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <div class="fi-ra-config-card-header">
+                                    <h4 class="fi-ra-config-card-title">
                                         <span>⏱️</span> {{ __('admin.gestion_routers.config_node_info_title') }}
                                     </h4>
-                                    <span class="text-xs text-indigo-700 dark:text-indigo-400 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded">DeviceConfig</span>
+                                    <span class="fi-ra-config-badge fi-ra-config-badge-indigo">DeviceConfig</span>
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                <p class="fi-ra-config-card-desc">
                                     {{ __('admin.gestion_routers.config_node_info_desc') }}
                                 </p>
 
-                                <div class="mt-4">
+                                <div class="fi-ra-config-card-body">
                                     <div class="fi-ra-form-group">
                                         <label class="fi-ra-label">{{ __('admin.gestion_routers.config_node_info_label') }}</label>
-                                        <div class="flex items-center gap-2">
-                                            <input type="number" min="60" max="86400" step="60" x-model="configForm.node_info_broadcast_secs" placeholder="10800" class="fi-ra-input font-mono text-xs" />
-                                            <span class="text-xs text-gray-400 font-mono" x-text="`(${(configForm.node_info_broadcast_secs / 3600).toFixed(1)} h)`"></span>
+                                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                            <input type="number" min="60" max="86400" step="60" x-model="configForm.node_info_broadcast_secs" placeholder="10800" class="fi-ra-input" style="font-family: monospace; font-size: 0.8125rem;" />
+                                            <span style="font-family: monospace; font-size: 0.8125rem; color: #8D8EA6; white-space: nowrap;" x-text="`(${(configForm.node_info_broadcast_secs / 3600).toFixed(1)} h)`"></span>
                                         </div>
                                     </div>
-                                    <div class="flex gap-1.5 mt-2 flex-wrap">
-                                        <button type="button" @click="configForm.node_info_broadcast_secs = 3600" class="text-[0.7rem] px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40">1h (3600s)</button>
-                                        <button type="button" @click="configForm.node_info_broadcast_secs = 10800" class="text-[0.7rem] px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 font-bold">3h (10800s - Rec.)</button>
-                                        <button type="button" @click="configForm.node_info_broadcast_secs = 21600" class="text-[0.7rem] px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40">6h (21600s)</button>
+                                    <div class="fi-ra-preset-group">
+                                        <button type="button" @click="configForm.node_info_broadcast_secs = 3600" class="fi-ra-preset-pill" :class="{ 'fi-ra-preset-pill-active': configForm.node_info_broadcast_secs == 3600 }">1h (3600s)</button>
+                                        <button type="button" @click="configForm.node_info_broadcast_secs = 10800" class="fi-ra-preset-pill" :class="{ 'fi-ra-preset-pill-active': configForm.node_info_broadcast_secs == 10800 }">3h (10800s - Rec.)</button>
+                                        <button type="button" @click="configForm.node_info_broadcast_secs = 21600" class="fi-ra-preset-pill" :class="{ 'fi-ra-preset-pill-active': configForm.node_info_broadcast_secs == 21600 }">6h (21600s)</button>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex justify-end">
+                            <div class="fi-ra-config-card-footer">
                                 <button type="button" @click="saveRouterNodeInfoInterval()" :disabled="configSaving.node_info || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm">
                                     <span x-show="!configSaving.node_info">💾 {{ __('admin.gestion_routers.btn_save_node_info') }}</span>
                                     <span x-show="configSaving.node_info">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
@@ -2298,35 +2693,35 @@
                         </div>
 
                         {{-- 6. Device Metrics Interval --}}
-                        <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 flex flex-col justify-between gap-4 shadow-sm hover:border-emerald-500/50 transition-all">
+                        <div class="fi-ra-config-card">
                             <div>
-                                <div class="flex items-center justify-between gap-2">
-                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <div class="fi-ra-config-card-header">
+                                    <h4 class="fi-ra-config-card-title">
                                         <span>📊</span> {{ __('admin.gestion_routers.config_device_metrics_title') }}
                                     </h4>
-                                    <span class="text-xs text-teal-700 dark:text-teal-400 font-semibold bg-teal-500/10 px-2 py-0.5 rounded">TelemetryModule</span>
+                                    <span class="fi-ra-config-badge fi-ra-config-badge-teal">TelemetryModule</span>
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                <p class="fi-ra-config-card-desc">
                                     {{ __('admin.gestion_routers.config_device_metrics_desc') }}
                                 </p>
 
-                                <div class="mt-4">
+                                <div class="fi-ra-config-card-body">
                                     <div class="fi-ra-form-group">
                                         <label class="fi-ra-label">{{ __('admin.gestion_routers.config_device_metrics_label') }}</label>
-                                        <div class="flex items-center gap-2">
-                                            <input type="number" min="60" max="86400" step="60" x-model="configForm.device_update_interval" placeholder="1800" class="fi-ra-input font-mono text-xs" />
-                                            <span class="text-xs text-gray-400 font-mono" x-text="`(${Math.round(configForm.device_update_interval / 60)} min)`"></span>
+                                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                            <input type="number" min="60" max="86400" step="60" x-model="configForm.device_update_interval" placeholder="1800" class="fi-ra-input" style="font-family: monospace; font-size: 0.8125rem;" />
+                                            <span style="font-family: monospace; font-size: 0.8125rem; color: #8D8EA6; white-space: nowrap;" x-text="`(${Math.round(configForm.device_update_interval / 60)} min)`"></span>
                                         </div>
                                     </div>
-                                    <div class="flex gap-1.5 mt-2 flex-wrap">
-                                        <button type="button" @click="configForm.device_update_interval = 900" class="text-[0.7rem] px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40">15m (900s)</button>
-                                        <button type="button" @click="configForm.device_update_interval = 1800" class="text-[0.7rem] px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 font-bold">30m (1800s - Rec.)</button>
-                                        <button type="button" @click="configForm.device_update_interval = 3600" class="text-[0.7rem] px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40">1h (3600s)</button>
+                                    <div class="fi-ra-preset-group">
+                                        <button type="button" @click="configForm.device_update_interval = 900" class="fi-ra-preset-pill" :class="{ 'fi-ra-preset-pill-active': configForm.device_update_interval == 900 }">15m (900s)</button>
+                                        <button type="button" @click="configForm.device_update_interval = 1800" class="fi-ra-preset-pill" :class="{ 'fi-ra-preset-pill-active': configForm.device_update_interval == 1800 }">30m (1800s - Rec.)</button>
+                                        <button type="button" @click="configForm.device_update_interval = 3600" class="fi-ra-preset-pill" :class="{ 'fi-ra-preset-pill-active': configForm.device_update_interval == 3600 }">1h (3600s)</button>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex justify-end">
+                            <div class="fi-ra-config-card-footer">
                                 <button type="button" @click="saveRouterDeviceMetricsInterval()" :disabled="configSaving.device_metrics || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm">
                                     <span x-show="!configSaving.device_metrics">💾 {{ __('admin.gestion_routers.btn_save_device_metrics') }}</span>
                                     <span x-show="configSaving.device_metrics">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
@@ -2335,37 +2730,39 @@
                         </div>
 
                         {{-- 7. Mediciones Ambientales (Environment Measurements) --}}
-                        <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 flex flex-col justify-between gap-4 shadow-sm hover:border-emerald-500/50 transition-all lg:col-span-2">
+                        <div class="fi-ra-config-card fi-ra-config-card-full">
                             <div>
-                                <div class="flex items-center justify-between gap-2">
-                                    <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <div class="fi-ra-config-card-header">
+                                    <h4 class="fi-ra-config-card-title">
                                         <span>🌡️</span> {{ __('admin.gestion_routers.config_env_title') }}
                                     </h4>
-                                    <span class="text-xs text-rose-700 dark:text-rose-400 font-semibold bg-rose-500/10 px-2 py-0.5 rounded">Environment Sensors</span>
+                                    <span class="fi-ra-config-badge fi-ra-config-badge-rose">Environment Sensors</span>
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                <p class="fi-ra-config-card-desc">
                                     {{ __('admin.gestion_routers.config_env_desc') }}
                                 </p>
 
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 items-center">
-                                    <div class="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700">
-                                        <input type="checkbox" id="envEnabled" x-model="configForm.environment_measurement_enabled" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 accent-emerald-600 cursor-pointer" />
-                                        <label for="envEnabled" class="text-xs font-semibold text-gray-700 dark:text-gray-300 cursor-pointer select-none">
-                                            {{ __('admin.gestion_routers.config_env_enabled_label') }}
+                                <div class="fi-ra-config-card-body">
+                                    <div class="fi-ra-config-subgrid-env">
+                                        <label for="envEnabled" class="fi-ra-checkbox-box">
+                                            <input type="checkbox" id="envEnabled" x-model="configForm.environment_measurement_enabled" />
+                                            <span class="fi-ra-checkbox-label">
+                                                {{ __('admin.gestion_routers.config_env_enabled_label') }}
+                                            </span>
                                         </label>
-                                    </div>
 
-                                    <div class="fi-ra-form-group">
-                                        <label class="fi-ra-label">{{ __('admin.gestion_routers.config_env_interval_label') }}</label>
-                                        <div class="flex items-center gap-2">
-                                            <input type="number" min="60" max="86400" step="60" x-model="configForm.environment_update_interval" placeholder="1800" class="fi-ra-input font-mono text-xs" />
-                                            <span class="text-xs text-gray-400 font-mono" x-text="`(${Math.round(configForm.environment_update_interval / 60)} min)`"></span>
+                                        <div class="fi-ra-form-group">
+                                            <label class="fi-ra-label">{{ __('admin.gestion_routers.config_env_interval_label') }}</label>
+                                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                                <input type="number" min="60" max="86400" step="60" x-model="configForm.environment_update_interval" placeholder="1800" class="fi-ra-input" style="font-family: monospace; font-size: 0.8125rem;" />
+                                                <span style="font-family: monospace; font-size: 0.8125rem; color: #8D8EA6; white-space: nowrap;" x-text="`(${Math.round(configForm.environment_update_interval / 60)} min)`"></span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex justify-end">
+                            <div class="fi-ra-config-card-footer">
                                 <button type="button" @click="saveRouterEnvironment()" :disabled="configSaving.environment || orderActive || connectionStatus !== 'connected' || !getActiveRouterHex()" class="fi-ra-btn fi-ra-btn-primary fi-ra-btn-sm">
                                     <span x-show="!configSaving.environment">💾 {{ __('admin.gestion_routers.btn_save_env') }}</span>
                                     <span x-show="configSaving.environment">⏳ {{ __('admin.gestion_routers.transmitting') }}</span>
