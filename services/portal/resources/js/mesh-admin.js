@@ -369,6 +369,11 @@ export function meshAdminComponent() {
                             this.routerConfigs[kLower] = { ...(this.routerConfigs[kLower] || {}), ...v };
                             this.routerConfigs[k] = this.routerConfigs[kLower];
                         }
+
+                        const savedHost = localStorage.getItem('snm_last_http_host');
+                        if (savedHost) {
+                            this.httpHost = savedHost;
+                        }
                     }
                 } catch (e) {
                     console.warn('Error cargando snm_router_configs de localStorage:', e);
@@ -771,6 +776,7 @@ export function meshAdminComponent() {
 
             try {
                 let transport;
+                let targetUrl = '';
                 if (this.transportType === 'serial') {
                     if (!('serial' in navigator)) {
                         throw new Error('Web Serial API no está soportada en este navegador. Usa Chrome, Edge u Opera en escritorio.');
@@ -782,8 +788,37 @@ export function meshAdminComponent() {
                     }
                     transport = await TransportWebBluetooth.create();
                 } else if (this.transportType === 'http') {
-                    const host = this.httpHost.trim() || 'meshtastic.local';
-                    transport = new TransportHTTP(host, false);
+                    let rawHost = (this.httpHost || '').trim();
+                    if (!rawHost) {
+                        rawHost = 'meshtastic.local';
+                    }
+
+                    // Determinar protocolo y limpiar dirección
+                    let isTls = false;
+                    let cleanHost = rawHost;
+                    if (/^https:\/\//i.test(cleanHost)) {
+                        isTls = true;
+                        cleanHost = cleanHost.replace(/^https:\/\//i, '');
+                    } else if (/^http:\/\//i.test(cleanHost)) {
+                        isTls = false;
+                        cleanHost = cleanHost.replace(/^http:\/\//i, '');
+                    }
+                    // Quitar rutas o barras al final conservando el puerto
+                    cleanHost = cleanHost.replace(/\/.*$/, '').trim();
+
+                    targetUrl = `${isTls ? 'https' : 'http'}://${cleanHost}`;
+
+                    // Advertencia preventiva si se carga el portal por HTTPS y el nodo usa HTTP (Mixed Content)
+                    if (typeof window !== 'undefined' && window.location.protocol === 'https:' && !isTls) {
+                        this.log('warn', '⚠️ El portal está bajo HTTPS. Los navegadores bloquean peticiones HTTP a IPs locales (Mixed Content). Si la conexión falla, accede al portal por HTTP o utiliza USB Serie / Bluetooth.');
+                    }
+
+                    // Guardar último host utilizado en localStorage
+                    if (typeof window !== 'undefined' && window.localStorage) {
+                        localStorage.setItem('snm_last_http_host', this.httpHost);
+                    }
+
+                    transport = new TransportHTTP(targetUrl);
                 } else {
                     throw new Error(`Tipo de transporte desconocido: ${this.transportType}`);
                 }
@@ -817,6 +852,14 @@ export function meshAdminComponent() {
                         if (this.connectionStatus === 'connected') {
                             this.log('warn', 'Dispositivo local desconectado.');
                             this.connectionStatus = 'disconnected';
+                        } else if (this.connectionStatus === 'connecting') {
+                            const failMsg = this.transportType === 'http'
+                                ? `No se pudo conectar al nodo por WiFi (${targetUrl}). Verifica que la IP sea correcta, que el nodo esté encendido y en la misma red local.`
+                                : `Fallo al establecer comunicación con el dispositivo local (${this.transportType}).`;
+                            this.log('error', failMsg);
+                            this.errorMessage = failMsg;
+                            this.connectionStatus = 'error';
+                            this.disconnectLocalNode();
                         }
                     }
                 });
@@ -875,9 +918,17 @@ export function meshAdminComponent() {
                     this.handleIncomingMeshPacket(packet);
                 });
 
-                // Marcar como conectado de inmediato tras inicializar el transporte serie
-                this.connectionStatus = 'connected';
-                this.log('info', '¡Puerto serie abierto con éxito! Listo para transmitir.');
+                // Notificar estado según el tipo de transporte inicializado
+                if (this.transportType === 'serial') {
+                    this.connectionStatus = 'connected';
+                    this.log('info', '¡Puerto serie abierto con éxito! Listo para transmitir.');
+                } else if (this.transportType === 'bluetooth') {
+                    this.connectionStatus = 'connected';
+                    this.log('info', '¡Dispositivo Bluetooth vinculado con éxito! Listo para transmitir.');
+                } else if (this.transportType === 'http') {
+                    // Para HTTP la conexión se confirmará cuando responda /api/v1/fromradio (DeviceConnected)
+                    this.log('info', `Sondeando nodo por WiFi en ${targetUrl}...`);
+                }
 
                 // Disparar configuración inicial en segundo plano sin bloquear el hilo principal (evita el timeout de 60s)
                 device.configure().catch((cfgErr) => {
@@ -888,6 +939,7 @@ export function meshAdminComponent() {
                 this.connectionStatus = 'error';
                 this.errorMessage = err.message || 'Error desconocido al conectar.';
                 this.log('error', `Fallo de conexión: ${this.errorMessage}`);
+                this.disconnectLocalNode();
             }
         },
 
@@ -924,10 +976,12 @@ export function meshAdminComponent() {
                 this._sessionKeyWaiters = {};
                 this._device = null;
                 this._transport = null;
-                this.connectionStatus = 'disconnected';
+                if (this.connectionStatus !== 'error') {
+                    this.connectionStatus = 'disconnected';
+                    this.log('info', 'Dispositivo local desconectado con éxito.');
+                }
                 this.localNode.nodeNum = null;
                 this.localNode.hexId = '';
-                this.log('info', 'Dispositivo local desconectado con éxito.');
             }
         },
 
