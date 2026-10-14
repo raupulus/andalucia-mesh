@@ -200,6 +200,8 @@ class PortadaYMapaTest extends TestCase
         $response->assertSee('href="/herramientas"', false);
         $response->assertSee('href="/paginas"', false);
         $response->assertSee('btn-extras-nav', false);
+        $response->assertSee('class="nav-enlace', false);
+        $response->assertSee('class="dropdown-nav-toggle btn-extras-toggle', false);
 
         // 2. Submenú Tu Nodo en orden alfabético
         $posConfigura = strpos($contenido, 'href="/configura-tu-nodo"');

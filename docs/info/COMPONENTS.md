@@ -5,7 +5,7 @@ Catálogo de componentes reutilizables de interfaz de usuario de Andalucía Mesh
 ## Componentes Registrados
 
 ### `x-cabecera` (`cabecera.blade.php`)
-- **Propósito:** Barra superior fija con logotipo oficial, navegación principal agrupada (enlaces directos `Mapa`, `Herramientas`, `Páginas` y submenús desplegables con ordenación alfabética estricta: `Tu Nodo`, `Estadísticas`, `Documentación`, `Extras`), menú móvil modular estructurado en bloques temáticos, selector de idioma redondo con banderas y conmutador de contraste accesible (modo claro / modo oscuro persistente en `localStorage`) sobre franja tricolor andaluza.
+- **Propósito:** Barra superior fija con logotipo oficial, navegación principal agrupada (enlaces directos `Mapa`, `Herramientas`, `Páginas` y submenús desplegables con ordenación alfabética estricta: `Tu Nodo`, `Estadísticas`, `Documentación`, `Extras`) con clases unificadas `.nav-enlace` y `.dropdown-nav-toggle` que garantizan alineación horizontal y vertical milimétrica entre todos los elementos de menú, menú móvil modular estructurado en bloques temáticos, selector de idioma redondo con banderas y conmutador de contraste accesible (modo claro / modo oscuro persistente en `localStorage`) sobre franja tricolor andaluza.
 - **Ranuras:** Ninguna.
 
 ### `x-pie` (`pie.blade.php`)

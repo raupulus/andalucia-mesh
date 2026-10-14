@@ -26,8 +26,8 @@
         <!-- Navegación de Escritorio -->
         <nav class="nav-escritorio" aria-label="Navegación principal" style="display: flex; align-items: center; gap: 1.15rem;">
             <!-- 1. Mapa (enlace directo) -->
-            <a href="/mapa{{ $langQuery }}" style="text-decoration: none; font-size: 0.95rem; font-weight: 500; color: {{ request()->is('mapa*') ? 'var(--color-enlace)' : 'var(--color-texto)' }}; border-bottom: 2px solid {{ request()->is('mapa*') ? 'var(--color-enlace)' : 'transparent' }}; padding-bottom: 0.25rem;">
-                {{ __('portal.nav.map') }}
+            <a href="/mapa{{ $langQuery }}" class="nav-enlace {{ request()->is('mapa*') ? 'activo' : '' }}">
+                <span>{{ __('portal.nav.map') }}</span>
             </a>
 
             <!-- 2. Tu Nodo (Menú Desplegable) -->
@@ -35,12 +35,11 @@
                 <button
                     type="button"
                     id="btn-tunodo-nav"
-                    class="dropdown-nav-toggle btn-extras-toggle"
+                    class="dropdown-nav-toggle btn-extras-toggle {{ $tuNodoActivo ? 'activo' : '' }}"
                     aria-expanded="false"
                     aria-haspopup="true"
                     aria-controls="dropdown-tunodo-nav"
                     aria-label="{{ __('portal.nav.your_node') }}"
-                    style="background: none; border: none; font-family: inherit; font-size: 0.95rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; color: {{ $tuNodoActivo ? 'var(--color-enlace)' : 'var(--color-texto)' }}; border-bottom: 2px solid {{ $tuNodoActivo ? 'var(--color-enlace)' : 'transparent' }}; padding-bottom: 0.25rem; padding-left: 0; padding-right: 0;"
                 >
                     <span>{{ __('portal.nav.your_node') }}</span>
                     <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -106,12 +105,11 @@
                 <button
                     type="button"
                     id="btn-stats-nav"
-                    class="dropdown-nav-toggle btn-extras-toggle"
+                    class="dropdown-nav-toggle btn-extras-toggle {{ $statsActivo ? 'activo' : '' }}"
                     aria-expanded="false"
                     aria-haspopup="true"
                     aria-controls="dropdown-stats-nav"
                     aria-label="{{ __('portal.nav.stats') }}"
-                    style="background: none; border: none; font-family: inherit; font-size: 0.95rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; color: {{ $statsActivo ? 'var(--color-enlace)' : 'var(--color-texto)' }}; border-bottom: 2px solid {{ $statsActivo ? 'var(--color-enlace)' : 'transparent' }}; padding-bottom: 0.25rem; padding-left: 0; padding-right: 0;"
                 >
                     <span>{{ __('portal.nav.stats') }}</span>
                     <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -157,12 +155,11 @@
                 <button
                     type="button"
                     id="btn-doc-nav"
-                    class="dropdown-nav-toggle btn-extras-toggle"
+                    class="dropdown-nav-toggle btn-extras-toggle {{ $docActivo ? 'activo' : '' }}"
                     aria-expanded="false"
                     aria-haspopup="true"
                     aria-controls="dropdown-doc-nav"
                     aria-label="{{ __('portal.nav.documentation') }}"
-                    style="background: none; border: none; font-family: inherit; font-size: 0.95rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; color: {{ $docActivo ? 'var(--color-enlace)' : 'var(--color-texto)' }}; border-bottom: 2px solid {{ $docActivo ? 'var(--color-enlace)' : 'transparent' }}; padding-bottom: 0.25rem; padding-left: 0; padding-right: 0;"
                 >
                     <span>{{ __('portal.nav.documentation') }}</span>
                     <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -223,13 +220,13 @@
             </div>
 
             <!-- 5. Herramientas (enlace directo) -->
-            <a href="/herramientas{{ $langQuery }}" style="text-decoration: none; font-size: 0.95rem; font-weight: 500; color: {{ request()->is('herramientas*') ? 'var(--color-enlace)' : 'var(--color-texto)' }}; border-bottom: 2px solid {{ request()->is('herramientas*') ? 'var(--color-enlace)' : 'transparent' }}; padding-bottom: 0.25rem;">
-                {{ __('portal.nav.tools') }}
+            <a href="/herramientas{{ $langQuery }}" class="nav-enlace {{ request()->is('herramientas*') ? 'activo' : '' }}">
+                <span>{{ __('portal.nav.tools') }}</span>
             </a>
 
             <!-- 6. Páginas (enlace directo) -->
-            <a href="/paginas{{ $langQuery }}" style="text-decoration: none; font-size: 0.95rem; font-weight: 500; color: {{ request()->is('paginas*') ? 'var(--color-enlace)' : 'var(--color-texto)' }}; border-bottom: 2px solid {{ request()->is('paginas*') ? 'var(--color-enlace)' : 'transparent' }}; padding-bottom: 0.25rem;">
-                {{ __('portal.nav.pages') }}
+            <a href="/paginas{{ $langQuery }}" class="nav-enlace {{ request()->is('paginas*') ? 'activo' : '' }}">
+                <span>{{ __('portal.nav.pages') }}</span>
             </a>
 
             <!-- 7. Extras (Menú Desplegable) -->
@@ -237,12 +234,11 @@
                 <button
                     type="button"
                     id="btn-extras-nav"
-                    class="dropdown-nav-toggle btn-extras-toggle"
+                    class="dropdown-nav-toggle btn-extras-toggle {{ $extrasActivo ? 'activo' : '' }}"
                     aria-expanded="false"
                     aria-haspopup="true"
                     aria-controls="dropdown-extras-nav"
                     aria-label="{{ __('portal.nav.extras') }}"
-                    style="background: none; border: none; font-family: inherit; font-size: 0.95rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; color: {{ $extrasActivo ? 'var(--color-enlace)' : 'var(--color-texto)' }}; border-bottom: 2px solid {{ $extrasActivo ? 'var(--color-enlace)' : 'transparent' }}; padding-bottom: 0.25rem; padding-left: 0; padding-right: 0;"
                 >
                     <span>{{ __('portal.nav.extras') }}</span>
                     <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
