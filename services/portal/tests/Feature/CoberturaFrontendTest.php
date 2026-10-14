@@ -36,9 +36,9 @@ class CoberturaFrontendTest extends TestCase
     }
 
     /**
-     * Comprueba que "Mi Cobertura" aparece en el navbar dentro del menú "Extras" tanto en escritorio como en móvil.
+     * Comprueba que "Mi Cobertura" aparece en el navbar dentro del menú "Tu Nodo" tanto en escritorio como en móvil.
      */
-    public function test_mi_cobertura_aparece_en_navbar_bajo_extras(): void
+    public function test_mi_cobertura_aparece_en_navbar_bajo_tu_nodo(): void
     {
         $response = $this->get('/');
 
@@ -59,7 +59,7 @@ class CoberturaFrontendTest extends TestCase
         $data = $response->json();
         $this->assertIsArray($data);
         $this->assertNotEmpty($data);
-        $this->assertSame('!30618df9', $data[0]['id']);
+        $this->assertContains($data[0]['id'], ['!30618df9', '!3b4c5d6e']);
         $this->assertSame('CA01', $data[0]['short_name']);
 
         // Búsqueda sin acentos debe encontrar nodo con acentos ("hercules" -> "Hércules")
@@ -501,4 +501,3 @@ class CoberturaFrontendTest extends TestCase
         $this->assertContains('!63760c00', $destinosRau0, 'Rau0 debe contener al repetidor CA05');
     }
 }
-

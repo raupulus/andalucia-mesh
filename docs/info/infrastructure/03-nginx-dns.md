@@ -38,11 +38,11 @@ internet ─1883─────────────────────�
 | `portal` | `${PROJECT_DOMAIN}` | `127.0.0.1:8100` | `8080` |
 | `chat-ws` | `${PROJECT_DOMAIN}/ws/` | `127.0.0.1:8090` | `8000` |
 | `potatomesh` | `potato.${PROJECT_DOMAIN}` | `127.0.0.1:41447` | `41447` |
-| `meshview` | `${MESHVIEW_DOMAIN}` *(por defecto `meshview.${PROJECT_DOMAIN}`)* | `127.0.0.1:8081` | `8081` |
+| `meshview` | `${MESHVIEW_DOMAIN}` *(por defecto `meshview.${PROJECT_DOMAIN#mesh.}`; en producción `meshview.desdechipiona.es`)* | `127.0.0.1:8081` | `8081` |
 | Mosquitto (TLS) | `mqtt.${PROJECT_DOMAIN}:8883` | `127.0.0.1:1883` | — (nativo) |
 
 > [!NOTE]
-> **Compatibilidad con Cloudflare (TR-01 y TR-05):** El certificado gratuito de Cloudflare solo cubre un nivel (`*.dominio.tld`). Si `meshview` se publica con proxy naranja y `${PROJECT_DOMAIN}` es un subdominio (ej. `mesh.dominio.tld`), `MESHVIEW_DOMAIN` debe configurarse en un solo nivel (ej. `meshview.dominio.tld`) para evitar errores SSL. Asimismo, debido a que Cloudflare puede conectar al origen por HTTP (puerto 80), los bloques de Nginx para el puerto 80 proxifican directamente a los servicios internos en lugar de forzar redirección 301 incondicional, evitando bucles infinitos de redirección (`ERR_TOO_MANY_REDIRECTS`).
+> **Compatibilidad con Cloudflare (TR-01 y TR-05):** El certificado gratuito de Cloudflare solo cubre un nivel (`*.dominio.tld`). Subdominios de segundo nivel con proxy naranja (`*.mesh.dominio.tld` como `meshview.mesh...`) fallan con error SSL de certificado no válido y no existen en DNS. El dominio oficial y canónico de MeshView es ESTRICTAMENTE `https://meshview.desdechipiona.es` (o `${MESHVIEW_DOMAIN}` en un solo nivel, ej. `meshview.example.org`). NUNCA generar ni usar `meshview.mesh.desdechipiona.es`. Asimismo, debido a que Cloudflare puede conectar al origen por HTTP (puerto 80), los bloques de Nginx para el puerto 80 proxifican directamente a los servicios internos en lugar de forzar redirección 301 incondicional, evitando bucles infinitos de redirección (`ERR_TOO_MANY_REDIRECTS`).
 
 ### Archivos en el repositorio: `infrastructure/nginx/`
 
@@ -172,4 +172,4 @@ Para evitar que otras instancias o terceros extraigan masivamente datos o abusen
 - **Dado** un puerto local (`8100`), **cuando** se intenta desde internet, **entonces** no responde.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-07
+> Creado: 2026-10-07 · Última revisión: 2026-10-14

@@ -10,9 +10,12 @@
                 <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--color-texto-1); margin-bottom: 0.75rem;">
                     {{ __('portal.node_check.heading') }}
                 </h1>
-                <p class="lead" style="margin-bottom: 0;">
+                <p class="lead" style="margin-bottom: 1.25rem;">
                     {{ __('portal.node_check.lead') }}
                 </p>
+                <div style="display: flex; justify-content: center; margin-top: 1rem;">
+                    <x-botones-compartir :url="url()->current()" :titulo="__('portal.node_check.heading')" :texto="__('portal.node_check.lead')" align="center" />
+                </div>
             </header>
 
             <!-- Formulario de búsqueda con Autocompletado Reactivo -->

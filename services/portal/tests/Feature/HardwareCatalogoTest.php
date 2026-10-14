@@ -67,6 +67,10 @@ class HardwareCatalogoTest extends TestCase
         $response->assertSee('https://es.aliexpress.com/item/heltec-v3.html', false);
         $response->assertSee('https://meshtastic.org/docs/hardware/devices/heltec-v3/', false);
         $response->assertSee('Recomendado');
+
+        // Widget de compartir en redes sociales
+        $response->assertSee('grupo-botones-compartir', false);
+        $response->assertSee('btn-compartir-whatsapp', false);
     }
 
     /**

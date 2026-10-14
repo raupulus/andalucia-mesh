@@ -286,7 +286,7 @@ class CoordinatedRouter extends Model
             return false;
         }
 
-        return ($lat >= 35.90 && $lat <= 38.80 && $lon >= -7.60 && $lon <= -1.60);
+        return $lat >= 35.90 && $lat <= 38.80 && $lon >= -7.60 && $lon <= -1.60;
     }
 
     /**

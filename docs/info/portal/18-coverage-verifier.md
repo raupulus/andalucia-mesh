@@ -5,7 +5,7 @@
 ## Qué hace y qué NO hace
 
 - **Qué hace**:
-  - Proporciona la ruta pública `/mi-cobertura` bajo la sección «Extras» de la cabecera.
+  - Proporciona la ruta pública `/mi-cobertura` bajo la sección «Tu Nodo» de la cabecera.
   - Informa de manera inequívoca en la cabecera (banner destacado) y exportaciones que analiza **exclusivamente enlaces directos de radiofrecuencia (100% directos, 0 saltos RF)**, evaluando la calidad física de la estación con sus vecinos directos sin interferencia de tráfico multi-hop.
   - Ofrece autocompletado en vivo (`/mi-cobertura/buscar`) mediante debouncing para búsqueda por `Node ID` (ej. `!30618df9`), alias (`short_name`) o nombre largo (`long_name`).
   - Permite seleccionar 1 nodo para auditoría individual o comparar hasta 3 nodos simultáneamente en la malla.
@@ -91,7 +91,7 @@
   - Base de datos `ingest` (conexión `ingesta`, vistas `api_coverage_links`, `api_nodes`).
   - Cache de Laravel (`Illuminate\Support\Facades\Cache`).
 - **Hacia afuera**:
-  - `resources/views/components/cabecera.blade.php`: Menú desplegable «Extras» y menú móvil enlazan a `/mi-cobertura`.
+  - `resources/views/components/cabecera.blade.php`: Menú desplegable «Tu Nodo» y menú móvil enlazan a `/mi-cobertura`.
   - Archivos de internacionalización (`lang/es/portal.php`, `lang/en/portal.php`, `lang/pt/portal.php`).
 
 ## Configuración
@@ -132,4 +132,4 @@
 - [x] Ninguno. Módulo completamente implementado, probado y verificado.
 
 ---
-> Creado: 2026-10-11 · Última revisión: 2026-10-12
+> Creado: 2026-10-11 · Última revisión: 2026-10-14

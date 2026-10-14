@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Data\Ingest\Trafico;
 use App\Http\Middleware\FilamentLocaleMiddleware;
 use App\Http\Middleware\PortalLocaleMiddleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
@@ -361,9 +363,9 @@ class TraduccionesTest extends TestCase
      */
     public function test_rankings_filtro_14_dias_y_ambitos(): void
     {
-        \App\Data\Ingest\Trafico::ensureApiNodeTrafficTablesExist();
+        Trafico::ensureApiNodeTrafficTablesExist();
         $ahora = now();
-        \Illuminate\Support\Facades\DB::connection('ingesta')->table('api_node_traffic_day')->insert([
+        DB::connection('ingesta')->table('api_node_traffic_day')->insert([
             [
                 'bucket' => $ahora->copy()->subDays(2)->format('Y-m-d H:i:s'),
                 'from_id' => '!30618df9',

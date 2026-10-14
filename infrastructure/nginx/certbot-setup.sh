@@ -40,7 +40,9 @@ elif [[ -f "${STORAGE_ENV}" ]]; then
 fi
 
 PROJECT_DOMAIN="${PROJECT_DOMAIN:-mesh.example.org}"
-MESHVIEW_DOMAIN="${MESHVIEW_DOMAIN:-meshview.${PROJECT_DOMAIN}}"
+# TR-01: MeshView siempre en un solo nivel de subdominio (ej. meshview.desdechipiona.es o meshview.example.org). NUNCA meshview.mesh.*
+BASE_DOMAIN="${PROJECT_DOMAIN#mesh.}"
+MESHVIEW_DOMAIN="${MESHVIEW_DOMAIN:-meshview.${BASE_DOMAIN}}"
 POTATO_DOMAIN="potato.${PROJECT_DOMAIN}"
 MQTT_DOMAIN="mqtt.${PROJECT_DOMAIN}"
 CONTACT_EMAIL="${PROJECT_CONTACT:-public@raupulus.dev}"

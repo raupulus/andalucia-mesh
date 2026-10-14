@@ -33,6 +33,8 @@ class OpenGraphImagesTest extends TestCase
             'configura tu nodo' => ['/configura-tu-nodo', 'og-configura-nodo.webp'],
             'conecta tu gateway' => ['/conecta-tu-gateway', 'og-conecta-gateway.webp'],
             'configurador' => ['/configurador', 'og-configurador.webp'],
+            'herramientas' => ['/herramientas', 'og-herramientas.webp'],
+            'calculadora bateria' => ['/herramientas/calculadora-bateria-adc', 'og-calculadora-bateria.webp'],
             'rankings' => ['/rankings', 'og-rankings.webp'],
             'routers' => ['/routers', 'og-routers.webp'],
             'alertas' => ['/alertas', 'og-alertas.webp'],

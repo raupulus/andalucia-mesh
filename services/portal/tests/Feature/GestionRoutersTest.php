@@ -567,4 +567,3 @@ class GestionRoutersTest extends TestCase
         $response->assertSee('SE01');
     }
 }
-

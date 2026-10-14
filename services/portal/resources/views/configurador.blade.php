@@ -24,6 +24,11 @@
                 </div>
                 <p>{{ __('portal.configurator.lead') }}</p>
 
+                <!-- Widget para compartir en redes sociales -->
+                <div style="display: flex; justify-content: center; margin-top: 1.25rem; margin-bottom: 1.25rem;">
+                    <x-botones-compartir :url="url()->current()" :titulo="__('portal.configurator.title')" :texto="__('portal.configurator.lead')" align="center" />
+                </div>
+
                 <!-- Aviso de advertencia: herramienta experimental y reporte en sugerencias -->
                 <div class="banner-aviso-configurador" role="alert">
                     <span style="font-size: 1.35rem; flex-shrink: 0;" aria-hidden="true">⚠️</span>

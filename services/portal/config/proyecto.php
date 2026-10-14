@@ -10,6 +10,10 @@ declare(strict_types=1);
  * Ningún texto en vistas o markdown debe tener estos datos quemados.
  */
 $projectDomain = env('PROJECT_DOMAIN', 'mesh.desdechipiona.es');
+// TR-01: El dominio de MeshView debe ser estrictamente de un solo nivel (p. ej. meshview.desdechipiona.es).
+// NUNCA generar meshview.mesh.desdechipiona.es concatenando 'meshview.' con un PROJECT_DOMAIN que ya contenga 'mesh.'.
+$rootDomain = (string) preg_replace('/^mesh\./', '', $projectDomain);
+$meshviewDomain = env('MESHVIEW_DOMAIN', 'meshview.'.$rootDomain);
 
 return [
     'nombre' => env('PROJECT_NAME', 'Andalucía Mesh'),
@@ -93,7 +97,7 @@ return [
             'id' => 'meshview',
             'titulo' => 'MeshView',
             'descripcion' => 'Visor técnico detallado con mapa topológico, nodos, enlaces y métricas de paquetes en directo.',
-            'url' => 'https://'.env('MESHVIEW_DOMAIN', 'meshview.'.$projectDomain),
+            'url' => 'https://'.$meshviewDomain,
             'imagen' => '/img/servicios/meshview.webp',
             'servicio_clave' => 'meshview',
             'target_blank' => true,
@@ -118,25 +122,48 @@ return [
         ],
     ],
 
-    // Navegación principal y pie
+    // Visor técnico MeshView (TR-01: subdominio en un solo nivel, NUNCA meshview.mesh.*)
+    'meshview' => [
+        'dominio' => $meshviewDomain,
+        'url' => 'https://'.$meshviewDomain,
+        'url_nodo' => 'https://'.$meshviewDomain.'/node/{id}',
+    ],
+
+    // Navegación principal, submenús organizados alfabéticamente y pie
     'navegacion' => [
         ['titulo' => 'Inicio', 'url' => '/'],
         ['titulo' => 'Mapa', 'url' => '/mapa'],
+        ['titulo' => 'Herramientas', 'url' => '/herramientas'],
+        ['titulo' => 'Páginas', 'url' => '/paginas'],
+    ],
+
+    'tu_nodo' => [
         ['titulo' => 'Configura tu nodo', 'url' => '/configura-tu-nodo'],
+        ['titulo' => 'Configurador automático', 'url' => '/configurador'],
+        ['titulo' => 'Mi Cobertura', 'url' => '/mi-cobertura'],
         ['titulo' => 'MQTT', 'url' => '/conecta-tu-gateway'],
+        ['titulo' => 'Revisa tu nodo', 'url' => '/revisa-tu-nodo'],
+    ],
+
+    'estadisticas' => [
+        ['titulo' => 'Alertas', 'url' => '/alertas'],
         ['titulo' => 'Rankings', 'url' => '/rankings'],
         ['titulo' => 'Routers', 'url' => '/routers'],
-        ['titulo' => 'Alertas', 'url' => '/alertas'],
+    ],
+
+    'documentacion' => [
+        ['titulo' => 'API/Websockets', 'url' => '/api'],
         ['titulo' => 'Bots', 'url' => '/bots'],
+        ['titulo' => 'FAQ', 'url' => '/faq'],
+        ['titulo' => 'Hardware', 'url' => '/hardware'],
     ],
 
     'extras' => [
-        ['titulo' => 'Configurador automático', 'url' => '/configurador'],
-        ['titulo' => 'Revisa tu nodo', 'url' => '/revisa-tu-nodo'],
-        ['titulo' => 'Hardware', 'url' => '/hardware'],
-        ['titulo' => 'API/Websockets', 'url' => '/api'],
+        ['titulo' => 'Cómo se gestiona', 'url' => '/como-se-gestiona'],
+        ['titulo' => 'El proyecto', 'url' => '/proyecto'],
+        ['titulo' => 'Firmware y apps', 'url' => '/firmware'],
+        ['titulo' => 'Quién lo impulsa', 'url' => '/quien-lo-impulsa'],
         ['titulo' => 'Sugerencias', 'url' => '/sugerencias'],
-        ['titulo' => 'FAQ', 'url' => '/faq'],
     ],
 
     'pie' => [

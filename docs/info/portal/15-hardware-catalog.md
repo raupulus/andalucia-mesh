@@ -140,8 +140,9 @@ El sistema cuenta con un seeder maestro (`Database\Seeders\HardwareSeeder`) regi
 - [x] Recursos Filament completos con cropper 1:1 y ToggleColumns.
 - [x] Seeder con las 4 categorías fijas requeridas y 10 artículos realistas para previsualización local.
 - [x] Controlador y vista pública Blade `/hardware` con menú lateral responsive (fijo a la izquierda en escritorio / arriba en móvil) y recuentos de artículos siempre visibles.
+- [x] Widget para compartir en redes sociales (`<x-botones-compartir>`) bajo el título y descripción del catálogo.
 - [x] Traducciones ES / EN / PT en JSON y archivos PHP.
 - [x] Tests de integración automatizados al 100%.
 
 ---
-> Creado: 2026-10-08 · Última revisión: 2026-10-08
+> Creado: 2026-10-08 · Última revisión: 2026-10-14

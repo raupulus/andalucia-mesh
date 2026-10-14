@@ -43,7 +43,9 @@ else
 fi
 
 PROJECT_DOMAIN="${PROJECT_DOMAIN:-mesh.example.org}"
-MESHVIEW_DOMAIN="${MESHVIEW_DOMAIN:-meshview.${PROJECT_DOMAIN}}"
+# TR-01: MeshView siempre en un solo nivel de subdominio (ej. meshview.desdechipiona.es o meshview.example.org). NUNCA meshview.mesh.*
+BASE_DOMAIN="${PROJECT_DOMAIN#mesh.}"
+MESHVIEW_DOMAIN="${MESHVIEW_DOMAIN:-meshview.${BASE_DOMAIN}}"
 POTATO_DOMAIN="potato.${PROJECT_DOMAIN}"
 MQTT_DOMAIN="mqtt.${PROJECT_DOMAIN}"
 CONFIG_DOMAIN="${CONFIG_DOMAIN:-config.${PROJECT_DOMAIN}}"
@@ -123,6 +125,7 @@ ln -sf /etc/nginx/sites-available/snm-potatomesh.conf /etc/nginx/sites-enabled/s
 
 # MeshView
 sed -e "s/meshview\.mesh\.example\.org/${MESHVIEW_DOMAIN}/g" \
+    -e "s/meshview\.example\.org/${MESHVIEW_DOMAIN}/g" \
     "${SCRIPT_DIR}/sites/snm-meshview.conf" > /etc/nginx/sites-available/snm-meshview.conf
 ln -sf /etc/nginx/sites-available/snm-meshview.conf /etc/nginx/sites-enabled/snm-meshview.conf
 

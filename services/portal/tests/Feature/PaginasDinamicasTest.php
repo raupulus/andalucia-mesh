@@ -135,6 +135,8 @@ class PaginasDinamicasTest extends TestCase
         $response->assertHeaderMissing('Set-Cookie');
         $response->assertSee('Revisa tu nodo', false);
         $response->assertSee('name="buscar"', false);
+        $response->assertSee('grupo-botones-compartir', false);
+        $response->assertSee('btn-compartir-whatsapp', false);
     }
 
     /**

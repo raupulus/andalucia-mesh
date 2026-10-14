@@ -5,7 +5,7 @@ Catálogo de componentes reutilizables de interfaz de usuario de Andalucía Mesh
 ## Componentes Registrados
 
 ### `x-cabecera` (`cabecera.blade.php`)
-- **Propósito:** Barra superior fija con logotipo oficial SVG, navegación principal con indicador visual de ruta activa, conmutador de contraste (modo claro / modo oscuro persistente en `localStorage`) y franja inferior tricolor representativa de Andalucía (verde `#007A33` / blanco `#FFFFFF` / verde).
+- **Propósito:** Barra superior fija con logotipo oficial, navegación principal agrupada (enlaces directos `Mapa`, `Herramientas`, `Páginas` y submenús desplegables con ordenación alfabética estricta: `Tu Nodo`, `Estadísticas`, `Documentación`, `Extras`), menú móvil modular estructurado en bloques temáticos, selector de idioma redondo con banderas y conmutador de contraste accesible (modo claro / modo oscuro persistente en `localStorage`) sobre franja tricolor andaluza.
 - **Ranuras:** Ninguna.
 
 ### `x-pie` (`pie.blade.php`)
@@ -121,5 +121,5 @@ Catálogo de componentes reutilizables de interfaz de usuario de Andalucía Mesh
   - `langQuerySolo` (string, opcional): parámetro de idioma para el enlace de inspección.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-13
+> Creado: 2026-10-07 · Última revisión: 2026-10-14
 

@@ -56,6 +56,8 @@ class SitemapController extends Controller
         'alertas' => 'img/og/og-alertas.webp',
         'revisa-tu-nodo' => 'img/og/og-revisa-nodo.webp',
         'configurador' => 'img/og/og-configurador.webp',
+        'herramientas' => 'img/og/og-herramientas.webp',
+        'herramientas/calculadora-bateria-adc' => 'img/og/og-calculadora-bateria.webp',
         'hardware' => 'img/og/og-hardware.webp',
         'faq' => 'img/og/og-faq.webp',
         'paginas' => 'img/og/og-paginas.webp',
@@ -246,7 +248,7 @@ class SitemapController extends Controller
             return ['priority' => 0.9, 'frequency' => Url::CHANGE_FREQUENCY_HOURLY];
         }
 
-        if (in_array($clean, ['configura-tu-nodo', 'conecta-tu-gateway', 'configurador', 'proyecto', 'revisa-tu-nodo', 'paginas', 'hardware'], true)) {
+        if (in_array($clean, ['configura-tu-nodo', 'conecta-tu-gateway', 'configurador', 'proyecto', 'revisa-tu-nodo', 'paginas', 'hardware', 'herramientas', 'herramientas/calculadora-bateria-adc'], true)) {
             return ['priority' => 0.8, 'frequency' => Url::CHANGE_FREQUENCY_WEEKLY];
         }
 

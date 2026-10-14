@@ -4,7 +4,7 @@
 
 ## 1. Contexto
 
-- **Requisitos:** desplegar MeshView en lugar de desarrollar un visor propio, en `meshview.${PROJECT_DOMAIN}`.
+- **Requisitos:** desplegar MeshView en lugar de desarrollar un visor propio, en `https://meshview.desdechipiona.es` (o `${MESHVIEW_DOMAIN}`). NUNCA `meshview.mesh.*` (TR-01).
 - **Proyecto:** `pablorevilla-meshtastic/meshview`, continuación activa de `armooo/meshview` (sin cambios desde 2024). Versión **3.0.8** (2026-09-09), AGPL-3.0, Python asíncrono (aiohttp, aiomqtt, SQLAlchemy async, Alembic). Instancias públicas con 1.000–4.800 nodos, del orden de la malla prevista.
 - **Quién lo consume:** el público (enlace desde la tarjeta de la portada) y el panel de operadores (`/health`). Nadie lee su base de datos.
 
@@ -39,7 +39,7 @@
 
 MeshView descifra con la clave por defecto y descarta lo que no decodifica. No publica nada (la ACL se lo impediría).
 
-**Salida HTTP pública:** `https://meshview.${PROJECT_DOMAIN}`: web y API JSON de solo lectura (`/api/nodes`, `/api/packets`, `/api/channels`, `/api/stats`, `/api/stats/count`, `/api/stats/top`, `/api/snapshots/daily`, `/api/edges`, `/api/config`, `/api/lang`, `/api/packets_seen/{packet_id}`, `/api/traceroute/{packet_id}`, `/api/node/{node_id}/qr`). Sin escritura ni autenticación.
+**Salida HTTP pública:** `https://meshview.desdechipiona.es` (o `${MESHVIEW_DOMAIN}`, en plantilla agnóstica `https://meshview.example.org`; NUNCA subdominio de segundo nivel `meshview.mesh.*` por TR-01): web y API JSON de solo lectura (`/api/nodes`, `/api/packets`, `/api/channels`, `/api/stats`, `/api/stats/count`, `/api/stats/top`, `/api/snapshots/daily`, `/api/edges`, `/api/config`, `/api/lang`, `/api/packets_seen/{packet_id}`, `/api/traceroute/{packet_id}`, `/api/node/{node_id}/qr`). Sin escritura ni autenticación.
 
 **Salud** (`integration.md` §11): el panel hace `GET http://meshview:8081/health` → 200. También `/version`.
 
@@ -217,7 +217,7 @@ Contenido de `integrations/meshview/`: `README.md` (referencia, versión, licenc
 - [x] Ningún secreto en `integrations/meshview/`; `config.ini` generado con permisos 0600.
 - [x] `svc-meshview` conecta a `mosquitto:1884` y solo puede leer `msh/EU_868/#`.
 - [x] Esquema creado en la base `meshview` del PostgreSQL nativo.
-- [x] `https://meshview.${PROJECT_DOMAIN}` en español, abre en `/map` con Andalucía, Ceuta y Melilla.
+- [x] `https://meshview.desdechipiona.es` (o `${MESHVIEW_DOMAIN}`) en español, abre en `/map` con Andalucía, Ceuta y Melilla.
 - [x] Título y mensaje con `PROJECT_NAME` y enlace al portal; sin otras marcas en lo configurable.
 - [x] Conversaciones de los 14 canales visibles e indexables.
 - [x] Limpieza a 14 días activa en la configuración de MeshView (`prune_hours = 336`).
@@ -260,4 +260,4 @@ Contenido de `integrations/meshview/`: `README.md` (referencia, versión, licenc
 7. Plantillas `chat.html` y `net.html` montadas para forzar formato 24h y zona `Europe/Madrid` (DT-36, CUST-01).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-12
+> Creado: 2026-10-07 · Última revisión: 2026-10-14

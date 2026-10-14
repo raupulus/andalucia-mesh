@@ -595,7 +595,7 @@ class MapaData
                 'problemas' => $problemas,
                 'packets_24h_total' => $totalPaquetes24h,
                 'packets_breakdown' => $breakdown,
-                'meshview_url' => 'https://'.config('proyecto.dominio').'/meshview/nodes/'.$idNormalizado,
+                'meshview_url' => config('proyecto.meshview.url', 'https://meshview.desdechipiona.es').'/node/'.$idNormalizado,
                 'revisa_nodo_url' => '/revisa-tu-nodo/'.$idNormalizado,
             ];
         });

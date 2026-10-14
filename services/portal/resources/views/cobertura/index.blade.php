@@ -35,7 +35,7 @@
                         Mi Cobertura — Verificador de Enlaces RF
                     @endif
                 </h1>
-                <p style="margin: 0; color: var(--color-texto-2); font-size: 0.95rem;">
+                <p style="margin: 0 0 1rem; color: var(--color-texto-2); font-size: 0.95rem;">
                     @if(!empty($datos['valido']))
                         @php
                             $nombresNodos = array_map(function ($n) {
@@ -47,6 +47,9 @@
                         Escribe tu nodo para auditar sus enlaces a 1 salto o compara hasta 3 nodos simultáneamente en la malla.
                     @endif
                 </p>
+                <div style="margin-top: 0.75rem; margin-bottom: 0.75rem;">
+                    <x-botones-compartir :url="url()->current()" :titulo="'Mi Cobertura — Verificador de Enlaces RF'" :texto="'Verificador y auditor de enlaces directos de radiofrecuencia en la red mesh.'" />
+                </div>
             </div>
 
             @if(!empty($datos['valido']))

@@ -25,6 +25,8 @@ Registro de funcionalidades y conceptos que han sido decididos formalmente pero 
 | Desbloqueador público de nodos en el frontend | Comprobador y autoservicio de desbloqueo por Node ID para nodos autobaneados (excluyendo bloqueos manuales o federados), con guía de motivos de ban y FAQ ([ver detalle](#desbloqueador-publico-de-nodos-en-el-frontend)) |
 | Estadísticas básicas y anónimas de uso | Métricas agregadas y autoalojadas sin cookies (visitas por página, uso del flasheador/configurador, clics en hardware y diagnósticos) respetando RN-06 ([ver detalle](#estadisticas-basicas-y-anonimas-de-uso)) |
 | Sección o ficha dedicada por provincia | Páginas provinciales con estadísticas exclusivas (nodos, carga del canal, routers) y alertas focalizadas de cada provincia ([ver detalle](#seccion-o-ficha-dedicada-por-provincia)) |
+| Catálogo de videotutoriales y guías audiovisuales | Página formativa /videotutoriales con vídeos y píldoras prácticas organizadas por temática y nivel, con fachada "click-to-load" respetuosa con RN-06 y gestión en /admin ([ver detalle](#catalogo-de-videotutoriales-y-guias-audiovisuales)) |
+| Sistema de votaciones comunitarias por hardware y Telegram | Consultas participativas con validación de nodo físico por Web Serial y pertenencia verificada al grupo de Telegram de Andalucía ([ver detalle](#sistema-de-votaciones-comunitarias-por-hardware-y-telegram)) |
 
 ## Detalle de Ideas
 
@@ -128,6 +130,72 @@ Vistas provinciales independientes (`/provincias/{slug}`) orientadas a proporcio
   - Soporte multidioma completo (ES / EN / PT) según `RN-48`.
   - Cero cookies (`RN-06`) y datos derivados de las vistas de ingesta y alertas existentes sin peticiones a terceros.
 
+### Catálogo de videotutoriales y guías audiovisuales
+
+Sección dedicada en el portal (`/videotutoriales`) orientada a proporcionar formación visual, demostraciones prácticas y guías paso a paso para la comunidad de Meshtastic en Andalucía:
+
+- **Motivación y valor formativo:**
+  - Complementar las guías de texto del portal (`/configura-tu-nodo`, `/conecta-tu-gateway`, `/faq`) con vídeos didácticos que resuelvan dudas visuales complejas (flasheo por navegador, ajustes de roles, ensamblaje de cajas estancas, conexionado de antenas y optimización solar).
+  - Servir de biblioteca organizada de conocimiento comunitario, reuniendo tanto producciones audiovisuales propias de la red como tutoriales curados y contrastados de creadores de referencia.
+- **Ruta y navegación:**
+  - Ruta pública: `/videotutoriales` (con redirección o alias `/videos`).
+  - Accesible desde el menú desplegable **«Extras»** de la barra de navegación y mediante enlaces contextuales destacados ("¿Prefieres verlo en vídeo?") dentro de las guías de configuración.
+- **Organización y filtros del catálogo:**
+  - **Categorías temáticas:**
+    - *Primeros pasos y flasheo:* Flasheo web, actualización de firmware, configuración de región `EU_868`, nombre del nodo y canales primario/secundarios.
+    - *Roles y salud de la red:* Diferencias prácticas entre `CLIENT`, `CLIENT_MUTE` y `ROUTER`, ajuste óptimo de saltos (`hop_limit`) y cómo evitar saturar la malla.
+    - *Hardware y montaje:* Placas recomendadas (Heltec, T-Beam, T-Echo, RAK Wireless), tipos de antenas (colineales, dipolos, planos de tierra), conectores SMA/IPEX y cajas para exterior.
+    - *Gateways y MQTT:* Conexión al servidor MQTT de la comunidad, configuración de subida y prevención de bucles de retransmisión.
+    - *Alimentación y nodos solares:* Baterías 18650/LiFePO4, controladores de carga solar, paneles fotovoltaicos y cálculo de autonomía en ubicaciones remotas.
+    - *Aplicación móvil:* Uso de las aplicaciones Meshtastic en Android e iOS, mapas offline, chats de difusión y mensajería directa punto a punto.
+  - **Filtros por nivel de dificultad:** Principiante, Intermedio y Avanzado.
+  - **Buscador integrado:** Localización rápida por palabras clave, componentes o autor.
+- **Privacidad y visualización sin cookies (`RN-06`):**
+  - **Fachada "Click-to-Load" (Privacy-friendly facade):**
+    - La página carga únicamente miniaturas estáticas optimizadas (WebP generadas localmente o cacheadas) con un botón visual de reproducción. No se insertan *iframes* ni scripts de rastreo de terceros (como Google/YouTube) durante la carga inicial.
+    - Al pulsar en reproducir, el reproductor incrustado se carga bajo demanda utilizando el dominio de privacidad estricta `www.youtube-nocookie.com` con parámetro `dnt=1` (Do Not Track) y sin emisión de cookies hacia el visitante, o bien ofreciendo enlaces directos para su visualización en plataformas externas (YouTube, PeerTube, Odysee).
+- **Gestión desde el panel de operadores (`/admin`):**
+  - Recurso en Filament (`VideoTutorialResource`) para la administración dinámica del catálogo:
+    - Campos: título, slug, descripción breve, URL del vídeo (YouTube, PeerTube, Vimeo o archivo MP4 local), categoría, nivel de dificultad, duración aproximada (minutos), autor/canal, miniatura personalizada (o captura automática optimizada), estado (publicado/borrador) y orden de prioridad.
+- **Multidioma (`RN-48`) y optimización SEO:**
+  - Textos de interfaz y metadatos localizados en Español, Inglés y Portugués, con indicación del idioma del audio y subtítulos disponibles.
+  - Esquema semántico `VideoObject` (Schema.org / JSON-LD) y metadatos Open Graph para enriquecer los resultados de búsqueda y previsualizaciones en aplicaciones de mensajería (Telegram/Discord).
+
+### Sistema de votaciones comunitarias por hardware y Telegram
+
+Mecanismo de toma de decisiones participativas y gobernanza comunitaria en el portal (`/votaciones`) para dirimir acuerdos técnicos (cambios de slots de frecuencia, canales comunitarios, directrices de despliegue de repetidores estratégicos o normas de red), blindado contra fraude mediante doble validación física y social:
+
+- **Motivación y gobernanza sin bots (Anti-Sybil):**
+  - Las encuestas abiertas tradicionales en la web o en plataformas de mensajería sufren de vulnerabilidad ante multicuentas, bots o votantes ajenos al ámbito territorial de la red.
+  - Para asegurar legitimidad democrática y que las decisiones las tomen quienes realmente operan nodos en Andalucía, el voto requiere demostrar simultáneamente la posesión de un nodo físico y la pertenencia a la comunidad regional.
+- **Doble validación de autenticidad:**
+  - **1. Verificación de nodo físico por puerto serie (`Web Serial API`):**
+    - El votante conecta su dispositivo Meshtastic mediante cable USB al ordenador (navegadores Chromium, Chrome, Edge u Opera).
+    - Mediante la API nativa de Web Serial, el navegador se comunica por puerto serie con el microcontrolador usando los paquetes Protobuf de Meshtastic (`FromRadio` / `ToRadio`).
+    - Se extrae la huella de hardware del dispositivo: identificador `Node ID` (ej. `!a1b2c3d4`), MAC de radio/Bluetooth, modelo de placa y número de serie único del procesador (Chip ID inmutable de ESP32 o nRF52).
+    - Se ejecuta un desafío local en tiempo real (*challenge-response*) con el nodo para certificar que hay un hardware real conectado físicamente y no un emulador o un identificador inyectado artificialmente.
+  - **2. Pertenencia verificada al grupo de Telegram de Andalucía:**
+    - Autenticación complementaria mediante el widget oficial de Telegram Login o a través del bot comunitario (`bot-telegram`).
+    - La API de Telegram verifica de forma transparente e instantánea (`getChatMember`) que la cuenta del usuario es miembro activo (`member`, `administrator` o `creator`) del supergrupo oficial de *Meshtastic Andalucía*.
+    - Impide que usuarios ajenos a la red regional participen en decisiones que afectan al espectro radioeléctrico andaluz.
+- **Garantías de voto democrático, secreto y privacidad (`RN-06`):**
+  - **Principio 1 nodo = 1 voto:** Cada nodo físico (por Chip ID / Node ID) y cada identificador de Telegram pueden emitir un único voto por consulta activa.
+  - **Disociación criptográfica (Voto secreto / Blind voting):**
+    - Para garantizar el secreto del voto y evitar sesgos o presiones, se separa estrictamente la acreditación del votante del contenido de la papeleta:
+      - Tabla de participación (`poll_participants`): Registra únicamente que un determinado hash de nodo y usuario de Telegram ya han ejercido su derecho en la consulta `poll_id`.
+      - Tabla de votos (`poll_votes`): Registra de manera independiente y anónima la opción seleccionada, sin almacenar claves foráneas ni referencias directas que permitan rastrear qué usuario votó qué opción.
+  - **Cero cookies (`RN-06`):** El proceso opera mediante tokens efímeros en memoria con expiración corta (15 min) durante el flujo de validación, sin fijar cookies de sesión en el navegador.
+- **Flujo de usuario en el portal (`/votaciones`):**
+  - 1. *Consulta activa:* Lectura del contexto de la propuesta técnica, alternativas disponibles y plazo de votación.
+  - 2. *Identificación:* Inicio de sesión rápido con Telegram para validar pertenencia comunitaria.
+  - 3. *Detección de hardware:* Conexión del nodo por USB; un solo clic en "Detectar mi nodo" lee y valida el chip mediante Web Serial.
+  - 4. *Emisión de voto:* Selección de la opción y confirmación irreversible.
+  - 5. *Escrutinio:* Visualización de barras de resultados y porcentaje de quórum (en tiempo real o tras el cierre, según las bases de la consulta).
+- **Gestión en el panel de operadores (`/admin`):**
+  - Recurso en Filament (`CommunityPollResource`):
+    - Configuración de consultas: título, descripción detallada en Markdown, opciones de respuesta, fechas de inicio y cierre, umbrales de quórum mínimo requerido y visibilidad de resultados.
+    - Auditoría del proceso con métricas de participación y generación de actas de escrutinio para transparencia pública.
+
 ### Edición de contenidos y textos desde el panel (/admin)
 
 - **Problema actual:** Los textos de las páginas públicas (`/configura-tu-nodo`, `/conecta-tu-gateway`, aviso legal, quién lo impulsa, etc.) residen en ficheros Markdown estáticos en `resources/contenido/*.md`. Cualquier ajuste, errata o ampliación requiere editar código fuente en git, crear un commit y reconstruir/redesplegar la imagen Docker del portal.
@@ -138,6 +206,6 @@ Vistas provinciales independientes (`/provincias/{slug}`) orientadas a proporcio
   - Invalidación automática de caché de vistas al guardar cambios, garantizando actualización inmediata sin caída de rendimiento.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-11
+> Creado: 2026-10-07 · Última revisión: 2026-10-14
 
 

@@ -44,6 +44,10 @@ class PortadaYMapaTest extends TestCase
         $this->assertMatchesRegularExpression('/href="[^"]*meshview[^"]*"[^>]*target="_blank"/i', $contenido);
         $this->assertMatchesRegularExpression('/href="[^"]*potato[^"]*"[^>]*target="_blank"/i', $contenido);
         $this->assertDoesNotMatchRegularExpression('/href="[^"]*rankings"[^>]*target="_blank"/i', $contenido);
+
+        // TR-01: El enlace de MeshView debe ser https://meshview.desdechipiona.es y NUNCA meshview.mesh.*
+        $this->assertStringContainsString('href="https://meshview.desdechipiona.es"', $contenido);
+        $this->assertStringNotContainsString('meshview.mesh.', $contenido);
     }
 
     /**
@@ -171,12 +175,73 @@ class PortadaYMapaTest extends TestCase
         $response->assertSee('MQTT', false);
         $response->assertSee('/conecta-tu-gateway', false);
 
-        // Menú Extras con Revisa tu nodo, Sugerencias y API/Websockets
+        // Menú Extras con Sugerencias y páginas institucionales
         $response->assertSee('Extras', false);
         $response->assertSee('btn-extras-nav', false);
         $response->assertSee('dropdown-extras-nav', false);
         $response->assertSee('API/Websockets', false);
         $response->assertSee('/api', false);
+    }
+
+    /**
+     * Comprueba que el navbar agrupa por bloques temáticos y que cada submenú está ordenado alfabéticamente.
+     */
+    public function test_navbar_agrupa_por_bloques_y_ordena_submenus_alfabeticamente(): void
+    {
+        $response = $this->get('/');
+        $response->assertStatus(200);
+        $contenido = (string) $response->getContent();
+
+        // 1. Elementos principales presentes
+        $response->assertSee('href="/mapa"', false);
+        $response->assertSee('btn-tunodo-nav', false);
+        $response->assertSee('btn-stats-nav', false);
+        $response->assertSee('btn-doc-nav', false);
+        $response->assertSee('href="/herramientas"', false);
+        $response->assertSee('href="/paginas"', false);
+        $response->assertSee('btn-extras-nav', false);
+
+        // 2. Submenú Tu Nodo en orden alfabético
+        $posConfigura = strpos($contenido, 'href="/configura-tu-nodo"');
+        $posConfigurador = strpos($contenido, 'href="/configurador"');
+        $posCobertura = strpos($contenido, 'href="/mi-cobertura"');
+        $posMqtt = strpos($contenido, 'href="/conecta-tu-gateway"');
+        $posRevisa = strpos($contenido, 'href="/revisa-tu-nodo"');
+
+        $this->assertTrue($posConfigura < $posConfigurador, 'Configura tu nodo debe ir antes de Configurador');
+        $this->assertTrue($posConfigurador < $posCobertura, 'Configurador debe ir antes de Mi Cobertura');
+        $this->assertTrue($posCobertura < $posMqtt, 'Mi Cobertura debe ir antes de MQTT');
+        $this->assertTrue($posMqtt < $posRevisa, 'MQTT debe ir antes de Revisa tu nodo');
+
+        // 3. Submenú Estadísticas en orden alfabético
+        $posAlertas = strpos($contenido, 'href="/alertas"');
+        $posRankings = strpos($contenido, 'href="/rankings"');
+        $posRouters = strpos($contenido, 'href="/routers"');
+
+        $this->assertTrue($posAlertas < $posRankings, 'Alertas debe ir antes de Rankings');
+        $this->assertTrue($posRankings < $posRouters, 'Rankings debe ir antes de Routers');
+
+        // 4. Submenú Documentación en orden alfabético
+        $posApi = strpos($contenido, 'href="/api"');
+        $posBots = strpos($contenido, 'href="/bots"');
+        $posFaq = strpos($contenido, 'href="/faq"');
+        $posHardware = strpos($contenido, 'href="/hardware"');
+
+        $this->assertTrue($posApi < $posBots, 'API debe ir antes de Bots');
+        $this->assertTrue($posBots < $posFaq, 'Bots debe ir antes de FAQ');
+        $this->assertTrue($posFaq < $posHardware, 'FAQ debe ir antes de Hardware');
+
+        // 5. Submenú Extras en orden alfabético
+        $posGestiona = strpos($contenido, 'href="/como-se-gestiona"');
+        $posProyecto = strpos($contenido, 'href="/proyecto"');
+        $posFirmware = strpos($contenido, 'href="/firmware"');
+        $posImpulsa = strpos($contenido, 'href="/quien-lo-impulsa"');
+        $posSugerencias = strpos($contenido, 'href="/sugerencias"');
+
+        $this->assertTrue($posGestiona < $posProyecto, 'Cómo se gestiona debe ir antes de El proyecto');
+        $this->assertTrue($posProyecto < $posFirmware, 'El proyecto debe ir antes de Firmware');
+        $this->assertTrue($posFirmware < $posImpulsa, 'Firmware debe ir antes de Quién lo impulsa');
+        $this->assertTrue($posImpulsa < $posSugerencias, 'Quién lo impulsa debe ir antes de Sugerencias');
     }
 
     /**

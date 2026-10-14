@@ -9,6 +9,7 @@ use App\Http\Controllers\CustomPageController;
 use App\Http\Controllers\DiagnosticoController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HardwareController;
+use App\Http\Controllers\HerramientasController;
 use App\Http\Controllers\MapaController;
 use App\Http\Controllers\PaginaController;
 use App\Http\Controllers\PortadaController;
@@ -51,6 +52,8 @@ Route::get('/alertas/{id}', [AlertasController::class, 'show'])->name('alertas.s
 Route::get('/revisa-tu-nodo', [DiagnosticoController::class, 'index'])->name('revisa-nodo');
 Route::get('/revisa-tu-nodo/buscar', [DiagnosticoController::class, 'buscar'])->name('revisa-nodo.buscar');
 Route::get('/revisa-tu-nodo/{id}', [DiagnosticoController::class, 'show'])->name('revisa-nodo.show');
+Route::get('/herramientas', [HerramientasController::class, 'index'])->name('herramientas.index');
+Route::get('/herramientas/calculadora-bateria-adc', [HerramientasController::class, 'calculadoraBateria'])->name('herramientas.calculadora-bateria');
 Route::get('/configurador', [ConfiguradorController::class, 'index'])->name('configurador');
 Route::get('/configurador/{file}', [ConfiguradorController::class, 'asset'])->where('file', '.*')->name('configurador.asset');
 Route::get('/styles.css', fn () => redirect('/configurador/styles.css', 301));

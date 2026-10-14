@@ -244,4 +244,14 @@ class ConfiguradorTest extends TestCase
         $js->assertStatus(200);
         $js->assertSee('snm_last_http_host');
     }
+
+    public function test_configurador_muestra_widget_compartir_redes(): void
+    {
+        $response = $this->get('/configurador');
+
+        $response->assertStatus(200);
+        $response->assertSee('grupo-botones-compartir', false);
+        $response->assertSee('btn-compartir-whatsapp', false);
+        $response->assertSee('btn-compartir-telegram', false);
+    }
 }

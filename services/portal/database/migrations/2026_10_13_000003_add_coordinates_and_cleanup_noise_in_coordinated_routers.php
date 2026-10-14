@@ -41,7 +41,7 @@ return new class extends Migration
                         ->orWhere('long_name', '');
                 })
                 ->delete();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // Silencioso si ocurre error en la purga inicial
         }
 
@@ -74,7 +74,7 @@ return new class extends Migration
                     }
                 }
             }
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // Silencioso si la conexión de ingesta no está disponible en este momento
         }
     }

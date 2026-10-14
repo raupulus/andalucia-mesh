@@ -32,6 +32,7 @@
 | 06.16 | [`16-custom-pages.md`](16-custom-pages.md) | Páginas y artículos dinámicos: catálogo `/paginas`, tarjetas horizontales, SEO Article y gestión en `/admin` | Media |
 | 06.17 | [`17-interactive-map.md`](17-interactive-map.md) | Mapa interactivo de nodos y problemas de malla en `/mapa`: Leaflet local, marcadores, modales de diagnóstico, favoritos, búsqueda y caché Nginx/Gzip | Alta |
 | 06.18 | [`18-coverage-verifier.md`](18-coverage-verifier.md) | Verificador y comparador de cobertura RF / Mi Cobertura (`/mi-cobertura`), autocompletado en vivo, filtros SNR, exportación PDF y Markdown | Media |
+| 06.19 | [`19-tools-section.md`](19-tools-section.md) | Catálogo de herramientas (`/herramientas`) y calculadora interactiva ADC de batería (`/herramientas/calculadora-bateria-adc`) | Media |
 | — | [`pages/`](pages/README.md) | Contenido y borrador del texto de cada página pública | — |
 | — | [`DESIGN.md`](../DESIGN.md) | Sistema visual | — |
 
@@ -72,6 +73,7 @@ El portal es la **única pieza** del proyecto con internacionalización y traduc
 | `/mapa` | Público | 17 |
 | `/mi-cobertura`, `/mi-cobertura/buscar`, `/mi-cobertura/pdf`, `/mi-cobertura/markdown` | Público | 18 |
 | `/revisa-tu-nodo`, `/revisa-tu-nodo/{id}` | Público | 09 |
+| `/herramientas`, `/herramientas/calculadora-bateria-adc` | Público | 19 |
 | `/sugerencias`, `/faq` | Público | 01, 14 |
 | `/legal/aviso-legal`, `/legal/privacidad`, `/legal/cookies` | Público | 10 |
 | `/api` (documentación) | Público | 11 |
@@ -210,4 +212,4 @@ Actualización: nueva etiqueta git → `deploy.sh portal`.
 6. Las decisiones de detalle de la API y el panel están en sus módulos (11–14).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-11
+> Creado: 2026-10-07 · Última revisión: 2026-10-14

@@ -385,6 +385,11 @@
                 {{ __('portal.hardware.lead') }}
             </p>
 
+            <!-- Widget para compartir en redes sociales -->
+            <div style="margin-bottom: 1.5rem;">
+                <x-botones-compartir :url="url()->current()" :titulo="__('portal.hardware.heading')" :texto="__('portal.hardware.lead')" />
+            </div>
+
             <!-- Aviso de transparencia técnica -->
             <div style="background-color: var(--color-superficie-sutil); border: 1px solid var(--color-borde); border-left: 4px solid var(--color-acento); border-radius: var(--radio-md); padding: 1rem 1.25rem; max-width: 860px; font-size: 0.92rem; color: var(--color-texto-2); line-height: 1.55;">
                 <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: var(--color-texto-1); margin-bottom: 0.35rem;">

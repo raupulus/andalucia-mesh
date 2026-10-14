@@ -30,20 +30,20 @@ class RoutersFrontendTest extends TestCase
     }
 
     /**
-     * Comprueba que "Routers" aparece en el navbar principal situado antes de "Alertas".
+     * Comprueba que "Routers" y "Alertas" aparecen en el submenú de Estadísticas ordenados alfabéticamente.
      */
-    public function test_routers_aparece_en_navbar_antes_de_alertas(): void
+    public function test_routers_y_alertas_aparecen_en_menu_estadisticas_alfabeticamente(): void
     {
         $response = $this->get('/routers');
         $contenido = $response->getContent();
         $this->assertNotFalse($contenido);
 
-        $posRouters = strpos($contenido, 'href="/routers"');
         $posAlertas = strpos($contenido, 'href="/alertas"');
+        $posRouters = strpos($contenido, 'href="/routers"');
 
-        $this->assertNotFalse($posRouters, 'El enlace a /routers debe existir en el navbar');
         $this->assertNotFalse($posAlertas, 'El enlace a /alertas debe existir en el navbar');
-        $this->assertTrue($posRouters < $posAlertas, 'El enlace a /routers debe ubicarse antes de /alertas en el menú');
+        $this->assertNotFalse($posRouters, 'El enlace a /routers debe existir en el navbar');
+        $this->assertTrue($posAlertas < $posRouters, 'El enlace a /alertas debe ubicarse antes de /routers en el submenú alfabético');
     }
 
     /**
