@@ -1816,6 +1816,15 @@
                 </div>
             </div>
 
+            {{-- Aviso proactivo si el navegador no soporta Web Serial (como Firefox) --}}
+            <div x-show="!hasWebSerial && connectionStatus !== 'connected'" style="margin-bottom: 1rem; padding: 0.85rem 1.15rem; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: var(--radio-md, 0.5rem); display: flex; align-items: flex-start; gap: 0.75rem;">
+                <span style="font-size: 1.25rem; line-height: 1;">💡</span>
+                <div style="font-size: 0.84rem; color: var(--color-texto, #cbd5e1); line-height: 1.45;">
+                    <strong style="color: #60a5fa;">{{ __('admin.gestion_routers.browser_no_serial_title') }}</strong>
+                    <span>{{ __('admin.gestion_routers.browser_no_serial_tip', ['browser' => 'Firefox / Safari']) }}</span>
+                </div>
+            </div>
+
             {{-- Formulario de conexión al nodo físico --}}
             <div class="fi-ra-form-grid fi-ra-form-grid-3">
                 <div class="fi-ra-form-group">
@@ -1838,6 +1847,10 @@
                 <div class="fi-ra-form-group" x-show="transportType === 'http'">
                     <label class="fi-ra-label">{{ __('admin.gestion_routers.http_host_label') }}</label>
                     <input type="text" x-model="httpHost" :disabled="connectionStatus === 'connected' || connectionStatus === 'connecting'" placeholder="192.168.1.100 o meshtastic.local" class="fi-ra-input font-mono" />
+                    <p style="margin-top: 0.4rem; font-size: 0.78rem; color: var(--color-texto-2, #94a3b8); line-height: 1.35;">
+                        <span style="color: #f59e0b;">⚠️ {{ __('admin.gestion_routers.http_mixed_content_hint') }}</span>
+                        <a :href="'http://' + (httpHost.replace(/^https?:\/\//i, '') || '192.168.1.100')" target="_blank" rel="noopener" style="color: #60a5fa; text-decoration: underline; margin-left: 0.25rem;">(Abrir web del nodo ↗)</a>
+                    </p>
                 </div>
 
                 <div class="fi-ra-form-group">

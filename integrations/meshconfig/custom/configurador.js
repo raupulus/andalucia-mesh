@@ -11086,12 +11086,12 @@ async function w_(e = "assistant") {
 			7: "Configurado (DeviceConfigured)"
 		};
 		n.events.onDeviceStatus.subscribe((e) => {
-			if ($(`Estado del enlace local: ${a[e] || e}`), e === 5 || e === 6 || e === 7 || e === "connected" || e === "configured" || e === "DeviceConnected" || e === "DeviceConfigured") Q.nodoConectado || (b_("connected"), $("✓ Conexión establecida con éxito con el nodo Meshtastic."));
+			if ($(`Estado del enlace local: ${a[e] || e}`), e === 5 || e === 7 || e === "connected" || e === "configured" || e === "DeviceConnected" || e === "DeviceConfigured") Q.nodoConectado || (b_("connected"), $("✓ Conexión establecida con éxito con el nodo Meshtastic."));
 			else if (e === 2 || e === "disconnected" || e === "DeviceDisconnected") {
 				if (Q.nodoConectado) $("Dispositivo local desconectado."), T_();
 				else if (Q.conectando) {
-					let e = r === "http" ? `No se pudo conectar al nodo por WiFi (${i}). Verifica que la IP sea correcta, que el nodo esté encendido y en la misma red local.` : `Fallo al establecer comunicación con el dispositivo (${r}).`;
-					$(`❌ ${e}`), alert(e), T_();
+					let e = typeof window < "u" && window.location.protocol === "https:", t = r === "http" ? e ? `No se pudo conectar al nodo por WiFi (${i}). Bajo HTTPS el navegador bloquea peticiones HTTP a IPs locales por seguridad (Mixed Content). Conecta por cable USB en Chrome/Edge o accede mediante https://${rawHost.replace(/^https?:\/\//i, "")} aceptando su certificado en el navegador.` : `No se pudo conectar al nodo por WiFi (${i}). Verifica que la IP sea correcta, que el nodo esté encendido y en la misma red local.` : `Fallo al establecer comunicación con el dispositivo (${r}).`;
+					$(`❌ ${t}`), alert(t), T_();
 				}
 			}
 		}), n.events.onMyNodeInfo.subscribe((e) => {

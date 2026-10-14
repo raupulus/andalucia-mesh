@@ -166,6 +166,12 @@ export function meshAdminComponent() {
         baudRate: 115200,
         errorMessage: '',
 
+        // Capacidades y entorno del navegador
+        hasWebSerial: typeof navigator !== 'undefined' && 'serial' in navigator,
+        hasWebBluetooth: typeof navigator !== 'undefined' && 'bluetooth' in navigator,
+        isFirefox: typeof navigator !== 'undefined' && /firefox/i.test(navigator.userAgent),
+        isHttps: typeof window !== 'undefined' && window.location.protocol === 'https:',
+
         // Datos del nodo local conectado
         localNode: {
             nodeNum: null,
@@ -842,8 +848,8 @@ export function meshAdminComponent() {
                     const statusText = statusNames[status] || status;
                     this.log('info', `Estado del dispositivo local: ${statusText}`);
 
-                    // 5 = DeviceConnected, 6 = DeviceConfiguring, 7 = DeviceConfigured
-                    if (status === 5 || status === 6 || status === 7 || status === 'connected' || status === 'configured' || status === 'DeviceConnected' || status === 'DeviceConfigured') {
+                    // 5 = DeviceConnected, 7 = DeviceConfigured (Nota: 6 = DeviceConfiguring es preliminar y no confirma conexión)
+                    if (status === 5 || status === 7 || status === 'connected' || status === 'configured' || status === 'DeviceConnected' || status === 'DeviceConfigured') {
                         if (this.connectionStatus !== 'connected') {
                             this.connectionStatus = 'connected';
                             this.log('info', '¡Conexión establecida con el nodo local! Listo para transmitir.');
@@ -853,8 +859,11 @@ export function meshAdminComponent() {
                             this.log('warn', 'Dispositivo local desconectado.');
                             this.connectionStatus = 'disconnected';
                         } else if (this.connectionStatus === 'connecting') {
+                            const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
                             const failMsg = this.transportType === 'http'
-                                ? `No se pudo conectar al nodo por WiFi (${targetUrl}). Verifica que la IP sea correcta, que el nodo esté encendido y en la misma red local.`
+                                ? (isHttps
+                                    ? `No se pudo conectar al nodo por WiFi (${targetUrl}). Bajo HTTPS el navegador bloquea peticiones HTTP a IPs locales por seguridad (Mixed Content). Conecta por cable USB en Chrome/Edge o accede mediante https://${this.httpHost.replace(/^https?:\/\//i, '')} aceptando su certificado en el navegador.`
+                                    : `No se pudo conectar al nodo por WiFi (${targetUrl}). Verifica que la IP sea correcta, que el nodo esté encendido y en la misma red local.`)
                                 : `Fallo al establecer comunicación con el dispositivo local (${this.transportType}).`;
                             this.log('error', failMsg);
                             this.errorMessage = failMsg;

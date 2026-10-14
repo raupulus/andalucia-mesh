@@ -842,8 +842,8 @@ export async function conectarDispositivo(origen = "assistant") {
       const statusText = statusNames[status] || status;
       logActividad(`Estado del enlace local: ${statusText}`);
 
-      // 5 = DeviceConnected, 6 = DeviceConfiguring, 7 = DeviceConfigured
-      if (status === 5 || status === 6 || status === 7 || status === "connected" || status === "configured" || status === "DeviceConnected" || status === "DeviceConfigured") {
+      // 5 = DeviceConnected, 7 = DeviceConfigured (Nota: 6 = DeviceConfiguring es preliminar y no confirma conexión)
+      if (status === 5 || status === 7 || status === "connected" || status === "configured" || status === "DeviceConnected" || status === "DeviceConfigured") {
         if (!estado.nodoConectado) {
           actualizarUiEstadoConexion("connected");
           logActividad("✓ Conexión establecida con éxito con el nodo Meshtastic.");
@@ -853,8 +853,11 @@ export async function conectarDispositivo(origen = "assistant") {
           logActividad("Dispositivo local desconectado.");
           desconectarDispositivo();
         } else if (estado.conectando) {
+          const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
           const failMsg = tipoTransporte === "http"
-            ? `No se pudo conectar al nodo por WiFi (${targetUrl}). Verifica que la IP sea correcta, que el nodo esté encendido y en la misma red local.`
+            ? (isHttps
+                ? `No se pudo conectar al nodo por WiFi (${targetUrl}). Bajo HTTPS el navegador bloquea peticiones HTTP a IPs locales por seguridad (Mixed Content). Conecta por cable USB en Chrome/Edge o accede mediante https://${rawHost.replace(/^https?:\/\//i, "")} aceptando su certificado en el navegador.`
+                : `No se pudo conectar al nodo por WiFi (${targetUrl}). Verifica que la IP sea correcta, que el nodo esté encendido y en la misma red local.`)
             : `Fallo al establecer comunicación con el dispositivo (${tipoTransporte}).`;
           logActividad(`❌ ${failMsg}`);
           alert(failMsg);
