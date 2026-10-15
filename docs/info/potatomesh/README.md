@@ -55,9 +55,8 @@ Usuario `svc-potato`, lectura `msh/EU_868/#` (adaptador) y escritura `snm/v1/pee
 | `API_TOKEN` | `${POTATOMESH_API_TOKEN}` | Propia | Sí |
 | `INSTANCE_DOMAIN` | `https://potato.${PROJECT_DOMAIN}` (obligatoria: sin ella usa `Host`, riesgo de envenenamiento de caché) | Propia | No |
 | `SITE_NAME` | `${PROJECT_NAME}` | Común | No |
-| `MESHTASTIC_PRESET` / `MESHTASTIC_FREQ` | `#SFNarrow` / `868MHz` | Común | No |
-| `MAP_CENTER` / `MAP_ZOOM` | `36.48,-5.85` / `9` | Común | No |
-| `MAX_DISTANCE` | `600` | Propia | No |
+| `MAP_CENTER` / `MAP_ZOOM` | `37.45,-4.60` / `8` | Común | No |
+| `MAX_DISTANCE` | `270` | Propia: límite en km desde el centro geográfico para cubrir las 8 provincias andaluzas sin desbordar a Madrid o Portugal | No |
 | `MIN_THREADS` / `MAX_THREADS` | `32` / `500` | Propia: holgura para 100 clientes SSE | No |
 | `EVENTS` | `1` | Propia | No |
 | `FEDERATION` | `0` | Propia | No |
@@ -159,4 +158,4 @@ Copia: diaria con `.backup`, etiqueta `potato`, 7 diarias (`../infrastructure/04
 6. Plantilla `app.erb` personalizada montada en `/app/views/layouts/app.erb:ro` para mostrar el indicador de retención (`RETENTION_BADGE`) en el navbar de escritorio y móvil (CUST-04).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-09
+> Creado: 2026-10-07 · Última revisión: 2026-10-15

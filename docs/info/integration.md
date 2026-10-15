@@ -337,7 +337,7 @@ Un archivo en el servidor (`/srv/comun/.env`) que cada `compose.yaml` carga con 
 | `SATURACION_PESO_ROUTERS` / `SATURACION_PESO_CLIENTES` | `0.6` / `0.4` | Portal (mapa, `summary`), detector (`chutil-high`) |
 | `LORA_REGION`, `LORA_BANDWIDTH`, `LORA_SPREAD_FACTOR`, `LORA_CODING_RATE`, `LORA_FREQUENCY_SLOT`, `LORA_FREQUENCY_MHZ`, `LORA_HOP_LIMIT` | `EU_868`, `62`, `7`, `5`, `4`, `869.618`, `3` | Portal, ingesta (tiempo de aire) |
 | `MESHTASTIC_PRESET` / `MESHTASTIC_FREQ` | `#SFNarrow` / `868MHz` | PotatoMesh (nombres de sus variables) |
-| `MAP_CENTER` / `MAP_ZOOM` | `36.48,-5.85` / `9` | PotatoMesh, portal |
+| `MAP_CENTER` / `MAP_ZOOM` | `37.45,-4.60` / `8` | PotatoMesh, portal |
 | `DB_HOST` / `DB_PORT` | `172.30.0.1` / `5432` | Servicios con base de datos |
 | `ALERTAS_SOCKET` / `ALERTAS_SOCKET_GID` | `/run/snm/alertas.sock` / `10500` | Detector, bots, webhooks |
 | `INTERNAL_API_SECRET` | Token secreto compartido para APIs internas en red `mesh` | Portal, detector-alertas, webhooks |
@@ -402,4 +402,4 @@ services/             portal/, ingesta/, detector-alertas/, bot-telegram/, bot-d
 - Sin secretos ni `.env` reales en git. Commits sin firmas de atribución de herramientas.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-14
+> Creado: 2026-10-07 · Última revisión: 2026-10-15
