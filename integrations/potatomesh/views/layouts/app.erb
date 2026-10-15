@@ -307,6 +307,24 @@
   <script>
     const CHAT_ENABLED = <%= private_mode ? "false" : "true" %>;
     const current_view_mode = '<%= view_mode %>';
+
+    // Desactivar trazas por defecto en la carga inicial (CUST-05)
+    (function() {
+      if (current_view_mode !== 'dashboard' && current_view_mode !== 'map') return;
+      if (typeof window === 'undefined' || typeof MutationObserver === 'undefined') return;
+      var observer = new MutationObserver(function() {
+        var traceBtn = document.querySelector('.legend-toggle-traces');
+        if (traceBtn && traceBtn.getAttribute('aria-pressed') === 'true') {
+          observer.disconnect();
+          setTimeout(function() {
+            if (traceBtn.getAttribute('aria-pressed') === 'true') {
+              traceBtn.click();
+            }
+          }, 0);
+        }
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    })();
   </script>
   <script type="module" src="<%= asset_url("/assets/js/app/index.js") %>"></script>
 </body>

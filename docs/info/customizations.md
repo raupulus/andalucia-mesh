@@ -21,6 +21,7 @@ Al actualizar la versión de una imagen de terceros (ej. subir de etiqueta de ve
 | `CUST-02` | **PotatoMesh** | `0.7.5` | `integrations/potatomesh/compose.yaml`<br>`integrations/potatomesh/.env.example` | **Desactivación obligatoria de federación (`FEDERATION=0`)**: PotatoMesh activa por defecto la federación peer-to-peer si no se declara la variable. Se asegura `FEDERATION=0` tanto en el bloque `environment` del `compose.yaml` como en `.env` para garantizar aislamiento absoluto sin anuncios salientes. | Activo |
 | `CUST-03` | **MeshConfig** | `658f461` | `integrations/meshconfig/compose.yaml`<br>`integrations/meshconfig/custom/*`<br>`integrations/meshconfig/configs/*` | **Interfaz visual Material según DESIGN.md, asistente en 4 pasos, estándar SFNarrow y QR oficial**: la imagen base upstream se construye sin alterar a partir del repositorio oficial anclado al commit `658f461`. Las personalizaciones (diseño accesible, selección de provincias andaluzas, generador de QR dinámico y buenas prácticas de red) se montan como volúmenes de solo lectura (`:ro`). | Activo |
 | `CUST-04` | **PotatoMesh** | `0.7.5` | `integrations/potatomesh/views/layouts/app.erb`<br>`integrations/potatomesh/compose.yaml`<br>`integrations/potatomesh/.env.example` | **Indicador visual de retención en la barra de navegación (navbar) y menú móvil**: PotatoMesh no expone de serie el período de retención a los usuarios del mapa. Se monta la plantilla `app.erb` como volumen de solo lectura con un badge configurable (`RETENTION_BADGE`, por defecto `Nodos: 15d · Trazas: 5d`) tanto en el navbar principal de escritorio (`.site-nav`) como en el menú desplegable móvil (`.mobile-nav`), indicando claramente el margen de histórico visible sin alterar la lógica de negocio ni dependencias externas. | Activo |
+| `CUST-05` | **PotatoMesh** | `0.7.5` | `integrations/potatomesh/views/layouts/app.erb` | **Desactivación de trazas por defecto en la carga inicial**: PotatoMesh inicializa siempre visibles las líneas de traceroutes (`traceLinesVisible = true`), saturando el mapa de polígonos. En `app.erb` se inyecta un observer que desactiva inicialmente el botón de trazas en la leyenda (`.legend-toggle-traces`), permitiendo que el usuario las active a demanda pulsando 'Trace lines'. | Activo |
 
 ---
 
@@ -108,6 +109,15 @@ Al actualizar la versión de una imagen de terceros (ej. subir de etiqueta de ve
     - ./views/layouts/app.erb:/app/views/layouts/app.erb:ro
   ```
 
+### CUST-05 — Desactivación de Líneas de Trazas por Defecto en PotatoMesh
+
+* **Problema upstream**: PotatoMesh inicializa siempre la variable interna `traceLinesVisible = true`, dibujando de inmediato todas las líneas de traceroute en el mapa en cada carga de página. En mallas activas esto satura visualmente el mapa con polígonos continuos que dificultan distinguir la posición de los nodos y repetidores.
+* **Solución aplicada**:
+  En la plantilla personalizada `views/layouts/app.erb`, se incluye un `MutationObserver` ligero y síncrono que detecta la inserción del botón de trazas en la leyenda de Leaflet (`.legend-toggle-traces`) y, si se encuentra en estado activo (`aria-pressed="true"`), ejecuta un clic de desactivación automática en la carga inicial y desconecta el observador. De este modo:
+  1. El mapa carga limpio, legible y sin trazas por defecto.
+  2. La leyenda muestra el botón de «Trace lines» desmarcado (`aria-pressed="false"`).
+  3. Si el usuario desea inspeccionar las rutas de los paquetes, basta con pulsar el botón «Trace lines» en la leyenda para activar las líneas en cualquier momento de forma interactiva.
+
 ---
 
-> Creado: 2026-10-08 · Última revisión: 2026-10-09
+> Creado: 2026-10-08 · Última revisión: 2026-10-15
