@@ -18,8 +18,8 @@ Leyenda: **MVP** = esta entrega, activa; **Ampl.** = ampliación, se implementa 
 | `battery-low` | MVP | Batería baja confirmada en 2 muestras seguidas (batería 1–100 %; > 100 = alimentado) | Dinámico vía `GestorUmbrales`: Routers `medio` < 60 %, `alto` < 40 % · Clientes: `bajo` < 35 %, `medio` < 15 % · Mudos: `bajo` < 25 %, `medio` < 10 % | — | Histéresis dinámica (> 70 % routers, > 45 % clientes, > 30 % mudos) | `dm.battery_level`, `dm.voltage`, `fn.role` |
 | `sunset-battery` | MVP | Router solar que llega a las 20:00 h peninsulares con carga insuficiente (excluye nodos fuera de Andalucía `FUERA`) | Dinámico vía `GestorUmbrales`: `medio` < 60 %, `alto` < 40 % (desactivable con umbral 0) | — | > 70 % o luz solar | `dm.battery_level`, `fn.role`, `fn.province` (tick 20:00) |
 | `chutil-high` | MVP | Canal saturado calculando saturación provincial (60 % peso routers, 40 % peso clientes) | Red: `bajo` > 20 %, `medio` > 30 %, `alto` > 40 % | — | ≤ 20 % | `dm.channel_utilization`, `fn.role`, `fn.province` |
-| `infra-silent` | MVP | Router que deja de oírse | Dinámico vía `GestorUmbrales`: `medio` > max(6 h, 3 × típico) · `alto` > 24 h (desactivable con 0) | Intervalo típico del nodo | Se vuelve a oír | `from`, `fn.role`, `rx_first` (tick) |
-| `gateway-offline` | MVP | Gateway que deja de publicar | Infra: `medio` > max(15 min, 3 × intervalo típico) · `alto` > 120 min | Intervalo típico del gateway | Vuelve a publicar | `rx[].gateway`, `rx[].at`, `fn.is_gateway` (tick) |
+| `infra-silent` | MVP | Router que deja de oírse (ignora nodos > 7 días / `seguimiento_dias`) | Dinámico vía `GestorUmbrales`: `medio` > max(6 h, 3 × típico) · `alto` > 24 h (desactivable con 0) | Intervalo típico del nodo | Se vuelve a oír | `from`, `fn.role`, `rx_first` (tick) |
+| `gateway-offline` | MVP | Gateway que deja de publicar (ignora pasarelas > 7 días / `seguimiento_dias`) | Infra: `medio` > max(15 min, 3 × intervalo típico) · `alto` > 120 min | Intervalo típico del gateway | Vuelve a publicar | `rx[].gateway`, `rx[].at`, `fn.is_gateway` (tick) |
 | `gateway-no-traffic` | Ampl. | Pasarela con transceptor LoRa sordo/bloqueado (> 1 h sin recepciones LoRa pese a proceso activo) | Infra: `bajo` > 60 min sin paquetes | — | Vuelve a recibir paquetes LoRa | `rx[].gateway`, `rx[].at`, `fn.is_gateway` (tick) |
 | `battery-drain` | Ampl. | Router solar que no recarga | Infra: `medio` | Proyección lineal del voltaje de 72 h hasta 3,3 V en < 3 días | Pendiente de 24 h ≥ 0 | `dm.voltage` |
 | `airtime-high` | Ampl. | Tiempo de aire propio por encima de límites operativos | Red: `bajo` > 4 % · `medio` > 6 % · `alto` > 8 % | — | ≤ 3 % durante 30 min | `dm.air_util_tx`, `ls.air_util_tx` |
@@ -255,7 +255,7 @@ silencios: []
 ## Unidades de trabajo
 
 - **UT-07.2.1 — `reboot-loop` y `battery-low`.** *Bordes:* uptime que vuelve a 0 por desbordamiento, telemetría de `local_stats` y `device_metrics` del mismo reinicio (cuenta uno), `battery_level` 101. *Aceptación:* escenarios 1 y 2.
-- **UT-07.2.2 — `infra-silent` y `gateway-offline`.** Evaluadas en el tick. *Bordes:* nodo que deja de ser router (se resuelve con `fuera_de_seguimiento` si no vuelve), gateway que solo oye su propio nodo. *Aceptación:* escenario 3.
+- **UT-07.2.2 — `infra-silent` y `gateway-offline`.** Evaluadas en el tick. Ignoran nodos y gateways con inactividad superior a `seguimiento_dias` (7 días) para prevenir bucles de reapertura/resolución (*flapping*). *Bordes:* nodo que deja de ser router (se resuelve con `fuera_de_seguimiento` si no vuelve), gateway que solo oye su propio nodo. *Aceptación:* escenario 3.
 - **UT-07.2.3 — `flood`, `rafaga-masiva` y `hops-high`.** *Bordes:* nodo nuevo sin base (solo mínimos), `hop_start` `null`. *Aceptación:* escenarios 4 y 5.
 - **UT-07.2.4 — Mensajes y `datos` del MVP.** Plantillas de la tabla con números enteros y `{corto}` de respaldo. *Aceptación:* prueba de instantánea (golden) por regla.
 - **UT-07.2.5 — Ampliación: salud** (`battery-drain`, `chutil-high`, `airtime-high`, `gateway-no-traffic`, `tx-dropped`, `noise-high`).
@@ -271,4 +271,4 @@ silencios: []
 5. Dado un nodo con `hop_start` 7 / Cuando emite dos paquetes con `hop_start` 3 / Entonces `hops-high` se resuelve; con `hop_start` 5 nunca se abre.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-11
+> Creado: 2026-10-07 · Última revisión: 2026-10-17

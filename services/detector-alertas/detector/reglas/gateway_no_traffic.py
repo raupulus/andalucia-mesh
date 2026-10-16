@@ -1,5 +1,6 @@
 """Regla gateway-no-traffic: pasarela con transceptor LoRa sordo o bloqueado."""
 
+from datetime import timedelta
 from typing import ClassVar, Literal
 
 from pydantic import BaseModel
@@ -34,9 +35,17 @@ class ReglaGatewayNoTraffic:
     def comprobar(self, ctx: Contexto) -> list[Alerta]:
         """Evalúa pasarelas con historial de recepciones que lleven más de 1 hora sin tráfico LoRa."""
         alertas: list[Alerta] = []
+        dias_seguimiento = getattr(ctx.general, "seguimiento_dias", 7)
+        if not isinstance(dias_seguimiento, (int, float)):
+            dias_seguimiento = 7
+        limite_seguimiento = ctx.ahora - timedelta(days=float(dias_seguimiento))
 
         for gw in ctx.estado.gateways.values():
             if not gw.has_prior_traffic or gw.last_lora_rx_at is None:
+                continue
+
+            # Pasarelas sin actividad durante más de seguimiento_dias dejan de vigilarse
+            if gw.last_lora_rx_at < limite_seguimiento:
                 continue
 
             silencio_s = (ctx.ahora - gw.last_lora_rx_at).total_seconds()

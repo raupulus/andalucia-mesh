@@ -1,5 +1,6 @@
 """Regla gateway-offline: detección de pasarelas MQTT inactivas."""
 
+from datetime import timedelta
 from typing import ClassVar, Literal
 
 from pydantic import BaseModel, Field
@@ -41,8 +42,16 @@ class ReglaGatewayOffline:
     def comprobar(self, ctx: Contexto) -> list[Alerta]:
         """Evalúa todos los gateways conocidos y genera alertas si superan el tiempo de silencio."""
         alertas: list[Alerta] = []
+        dias_seguimiento = getattr(ctx.general, "seguimiento_dias", 7)
+        if not isinstance(dias_seguimiento, (int, float)):
+            dias_seguimiento = 7
+        limite_seguimiento = ctx.ahora - timedelta(days=float(dias_seguimiento))
 
         for gw in ctx.estado.gateways.values():
+            # Pasarelas sin actividad durante más de seguimiento_dias dejan de vigilarse
+            if gw.last_seen_at < limite_seguimiento:
+                continue
+
             inicio_silencio = max(gw.last_seen_at, ctx.estado.started_at)
             silencio_s = (ctx.ahora - inicio_silencio).total_seconds()
             silencio_min = silencio_s / 60.0

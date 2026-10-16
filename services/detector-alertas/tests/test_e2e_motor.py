@@ -264,3 +264,56 @@ def test_ejecutar_tick_no_resuelve_alertas_abiertas_indebidamente() -> None:
     assert "hops-high:!node_hops" in motor.ciclo.alertas_abiertas
 
 
+def test_ejecutar_tick_ignora_nodos_fuera_de_seguimiento_sin_flapping() -> None:
+    """Verifica que routers o gateways con más de 7 días sin actividad dejan de vigilarse y no producen flapping."""
+    settings = Settings()
+    motor = MotorAlertas(settings=settings)
+    motor.inicializar()
+
+    # t0 de referencia; motor iniciado hace 10 días
+    t0 = datetime(2026, 10, 10, 12, 0, 0, tzinfo=UTC)
+    motor.estado.started_at = t0 - timedelta(days=10)
+
+    # 1. Router que lleva 6 días silenciado (< 7 días): debe alertar
+    rtr_activo = motor.estado.obtener_o_crear_nodo("!rtr_6d", t0)
+    rtr_activo.role = "ROUTER"
+    rtr_activo.short = "RTR6D"
+    rtr_activo.last_seen = t0 - timedelta(days=6)
+
+    # 2. Router que lleva más de 7 días silenciado (ej. 7 días y 2 h): DEBE IGNORARSE
+    rtr_expirado = motor.estado.obtener_o_crear_nodo("!rtr_expirado", t0)
+    rtr_expirado.role = "ROUTER"
+    rtr_expirado.short = "TXTX"
+    rtr_expirado.last_seen = t0 - timedelta(days=7, hours=2)
+
+    # Ejecutar primer tick
+    trans_1 = motor.ejecutar_tick(t0)
+    reglas_nodos = {(t.alerta.regla, t.alerta.nodo) for t in trans_1 if t.transicion == "abierta"}
+
+    assert ("infra-silent", "!rtr_6d") in reglas_nodos
+    assert ("infra-silent", "!rtr_expirado") not in reglas_nodos
+
+    # Ahora avanzamos el tiempo para que !rtr_6d supere los 7 días
+    t1 = t0 + timedelta(days=1, hours=2)  # ahora !rtr_6d lleva 7 días y 2h
+    trans_2 = motor.ejecutar_tick(t1)
+
+    # Debe haberse resuelto con motivo fuera_de_seguimiento
+    resueltas_fuera = [
+        t for t in trans_2
+        if t.transicion == "resuelta"
+        and t.alerta.nodo == "!rtr_6d"
+        and t.alerta.datos.get("cierre") == "fuera_de_seguimiento"
+    ]
+    assert len(resueltas_fuera) == 1
+
+    # En los siguientes ticks (t1 + 60s, t1 + 120s), NO debe reabrirse ni emitir nada (evita bucle/flapping)
+    t2 = t1 + timedelta(seconds=60)
+    trans_3 = motor.ejecutar_tick(t2)
+    assert len([t for t in trans_3 if t.alerta.nodo == "!rtr_6d"]) == 0
+
+    t3 = t2 + timedelta(seconds=60)
+    trans_4 = motor.ejecutar_tick(t3)
+    assert len([t for t in trans_4 if t.alerta.nodo == "!rtr_6d"]) == 0
+
+
+

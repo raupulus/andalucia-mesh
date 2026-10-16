@@ -1,5 +1,6 @@
 """Regla infra-silent: detección de routers de infraestructura inactivos."""
 
+from datetime import timedelta
 from typing import ClassVar, Literal
 
 from pydantic import BaseModel, Field
@@ -57,10 +58,19 @@ class ReglaInfraSilent:
             min_medio_h = self.config.medio.minimo_h
             alto_h = self.config.alto_h
 
+        dias_seguimiento = getattr(ctx.general, "seguimiento_dias", 7)
+        if not isinstance(dias_seguimiento, (int, float)):
+            dias_seguimiento = 7
+        limite_seguimiento = ctx.ahora - timedelta(days=float(dias_seguimiento))
+
         for nodo in ctx.estado.nodes.values():
             rol = (nodo.role or "").strip().upper()
             es_infra = ctx.es_infraestructura(nodo.node_id) or rol in ctx.bases.infra_roles
             if not es_infra:
+                continue
+
+            # Routers sin actividad durante más de seguimiento_dias dejan de vigilarse
+            if nodo.last_seen < limite_seguimiento:
                 continue
 
             # El silencio se computa desde max(último visto, arranque del detector)

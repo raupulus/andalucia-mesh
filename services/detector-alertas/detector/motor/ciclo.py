@@ -58,6 +58,7 @@ class GestorCicloVida:
             if (
                 reciente is not None
                 and reciente.resuelta_en is not None
+                and reciente.datos.get("cierre") not in ("fuera_de_seguimiento", "regla_desactivada")
                 and (ahora - reciente.resuelta_en).total_seconds() < self.general.reapertura_min * 60
             ):
                 # Reabrir alerta previa con su ID original
