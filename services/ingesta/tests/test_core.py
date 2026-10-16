@@ -35,6 +35,7 @@ from src.dedup import (
     UnifiedPacket,
     ReceptionItem,
 )
+from src.registry import NodeRecord, NodeRegistry
 
 
 def test_normalize_channel_name() -> None:
@@ -403,5 +404,100 @@ def test_topic_validator_peer_and_payload() -> None:
     assert res_msgs.topic_type == "peer"
     assert res_msgs.peer_id == "almeria"
     assert res_msgs.event_type == "messages"
+
+
+def test_peer_update_shields_real_router() -> None:
+    """Verifica que fichas sintéticas de peers no sobreescriben nombres ni roles de routers locales."""
+    now = datetime.now(timezone.utc)
+    node = NodeRecord(
+        id="!63760c00",
+        first_seen=now,
+        last_seen=now,
+        short_name="CA05",
+        long_name="EA7-CA-05🗼SLPO",
+        role="ROUTER",
+        hw_model="TLORA_V2_1_16",
+    )
+
+    # El peer de Albacete envía una ficha sintética con CLIENT_HIDDEN y placeholder 0C00
+    peer_item = {
+        "id": "!63760c00",
+        "short_name": "0C00",
+        "long_name": "Meshtastic 0C00",
+        "role": "CLIENT_HIDDEN",
+        "synthetic": True,
+        "hw_model": "TLORA_V2_1_16",
+        "firmware": "2.5.6",
+    }
+
+    node.update_from_peer_item(peer_item)
+
+    # short_name, long_name y role deben permanecer intactos
+    assert node.short_name == "CA05"
+    assert node.long_name == "EA7-CA-05🗼SLPO"
+    assert node.role == "ROUTER"
+    # Campos que no degradan la infraestructura se actualizan normalmente
+    assert node.firmware == "2.5.6"
+
+
+def test_peer_update_shields_infra_role_against_downgrade() -> None:
+    """Verifica que un nodo repetidor o router local nunca se degrada a cliente por datos de peer."""
+    now = datetime.now(timezone.utc)
+    node = NodeRecord(
+        id="!12345678",
+        first_seen=now,
+        last_seen=now,
+        short_name="REP1",
+        long_name="Repetidor Sierra",
+        role="REPEATER",
+    )
+
+    peer_item = {
+        "id": "!12345678",
+        "short_name": "REP1",
+        "long_name": "Repetidor Sierra",
+        "role": "CLIENT",
+        "synthetic": False,
+    }
+
+    node.update_from_peer_item(peer_item)
+    assert node.role == "REPEATER"
+
+
+def test_peer_update_populates_new_node_and_allows_real_overwrites() -> None:
+    """Verifica que datos válidos de peers sí se asignan a nodos nuevos o reemplazan placeholders."""
+    now = datetime.now(timezone.utc)
+    
+    # 1. Nodo nuevo sin nombre
+    new_node = NodeRecord(id="!abcdef12", first_seen=now, last_seen=now)
+    new_node.update_from_peer_item({
+        "short_name": "AB12",
+        "long_name": "Nodo Albacete 12",
+        "role": "ROUTER",
+        "hw_model": "HELTEC_V3",
+    })
+    assert new_node.short_name == "AB12"
+    assert new_node.long_name == "Nodo Albacete 12"
+    assert new_node.role == "ROUTER"
+    assert new_node.hw_model == "HELTEC_V3"
+
+    # 2. Nodo con placeholder genérico previo recibe nombre real desde el peer
+    ph_node = NodeRecord(
+        id="!aabb1122",
+        first_seen=now,
+        last_seen=now,
+        short_name="1122",
+        long_name="Meshtastic 1122",
+        role="CLIENT",
+    )
+    ph_node.update_from_peer_item({
+        "short_name": "REAL",
+        "long_name": "Estación Meteorológica",
+        "role": "ROUTER",
+    })
+    assert ph_node.short_name == "REAL"
+    assert ph_node.long_name == "Estación Meteorológica"
+    assert ph_node.role == "ROUTER"
+
 
 

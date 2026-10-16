@@ -65,6 +65,17 @@ En memoria (unas 2.000 entradas), cargado de la tabla `node` al arrancar; las fi
 - "Router" = `role` en `INFRA_ROLES`; "nodo de infraestructura" = router o `is_gateway`. `CLIENT_BASE` no es infraestructura. Se evalúa en las vistas, no se guarda.
 - Los nodos sin actividad en 365 días se borran (tarea diaria de [04](04-storage-retention.md)); si vuelven, empiezan de cero.
 
+### Sincronización federada y protección contra datos sintéticos de peers
+
+Al recibir nodos desde instancias federadas (`snm/v1/peer/<peer_id>/nodes`, emitidos por `sync-peers`):
+- Instancias como PotatoMesh generan registros sintéticos provisionales (`Meshtastic <hex>`, short_name con los últimos 4 dígitos hex, rol `CLIENT_HIDDEN`, `synthetic: true`) cuando reciben paquetes LoRa sin haber decodificado aún su `NodeInfo`.
+- Si un peer externo federado (ej. Albacete u otras provincias limítrofes) escucha saltos de nodos andaluces y expone esas fichas sintéticas en su `/api/nodes`, la ingesta aplica las siguientes protecciones para blindar el registro maestro:
+  1. **Nombres reales protegidos:** Si el nodo ya cuenta en local con un nombre real (no coincidente con el patrón `Meshtastic <hex>` o su sufijo hex), se ignoran los nombres genéricos o sintéticos del peer.
+  2. **Invariabilidad de infraestructura:** Si el nodo local tiene rol de infraestructura (`ROUTER`, `ROUTER_LATE`, `REPEATER`), se rechaza cualquier degradación a rol cliente (`CLIENT`, `CLIENT_MUTE`, etc.) o a `CLIENT_HIDDEN`.
+  3. **Rechazo de CLIENT_HIDDEN:** Ningún nodo que ya disponga de rol conocido aceptará `CLIENT_HIDDEN` ni placeholders genéricos procedentes de sincronización de peers.
+  4. Nodos nuevos o registros que solo poseían nombres sintéticos sí se actualizan con la información completa recibida si el peer aporta nombres reales.
+
+
 ### Registro de gateways
 
 | Campo | Regla |
@@ -123,4 +134,4 @@ En memoria (unas 2.000 entradas), cargado de la tabla `node` al arrancar; las fi
 - **Dado** un nodo que pasa de Cádiz a Málaga, **cuando** llega la nueva posición, **entonces** los paquetes siguientes se guardan con `province = ES-MA` y los anteriores no cambian.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-08
+> Creado: 2026-10-07 · Última revisión: 2026-10-16

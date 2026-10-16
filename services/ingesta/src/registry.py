@@ -9,6 +9,7 @@ Mantiene el estado vivo más reciente de cada nodo y gateway de la red para:
 
 from __future__ import annotations
 
+import re
 import statistics
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -63,6 +64,65 @@ class NodeRecord:
             "is_gateway": self.is_gateway,
             "province": self.province,
         }
+
+    def update_from_peer_item(self, item: dict[str, Any]) -> None:
+        """Actualiza los metadatos de un nodo desde un objeto de sincronización de peers.
+
+        Protege campos clave (nombre corto, largo y rol) contra sobreescrituras por
+        datos sintéticos o placeholders genéricos emitidos por PotatoMesh u otros peers.
+        """
+        node_id = self.id
+        node_hex = node_id.lstrip("!").lower()
+        is_synthetic = bool(item.get("synthetic"))
+        peer_short = str(item.get("short_name") or "").strip()
+        peer_long = str(item.get("long_name") or "").strip()
+        peer_role = str(item.get("role") or "").strip()
+
+        is_generic_long = bool(re.match(r"^Meshtastic\s+[0-9a-fA-F]{4}$", peer_long, re.IGNORECASE))
+        is_generic_short = len(node_hex) >= 4 and peer_short.lower() == node_hex[-4:]
+        is_placeholder = is_synthetic or is_generic_long or (is_generic_short and not peer_long)
+
+        # 1. Nombre corto y largo: no degradar a genérico si ya tenemos nombre real propio
+        is_local_generic_short = (
+            len(node_hex) >= 4
+            and bool(self.short_name and self.short_name.lower() == node_hex[-4:])
+        )
+        is_local_generic_long = bool(
+            self.long_name
+            and re.match(r"^Meshtastic\s+[0-9a-fA-F]{4}$", self.long_name, re.IGNORECASE)
+        )
+        has_real_local_name = bool(
+            (self.long_name and not is_local_generic_long)
+            or (self.short_name and not is_local_generic_short)
+        )
+
+        if peer_short:
+            if not (has_real_local_name and is_generic_short):
+                self.short_name = peer_short
+
+        if peer_long:
+            if not (has_real_local_name and is_generic_long):
+                self.long_name = peer_long
+
+        if item.get("hw_model"):
+            self.hw_model = str(item["hw_model"])
+
+        # 2. Rol: no degradar routers de infraestructura ni aceptar CLIENT_HIDDEN sintético
+        infra_roles = {"ROUTER", "ROUTER_LATE", "REPEATER"}
+        is_local_infra = self.role in infra_roles
+
+        if peer_role:
+            if is_local_infra and peer_role not in infra_roles:
+                pass
+            elif peer_role == "CLIENT_HIDDEN" and self.role:
+                pass
+            elif is_placeholder and self.role:
+                pass
+            else:
+                self.role = peer_role
+
+        if item.get("firmware"):
+            self.firmware = str(item["firmware"])
 
 
 @dataclass

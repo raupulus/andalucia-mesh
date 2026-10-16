@@ -11,6 +11,7 @@ import asyncio
 import json
 import logging
 import os
+import re
 import signal
 import sys
 from datetime import datetime, timezone
@@ -301,16 +302,9 @@ async def main() -> None:
                                             node_ts = now
 
                                     node_rec = registry.get_or_create_node(node_id, node_ts)
-                                    if item.get("short_name"):
-                                        node_rec.short_name = str(item["short_name"])
-                                    if item.get("long_name"):
-                                        node_rec.long_name = str(item["long_name"])
-                                    if item.get("hw_model"):
-                                        node_rec.hw_model = str(item["hw_model"])
-                                    if item.get("role"):
-                                        node_rec.role = str(item["role"])
-                                    if item.get("firmware"):
-                                        node_rec.firmware = str(item["firmware"])
+
+                                    # Actualizar campos protegiendo nombres reales y roles de infraestructura
+                                    node_rec.update_from_peer_item(item)
                                     if item.get("battery_level") is not None:
                                         try:
                                             node_rec.battery_level = int(item["battery_level"])
