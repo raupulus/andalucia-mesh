@@ -258,6 +258,7 @@ Contenido de `integrations/meshview/`: `README.md` (referencia, versión, licenc
 5. `vacuum` y copias internas desactivados: autovacuum de PostgreSQL y copias del operador.
 6. Todas las secciones activas salvo `net`; refresco a 10 s.
 7. Plantillas `chat.html` y `net.html` montadas para forzar formato 24h y zona `Europe/Madrid` (DT-36, CUST-01).
+8. Restricción de rastreo y SEO: Nginx publica `robots.txt` bloqueando el rastreo de paquetes (`/packet/`), traceroutes (`/traceroute/`), grafos y APIs; inyecta cabecera `X-Robots-Tag: noindex, nofollow` y descarta con HTTP 410 peticiones a variables de plantillas JS no interpoladas (`${...}`).
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-14
+> Creado: 2026-10-07 · Última revisión: 2026-10-27

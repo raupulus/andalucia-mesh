@@ -146,6 +146,11 @@ Para evitar que otras instancias o terceros extraigan masivamente datos o abusen
   1. Se bloquea temporalmente la IP en el cortafuegos UFW durante 1 hora.
   2. Se genera un aviso inmediato al operador (log de auditoría / panel / bot privado) para evaluar si es una instancia amiga mal configurada o un scraping abusivo.
 - **Protección de PotatoMesh:** los endpoints de inyección/escritura (`/api/nodes`, `/api/messages`, etc.) exigen el token `POTATOMESH_API_TOKEN` interno; el acceso externo no autenticado solo permite lectura web normal.
+- **Directivas de Rastreo (`robots.txt` y `robots.xml`) y Control SEO:**
+  - Nginx publica directamente `/robots.txt` y `/robots.xml` con cabeceras `text/plain` y `application/xml` respectivamente en todos los subdominios de servicios.
+  - **MeshView:** restringe el rastreo masivo de paquetes efímeros (`/packet/`, `/packet_list/`, `/traceroute/`, `/graph/`, `/api/`) evitando saturación de *crawl budget* e incidencias de páginas duplicadas en Google Search Console; inyecta `X-Robots-Tag: noindex, nofollow` y devuelve `410 Gone` ante peticiones producidas por rastreadores que scrapean expresiones literales de plantillas JS (`${...}`).
+  - **PotatoMesh:** restringe el rastreo de `/metrics` y `/api/`.
+  - **MeshConfig:** permite el rastreo general de la aplicación web y enlaza al `sitemap.xml`.
 
 ## Contratos propios
 
@@ -172,4 +177,4 @@ Para evitar que otras instancias o terceros extraigan masivamente datos o abusen
 - **Dado** un puerto local (`8100`), **cuando** se intenta desde internet, **entonces** no responde.
 
 ---
-> Creado: 2026-10-07 · Última revisión: 2026-10-14
+> Creado: 2026-10-07 · Última revisión: 2026-10-27

@@ -145,13 +145,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             </span>
 
             <span class="col-2 channel">
-                <a href="/packet/${packet.id}"
+                <a href="${'/packet/' + encodeURIComponent(packet.id)}"
                    data-translate-lang-title="view_packet_details">✉️</a>
                 ${escapeHtml(packet.channel || "")}
             </span>
 
             <span class="col-3 nodename">
-                <a href="/node/${packet.from_node_id}">
+                <a href="${'/node/' + encodeURIComponent(packet.from_node_id)}">
                     ${escapeHtml(fromName)}
                 </a>
             </span>
